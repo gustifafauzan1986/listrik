@@ -14,26 +14,48 @@ class StudentImport implements ToModel, WithHeadingRow
     *
     * @return \Illuminate\Database\Eloquent\Model|null
     */
+
+    
+    // Variabel untuk menampung NIS yang ganda
+    private $duplicates = [];
+    private $successCount = 0;
+
     public function model(array $row)
     {
-        // Validasi sederhana: Jika baris kosong/tidak ada NIS, skip
+         // Validasi dasar
         if (!isset($row['nis']) || !isset($row['kelas'])) {
             return null;
         }
 
-        // 1. LOGIKA PENCARIAN KELAS
-        // Kita cari kelas berdasarkan nama yang ada di Excel (Kolom 'kelas')
-        // Gunakan firstOrCreate: Jika kelas belum ada, sistem otomatis membuatnya.
+        // 1. CEK DUPLIKASI NIS
+        // Jika NIS sudah ada di database, masukkan ke list duplicates & SKIP
+        if (Student::where('nis', $row['nis'])->exists()) {
+            $this->duplicates[] = $row['nis'] . " - " . ($row['nama_siswa'] ?? 'Tanpa Nama');
+            return null; // Jangan simpan
+        }
+
+        // 2. CARI / BUAT KELAS
         $classroom = Classroom::firstOrCreate(
             ['name' => strtoupper(trim($row['kelas']))] 
         );
-        // Pastikan NIS unik, jika ada update, jika tidak buat baru
-        return Student::updateOrCreate(
-            ['nis' => $row['nis']], // Kunci pencarian (Cek NIS)
-            [
-                'name'       => $row['nama_siswa'], // Sesuaikan dengan header Excel
-                'classroom_id' => $classroom->id, // <--- Masukkan UUID disini
-            ]
-        );
+
+        // 3. SIMPAN SISWA BARU
+        $this->successCount++;
+        return new Student([
+            'nis'          => $row['nis'],
+            'name'         => $row['nama_siswa'],
+            'classroom_id' => $classroom->id,
+        ]);
+    }
+
+    // Fungsi getter untuk mengambil data duplikat dari Controller
+    public function getDuplicates()
+    {
+        return $this->duplicates;
+    }
+
+    public function getSuccessCount()
+    {
+        return $this->successCount;
     }
 }

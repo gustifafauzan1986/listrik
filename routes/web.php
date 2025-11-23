@@ -11,6 +11,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 
 use App\Http\Controllers\UserImportController;
+use App\Http\Controllers\ScheduleController;
 
 Route::view('/', 'welcome');
 
@@ -73,6 +74,7 @@ Route::middleware(['auth'])->group(function () {
     // ROUTE MANAGE ROLE (Resourceful Route)
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
+    Route::resource('schedule', ScheduleController::class);
     
 });
     
