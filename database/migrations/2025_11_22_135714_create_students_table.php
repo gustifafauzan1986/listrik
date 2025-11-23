@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('students', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('nis')->unique(); // Ini yang akan jadi isi QR Code
             $table->string('name');
             $table->string('class_name'); // Contoh: XII TKJ 1

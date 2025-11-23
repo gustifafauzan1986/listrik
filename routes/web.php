@@ -45,10 +45,13 @@ Route::middleware(['auth'])->group(function () {
         $students = Student::all(); // Atau paginate jika siswanya ribuan
         return view('print.all_cards', compact('students'));
     });
+    Route::middleware(['role:admin'])->group(function () {
+        // Import Siswa
+        Route::get('/import-students', [StudentImportController::class, 'index'])->name('students.import');
+        Route::post('/import-students', [StudentImportController::class, 'store'])->name('students.import.store');
 
-    Route::get('/import-students', [StudentImportController::class, 'index'])->name('students.import');
-    Route::post('/import-students', [StudentImportController::class, 'store'])->name('students.import.store');
-
-    Route::get('/report', [ReportController::class, 'index'])->name('report.index');
-    Route::post('/report/print', [ReportController::class, 'print'])->name('report.print');
+        Route::get('/report', [ReportController::class, 'index'])->name('report.index');
+        Route::post('/report/print', [ReportController::class, 'print'])->name('report.print');
+    });
+    
 });

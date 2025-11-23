@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('schedules', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teacher_id')->constrained('users'); // Asumsi guru masuk tabel users
+            $table->uuid('id')->primary();
+           // Foreign Key ke Users (Guru) juga harus UUID
+            // Gunakan foreignUuid(), BUKAN foreignId()
+            $table->foreignUuid('teacher_id')->constrained('users')->onDelete('cascade');
             $table->string('subject_name');
             $table->string('day'); // Senin, Selasa, dst
             $table->time('start_time');

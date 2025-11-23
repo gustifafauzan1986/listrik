@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('attendances', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('student_id')->constrained('students');
-            $table->foreignId('schedule_id')->constrained('schedules');
+            $table->uuid('id')->primary();
+            // Relasi ke Siswa & Jadwal (Keduanya sudah UUID)
+            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
+            $table->foreignUuid('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->date('date');
             $table->time('check_in_time');
             $table->enum('status', ['hadir', 'terlambat']);
