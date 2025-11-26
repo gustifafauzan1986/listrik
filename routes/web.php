@@ -13,6 +13,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserImportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\FaceController;
 use App\Http\Controllers\CardController;
 
 Route::view('/', 'welcome');
@@ -86,6 +87,10 @@ Route::middleware(['auth'])->group(function () {
             $students = Student::all(); // Atau paginate jika siswanya ribuan
             return view('print.all_cards', compact('students'));
         });
+
+        Route::get('/face/register', [FaceController::class, 'index'])->name('face.index');
+        Route::get('/face/register/{id}', [FaceController::class, 'register'])->name('face.register');
+        Route::post('/face/register/{id}', [FaceController::class, 'store'])->name('face.store');
     });
 
 });
