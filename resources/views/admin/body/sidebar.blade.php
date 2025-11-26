@@ -19,13 +19,7 @@
 					</a>
 				</li>
 				<li class="menu-label">UI Elements</li>
-				<li>
-					<a href="widgets.html">
-						<div class="parent-icon"><i class='bx bx-cookie'></i>
-						</div>
-						<div class="menu-title">Widgets</div>
-					</a>
-				</li>
+
 				<li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon"><i class='bx bx-user'></i>
@@ -76,13 +70,7 @@
 
 					</ul>
 				</li>
-				<li>
-					<a href="">
-						<div class="parent-icon"><i class='bx bx-code-alt'></i>
-						</div>
-						<div class="menu-title">Froala Editor</div>
-					</a>
-				</li>
+
 				<li class="menu-label">Forms & Tables</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
@@ -100,10 +88,10 @@
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-grid-alt"></i>
 						</div>
-						<div class="menu-title">Tables</div>
+						<div class="menu-title">GTK</div>
 					</a>
 					<ul>
-						<li> <a href="table-basic-table.html"><i class='bx bx-radio-circle'></i>Basic Table</a>
+						<li> <a href="table-basic-table.html"><i class='bx bx-radio-circle'></i>Guru</a>
 						</li>
 						<li> <a href="table-datatable.html"><i class='bx bx-radio-circle'></i>Data Table</a>
 						</li>
