@@ -35,8 +35,6 @@
 					<ul>
 						<li> <a href="{{route('students.import')}}"><i class='bx bx-radio-circle'></i>Import Murid</a>
 						</li>
-						<li> <a href="ecommerce-products-details.html"><i class='bx bx-radio-circle'></i>Product Details</a>
-						</li>
 
 					</ul>
 				</li>
@@ -44,14 +42,10 @@
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bx-bookmark-heart'></i>
 						</div>
-						<div class="menu-title">Components</div>
+						<div class="menu-title">Schedule</div>
 					</a>
 					<ul>
-						<li> <a href="component-alerts.html"><i class='bx bx-radio-circle'></i>Alerts</a>
-						</li>
-						<li> <a href="component-accordions.html"><i class='bx bx-radio-circle'></i>Accordions</a>
-						</li>
-						<li> <a href="component-badges.html"><i class='bx bx-radio-circle'></i>Badges</a>
+						<li> <a href="{{route('schedule.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
 						</li>
 
 					</ul>
@@ -60,10 +54,12 @@
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-repeat"></i>
 						</div>
-						<div class="menu-title">Content</div>
+						<div class="menu-title">Hak Akses</div>
 					</a>
 					<ul>
-						<li> <a href="content-grid-system.html"><i class='bx bx-radio-circle'></i>Grid System</a>
+						<li> <a href="{{route('permissions.index')}}"><i class='bx bx-radio-circle'></i>Permission</a>
+						</li>
+                        <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
 						</li>
 
 					</ul>
@@ -72,16 +68,16 @@
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
 						</div>
-						<div class="menu-title">Icons</div>
+						<div class="menu-title">Laporan</div>
 					</a>
 					<ul>
-						<li> <a href="icons-line-icons.html"><i class='bx bx-radio-circle'></i>Line Icons</a>
+						<li> <a href="{{route('report.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
 						</li>
 
 					</ul>
 				</li>
 				<li>
-					<a href="form-froala-editor.html">
+					<a href="">
 						<div class="parent-icon"><i class='bx bx-code-alt'></i>
 						</div>
 						<div class="menu-title">Froala Editor</div>
@@ -92,10 +88,10 @@
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bx-message-square-edit'></i>
 						</div>
-						<div class="menu-title">Forms</div>
+						<div class="menu-title">Print</div>
 					</a>
 					<ul>
-						<li> <a href="form-elements.html"><i class='bx bx-radio-circle'></i>Form Elements</a>
+						<li> <a href="{{url('/print-all-cards')}}"><i class='bx bx-radio-circle'></i>Kartu</a>
 						</li>
 
 					</ul>

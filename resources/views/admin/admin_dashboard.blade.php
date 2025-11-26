@@ -29,7 +29,7 @@
 
 	<link href="{{ asset('backend/assets/plugins/datatable/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" >
-	
+
 	<title>SISFO SMK | @yield('title') </title>
 </head>
 
@@ -56,6 +56,7 @@
 		@include('admin.body.footer')
 	</div>
 	<!--end wrapper-->
+
 
 
 	<!-- search modal -->
@@ -225,7 +226,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     {{-- <script src="{{ asset('backend/assets/plugins/select2/js/select2-custom.js') }}"></script> --}}
 
-	
+
 	<script>
 		new PerfectScrollbar(".app-container")
 	</script>

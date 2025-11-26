@@ -1,146 +1,128 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Jadwal Mengajar Saya</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Tambahkan CSS SweetAlert -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <!-- Tambahkan FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-<nav class="mb-4 navbar navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="#">Sistem Absensi</a>
-        <span class="text-white navbar-text">
-            {{ Auth::user()->name }} | <a href="{{ route('dashboard') }}" class="text-white fw-bold" style="text-decoration: none;">Dashboard</a>
-        </span>
-    </div>
-</nav>
+<x-app-layout>
+    <div class="page-content">
+
+        <div class="container">
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
 
-<div class="container">
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <h3>Jadwal Mengajar Saya</h3>
+                <div>
+                    <a href="{{ route('schedule.create') }}" class="btn btn-success">
+                        + Buat Jadwal Baru
+                    </a>
+                </div>
+            </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+            <div class="shadow card">
+                <div class="card-body">
+                    <table class="table align-middle table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Hari</th>
+                                <th>Jam</th>
+                                <th>Kelas</th>
+                                <th>Mata Pelajaran</th>
+                                <th class="text-center" width="25%">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($schedules as $sched)
+                                @php
+                                    $dayMap = [
+                                        'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
+                                        'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
+                                    ];
+                                    $todayIs = $dayMap[date('l')];
+                                    $now = date('H:i:s');
+
+                                    $isActive = false;
+                                    if ($sched->day == $todayIs && $now >= $sched->start_time && $now <= $sched->end_time) {
+                                        $isActive = true;
+                                    }
+                                @endphp
+
+
+                                <tr class="{{ $isActive ? 'table-success fw-bold' : '' }}">
+                                    <td>{{ $sched->day }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            {{ $sched->classroom->name ?? 'Tanpa Kelas' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $sched->subject_name }}</td>
+                                    <td class="text-center">
+                                        <!-- TOMBOL 1: LIHAT DATA -->
+                                        <a href="{{ route('schedule.show', $sched->id) }}" class="text-white btn btn-sm btn-info me-1" title="Lihat Detail">
+                                            Lihat
+                                        </a>
+
+
+                                        <!-- TOMBOL 2: CETAK PDF (LINK KE ROUTE BARU) -->
+                                        <a href="{{ route('report.schedule', $sched->id) }}" class="btn btn-sm btn-danger me-1" target="_blank" title="Cetak Laporan Mapel">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </a>
+
+
+                                        <!-- TOMBOL 3: SCAN / HAPUS -->
+                                        @if($isActive)
+                                            <a href="{{ route('scan.index', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary">
+                                                Scan
+                                            </a>
+                                        @else
+                                            <form id="delete-form-{{ $sched->id }}" action="{{ route('schedule.destroy', $sched->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('{{ $sched->id }}', '{{ $sched->subject_name }}')">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-4 text-center text-muted">
+                                        Belum ada jadwal. Silakan klik tombol "Buat Jadwal Baru".
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    @endif
 
 
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-        <h3>Jadwal Mengajar Saya</h3>
-        <div>
-            <a href="{{ route('schedule.create') }}" class="btn btn-success">
-                + Buat Jadwal Baru
-            </a>
-        </div>
-    </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-    <div class="shadow card">
-        <div class="card-body">
-            <table class="table align-middle table-bordered table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Hari</th>
-                        <th>Jam</th>
-                        <th>Kelas</th>
-                        <th>Mata Pelajaran</th>
-                        <th class="text-center" width="25%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($schedules as $sched)
-                        @php
-                            $dayMap = [
-                                'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
-                                'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
-                            ];
-                            $todayIs = $dayMap[date('l')];
-                            $now = date('H:i:s');
-
-                            $isActive = false;
-                            if ($sched->day == $todayIs && $now >= $sched->start_time && $now <= $sched->end_time) {
-                                $isActive = true;
-                            }
-                        @endphp
-
-
-                        <tr class="{{ $isActive ? 'table-success fw-bold' : '' }}">
-                            <td>{{ $sched->day }}</td>
-                            <td>{{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}</td>
-                            <td>
-                                <span class="badge bg-info text-dark">
-                                    {{ $sched->classroom->name ?? 'Tanpa Kelas' }}
-                                </span>
-                            </td>
-                            <td>{{ $sched->subject_name }}</td>
-                            <td class="text-center">
-                                <!-- TOMBOL 1: LIHAT DATA -->
-                                <a href="{{ route('schedule.show', $sched->id) }}" class="text-white btn btn-sm btn-info me-1" title="Lihat Detail">
-                                    Lihat
-                                </a>
-
-
-                                <!-- TOMBOL 2: CETAK PDF (LINK KE ROUTE BARU) -->
-                                <a href="{{ route('report.schedule', $sched->id) }}" class="btn btn-sm btn-danger me-1" target="_blank" title="Cetak Laporan Mapel">
-                                    <i class="fas fa-file-pdf"></i> PDF
-                                </a>
-
-
-                                <!-- TOMBOL 3: SCAN / HAPUS -->
-                                @if($isActive)
-                                    <a href="{{ route('scan.index', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary">
-                                        Scan
-                                    </a>
-                                @else
-                                    <form id="delete-form-{{ $sched->id }}" action="{{ route('schedule.destroy', $sched->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('{{ $sched->id }}', '{{ $sched->subject_name }}')">
-                                            Hapus
-                                        </button>
-                                    </form>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="py-4 text-center text-muted">
-                                Belum ada jadwal. Silakan klik tombol "Buat Jadwal Baru".
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-<script>
-    function confirmDelete(id, mapel) {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Jadwal " + mapel + " akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-form-' + id).submit();
+        <script>
+            function confirmDelete(id, mapel) {
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Jadwal " + mapel + " akan dihapus permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-form-' + id).submit();
+                    }
+                })
             }
-        })
-    }
-</script>
-</body>
-</html>
+        </script>
+    </div>
+</x-app-layout>
