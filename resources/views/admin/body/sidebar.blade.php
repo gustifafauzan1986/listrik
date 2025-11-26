@@ -20,18 +20,8 @@
 				</li>
 				<li class="menu-label">UI Elements</li>
 
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon"><i class='bx bx-user'></i>
-						</div>
-						<div class="menu-title">Murid</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('students.import')}}"><i class='bx bx-radio-circle'></i>Import Murid</a>
-						</li>
 
-					</ul>
-				</li>
+                @role('guru')
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bx-bookmark-heart'></i>
@@ -40,6 +30,20 @@
 					</a>
 					<ul>
 						<li> <a href="{{route('schedule.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
+						</li>
+
+					</ul>
+				</li>
+                @endrole
+                @role('admin')
+                <li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class='bx bx-user'></i>
+						</div>
+						<div class="menu-title">Murid</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('students.import')}}"><i class='bx bx-radio-circle'></i>Import Murid</a>
 						</li>
 
 					</ul>
@@ -58,20 +62,7 @@
 
 					</ul>
 				</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
-						</div>
-						<div class="menu-title">Laporan</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('report.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
-						</li>
-
-					</ul>
-				</li>
-
-				<li class="menu-label">Forms & Tables</li>
+                <li class="menu-label">Forms & Tables</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bx-message-square-edit'></i>
@@ -91,12 +82,28 @@
 						<div class="menu-title">GTK</div>
 					</a>
 					<ul>
-						<li> <a href="table-basic-table.html"><i class='bx bx-radio-circle'></i>Guru</a>
+						<li> <a href="{{route('users.import')}}"><i class='bx bx-radio-circle'></i>Impor Guru</a>
 						</li>
 						<li> <a href="table-datatable.html"><i class='bx bx-radio-circle'></i>Data Table</a>
 						</li>
 					</ul>
 				</li>
+
+                @endrole
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
+						</div>
+						<div class="menu-title">Laporan</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('report.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
+						</li>
+
+					</ul>
+				</li>
+
+
 				<li class="menu-label">Pages</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">

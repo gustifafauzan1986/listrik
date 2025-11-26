@@ -33,12 +33,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/scan/{schedule_id}', [AttendanceController::class, 'index'])->name('scan.index');
         // Proses Data Scan (Ajax)
         Route::post('/scan/store', [AttendanceController::class, 'store'])->name('scan.store');
+        Route::resource('schedule', ScheduleController::class);
     });
     Route::middleware(['role:admin|guru'])->group(function () {
 
         Route::get('/report', [ReportController::class, 'index'])->name('report.index');
         Route::post('/report/print', [ReportController::class, 'print'])->name('report.print');
-
+        // [BARU] Route Cetak Laporan Per Jadwal (Direct Link)
+        Route::get('/report/schedule/{id}', [ReportController::class, 'printSchedule'])->name('report.schedule');
         Route::resource('subjects', SubjectController::class);
     });
 
@@ -54,15 +56,14 @@ Route::middleware(['auth'])->group(function () {
         // ROUTE MANAGE ROLE (Resourceful Route)
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
-        Route::resource('schedule', ScheduleController::class);
+
         // Melihat daftar siswa yang sudah absen di jadwal tertentu
         //Route::get('/my-schedule/{id}/attendances', [ScheduleController::class, 'show'])->name('schedule.show');
         // Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
         // Route::get('/schedule/create', [ScheduleController::class, 'create'])->name('schedule.create');
         // Route::post('/schedule/store', [ScheduleController::class, 'store'])->name('schedule.store');
         // Route::post('/schedule/', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
-        // [BARU] Route Cetak Laporan Per Jadwal (Direct Link)
-        Route::get('/report/schedule/{id}', [ReportController::class, 'printSchedule'])->name('report.schedule');
+
         Route::get('/student-qr/{id}', function ($id) {
                 $student = Student::findOrFail($id);
                 // QR Code berisi NIS siswa
