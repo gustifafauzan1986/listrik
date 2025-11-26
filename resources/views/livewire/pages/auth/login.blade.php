@@ -2,6 +2,7 @@
 
 use App\Livewire\Forms\LoginForm;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException; // Tambahkan ini
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
@@ -16,11 +17,35 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $this->validate();
 
-        $this->form->authenticate();
+        try {
+            // 1. Authenticate User
+            $this->form->authenticate();
 
-        Session::regenerate();
+            // 2. Regenerate Session
+            Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+            // 3. Ambil data User & URL Tujuan (Dashboard)
+            $user = auth()->user();
+            // Cek apakah ada URL yang ingin dituju sebelumnya, jika tidak ke dashboard
+            $redirectUrl = session('url.intended', route('dashboard', absolute: false));
+
+            // 4. JANGAN redirect disini pakai PHP.
+            // Kirim event ke browser (JavaScript)
+            $this->dispatch('login-success', [
+                'name' => $user->name,
+                'redirect_url' => $redirectUrl
+            ]);
+
+        } catch (ValidationException $e) {
+            // Error Handling (Login Gagal)
+            $this->dispatch('show-alert', [
+                'icon' => 'error',
+                'title' => 'Gagal Masuk!',
+                'message' => 'Email atau Password salah.',
+            ]);
+
+            throw $e;
+        }
     }
 }; ?>
 

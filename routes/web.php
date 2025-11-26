@@ -13,6 +13,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserImportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\CardController;
 
 Route::view('/', 'welcome');
 
@@ -54,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
         $students = Student::all(); // Atau paginate jika siswanya ribuan
         return view('print.all_cards', compact('students'));
     });
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware(['role:admin|guru'])->group(function () {
         // Import Siswa
         Route::get('/import-students', [StudentImportController::class, 'index'])->name('students.import');
         Route::post('/import-students', [StudentImportController::class, 'store'])->name('students.import.store');

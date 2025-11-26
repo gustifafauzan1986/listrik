@@ -21,6 +21,10 @@
 	<link href="{{ asset('backend/assets/css/app.css')}}" rel="stylesheet">
 	<link href="{{ asset('backend/assets/css/icons.css')}}" rel="stylesheet">
 	<title>Rocker - Bootstrap 5 Admin Dashboard Template</title>
+
+    <!--app JS-->
+	<script src="{{ asset('backend/assets/js/app.js')}}"></script>
+
 </head>
 
 <body class="">
@@ -59,8 +63,40 @@
 			});
 		});
 	</script>
-	<!--app JS-->
-	<script src="{{ asset('backend/assets/js/app.js')}}"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    document.addEventListener('livewire:initialized', () => {
+
+        // 1. Listener untuk Error (Gagal Login)
+        Livewire.on('show-alert', (event) => {
+            Swal.fire({
+                icon: event[0].icon,
+                title: event[0].title,
+                text: event[0].message,
+                confirmButtonColor: '#d33',
+            });
+        });
+
+        // 2. Listener untuk Sukses (Berhasil Login)
+        Livewire.on('login-success', (event) => {
+            const data = event[0]; // Mengambil data array yang dikirim
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Berhasil!',
+                text: 'Selamat datang kembali, ' + data.name, // Menampilkan Nama
+                timer: 2000, // Alert menutup otomatis dalam 2 detik
+                showConfirmButton: false,
+                willClose: () => {
+                    // Redirect dilakukan oleh JS setelah alert mau tutup
+                    window.location.href = data.redirect_url;
+                }
+            });
+        });
+
+    });
+</script>
 </body>
 
 </html>
