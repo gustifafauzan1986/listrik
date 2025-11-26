@@ -77,6 +77,9 @@
                                             <a href="{{ route('scan.index', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary">
                                                 Scan
                                             </a>
+                                            <a href="{{ route('scan.face', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-warning" title="Mode Scan Wajah">Wajah
+                                                <i class="fas fa-user"></i>
+                                            </a>
                                         @else
                                             <form id="delete-form-{{ $sched->id }}" action="{{ route('schedule.destroy', $sched->id) }}" method="POST" class="d-inline">
                                                 @csrf

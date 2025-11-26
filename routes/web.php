@@ -43,6 +43,10 @@ Route::middleware(['auth'])->group(function () {
         // [BARU] Route Cetak Laporan Per Jadwal (Direct Link)
         Route::get('/report/schedule/{id}', [ReportController::class, 'printSchedule'])->name('report.schedule');
         Route::resource('subjects', SubjectController::class);
+
+        // Scanner Wajah (API & View)
+        Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
+        Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
     });
 
     Route::middleware(['role:admin'])->group(function () {

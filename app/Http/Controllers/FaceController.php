@@ -38,19 +38,35 @@ class FaceController extends Controller
 
     /**
      * Simpan Descriptor Wajah (AJAX)
+     * UPDATE: Menggunakan try-catch dan forceFill untuk debugging yang lebih baik
      */
     public function store(Request $request, $id)
     {
-        $request->validate([
-            'descriptor' => 'required' // JSON String dari Face API
-        ]);
+        try {
+            $request->validate([
+                'descriptor' => 'required' // JSON String dari Face API
+            ]);
 
-        $student = Student::findOrFail($id);
-        $student->update([
-            'face_descriptor' => $request->descriptor
-        ]);
+            $student = Student::findOrFail($id);
 
-        return response()->json(['status' => 'success', 'message' => 'Wajah berhasil didaftarkan!']);
+            // Menggunakan forceFill agar tetap tersimpan meskipun user lupa
+            // menambahkan 'face_descriptor' ke $fillable di Model Student
+            $student->forceFill([
+                'face_descriptor' => $request->descriptor
+            ])->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Wajah berhasil didaftarkan!'
+            ]);
+
+        } catch (\Exception $e) {
+            // Kembalikan pesan error asli agar bisa dilihat di Console Browser/SweetAlert
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal Simpan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -59,25 +75,35 @@ class FaceController extends Controller
      */
     public function getDescriptors($schedule_id)
     {
-        // Cari jadwal
-        $schedule = Schedule::findOrFail($schedule_id);
+        try {
+            // Cari jadwal
+            $schedule = Schedule::findOrFail($schedule_id);
 
-        // Ambil siswa di kelas tersebut yang SUDAH punya data wajah
-        $students = Student::where('classroom_id', $schedule->classroom_id)
-                    ->whereNotNull('face_descriptor')
-                    ->select('nis', 'name', 'face_descriptor')
-                    ->get();
+            // Ambil siswa di kelas tersebut yang SUDAH punya data wajah
+            $students = Student::where('classroom_id', $schedule->classroom_id)
+                        ->whereNotNull('face_descriptor')
+                        ->select('nis', 'name', 'face_descriptor')
+                        ->get();
 
-        // Format data untuk Face API
-        $labeledDescriptors = [];
-        foreach($students as $student) {
-            $labeledDescriptors[] = [
-                'label' => $student->nis . ' - ' . $student->name, // Label yang muncul saat terdeteksi
-                'descriptor' => json_decode($student->face_descriptor)
-            ];
+            // Format data untuk Face API
+            $labeledDescriptors = [];
+            foreach($students as $student) {
+                // Pastikan data JSON valid sebelum dikirim
+                $descriptor = json_decode($student->face_descriptor);
+
+                if (is_array($descriptor) && count($descriptor) > 0) {
+                    $labeledDescriptors[] = [
+                        'label' => $student->nis . ' - ' . $student->name,
+                        'descriptor' => $descriptor
+                    ];
+                }
+            }
+
+            return response()->json($labeledDescriptors);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json($labeledDescriptors);
     }
 
     /**
