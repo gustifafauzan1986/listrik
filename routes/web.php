@@ -12,6 +12,7 @@ use App\Http\Controllers\PermissionController;
 
 use App\Http\Controllers\UserImportController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\SubjectController;
 
 Route::view('/', 'welcome');
 
@@ -60,22 +61,32 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/report', [ReportController::class, 'index'])->name('report.index');
         Route::post('/report/print', [ReportController::class, 'print'])->name('report.print');
+
+        Route::resource('subjects', SubjectController::class);
     });
 
-    Route::middleware(['role:admin'])->group(function () {
-    
+    Route::middleware(['role:admin|guru'])->group(function () {
+
     // ... route import siswa yang lama ...
 
     // ROUTE BARU: IMPORT USER
     Route::get('/import-users', [UserImportController::class, 'index'])->name('users.import');
     Route::post('/import-users', [UserImportController::class, 'store'])->name('users.import.store');
 
-    
+
     // ROUTE MANAGE ROLE (Resourceful Route)
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
     Route::resource('schedule', ScheduleController::class);
-    
+    // Melihat daftar siswa yang sudah absen di jadwal tertentu
+    //Route::get('/my-schedule/{id}/attendances', [ScheduleController::class, 'show'])->name('schedule.show');
+    // Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+    // Route::get('/schedule/create', [ScheduleController::class, 'create'])->name('schedule.create');
+    // Route::post('/schedule/store', [ScheduleController::class, 'store'])->name('schedule.store');
+    // Route::post('/schedule/', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
+    // [BARU] Route Cetak Laporan Per Jadwal (Direct Link)
+    Route::get('/report/schedule/{id}', [ReportController::class, 'printSchedule'])->name('report.schedule');
+
 });
-    
+
 });

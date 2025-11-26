@@ -32,8 +32,8 @@
         /* --- DESAIN KARTU (Sama dengan Single, tapi disesuaikan ukurannya) --- */
         .id-card-wrapper {
             /* Wrapper untuk border putus-putus (Garis Potong) */
-            border: 1px dashed #ccc; 
-            padding: 2px; 
+            border: 1px dashed #ccc;
+            padding: 2px;
             page-break-inside: avoid; /* PENTING: Jangan potong elemen ini ke halaman baru */
         }
 
@@ -80,10 +80,10 @@
 
         .school-name { font-size: 7px; text-transform: uppercase; color: #666; letter-spacing: 1px; margin-bottom: 3px; }
         .student-name { font-size: 12px; font-weight: 700; color: #333; margin: 0; line-height: 1.2; }
-        .student-class { 
-            font-size: 10px; font-weight: 600; color: #005bea; 
-            margin-top: 3px; background-color: #eef4ff; 
-            display: inline-block; padding: 2px 6px; border-radius: 4px; 
+        .student-class {
+            font-size: 10px; font-weight: 600; color: #005bea;
+            margin-top: 3px; background-color: #eef4ff;
+            display: inline-block; padding: 2px 6px; border-radius: 4px;
         }
         .nis-label { font-size: 7px; color: #999; margin-top: auto; padding-top: 4px; }
 
@@ -107,13 +107,21 @@
                 border: none; box-shadow: none;
             }
             .fab-print { display: none; } /* Sembunyikan tombol saat print */
-            
+
             /* Paksa Background Color tercetak */
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
 <body>
+    <!-- Header Judul (Hanya tampil jika variabel $classroom dikirim) -->
+@if(isset($classroom))
+    <div class="no-print" style="text-align: center; padding: 20px; background: #fff; margin-bottom: 20px; border-bottom: 1px solid #ccc;">
+        <h2>Preview Kartu Kelas: {{ $classroom->name }}</h2>
+        <p>Pastikan setingan printer: A4, Margins Minimum/None, Scale 100%.</p>
+        <button onclick="window.print()" style="padding: 10px 20px; background: blue; color: white; border: none; cursor: pointer;">🖨️ Cetak Sekarang</button>
+    </div>
+@endif
 
     <button class="fab-print" onclick="window.print()">🖨️</button>
 
@@ -124,12 +132,13 @@
                     <div class="accent-bar"></div>
                     <div class="card-content">
                         <div class="qr-area">
-                            {!! QrCode::size(90)->generate($student->nis) !!}
+                            {!! QrCode::size(150)->generate($student->nis) !!}
                         </div>
                         <div class="text-area">
-                            <div class="school-name">SMK Negeri 1 Contoh</div>
+                            <div class="school-name">SMK Negeri 1 Bukittinggi</div>
                             <h1 class="student-name">{{ Str::limit($student->name, 20) }}</h1> <div class="student-class">{{ $student->class_name }}</div>
                             <div class="nis-label">NIS: {{ $student->nis }}</div>
+                            <div class="nis-label">Kelas: {{ $student->classroom->name }}</div>
                         </div>
                     </div>
                 </div>

@@ -8,12 +8,12 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+            <div class="shadow card">
+                <div class="text-white card-header bg-primary">
                     <h4 class="mb-0">Buat Jadwal Pelajaran Baru</h4>
                 </div>
                 <div class="card-body">
-                    
+
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul>
@@ -26,7 +26,7 @@
 
                     <form action="{{ route('schedule.store') }}" method="POST">
                         @csrf
-                        
+
                         <!-- Nama Mata Pelajaran -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Mata Pelajaran</label>
@@ -51,7 +51,7 @@
                                 @php
                                     $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
                                     // Otomatis pilih hari ini
-                                    $today = \Carbon\Carbon::now()->isoFormat('dddd'); 
+                                    $today = \Carbon\Carbon::now()->isoFormat('dddd');
                                 @endphp
                                 @foreach($days as $day)
                                     <option value="{{ $day }}" {{ $day == $today ? 'selected' : '' }}>{{ $day }}</option>
@@ -61,13 +61,13 @@
 
                         <div class="row">
                             <!-- Jam Mulai -->
-                            <div class="col-md-6 mb-3">
+                            <div class="mb-3 col-md-6">
                                 <label class="form-label fw-bold">Jam Mulai</label>
                                 <input type="time" name="start_time" class="form-control" value="{{ date('H:i') }}" required>
                             </div>
 
                             <!-- Jam Selesai -->
-                            <div class="col-md-6 mb-3">
+                            <div class="mb-3 col-md-6">
                                 <label class="form-label fw-bold">Jam Selesai</label>
                                 <input type="time" name="end_time" class="form-control" value="{{ date('H:i', strtotime('+1 hour')) }}" required>
                             </div>

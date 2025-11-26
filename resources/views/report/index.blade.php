@@ -6,14 +6,14 @@
 </head>
 <body>
 <div class="container mt-5">
-    <div class="card shadow col-md-8 mx-auto">
-        <div class="card-header bg-primary text-white">
+    <div class="mx-auto shadow card col-md-8">
+        <div class="text-white card-header bg-primary">
             <h5 class="mb-0">Cetak Laporan Absensi</h5>
         </div>
         <div class="card-body">
             <form action="{{ route('report.print') }}" method="POST" target="_blank">
                 @csrf
-                
+
                 <div class="mb-4">
                     <label class="form-label fw-bold">Pilih Periode Laporan:</label>
                     <select id="periode_selector" name="periode" class="form-select" onchange="toggleFilter()">
@@ -94,7 +94,7 @@
                     </div>
                 </div>
 
-                <div class="d-grid mt-4">
+                <div class="mt-4 d-grid">
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-printer"></i> Cetak PDF
                     </button>
@@ -102,16 +102,18 @@
             </form>
         </div>
     </div>
+
+
 </div>
 
 <script>
     function toggleFilter() {
         // Sembunyikan semua
         document.querySelectorAll('.filter-section').forEach(el => el.classList.add('d-none'));
-        
+
         // Ambil value dropdown
         let selected = document.getElementById('periode_selector').value;
-        
+
         // Tampilkan yang dipilih
         document.getElementById('filter_' + selected).classList.remove('d-none');
     }

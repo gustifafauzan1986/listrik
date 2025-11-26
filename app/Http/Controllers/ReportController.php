@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Attendance;
+use App\Models\Schedule; // Import Schedule
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
@@ -41,10 +42,10 @@ class ReportController extends Controller
             case 'bulanan':
                 $month = $request->bulan;
                 $year = $request->tahun_bulan;
-                
+
                 $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d');
                 $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
-                
+
                 $labelPeriode = "Bulan " . Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
                 break;
 
@@ -76,5 +77,50 @@ class ReportController extends Controller
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->stream('Laporan-Absensi.pdf');
+    }
+
+    /**
+     * METHOD BARU: Cetak Laporan Spesifik Jadwal/Mapel
+     * Diakses dari tombol PDF di halaman Jadwal Mengajar
+     */
+    public function printSchedule($id)
+    {
+        // 1. Ambil Data Jadwal
+        $schedule = Schedule::with('classroom')->findOrFail($id);
+
+        // 2. Ambil Data Absensi Jadwal Tersebut
+        // Kita ambil data semester ini (opsional) atau semua history
+        $attendances = Attendance::with(['student', 'schedule'])
+                        ->where('schedule_id', $id)
+                        ->orderBy('date', 'desc') // Tanggal terbaru di atas
+                        ->orderBy('check_in_time', 'desc')
+                        ->get();
+
+        // 3. Siapkan Variabel untuk Header PDF
+        // Karena view PDF kita butuh variable startDate/endDate, kita ambil dari data pertama & terakhir
+        if ($attendances->count() > 0) {
+            $startDate = $attendances->last()->date; // Tanggal terlama
+            $endDate = $attendances->first()->date;  // Tanggal terbaru
+        } else {
+            $startDate = date('Y-m-d');
+            $endDate = date('Y-m-d');
+        }
+
+        $labelPeriode = "Rekapitulasi Mata Pelajaran";
+        $labelTambahan = "Mapel: " . $schedule->subject_name . " - Kelas: " . ($schedule->classroom->name ?? '-');
+
+        // 4. Generate PDF
+        // Kita reuse (gunakan kembali) view 'report.pdf_view' yang sudah dibuat sebelumnya
+        $pdf = Pdf::loadView('report.pdf_view', compact(
+            'attendances',
+            'labelPeriode',
+            'labelTambahan',
+            'startDate',
+            'endDate'
+        ));
+
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Laporan-' . $schedule->subject_name . '.pdf');
     }
 }

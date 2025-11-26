@@ -5,14 +5,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-<div class="alert alert-info text-center">
-    Mengabsen Kelas: <strong>{{ $schedule->class_name }}</strong> <br>
+<div class="text-center alert alert-info">
+    Mengabsen Kelas: <strong>{{ $schedule->classroom->name }}</strong> <br>
     Mapel: {{ $schedule->subject_name }}
 </div>
 <body>
 <div class="container mt-5">
     <h2 class="text-center">Scanner Absensi Kelas</h2>
-    
+
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div id="reader" width="600px"></div>
@@ -28,8 +28,8 @@
     function onScanSuccess(decodedText, decodedResult) {
         // 1. Pause scanner dulu agar tidak scan berulang-ulang secepat kilat
     try {
-        html5QrcodeScanner.pause(); 
-    } catch(e) { 
+        html5QrcodeScanner.pause();
+    } catch(e) {
         // Abaikan error jika scanner sedang tidak aktif (misal upload file)
     }
 
@@ -39,7 +39,7 @@
         data: {
             _token: $('meta[name="csrf-token"]').attr('content'),
             nis: decodedText,
-            schedule_id: "{{ $schedule->id }}" 
+            schedule_id: "{{ $schedule->id }}"
         },
         success: function(response) {
             if(response.status == 'success') {
