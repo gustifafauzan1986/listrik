@@ -9,7 +9,7 @@
                     <!-- Filter Kelas -->
                     <form action="{{ route('face.index') }}" method="GET" class="mb-4">
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-12">
                                 <select name="classroom_id" class="form-select" onchange="this.form.submit()">
                                     <option value="">-- Pilih Kelas --</option>
                                     @foreach($classrooms as $class)
