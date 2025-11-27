@@ -11,7 +11,7 @@ class Attendance extends Model
     protected $guarded = [];
 
     // --- BAGIAN INI YANG HILANG/ERROR ---
-    
+
     // Relasi ke Siswa (belongsTo = Milik satu siswa)
     public function student()
     {
@@ -22,5 +22,31 @@ class Attendance extends Model
     public function schedule()
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    // Relasi ke Guru (User)
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    // Relasi ke Kelas
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
+    // --- BAGIAN INI YANG HILANG ---
+    // Relasi ke Mata Pelajaran (Subject)
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+    // ------------------------------
+
+    // Relasi ke Absensi
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

@@ -8,7 +8,6 @@ use App\Models\Schedule;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http; // <--- WAJIB IMPORT HTTP CLIENT
 
 class AttendanceController extends Controller
 {
@@ -43,10 +42,10 @@ class AttendanceController extends Controller
         // 1. Cari Siswa berdasarkan NIS
         // Load 'classroom' agar kita tahu nama kelas siswa tersebut (untuk pesan error)
         $student = Student::with('classroom')->where('nis', $request->nis)->first();
-
+        
         if (!$student) {
             return response()->json([
-                'status' => 'error',
+                'status' => 'error', 
                 'message' => 'Data Siswa tidak ditemukan!'
             ]);
         }
@@ -57,7 +56,7 @@ class AttendanceController extends Controller
 
         if (!$schedule) {
             return response()->json([
-                'status' => 'error',
+                'status' => 'error', 
                 'message' => 'Jadwal tidak valid!'
             ]);
         }
@@ -66,7 +65,7 @@ class AttendanceController extends Controller
         // LOGIKA VALIDASI 1: CEK KESESUAIAN KELAS (UUID)
         // ---------------------------------------------------------
         if ($student->classroom_id !== $schedule->classroom_id) {
-
+            
             $kelasSiswa = $student->classroom->name ?? 'Tanpa Kelas';
             $kelasJadwal = $schedule->classroom->name ?? 'Tanpa Kelas';
 
@@ -81,7 +80,7 @@ class AttendanceController extends Controller
         // ---------------------------------------------------------
         if ($schedule->teacher_id !== Auth::id()) {
             return response()->json([
-                'status' => 'error',
+                'status' => 'error', 
                 'message' => 'Security Alert: Anda tidak berhak mengabsen di jadwal guru lain!'
             ]);
         }
@@ -98,7 +97,7 @@ class AttendanceController extends Controller
             // Pesan berbeda tergantung status sebelumnya
             $statusLama = strtoupper($existing->status);
             return response()->json([
-                'status' => 'error',
+                'status' => 'error', 
                 'message' => "Siswa {$student->name} SUDAH ABSEN sebelumnya! (Status: {$statusLama})"
             ]);
         }
@@ -107,11 +106,11 @@ class AttendanceController extends Controller
         // LOGIKA 4: HITUNG KETERLAMBATAN
         // ---------------------------------------------------------
         $status = 'hadir';
-
+        
         // Pastikan Timezone di config/app.php sudah 'Asia/Jakarta'
         $jamMasuk = Carbon::parse($schedule->start_time);
         $jamSekarang = Carbon::now();
-
+        
         // Toleransi 15 menit
         if ($jamSekarang->greaterThan($jamMasuk->addMinutes(15))) {
             $status = 'terlambat';
@@ -128,57 +127,9 @@ class AttendanceController extends Controller
             'status' => $status
         ]);
 
-        // ======================================================
-        // LOGIKA TAMBAHAN: KIRIM NOTIFIKASI WHATSAPP OTOMATIS
-        // ======================================================
-        // Cek apakah siswa punya nomor HP orang tua
-        if (!empty($student->phone)) {
-            try {
-                // 1. Susun Variabel Pesan
-                $namaSiswa = $student->name;
-                $kelas     = $student->classroom->name ?? '-';
-
-                // Ambil nama mapel dari relasi subject
-                // Jika relasi null (legacy data), coba ambil kolom lama atau dash
-                $mapel     = $schedule->subject->name ?? $schedule->subject_name ?? '-';
-
-                $waktu     = date('H:i');
-                $tgl       = date('d-m-Y');
-
-                // Variasi Emoji berdasarkan status
-                $statEmoji = $status == 'hadir' ? '✅' : '⚠️';
-                $statText  = strtoupper($status);
-
-                // 2. Format Pesan WhatsApp
-                $message = "*LAPORAN KEHADIRAN SISWA*\n\n" .
-                           "Yth. Orang Tua/Wali,\n" .
-                           "Putra/Putri Anda:\n\n" .
-                           "👤 Nama : *$namaSiswa*\n" .
-                           "🏫 Kelas : $kelas\n" .
-                           "📚 Mapel : $mapel\n" .
-                           "📅 Tanggal : $tgl\n" .
-                           "⏰ Pukul : $waktu WIB\n" .
-                           "📝 Status : *$statText* $statEmoji\n\n" .
-                           "_Pesan ini dikirim otomatis oleh Sistem Presensi Sekolah._";
-
-                // 3. Kirim ke Service Node.js (Port 3000)
-                // Gunakan timeout singkat (2 detik) agar proses scan tidak terasa lambat jika bot mati
-                Http::timeout(2)->post('http://localhost:3000/send-message', [
-                    'number'  => $student->phone, // No HP Ortu
-                    'message' => $message,
-                ]);
-
-            } catch (\Exception $e) {
-                // Jika Bot mati/error, catat di log saja (storage/logs/laravel.log).
-                // JANGAN gagalkan proses absensi hanya karena WA gagal.
-                \Illuminate\Support\Facades\Log::error("Gagal Kirim WA Auto: " . $e->getMessage());
-            }
-        }
-        // ======================================================
-
         return response()->json([
-            'status' => 'success',
-            'message' => 'Absensi Berhasil',
+            'status' => 'success', 
+            'message' => 'Absensi Berhasil', 
             'student' => $student->name . " (" . strtoupper($status) . ")"
         ]);
     }
