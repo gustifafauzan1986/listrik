@@ -4,7 +4,7 @@
     <title>Laporan Absensi</title>
     <style>
         body { font-family: sans-serif; font-size: 12px; }
-        
+
         /* Kop Surat */
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
         .header h1 { margin: 0; font-size: 18px; text-transform: uppercase; }
@@ -14,7 +14,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #333; padding: 6px; text-align: left; }
         th { background-color: #eee; }
-        
+
         /* Utility */
         .text-center { text-align: center; }
         .badge { padding: 2px 5px; border-radius: 3px; color: white; font-size: 10px; }
@@ -54,7 +54,7 @@
                 <td>{{ $row->check_in_time }}</td>
                 <td>{{ $row->student->nis }}</td>
                 <td>{{ $row->student->name }}</td>
-                <td>{{ $row->student->class_name }}</td>
+                <td>{{ $row->student->classroom->name }}</td>
                 <td>{{ $row->schedule->subject_name ?? '-' }}</td>
                 <td class="text-center">
                     @if($row->status == 'hadir')

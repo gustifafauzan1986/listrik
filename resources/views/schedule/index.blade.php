@@ -62,7 +62,7 @@
                                     <td class="text-center">
                                         <!-- TOMBOL 1: LIHAT DATA -->
                                         <a href="{{ route('schedule.show', $sched->id) }}" class="text-white btn btn-sm btn-info me-1" title="Lihat Detail">
-                                            Lihat
+                                             <i class="bx bx-show-alt"></i>
                                         </a>
 
 
@@ -75,10 +75,10 @@
                                         <!-- TOMBOL 3: SCAN / HAPUS -->
                                         @if($isActive)
                                             <a href="{{ route('scan.index', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary">
-                                                Scan
+                                                <i class="bx bx-scan"></i>
                                             </a>
-                                            <a href="{{ route('scan.face', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-warning" title="Mode Scan Wajah">Wajah
-                                                <i class="fas fa-user"></i>
+                                            <a href="{{ route('scan.face', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-warning" title="Mode Scan Wajah">
+                                                <i class="bx bx-camera"></i>
                                             </a>
 
                                         @else

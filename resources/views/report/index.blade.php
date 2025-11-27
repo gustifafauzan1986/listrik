@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="page-content">
-        <div class="container mt-5">
-            <div class="mx-auto shadow card col-md-8">
+        <div class="col-md-12">
+            <div class="mx-auto shadow card col-md-12">
                 <div class="text-white card-header bg-primary">
                     <h5 class="mb-0">Cetak Laporan Absensi</h5>
                 </div>

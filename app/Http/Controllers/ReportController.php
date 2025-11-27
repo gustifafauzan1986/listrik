@@ -7,6 +7,8 @@ use App\Models\Attendance;
 use App\Models\Schedule; // Import Schedule
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+// ... Jangan lupa import Model Setting di paling atas
+use App\Models\Setting;
 
 class ReportController extends Controller
 {
@@ -109,9 +111,17 @@ class ReportController extends Controller
         $labelPeriode = "Rekapitulasi Mata Pelajaran";
         $labelTambahan = "Mapel: " . $schedule->subject_name . " - Kelas: " . ($schedule->classroom->name ?? '-');
 
+        $school = [
+        'name'    => Setting::value('school_name', 'SMK DEFAULT'),
+        'address' => Setting::value('school_address', 'Alamat Sekolah'),
+        'phone'   => Setting::value('school_phone', '-'),
+        'web'     => Setting::value('school_web', '-'),
+        'email'   => Setting::value('school_email', '-'),
+    ];
         // 4. Generate PDF
         // Kita reuse (gunakan kembali) view 'report.pdf_view' yang sudah dibuat sebelumnya
         $pdf = Pdf::loadView('report.pdf_view', compact(
+            'school', // <--- Tambahkan ini
             'attendances',
             'labelPeriode',
             'labelTambahan',

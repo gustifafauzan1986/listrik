@@ -16,6 +16,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\FaceController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CardController;
 
 Route::view('/', 'welcome');
@@ -103,6 +104,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
     Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
     Route::resource('students', StudentController::class);
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
     });
 
 });
