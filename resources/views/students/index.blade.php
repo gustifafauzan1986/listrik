@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="page-content">
-        <div class="container">
+        <div class="col-md-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h3 class="fw-bold text-primary"><i class="fas fa-users me-2"></i> Data Seluruh Siswa</h3>
                 <div>
@@ -35,9 +35,13 @@
                         </div>
                     </form>
 
-                    <!-- Tabel Data -->
-                    <div class="table-responsive">
-                        <table class="table align-middle table-hover table-striped">
+                </div>
+            </div>
+				<div class="card">
+
+					<div class="card-body">
+						<div class="table-responsive">
+							<table id="example" class="table table-striped table-bordered" style="width:100%">
                             <thead class="table-dark">
                                 <tr>
                                     <th>NIS</th>
@@ -71,7 +75,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
-                                                    <i class="fas fa-trash"></i>
+                                                    Hapus<i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
                                         </td>
@@ -83,14 +87,9 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
+						</div>
+					</div>
 
-                    <!-- Pagination -->
-                    {{-- <div class="mt-3">
-                        {{ $students->withQueryString()->links() }}
-                    </div> --}}
-
-                </div>
             </div>
         </div>
     </div>
