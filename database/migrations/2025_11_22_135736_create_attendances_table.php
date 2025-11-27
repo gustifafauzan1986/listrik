@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignUuid('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->date('date');
             $table->time('check_in_time');
-            $table->enum('status', ['hadir', 'terlambat']);
+            $table->enum('status', ['hadir', 'terlambat', 'izin', 'sakit', 'alpa']);
             $table->timestamps();
             });
     }

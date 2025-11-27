@@ -15,7 +15,7 @@
 
             <div class="row">
                 <!-- Card Ringkasan -->
-                <div class="mb-3 col-md-4">
+                <div class="mb-3 col-md-2">
                     <div class="text-white card bg-success">
                         <div class="text-center card-body">
                             <h3>{{ $attendances->where('status', 'hadir')->count() }}</h3>
@@ -23,7 +23,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-3 col-md-4">
+                <div class="mb-3 col-md-2">
                     <div class="card bg-warning text-dark">
                         <div class="text-center card-body">
                             <h3>{{ $attendances->where('status', 'terlambat')->count() }}</h3>
@@ -31,7 +31,32 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-3 col-md-4">
+                <!-- Card Ringkasan -->
+                <div class="mb-3 col-md-2">
+                    <div class="text-white card bg-success">
+                        <div class="text-center card-body">
+                            <h3>{{ $attendances->where('status', 'sakit')->count() }}</h3>
+                            <small>Sakit</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3 col-md-2">
+                    <div class="card bg-warning text-dark">
+                        <div class="text-center card-body">
+                            <h3>{{ $attendances->where('status', 'izin')->count() }}</h3>
+                            <small>Izin</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3 col-md-2">
+                    <div class="card bg-warning text-dark">
+                        <div class="text-center card-body">
+                            <h3>{{ $attendances->where('status', 'alfa')->count() }}</h3>
+                            <small>Alfa</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3 col-md-2">
                     <div class="text-white card bg-secondary">
                         <div class="text-center card-body">
                             <h3>{{ $attendances->count() }}</h3>
@@ -63,6 +88,10 @@
                                     <td>
                                         @if($row->status == 'hadir')
                                             <span class="badge bg-success">Hadir</span>
+                                        @elseif ($row->status == 'sakit')
+                                            <span class="badge bg-warning text-dark">Sakit</span>
+                                        @elseif ($row->status == 'izin')
+                                            <span class="badge bg-warning text-dark">Izin</span>
                                         @else
                                             <span class="badge bg-warning text-dark">Terlambat</span>
                                         @endif

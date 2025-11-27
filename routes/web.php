@@ -39,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/scan/store', [AttendanceController::class, 'store'])->name('scan.store');
 
     });
+    // =========================================================================
+    // GROUP 1: AREA GURU & ADMIN (Operasional Harian)
+    // =========================================================================
     Route::middleware(['role:admin|guru'])->group(function () {
 
         Route::get('/report', [ReportController::class, 'index'])->name('report.index');
@@ -50,9 +53,16 @@ Route::middleware(['auth'])->group(function () {
         // Scanner Wajah (API & View)
         Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
         Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
-         Route::resource('schedule', ScheduleController::class);
+        Route::resource('schedule', ScheduleController::class);
+
+         // --- 3. ABSENSI MANUAL (BARU) ---
+        Route::get('/schedule/manual/{id}', [AttendanceController::class, 'createManual'])->name('attendance.manual');
+        Route::post('/schedule/manual/{id}', [AttendanceController::class, 'storeManual'])->name('attendance.storeManual');
     });
 
+    // =========================================================================
+    // GROUP 2: KHUSUS ADMIN (Master Data & Settings)
+    // =========================================================================
     Route::middleware(['role:admin'])->group(function () {
 
         // ... route import siswa yang lama ...

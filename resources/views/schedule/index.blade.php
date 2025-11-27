@@ -74,6 +74,9 @@
 
                                         <!-- TOMBOL 3: SCAN / HAPUS -->
                                         @if($isActive)
+                                            <a href="{{ url('/schedule/manual', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary">
+                                                <i class="bx bx-message-square-add"></i>
+                                            </a>
                                             <a href="{{ route('scan.index', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary">
                                                 <i class="bx bx-scan"></i>
                                             </a>

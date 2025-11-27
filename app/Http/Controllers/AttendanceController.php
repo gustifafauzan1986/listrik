@@ -182,4 +182,81 @@ class AttendanceController extends Controller
             'student' => $student->name . " (" . strtoupper($status) . ")"
         ]);
     }
+
+    // =============================================================
+    // FITUR BARU: ABSENSI MANUAL GURU (SAKIT/IZIN/ALPA)
+    // =============================================================
+
+    /**
+     * Halaman Form Manual (Menampilkan Daftar Siswa)
+     * Route: GET /schedule/{id}/manual
+     */
+    public function createManual($schedule_id)
+    {
+        // 1. Cari Jadwal & Validasi Pemilik
+        $schedule = Schedule::with(['classroom', 'subject'])
+                    ->where('id', $schedule_id)
+                    ->where('teacher_id', Auth::id())
+                    ->firstOrFail();
+
+        // 2. Ambil semua siswa di kelas tersebut
+        $students = Student::where('classroom_id', $schedule->classroom_id)
+                    ->orderBy('name')
+                    ->get();
+
+        // 3. Ambil data absensi yang SUDAH ada hari ini (untuk mengisi status radio button)
+        // Format Array: [student_id => status] contoh: [1 => 'hadir', 2 => 'sakit']
+        $existingAttendances = Attendance::where('schedule_id', $schedule_id)
+                                ->where('date', date('Y-m-d'))
+                                ->pluck('status', 'student_id')
+                                ->toArray();
+
+        return view('attendance.manual', compact('schedule', 'students', 'existingAttendances'));
+    }
+
+    /**
+     * Proses Simpan Absensi Manual (Massal)
+     * Route: POST /schedule/{id}/manual
+     */
+    public function storeManual(Request $request, $schedule_id)
+    {
+        // Validasi Input array
+        $request->validate([
+            'attendances' => 'required|array', // Key: student_id, Value: status
+        ]);
+
+        $schedule = Schedule::findOrFail($schedule_id);
+
+        // Pastikan hanya pemilik jadwal yang bisa simpan
+        if ($schedule->teacher_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $date = date('Y-m-d');
+        $now = date('H:i:s');
+
+        // Loop setiap siswa yang diinput
+        foreach ($request->attendances as $studentId => $status) {
+            // Jika status kosong/tidak dipilih, skip
+            if (!$status) continue;
+
+            // Gunakan updateOrCreate agar data lama terupdate, data baru terbuat
+            Attendance::updateOrCreate(
+                [
+                    'student_id'  => $studentId,
+                    'schedule_id' => $schedule_id,
+                    'date'        => $date
+                ],
+                [
+                    'check_in_time' => $now, // Set waktu saat guru klik simpan
+                    'status'        => $status
+                ]
+            );
+
+            // Catatan: Kita TIDAK mengirim Notifikasi WA di sini untuk menghindari
+            // spam massal atau timeout server jika mengabsen 30 siswa sekaligus.
+        }
+
+        return redirect()->route('schedule.index')->with('success', 'Data absensi manual berhasil disimpan!');
+    }
 }

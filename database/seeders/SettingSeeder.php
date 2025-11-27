@@ -10,7 +10,7 @@ class SettingSeeder extends Seeder
     public function run()
     {
         $data = [
-            'school_name'    => 'SMK NEGERI 1 CONTOH',
+            'school_name'    => 'SMK NEGERI 1 BUKITTINGGI',
             'school_address' => 'Jl. Pendidikan No. 123, Jakarta Selatan',
             'school_phone'   => '(021) 555-5555',
             'school_web'     => 'www.sekolah.sch.id',
