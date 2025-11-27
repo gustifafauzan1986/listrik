@@ -1,8 +1,7 @@
 <x-app-layout>
 <div class="page-content">
-    <div class="container mt-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <div class="shadow card">
                     <div class="text-white card-header bg-primary">
                         <h4>Import Data Siswa</h4>
@@ -29,7 +28,7 @@
                                 <input type="file" name="file" class="form-control" required>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <a href="{{ route('dashboard') }}" class="btn btn-secondary">Kembali</a>
+                                <a href="{{ route('students.index') }}" class="btn btn-secondary">Kembali</a>
                                 <button type="submit" class="btn btn-success">Import Sekarang</button>
                             </div>
                         </form>
@@ -45,6 +44,7 @@
                                 <th>nis</th>
                                 <th>nama_siswa</th>
                                 <th>kelas</th>
+                                <th>no_hp</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -52,15 +52,15 @@
                                 <td>1001</td>
                                 <td>Budi Santoso</td>
                                 <td>XII RPL 1</td>
+                                <td>6285274817886</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
 </div>
-
+@stack('scripts')
 <!-- Script SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -90,6 +90,6 @@
         });
     @endif
 </script>
-</x-app-layout>
 
+</x-app-layout>
 

@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="page-content">
-        <div class="container mt-5">
+        <div class="col-md-12">
 
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <div>

@@ -36,7 +36,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/scan/{schedule_id}', [AttendanceController::class, 'index'])->name('scan.index');
         // Proses Data Scan (Ajax)
         Route::post('/scan/store', [AttendanceController::class, 'store'])->name('scan.store');
-        Route::resource('schedule', ScheduleController::class);
+
     });
     Route::middleware(['role:admin|guru'])->group(function () {
 
@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
         // Scanner Wajah (API & View)
         Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
         Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
+         Route::resource('schedule', ScheduleController::class);
     });
 
     Route::middleware(['role:admin'])->group(function () {

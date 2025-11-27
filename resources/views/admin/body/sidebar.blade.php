@@ -21,7 +21,7 @@
 				<li class="menu-label">UI Elements</li>
 
 
-                @role('guru')
+                @role('guru|admin')
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bx-bookmark-heart'></i>

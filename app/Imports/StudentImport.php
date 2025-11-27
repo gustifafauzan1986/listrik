@@ -15,7 +15,7 @@ class StudentImport implements ToModel, WithHeadingRow
     * @return \Illuminate\Database\Eloquent\Model|null
     */
 
-    
+
     // Variabel untuk menampung NIS yang ganda
     private $duplicates = [];
     private $successCount = 0;
@@ -36,7 +36,7 @@ class StudentImport implements ToModel, WithHeadingRow
 
         // 2. CARI / BUAT KELAS
         $classroom = Classroom::firstOrCreate(
-            ['name' => strtoupper(trim($row['kelas']))] 
+            ['name' => strtoupper(trim($row['kelas']))]
         );
 
         // 3. SIMPAN SISWA BARU
@@ -45,6 +45,8 @@ class StudentImport implements ToModel, WithHeadingRow
             'nis'          => $row['nis'],
             'name'         => $row['nama_siswa'],
             'classroom_id' => $classroom->id,
+            // Tambahkan Nomor HP (pastikan header di excel 'no_hp')
+            'phone'        => $row['no_hp'] ?? null,
         ]);
     }
 

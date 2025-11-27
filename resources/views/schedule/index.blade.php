@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="page-content">
 
-        <div class="container">
+        <div class="col-md-12">
 
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -23,7 +23,7 @@
 
             <div class="shadow card">
                 <div class="card-body">
-                    <table class="table align-middle table-bordered table-hover">
+                    <table id="example" class="table table-striped table-bordered" style="width:100%">
                         <thead class="table-dark">
                             <tr>
                                 <th>Hari</th>
@@ -67,9 +67,9 @@
 
 
                                         <!-- TOMBOL 2: CETAK PDF (LINK KE ROUTE BARU) -->
-                                        <a href="{{ route('report.schedule', $sched->id) }}" class="btn btn-sm btn-danger me-1" target="_blank" title="Cetak Laporan Mapel">
+                                        {{-- <a href="{{ route('report.schedule', $sched->id) }}" class="btn btn-sm btn-danger me-1" target="_blank" title="Cetak Laporan Mapel">
                                             <i class="fas fa-file-pdf"></i> PDF
-                                        </a>
+                                        </a> --}}
 
 
                                         <!-- TOMBOL 3: SCAN / HAPUS -->
@@ -80,7 +80,9 @@
                                             <a href="{{ route('scan.face', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-warning" title="Mode Scan Wajah">Wajah
                                                 <i class="fas fa-user"></i>
                                             </a>
+
                                         @else
+                                         @role('admin')
                                             <form id="delete-form-{{ $sched->id }}" action="{{ route('schedule.destroy', $sched->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -88,6 +90,7 @@
                                                     Hapus
                                                 </button>
                                             </form>
+                                        @endrole
                                         @endif
                                     </td>
                                 </tr>
