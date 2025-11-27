@@ -15,6 +15,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\FaceController;
 use App\Http\Controllers\WhatsAppController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CardController;
 
 Route::view('/', 'welcome');
@@ -100,6 +101,7 @@ Route::middleware(['auth'])->group(function () {
         // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
     Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
     Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
+    Route::resource('students', StudentController::class);
     });
 
 });

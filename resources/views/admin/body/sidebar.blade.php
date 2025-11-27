@@ -43,7 +43,7 @@
 						<div class="menu-title">Murid</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('students.import')}}"><i class='bx bx-radio-circle'></i>Import Murid</a>
+						<li> <a href="{{route('students.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
 						</li>
 
 					</ul>
