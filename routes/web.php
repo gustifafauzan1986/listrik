@@ -64,7 +64,15 @@ Route::middleware(['auth'])->group(function () {
         // --- ABSENSI HARIAN (GERBANG) ---
         Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
         Route::post('/daily-attendance', [DailyAttendanceController::class, 'store'])->name('daily.store');
-    });
+
+        // 1. Route Menampilkan Form Manual (GET)
+        // Sesuai dengan method create() di controller
+        Route::get('/daily-attendance/manual', [DailyAttendanceController::class, 'create'])->name('daily.create');
+
+        // 2. Route Menyimpan Data Manual (POST)
+        // Sesuai dengan method storeManual() di controller
+        Route::post('/daily-attendance/manual', [DailyAttendanceController::class, 'storeManual'])->name('daily.storeManual');
+        });
 
     // =========================================================================
     // GROUP 2: KHUSUS ADMIN (Master Data & Settings)
