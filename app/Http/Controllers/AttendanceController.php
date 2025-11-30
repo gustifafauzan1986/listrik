@@ -196,16 +196,18 @@ class AttendanceController extends Controller
      * Proses Simpan Absensi Manual (Massal)
      * Route: POST /schedule/{id}/manual
      */
+
+    /**
+     * Proses Simpan Absensi Manual (Massal) + Kirim WA Antrian
+     */
     public function storeManual(Request $request, $schedule_id)
     {
-        // Validasi Input array
         $request->validate([
             'attendances' => 'required|array', // Key: student_id, Value: status
         ]);
 
-        $schedule = Schedule::findOrFail($schedule_id);
+        $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
 
-        // Pastikan hanya pemilik jadwal yang bisa simpan
         if ($schedule->teacher_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
@@ -213,12 +215,12 @@ class AttendanceController extends Controller
         $date = date('Y-m-d');
         $now = date('H:i:s');
 
-        // Loop setiap siswa yang diinput
+        // Loop setiap input dari guru
         foreach ($request->attendances as $studentId => $status) {
-            // Jika status kosong/tidak dipilih, skip
+            // Jika status tidak dipilih (kosong), lewati
             if (!$status) continue;
 
-            // Gunakan updateOrCreate agar data lama terupdate, data baru terbuat
+            // 1. Simpan ke Database
             Attendance::updateOrCreate(
                 [
                     'student_id'  => $studentId,
@@ -226,15 +228,64 @@ class AttendanceController extends Controller
                     'date'        => $date
                 ],
                 [
-                    'check_in_time' => $now, // Set waktu saat guru klik simpan
+                    'check_in_time' => $now,
                     'status'        => $status
                 ]
             );
 
-            // Catatan: Kita TIDAK mengirim Notifikasi WA di sini untuk menghindari
-            // spam massal atau timeout server jika mengabsen 30 siswa sekaligus.
+            // ==========================================================
+            // 2. LOGIKA KIRIM WA (ANTRIAN / QUEUE)
+            // ==========================================================
+            // Ambil data siswa untuk dapat nomor HP & Nama
+            $student = Student::find($studentId);
+
+            if ($student && !empty($student->phone)) {
+
+                // Tentukan Emoji & Pesan berdasarkan status
+                $emoji = '✅';
+                $keterangan = 'Hadir di sekolah';
+
+                switch ($status) {
+                    case 'izin':
+                        $emoji = '📩';
+                        $keterangan = 'Izin (Diketahui Guru)';
+                        break;
+                    case 'sakit':
+                        $emoji = '💊';
+                        $keterangan = 'Sakit (Diketahui Guru)';
+                        break;
+                    case 'alpa':
+                        $emoji = '❌';
+                        $keterangan = 'ALPA / Tanpa Keterangan';
+                        break;
+                    case 'terlambat':
+                        $emoji = '⚠️';
+                        $keterangan = 'Hadir (Terlambat)';
+                        break;
+                }
+
+                // Susun Pesan
+                $mapel = $schedule->subject->name ?? $schedule->subject_name ?? '-';
+                $tgl = date('d-m-Y');
+
+                $message = "*LAPORAN PRESENSI MANUAL*\n\n" .
+                           "Yth. Orang Tua/Wali,\n" .
+                           "Informasi kehadiran putra/putri Anda:\n\n" .
+                           "👤 Nama : *$student->name*\n" .
+                           "🏫 Kelas : {$schedule->classroom->name}\n" .
+                           "📚 Mapel : $mapel\n" .
+                           "📅 Tanggal : $tgl\n" .
+                           "📝 Status : *" . strtoupper($status) . "* $emoji\n" .
+                           "ℹ️ Ket : $keterangan\n\n" .
+                           "_Data ini diinput manual oleh Guru Pengampu._";
+
+                // Masukkan ke Antrian (Background Job)
+                // Ini penting agar proses simpan tidak lemot
+                SendWhatsappJob::dispatch($student->phone, $message);
+            }
+            // ==========================================================
         }
 
-        return redirect()->route('schedule.index')->with('success', 'Data absensi manual berhasil disimpan!');
+        return redirect()->route('schedule.index')->with('success', 'Absensi manual disimpan & notifikasi WA sedang dikirim!');
     }
 }
