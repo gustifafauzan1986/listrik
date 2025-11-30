@@ -23,53 +23,94 @@
         </div>
     </div>
 
+@push('scripts')
+<!-- Load jQuery DULUAN (Wajib untuk $) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    let html5QrcodeScanner;
+    $(document).ready(function() {
+        let html5QrcodeScanner;
 
-    function onScanSuccess(decodedText, decodedResult) {
-        try { html5QrcodeScanner.pause(); } catch(e){}
+        function onScanSuccess(decodedText, decodedResult) {
+            try { html5QrcodeScanner.pause(); } catch(e){}
 
-        Swal.fire({
-            title: 'Memproses...',
-            didOpen: () => Swal.showLoading()
-        });
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Mencatat kehadiran...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
 
-        $.ajax({
-            url: "{{ route('daily.store') }}",
-            type: "POST",
-            data: {
-                _token: "{{ csrf_token() }}",
-                nis: decodedText
-            },
-            success: function(res) {
-                if(res.status == 'success') {
-                    let color = res.type == 'in' ? '#28a745' : '#17a2b8'; // Hijau Masuk, Biru Pulang
+            $.ajax({
+                url: "{{ route('daily.store') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    nis: decodedText
+                },
+                success: function(res) {
+                    if(res.status == 'success') {
+                        let color = res.type == 'in' ? '#28a745' : '#17a2b8'; // Hijau Masuk, Biru Pulang
+                        Swal.fire({
+                            title: res.message,
+                            text: res.student,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            background: '#fff',
+                            iconColor: color
+                        }).then(() => {
+                            try { html5QrcodeScanner.resume(); } catch(e){}
+                        });
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error')
+                            .then(() => {
+                                try { html5QrcodeScanner.resume(); } catch(e){}
+                            });
+                    }
+                },
+                error: function(xhr) {
+                    // --- PERBAIKAN DEBUGGING ERROR 500 ---
+                    console.error("Full Error Log:", xhr);
+
+                    let title = 'Error Sistem';
+                    let msg = 'Terjadi kesalahan pada server.';
+
+                    // Ambil pesan spesifik dari Laravel jika ada (misal: "Class not found")
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                        // Tampilkan detail file jika mode debug aktif
+                        if (xhr.responseJSON.file) {
+                            console.log("File:", xhr.responseJSON.file, "Line:", xhr.responseJSON.line);
+                        }
+                    } else if (xhr.status === 500) {
+                        msg = "Internal Server Error (500). Cek Terminal/Log Laravel Anda untuk detailnya.";
+                    } else if (xhr.status === 404) {
+                        msg = "Route tidak ditemukan (404). Pastikan route 'daily.store' sudah ada.";
+                    }
+
                     Swal.fire({
-                        title: res.message,
-                        text: res.student,
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false,
-                        background: '#fff',
-                        iconColor: color
-                    }).then(() => { html5QrcodeScanner.resume(); });
-                } else {
-                    Swal.fire('Gagal', res.message, 'error')
-                        .then(() => { html5QrcodeScanner.resume(); });
+                        title: title,
+                        text: msg,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        try { html5QrcodeScanner.resume(); } catch(e){}
+                    });
                 }
-            },
-            error: function(err) {
-                Swal.fire('Error', 'Siswa tidak ditemukan / Gangguan Server', 'warning')
-                    .then(() => { html5QrcodeScanner.resume(); });
-            }
-        });
-    }
+            });
+        }
 
-    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess, () => {});
+        // Pastikan elemen reader ada sebelum init
+        if (document.getElementById('reader')) {
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            html5QrcodeScanner.render(onScanSuccess, () => {});
+        } else {
+            console.error("Elemen #reader tidak ditemukan!");
+        }
+    });
 </script>
+
 </x-app-layout>

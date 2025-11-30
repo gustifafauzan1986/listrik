@@ -9,10 +9,10 @@ use App\Traits\HasUuid;
 class DailyAttendance extends Model
 {
     use HasFactory, HasUuid;
-    protected $guarded = [];
-    // protected $fillable = [
-    //     'student_id', 'date', 'arrival_time', 'departure_time', 'status'
-    // ];
+
+    protected $fillable = [
+        'student_id', 'date', 'arrival_time', 'departure_time', 'status'
+    ];
 
     public function student()
     {
