@@ -17,6 +17,8 @@ use App\Http\Controllers\FaceController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SettingController;
+
+use App\Http\Controllers\DailyAttendanceController;
 use App\Http\Controllers\CardController;
 
 Route::view('/', 'welcome');
@@ -58,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
          // --- 3. ABSENSI MANUAL (BARU) ---
         Route::get('/schedule/manual/{id}', [AttendanceController::class, 'createManual'])->name('attendance.manual');
         Route::post('/schedule/manual/{id}', [AttendanceController::class, 'storeManual'])->name('attendance.storeManual');
+
+        // --- ABSENSI HARIAN (GERBANG) ---
+        Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
+        Route::post('/daily-attendance', [DailyAttendanceController::class, 'store'])->name('daily.store');
     });
 
     // =========================================================================
