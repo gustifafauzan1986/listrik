@@ -9,7 +9,6 @@ use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http; // <--- WAJIB IMPORT HTTP CLIENT
-use App\Jobs\SendWhatsappJob; // <--- WAJIB IMPORT JOB
 
 class AttendanceController extends Controller
 {
@@ -130,33 +129,56 @@ class AttendanceController extends Controller
         ]);
 
         // ======================================================
-        // DISPATCH JOB ANTRIAN WHATSAPP (INSTANT RESPONSE)
+        // LOGIKA TAMBAHAN: KIRIM NOTIFIKASI WHATSAPP OTOMATIS
         // ======================================================
+        // Cek apakah siswa punya nomor HP orang tua
         if (!empty($student->phone)) {
-            // Susun Pesan
-            $mapel = $schedule->subject->name ?? $schedule->subject_name ?? '-';
-            $waktu = date('H:i');
-            $tgl = date('d-m-Y');
-            $statText = strtoupper($status);
-            $emoji = $status == 'hadir' ? '✅' : '⚠️';
+            try {
+                // 1. Susun Variabel Pesan
+                $namaSiswa = $student->name;
+                $kelas     = $student->classroom->name ?? '-';
 
-            $message = "*LAPORAN KEHADIRAN SISWA*\n\n" .
-                       "Yth. Orang Tua/Wali,\n" .
-                       "Putra/Putri Anda: *{$student->name}*\n" .
-                       "Kelas: {$student->classroom->name}\n" .
-                       "Mapel: {$mapel}\n" .
-                       "Waktu: {$waktu} WIB ($tgl)\n" .
-                       "Status: *{$statText}* {$emoji}\n\n" .
-                       "_Pesan otomatis sistem._";
+                // Ambil nama mapel dari relasi subject
+                // Jika relasi null (legacy data), coba ambil kolom lama atau dash
+                $mapel     = $schedule->subject->name ?? $schedule->subject_name ?? '-';
 
-            // Masukkan ke Antrian (Tidak menunggu WA terkirim)
-            SendWhatsappJob::dispatch($student->phone, $message);
+                $waktu     = date('H:i');
+                $tgl       = date('d-m-Y');
+
+                // Variasi Emoji berdasarkan status
+                $statEmoji = $status == 'hadir' ? '✅' : '⚠️';
+                $statText  = strtoupper($status);
+
+                // 2. Format Pesan WhatsApp
+                $message = "*LAPORAN KEHADIRAN SISWA*\n\n" .
+                           "Yth. Orang Tua/Wali,\n" .
+                           "Putra/Putri Anda:\n\n" .
+                           "👤 Nama : *$namaSiswa*\n" .
+                           "🏫 Kelas : $kelas\n" .
+                           "📚 Mapel : $mapel\n" .
+                           "📅 Tanggal : $tgl\n" .
+                           "⏰ Pukul : $waktu WIB\n" .
+                           "📝 Status : *$statText* $statEmoji\n\n" .
+                           "_Pesan ini dikirim otomatis oleh Sistem Presensi Sekolah._";
+
+                // 3. Kirim ke Service Node.js (Port 3000)
+                // Gunakan timeout singkat (2 detik) agar proses scan tidak terasa lambat jika bot mati
+                Http::timeout(2)->post('http://localhost:3000/send-message', [
+                    'number'  => $student->phone, // No HP Ortu
+                    'message' => $message,
+                ]);
+
+            } catch (\Exception $e) {
+                // Jika Bot mati/error, catat di log saja (storage/logs/laravel.log).
+                // JANGAN gagalkan proses absensi hanya karena WA gagal.
+                \Illuminate\Support\Facades\Log::error("Gagal Kirim WA Auto: " . $e->getMessage());
+            }
         }
         // ======================================================
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Absensi Berhasil (Notifikasi diproses)',
+            'message' => 'Absensi Berhasil',
             'student' => $student->name . " (" . strtoupper($status) . ")"
         ]);
     }
