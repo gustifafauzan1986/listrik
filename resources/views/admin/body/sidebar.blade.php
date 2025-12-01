@@ -52,12 +52,14 @@
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-repeat"></i>
 						</div>
-						<div class="menu-title">Hak Akses</div>
+						<div class="menu-title">Setting</div>
 					</a>
 					<ul>
 						<li> <a href="{{route('permissions.index')}}"><i class='bx bx-radio-circle'></i>Permission</a>
 						</li>
                         <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
+						</li>
+                        <li> <a href="{{url('/settings')}}"><i class='bx bx-radio-circle'></i>Sekolah</a>
 						</li>
 
 					</ul>

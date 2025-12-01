@@ -67,6 +67,17 @@ class ReportController extends Controller
                 break;
         }
 
+        $school = [
+            'name'    => Setting::value('school_name', 'SMK DEFAULT'),
+            'address' => Setting::value('school_address', 'Alamat Sekolah'),
+            'phone'   => Setting::value('school_phone', '-'),
+            'web'     => Setting::value('school_web', '-'),
+            'email'   => Setting::value('school_email', '-'),
+            // Tambahan Logo
+            'logo_left'  => Setting::value('logo_left'),
+            'logo_right' => Setting::value('logo_right'),
+        ];
+
         // QUERY DATA
         $attendances = Attendance::with(['student', 'schedule'])
                         ->whereBetween('date', [$startDate, $endDate])
@@ -75,7 +86,7 @@ class ReportController extends Controller
                         ->get();
 
         // GENERATE PDF
-        $pdf = Pdf::loadView('report.pdf_view', compact('attendances', 'labelPeriode', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('report.pdf_view', compact('attendances', 'labelPeriode', 'startDate', 'endDate', 'school'));
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->stream('Laporan-Absensi.pdf');
@@ -111,23 +122,30 @@ class ReportController extends Controller
         $labelPeriode = "Rekapitulasi Mata Pelajaran";
         $labelTambahan = "Mapel: " . $schedule->subject_name . " - Kelas: " . ($schedule->classroom->name ?? '-');
 
-        $school = [
-        'name'    => Setting::value('school_name', 'SMK DEFAULT'),
-        'address' => Setting::value('school_address', 'Alamat Sekolah'),
-        'phone'   => Setting::value('school_phone', '-'),
-        'web'     => Setting::value('school_web', '-'),
-        'email'   => Setting::value('school_email', '-'),
-    ];
+
+            $school = [
+            'name'    => Setting::value('school_name', 'SMK DEFAULT'),
+            'address' => Setting::value('school_address', 'Alamat Sekolah'),
+            'phone'   => Setting::value('school_phone', '-'),
+            'web'     => Setting::value('school_web', '-'),
+            'email'   => Setting::value('school_email', '-'),
+        ];
         // 4. Generate PDF
         // Kita reuse (gunakan kembali) view 'report.pdf_view' yang sudah dibuat sebelumnya
         $pdf = Pdf::loadView('report.pdf_view', compact(
-            'school', // <--- Tambahkan ini
+            'school',
             'attendances',
             'labelPeriode',
             'labelTambahan',
             'startDate',
             'endDate'
         ));
+
+        // 2. LEWATKAN data $school ke view
+        // Menggunakan compact() adalah cara yang ringkas
+
+        // Jika Anda menggunakan Dompdf (barryvdh/laravel-dompdf):
+        //$pdf = PDF::loadView('report.pdf_view', $data);
 
         $pdf->setPaper('a4', 'portrait');
 

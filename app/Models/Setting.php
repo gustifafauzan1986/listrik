@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Setting extends Model
 {
     protected $fillable = ['key', 'value'];
+    // protected $guarded = [];
 
     // Helper static untuk mengambil nilai setting dengan cepat
     // Cara pakai: Setting::value('school_name')

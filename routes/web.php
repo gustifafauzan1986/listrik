@@ -127,11 +127,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
         Route::resource('students', StudentController::class);
-        Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
-        Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+
+        // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
+        // Route ini diperlukan oleh form di settings/index.blade.php
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+        // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+        // Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
     });
-
-
-
 
 });

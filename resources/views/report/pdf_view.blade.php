@@ -5,78 +5,134 @@
     <style>
         body { font-family: sans-serif; font-size: 12px; }
 
-        /* Kop Surat */
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .header h1 { margin: 0; font-size: 18px; text-transform: uppercase; }
-        .header p { margin: 2px 0; font-size: 10px; color: #555; }
+        /* Layout Kop Surat menggunakan Tabel agar rapi di PDF */
+        .header-table { width: 100%; border-bottom: 3px double #333; margin-bottom: 20px; padding-bottom: 10px; }
+        .header-table td { vertical-align: middle; }
 
-        /* Tabel */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #333; padding: 6px; text-align: left; }
-        th { background-color: #eee; }
+        /* Logo harus menggunakan public_path agar terbaca oleh DOMPDF */
+        .logo-img { width: 80px; height: auto; }
 
-        /* Utility */
+        .school-info { text-align: center; }
+        .school-info h1 { margin: 0; font-size: 20px; text-transform: uppercase; font-weight: bold; }
+        .school-info p { margin: 2px 0; font-size: 11px; }
+
+        /* Tabel Data */
+        table.data { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table.data th, table.data td { border: 1px solid #333; padding: 6px; text-align: left; }
+        table.data th { background-color: #eee; text-align: center; font-weight: bold; }
+
         .text-center { text-align: center; }
-        .badge { padding: 2px 5px; border-radius: 3px; color: white; font-size: 10px; }
+        .badge { padding: 2px 5px; border-radius: 3px; color: white; font-size: 10px; text-transform: uppercase; }
         .bg-hadir { background-color: green; }
-        .bg-terlambat { background-color: orange; }
+        .bg-terlambat { background-color: orange; color: black; }
+        .bg-izin { background-color: blue; }
+        .bg-sakit { background-color: purple; }
+        .bg-alpa { background-color: red; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>SMK Negeri 1 Contoh</h1>
-        <p>Jl. Pendidikan No. 123, Jakarta Selatan | Telp: (021) 555-5555</p>
-        <p>Website: www.sekolah.sch.id | Email: info@sekolah.sch.id</p>
-    </div>
+    <!-- KOP SURAT DINAMIS -->
+    <table class="header-table">
+        <tr>
+            <!-- LOGO KIRI -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_left']) && $school['logo_left'])
+                    <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
+                @endif
+            </td>
 
-    <h3 class="text-center">LAPORAN ABSENSI SISWA</h3>
-<h4 class="text-center" style="margin-top: 0; font-weight: normal;">{{ $labelPeriode }}</h4>
+            <!-- TEKS TENGAH (IDENTITAS SEKOLAH) -->
+            <td width="70%" class="school-info">
+                <h1>{{ $school['name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</h1>
+                <p>{{ $school['address'] ?? 'Alamat sekolah belum diatur di menu pengaturan.' }}</p>
+                <p>Telp: {{ $school['phone'] ?? '-' }} | Email: {{ $school['email'] ?? '-' }}</p>
+                <p>Website: {{ $school['web'] ?? '-' }}</p>
+            </td>
 
-    <table>
+            <!-- LOGO KANAN -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_right']) && $school['logo_right'])
+                    <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
+                @endif
+            </td>
+        </tr>
+    </table>
+
+    <!-- JUDUL LAPORAN -->
+    <h3 class="text-center" style="text-transform: uppercase;">LAPORAN ABSENSI SISWA</h3>
+
+    <h4 class="text-center" style="margin-top: 0; font-weight: normal;">
+        {{ $labelPeriode ?? 'Periode Laporan' }}
+    </h4>
+
+    <!-- SUB-JUDUL (Misal: Filter per Kelas/Siswa) -->
+    @if(isset($labelTambahan))
+        <h5 class="text-center" style="margin-top: 5px; font-weight: bold; text-decoration: underline;">
+            {{ $labelTambahan }}
+        </h5>
+    @endif
+
+    <!-- TABEL DATA ABSENSI -->
+    <table class="data">
         <thead>
             <tr>
                 <th style="width: 5%">No</th>
-                <th>Tanggal</th>
-                <th>Jam</th>
-                <th>NIS</th>
+                <th style="width: 15%">Tanggal</th>
+                <th style="width: 10%">Jam</th>
+                <th style="width: 15%">NIS</th>
                 <th>Nama Siswa</th>
-                <th>Kelas</th>
+                <th style="width: 15%">Kelas</th>
                 <th>Mata Pelajaran</th>
-                <th>Status</th>
+                <th style="width: 10%">Status</th>
             </tr>
         </thead>
         <tbody>
             @forelse($attendances as $index => $row)
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ \Carbon\Carbon::parse($row->date)->format('d/m/Y') }}</td>
-                <td>{{ $row->check_in_time }}</td>
+                <td class="text-center">{{ \Carbon\Carbon::parse($row->date)->translatedFormat('d/m/Y') }}</td>
+                <td class="text-center">{{ \Carbon\Carbon::parse($row->check_in_time)->format('H:i') }}</td>
                 <td>{{ $row->student->nis }}</td>
                 <td>{{ $row->student->name }}</td>
-                <td>{{ $row->student->classroom->name }}</td>
-                <td>{{ $row->schedule->subject_name ?? '-' }}</td>
+
+                <!-- Mengambil nama kelas via relasi -->
+                <td>{{ $row->student->classroom->name ?? '-' }}</td>
+
+                <!-- Mengambil nama mapel via relasi atau kolom legacy -->
+                <td>{{ $row->schedule->subject->name ?? $row->schedule->subject_name ?? '-' }}</td>
+
                 <td class="text-center">
-                    @if($row->status == 'hadir')
-                        <span class="badge bg-hadir">Hadir</span>
-                    @else
-                        <span class="badge bg-terlambat">Terlambat</span>
-                    @endif
+                    @php
+                        $statusClass = 'bg-alpa';
+                        if($row->status == 'hadir') $statusClass = 'bg-hadir';
+                        elseif($row->status == 'terlambat') $statusClass = 'bg-terlambat';
+                        elseif($row->status == 'izin') $statusClass = 'bg-izin';
+                        elseif($row->status == 'sakit') $statusClass = 'bg-sakit';
+                    @endphp
+                    <span class="badge {{ $statusClass }}">{{ ucfirst($row->status) }}</span>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="8" class="text-center">Tidak ada data absensi pada periode ini.</td>
+                <td colspan="8" class="text-center" style="padding: 20px;">
+                    Tidak ada data absensi yang ditemukan pada periode ini.
+                </td>
             </tr>
             @endforelse
         </tbody>
     </table>
 
+    <!-- TANDA TANGAN -->
     <div style="margin-top: 50px; float: right; width: 200px; text-align: center;">
-        <p>Jakarta, {{ date('d M Y') }}</p>
-        <br><br><br>
-        <p><strong>{{ Auth::user()->name ?? 'Administrator' }}</strong></p>
+        <p>Jakarta, {{ date('d F Y') }}</p>
+        <p>Mengetahui,</p>
         <p>Kepala Tata Usaha</p>
+        <br><br><br>
+        <p style="text-decoration: underline; font-weight: bold;">
+            {{ Auth::user()->name ?? 'Administrator' }}
+        </p>
+        <p>NIP. .......................</p>
     </div>
 
 </body>
