@@ -17,7 +17,8 @@ class ClassroomSeeder extends Seeder
         $grades = ['X', 'XI', 'XII'];
 
         // Daftar Jurusan (Kode Jurusan)
-        $majors = ['RPL', 'TKJ', 'MM', 'AKL', 'OTKP'];
+        // $majors = ['RPL', 'TKJ', 'MM', 'AKL', 'OTKP'];
+        $majors = ['TITL', 'TPTUP'];
 
         // Daftar Rombel (Misal setiap jurusan punya kelas 1 dan 2)
         $groups = ['1', '2'];

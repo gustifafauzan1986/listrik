@@ -44,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
     // =========================================================================
     // GROUP 1: AREA GURU & ADMIN (Operasional Harian)
     // =========================================================================
-    Route::middleware(['role:admin|guru'])->group(function () {
+    Route::middleware(['role:admin|guru|piket'])->group(function () {
 
         Route::get('/report', [ReportController::class, 'index'])->name('report.index');
         Route::post('/report/print', [ReportController::class, 'print'])->name('report.print');
@@ -60,9 +60,7 @@ Route::middleware(['auth'])->group(function () {
          // --- 3. ABSENSI MANUAL (BARU) ---
         Route::get('/schedule/manual/{id}', [AttendanceController::class, 'createManual'])->name('attendance.manual');
         Route::post('/schedule/manual/{id}', [AttendanceController::class, 'storeManual'])->name('attendance.storeManual');
-
-        // --- ABSENSI HARIAN (GERBANG) ---
-        Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
+         Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
         Route::post('/daily-attendance', [DailyAttendanceController::class, 'store'])->name('daily.store');
 
         // 1. Route Menampilkan Form Manual (GET)
@@ -72,7 +70,8 @@ Route::middleware(['auth'])->group(function () {
         // 2. Route Menyimpan Data Manual (POST)
         // Sesuai dengan method storeManual() di controller
         Route::post('/daily-attendance/manual', [DailyAttendanceController::class, 'storeManual'])->name('daily.storeManual');
-        });
+
+    });
 
     // =========================================================================
     // GROUP 2: KHUSUS ADMIN (Master Data & Settings)
@@ -125,11 +124,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/face/register/{id}', [FaceController::class, 'store'])->name('face.store');
 
         // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
-    Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
-    Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
-    Route::resource('students', StudentController::class);
-    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
-    Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
+        Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
+        Route::resource('students', StudentController::class);
+        Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
     });
+
+
+
 
 });

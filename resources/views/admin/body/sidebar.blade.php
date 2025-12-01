@@ -18,10 +18,9 @@
 						<div class="menu-title">Dashboard</div>
 					</a>
 				</li>
-				<li class="menu-label">UI Elements</li>
 
-
-                @role('guru|admin')
+                 @role('guru|admin')
+				<li class="menu-label">Pembelajaran</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bx-bookmark-heart'></i>
@@ -35,6 +34,7 @@
 					</ul>
 				</li>
                 @endrole
+
                 @role('admin')
                 <li>
 					<a href="javascript:;" class="has-arrow">
@@ -72,11 +72,11 @@
 					<ul>
 						<li> <a href="{{url('/print-all-cards')}}"><i class='bx bx-radio-circle'></i>Kartu</a>
 						<li> <a href="{{url('/face/register')}}"><i class='bx bx-radio-circle'></i>Scan Wajah</a>
-						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-radio-circle'></i>Kehadiran</a>
 						</li>
 
 					</ul>
 				</li>
+
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-grid-alt"></i>
@@ -89,6 +89,22 @@
 					</ul>
 				</li>
 
+                @endrole
+
+                @role('piket|guru')
+                <li class="menu-label">Presensi</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class='bx bx-message-square-edit'></i>
+						</div>
+						<div class="menu-title">Scan</div>
+					</a>
+					<ul>
+						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-radio-circle'></i>QR</a>
+						</li>
+
+					</ul>
+				</li>
                 @endrole
 				<li>
 					<a class="has-arrow" href="javascript:;">
