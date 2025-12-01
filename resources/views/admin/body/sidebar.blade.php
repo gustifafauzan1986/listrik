@@ -72,6 +72,7 @@
 					<ul>
 						<li> <a href="{{url('/print-all-cards')}}"><i class='bx bx-radio-circle'></i>Kartu</a>
 						<li> <a href="{{url('/face/register')}}"><i class='bx bx-radio-circle'></i>Scan Wajah</a>
+						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-radio-circle'></i>Kehadiran</a>
 						</li>
 
 					</ul>
