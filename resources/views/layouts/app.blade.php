@@ -30,7 +30,7 @@
 	<link href="{{ asset('backend/assets/plugins/datatable/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" >
 
-	<title>SISFO SMK | @yield('title') </title>
+	<title>LISTRIK BKT | @yield('title') </title>
 </head>
 
 <body>
