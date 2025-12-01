@@ -93,7 +93,7 @@
 
                 @endrole
 
-                @role('piket|guru')
+                @role('piket|guru|admin')
                 <li class="menu-label">Presensi</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">

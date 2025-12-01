@@ -52,6 +52,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/report/schedule/{id}', [ReportController::class, 'printSchedule'])->name('report.schedule');
         Route::resource('subjects', SubjectController::class);
 
+        // Route untuk mencetak Laporan Riwayat Siswa (Transkrip)
+        // Memanggil method ReportController@printStudent
+        Route::get('/report/student/{id}', [ReportController::class, 'printStudent'])->name('report.student');
+
         // Scanner Wajah (API & View)
         Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
         Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
