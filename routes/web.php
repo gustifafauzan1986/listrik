@@ -38,7 +38,8 @@ Route::get('/logout', [UserController::class, 'Logout'])->name('user.logout');
 Route::get('/profile', [UserController::class, 'Profile'])->name('user.profile');
 Route::post('/profile/store', [UserController::class, 'profileStore'])->name('profile.store');
 Route::get('/change/password', [UserController::class, 'password'])->name('user.password');
- Route::post('/update/password', [UserController::class, 'updatePassword'])->name('update.password');
+Route::post('/update/password', [UserController::class, 'updatePassword'])->name('update.password');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:guru'])->group(function () {
@@ -146,6 +147,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
         // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         // Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+
+        Route::get('/user/all', [UserController::class, 'allUser'])->name('all.user');
     });
 
 });

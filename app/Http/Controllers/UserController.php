@@ -78,4 +78,10 @@ class UserController extends Controller
         );
         return redirect('/login')->with($notification);
     }
+
+
+     public function allUser(){
+        $allUser = User::latest()->get();
+        return view('users.all', compact('allUser'));
+    }/* End Method */
 }

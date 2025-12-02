@@ -63,7 +63,7 @@ new #[Layout('layouts.guest')] class extends Component
 									</div>
 									<div class="mb-4 text-center">
 										<h5 class="">Halaman Login</h5>
-										<p class="mb-0">Silahkan Login Menggunakan Akun</p>
+										<p class="mb-0">Sistem Presensi Listrik BKT</p>
 									</div>
 									<div class="form-body">
                                         <form class="row g-3" wire:submit="login">
@@ -90,22 +90,22 @@ new #[Layout('layouts.guest')] class extends Component
 													<label class="form-check-label" for="flexSwitchCheckChecked">Remember Me</label>
 												</div>
 											</div>
-											<div class="col-md-6 text-end">	<a href="authentication-forgot-password.html">Forgot Password ?</a>
-											</div>
+											<!-- <div class="col-md-6 text-end">	<a href="authentication-forgot-password.html">Forgot Password ?</a>
+											</div> -->
 											<div class="col-12">
 												<div class="d-grid">
 													<button type="submit" class="btn btn-primary">Sign in</button>
 												</div>
 											</div>
-											<div class="col-12">
+											<!-- <div class="col-12">
 												<div class="text-center ">
 													<p class="mb-0">Don't have an account yet? <a href="authentication-signup.html">Sign up here</a>
 													</p>
 												</div>
-											</div>
+											</div> -->
 										</form>
 									</div>
-									<div class="mb-5 text-center login-separater"> <span>OR SIGN IN WITH</span>
+									<!-- <div class="mb-5 text-center login-separater"> <span>OR SIGN IN WITH</span>
 										<hr/>
 									</div>
 									<div class="text-center list-inline contacts-social">
@@ -113,7 +113,7 @@ new #[Layout('layouts.guest')] class extends Component
 										<a href="javascript:;" class="text-white border-0 list-inline-item bg-twitter rounded-3"><i class="bx bxl-twitter"></i></a>
 										<a href="javascript:;" class="text-white border-0 list-inline-item bg-google rounded-3"><i class="bx bxl-google"></i></a>
 										<a href="javascript:;" class="text-white border-0 list-inline-item bg-linkedin rounded-3"><i class="bx bxl-linkedin"></i></a>
-									</div>
+									</div> -->
 
 								</div>
 							</div>
