@@ -6,8 +6,8 @@
     <title>Sistem Manajemen Terpadu</title>
     <link rel="stylesheet" href="{{ asset('backend/assets/css/custom/bootstrap@5.3.0.css')}}"/>
     <link rel="stylesheet" href="{{ asset('backend/assets/css/custom/font-awesome-6.4.0-css-all.min.css')}}"/>
-    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
-    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body {
@@ -88,8 +88,8 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="https://via.placeholder.com/50?text=LOGO" alt="Logo Instansi">
+            <a class="navbar-brand" href="{{url('/')}}">
+                <!-- <img src="https://via.placeholder.com/50?text=LOGO" alt="Logo Instansi"> -->
                 Sistem Terpadu
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -97,7 +97,7 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
+                    <!-- <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user-circle"></i> Admin User
                         </a>
@@ -106,7 +106,7 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="#">Logout</a></li>
                         </ul>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
         </div>
@@ -115,7 +115,7 @@
     <div class="container" style="margin-top: 100px; margin-bottom: 50px;">
 
         <div class="hero-section">
-            <h4>Selamat Datang, <span class="text-primary">Admin User</span></h4>
+            <h4>Selamat Datang, <span class="text-primary">Pengguna</span></h4>
             <div id="clock" class="clock-widget">00:00:00</div>
             <div id="date" class="date-widget">Senin, 1 Januari 2024</div>
         </div>
@@ -187,7 +187,7 @@
         <p>&copy; 2025 Sistem Manajemen Terpadu. All Rights Reserved.</p>
     </footer>
     <script src="{{ asset('backend/assets/js/custom/bootstrap@5.3.0.js')}}"></script>
-    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         function updateClock() {

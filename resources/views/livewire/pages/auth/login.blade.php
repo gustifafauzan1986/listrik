@@ -59,18 +59,18 @@ new #[Layout('layouts.guest')] class extends Component
 							<div class="card-body">
 								<div class="p-4">
 									<div class="mb-3 text-center">
-										<img src="{{ asset('backend/assets/images/logo-icon.png')}}" width="60" alt="" />
+										<img src="{{ asset('backend/assets/images/logo-titl.png')}}" width="60" alt="" />
 									</div>
 									<div class="mb-4 text-center">
 										<h5 class="">Halaman Login</h5>
-										<p class="mb-0">Please log in to your account</p>
+										<p class="mb-0">Silahkan Login Menggunakan Akun</p>
 									</div>
 									<div class="form-body">
                                         <form class="row g-3" wire:submit="login">
                                             @csrf
 											<div class="col-12">
 												<label for="inputEmailAddress" class="form-label">Email</label>
-												<input type="email" id="email" wire:model="form.email" class="form-control @error('email') is-invalid @enderror" id="inputEmailAddress" placeholder="admin@example.com">
+												<input type="email" id="email" wire:model="form.email" class="form-control @error('email') is-invalid @enderror" id="inputEmailAddress" placeholder="gatech@gmail.com">
                                                 @error('email')
                                                     <span class="text-danger">{{$message}}</span>
                                                 @enderror
