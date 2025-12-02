@@ -84,4 +84,40 @@ class UserController extends Controller
         $allUser = User::latest()->get();
         return view('users.all', compact('allUser'));
     }/* End Method */
+
+    public function UpdateStatusUser(Request $request){
+        $id = Auth::user()->id;
+        $name = Auth::user()->name;
+        $userId = $request->input('user');
+        if($id != $userId ){
+            $isChecked = $request->input('is_checked', 0);
+            if($isChecked){
+                $user = User::find($userId);
+                if ($user) {
+                    $user->status =  $isChecked;
+                    $user->save();
+                }
+                return response()->json(['message'=>'Pengguna <b class="text-dark">'.$user->name.' </b>Berhasil diaktifkan']); 
+                // $notification = array(
+                //     'message' => 'Kelas Berhasil ditambahkan',
+                //     'alert-type' => 'success',
+                // );
+                // return redirect()->back()->with($notification); 
+            }else{
+                $user = User::find($userId);
+                if ($user) {
+                    $user->status =  $isChecked;
+                    $user->save();
+                }
+                return response()->json(['message'=>'Pengguna <b class="text-danger">'.$user->name.' </b>Berhasil dinonaktifkan']);
+                // $notification = array(
+                //     'message' => 'Kelas Berhasil ditambahkan',
+                //     'alert-type' => 'success',
+                // );
+                // return redirect()->back()->with($notification); 
+            }
+        }else{
+            return response()->json(['message'=>'Anda Login sebagai <b class="text-danger">'.$name.' </b>Gagal Bro']);
+        }
+    }
 }

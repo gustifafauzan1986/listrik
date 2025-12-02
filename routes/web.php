@@ -149,6 +149,7 @@ Route::middleware(['auth'])->group(function () {
         // Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
 
         Route::get('/user/all', [UserController::class, 'allUser'])->name('all.user');
+        Route::post('/update-user/status',[UserController::class, 'UpdateStatusUser'])->name('update.status.user');
     });
 
 });

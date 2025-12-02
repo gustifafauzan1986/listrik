@@ -85,10 +85,10 @@ new #[Layout('layouts.guest')] class extends Component
                                                 </div>
 											</div>
 											<div class="col-md-6">
-												<div class="form-check form-switch">
+												<!-- <div class="form-check form-switch">
 													<input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked">
 													<label class="form-check-label" for="flexSwitchCheckChecked">Remember Me</label>
-												</div>
+												</div> -->
 											</div>
 											<!-- <div class="col-md-6 text-end">	<a href="authentication-forgot-password.html">Forgot Password ?</a>
 											</div> -->
