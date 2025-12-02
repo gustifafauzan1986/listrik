@@ -1,3 +1,7 @@
+
+@section('title')
+   Scan Datanng dan Pulang
+@endsection
 <x-app-layout>
     <div class="page-content">
         <div class="row justify-content-center">
@@ -23,7 +27,6 @@
         </div>
     </div>
 
-@push('scripts')
 <!-- Load jQuery DULUAN (Wajib untuk $) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>

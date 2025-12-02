@@ -19,7 +19,7 @@
 					</a>
 				</li>
 
-                 @role('guru|admin')
+                 @role('guru')
 				<li class="menu-label">Pembelajaran</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">

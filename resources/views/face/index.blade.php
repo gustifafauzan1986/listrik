@@ -1,6 +1,10 @@
+@section('title')
+   Registrasi Biometrik Wajah
+@endsection
+
 <x-app-layout>
     <div class="page-content">
-        <div class="container">
+        <div class="col-md-12">
             <div class="mb-4 shadow card">
                 <div class="text-white card-header bg-primary">
                     <h5 class="mb-0">Registrasi Biometrik Wajah</h5>

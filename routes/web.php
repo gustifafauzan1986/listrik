@@ -39,6 +39,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/scan/{schedule_id}', [AttendanceController::class, 'index'])->name('scan.index');
         // Proses Data Scan (Ajax)
         Route::post('/scan/store', [AttendanceController::class, 'store'])->name('scan.store');
+        // Scanner Wajah (API & View)
+        Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
+        Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
+        Route::resource('schedule', ScheduleController::class);
+
+         // --- 3. ABSENSI MANUAL (BARU) ---
+        Route::get('/schedule/manual/{id}', [AttendanceController::class, 'createManual'])->name('attendance.manual');
+        Route::post('/schedule/manual/{id}', [AttendanceController::class, 'storeManual'])->name('attendance.storeManual');
 
     });
     // =========================================================================
@@ -56,15 +64,8 @@ Route::middleware(['auth'])->group(function () {
         // Memanggil method ReportController@printStudent
         Route::get('/report/student/{id}', [ReportController::class, 'printStudent'])->name('report.student');
 
-        // Scanner Wajah (API & View)
-        Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
-        Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
-        Route::resource('schedule', ScheduleController::class);
-
-         // --- 3. ABSENSI MANUAL (BARU) ---
-        Route::get('/schedule/manual/{id}', [AttendanceController::class, 'createManual'])->name('attendance.manual');
-        Route::post('/schedule/manual/{id}', [AttendanceController::class, 'storeManual'])->name('attendance.storeManual');
-         Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
+        
+        Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
         Route::post('/daily-attendance', [DailyAttendanceController::class, 'store'])->name('daily.store');
 
         // 1. Route Menampilkan Form Manual (GET)

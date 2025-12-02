@@ -1,12 +1,8 @@
-@section('title')
-   Registrasi Wajah: {{ $student->name }}
-@endsection
-
 <x-app-layout>
 <div class="page-content">
             <div class="col-md-12">
                 <div class="shadow card">
-                    <div class="text-white card-header bg-primary">
+                    <div class="text-white card-header bg-dark">
                         Registrasi Wajah: <strong>{{ $student->name }}</strong>
                     </div>
                     <div class="text-center card-body">

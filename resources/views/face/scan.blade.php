@@ -172,6 +172,7 @@
             },
             error: function(xhr) {
                 // Error (misal sudah absen)
+                
                 // Kita abaikan alert error agar tidak mengganggu flow, cukup console log
                 // atau gunakan Toast kecil
                 console.log(xhr.responseJSON.message);

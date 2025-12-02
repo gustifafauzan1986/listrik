@@ -1,9 +1,15 @@
+@section('title')
+   Mengabsen Kelas: {{ $schedule->classroom->name }}
+@endsection
+
 <x-app-layout>
     <div class="page-content">
+        
         <div class="text-center alert alert-info">
             Mengabsen Kelas: <strong>{{ $schedule->classroom->name }}</strong> <br>
             Mapel: {{ $schedule->subject_name }}
         </div>
+        
         <div class="container mt-5">
             <h2 class="text-center">Scanner Absensi Kelas</h2>
 
