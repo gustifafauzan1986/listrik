@@ -91,6 +91,19 @@
 					</ul>
 				</li>
 
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
+						</div>
+						<div class="menu-title">Laporan</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('report.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
+						</li>
+
+					</ul>
+				</li>
+
                 @endrole
 
                 @role('piket|guru|admin')
@@ -108,18 +121,7 @@
 					</ul>
 				</li>
                 @endrole
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
-						</div>
-						<div class="menu-title">Laporan</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('report.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
-						</li>
-
-					</ul>
-				</li>
+				
 			</ul>
 			<!--end navigation-->
 		</div>
