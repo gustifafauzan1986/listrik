@@ -5,6 +5,7 @@
 <x-app-layout>
     <div class="page-content">
         <div class="col-md-12">
+            
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h3 class="fw-bold text-primary"><i class="fas fa-users me-2"></i> Data Seluruh Murid</h3>
                 <div>

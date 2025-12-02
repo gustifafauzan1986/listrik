@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png')}}" type="image/png"/>
     <title>Laporan Presensi Siswa</title>
     <style>
         body { font-family: sans-serif; font-size: 12px; color: #333; }
@@ -24,24 +25,70 @@
         .stat-val { font-size: 16px; font-weight: bold; color: #0056b3; }
 
         /* Tabel Data Main */
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .data-table th, .data-table td { border: 1px solid #333; padding: 8px; text-align: left; }
-        .data-table th { background-color: #eee; text-align: center; }
-        .text-center { text-align: center; }
+        .data-table-laporan { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .data-table-laporan th, .data-table-laporan td { border: 1px solid #333; padding: 8px; text-align: left; }
+        .data-table-laporan th { background-color: #eee; text-align: center; }
+        .text-center-laporan { text-align: center; }
 
         /* Status Badge Text */
         .status-hadir { color: green; font-weight: bold; }
+        .status-izin { color: #d7e04fff;; font-weight: bold; }
+        .status-alfa { color: red; font-weight: bold; }
         .status-terlambat { color: orange; font-weight: bold; }
+        
+
+        /* Layout Kop Surat menggunakan Tabel agar rapi di PDF */
+        .header-table-logo { width: 100%; border-bottom: 3px double #333; margin-bottom: 20px; padding-bottom: 10px; }
+        .header-table-logo td { vertical-align: middle; }
+
+        /* Logo harus menggunakan public_path agar terbaca oleh DOMPDF */
+        .logo-img { width: 80px; height: auto; }
+
+        .school-info { text-align: center; }
+        .school-info h1 { margin: 0; font-size: 20px; text-transform: uppercase; font-weight: bold; }
+        .school-info p { margin: 2px 0; font-size: 11px; }
+
+        /* Tabel Data */
+        table.data { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table.data th, table.data td { border: 1px solid #333; padding: 6px; text-align: left; }
+        table.data th { background-color: #eee; text-align: center; font-weight: bold; }
+
     </style>
 </head>
 <body>
 
     <!-- Kop Surat -->
-    <div class="header">
-        <h1>SMK Negeri Digital Indonesia</h1>
-        <p>Jl. Teknologi No. 1, Jakarta | Telp: (021) 123-4567</p>
+    <!-- <div class="header">
+        <h1>{{$school['name']}}</h1>
+        <p>{{$school['address']}} | Telp: {{$school['phone']}}</p>
         <p>Laporan Riwayat Kehadiran Siswa</p>
-    </div>
+    </div> -->
+
+     <table class="header-table-logo">
+        <tr>
+            <!-- LOGO KIRI -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_left']) && $school['logo_left'])
+                    <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
+                @endif
+            </td>
+
+            <!-- TEKS TENGAH (IDENTITAS SEKOLAH) -->
+            <td width="70%" class="school-info">
+                <h1>{{ $school['name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</h1>
+                <p>{{ $school['address'] ?? 'Alamat sekolah belum diatur di menu pengaturan.' }}</p>
+                <p>Telp: {{ $school['phone'] ?? '-' }} | Email: {{ $school['email'] ?? '-' }}</p>
+                <p>Website: {{ $school['web'] ?? '-' }}</p>
+            </td>
+
+            <!-- LOGO KANAN -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_right']) && $school['logo_right'])
+                    <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
+                @endif
+            </td>
+        </tr>
+    </table>
 
     <!-- Biodata -->
     <table class="bio-table">
@@ -70,11 +117,14 @@
         <strong>RINGKASAN KEHADIRAN:</strong> &nbsp;&nbsp;
         Total Masuk: <b>{{ $summary['total'] }}</b> &nbsp;|&nbsp;
         Tepat Waktu: <b>{{ $summary['hadir'] }}</b> &nbsp;|&nbsp;
+        Sakit: <b style="color: orange;">{{ $summary['sakit'] }}</b> &nbsp;|&nbsp;
+        Izin: <b style="color: #d7e04fff;">{{ $summary['izin'] }}</b> &nbsp;|&nbsp;
+        Alpa: <b style="color: red;">{{ $summary['alpa'] }}</b> &nbsp;|&nbsp;
         Terlambat: <b style="color: orange;">{{ $summary['terlambat'] }}</b>
     </div>
 
     <!-- Tabel Detail -->
-    <table class="data-table">
+    <table class="data-table-laporan">
         <thead>
             <tr>
                 <th style="width: 5%">No</th>
@@ -88,20 +138,26 @@
         <tbody>
             @forelse($attendances as $index => $row)
             <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
-                <td class="text-center">{{ \Carbon\Carbon::parse($row->date)->format('d/m/Y') }}</td>
-                <td class="text-center">{{ $row->check_in_time }}</td>
+                <td class="text-center-laporan">{{ $index + 1 }}</td>
+                <td class="text-center-laporan">{{ \Carbon\Carbon::parse($row->date)->format('d/m/Y') }}</td>
+                <td class="text-center-laporan">{{ $row->check_in_time }}</td>
                 <td>
                     <!-- Ambil nama mapel dari relasi subject -->
-                    {{ $row->schedule->subject->name ?? '-' }}
+                    {{ $row->schedule->subject_name ?? '-' }}
                 </td>
                 <td>
                     <!-- Ambil nama guru -->
                     {{ $row->schedule->teacher->name ?? '-' }}
                 </td>
-                <td class="text-center">
+                <td class="text-center-laporan">
                     @if($row->status == 'hadir')
                         <span class="status-hadir">HADIR</span>
+                    @elseif($row->status == 'sakit')
+                        <span class="status-sakit">SAKIT</span>
+                    @elseif($row->status == 'izin')
+                        <span class="status-izin">IZIN</span>
+                    @elseif($row->status == 'alpa')
+                        <span class="status-alfa">ALPA</span>
                     @else
                         <span class="status-terlambat">TERLAMBAT</span>
                     @endif
@@ -109,7 +165,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="text-center">Belum ada riwayat absensi untuk siswa ini.</td>
+                <td colspan="6" class="text-center-laporan">Belum ada riwayat absensi untuk siswa ini.</td>
             </tr>
             @endforelse
         </tbody>

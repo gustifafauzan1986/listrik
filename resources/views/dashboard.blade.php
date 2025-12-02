@@ -2,6 +2,10 @@
    Dashboard
 @endsection
 
+@php
+$student = App\Models\Student::where('jenis_user', 'siswa')->get();
+@endphp
+
 <x-app-layout>
     <div class="page-content">
         @role('admin')
@@ -11,7 +15,7 @@
 						<div class="card-body">
 							<div class="d-flex align-items-center">
 								<div class="me-auto">
-									<p class="mb-0 text-white">Total Orders</p>
+									<p class="mb-0 text-white">Total Siswa</p>
 									<h4 class="my-1 text-white">4805</h4>
 									<p class="mb-0 text-white font-13">+2.5% from last week</p>
 								</div>
@@ -25,7 +29,7 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Total Revenue</p>
+								   <p class="mb-0 text-white">Total Guru</p>
 								   <h4 class="my-1 text-white">$84,245</h4>
 								   <p class="mb-0 text-white font-13">+5.4% from last week</p>
 							   </div>
@@ -39,7 +43,7 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Bounce Rate</p>
+								   <p class="mb-0 text-white">Total Presensi</p>
 								   <h4 class="my-1 text-white">34.6%</h4>
 								   <p class="mb-0 text-white font-13">-4.5% from last week</p>
 							   </div>
