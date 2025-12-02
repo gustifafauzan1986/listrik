@@ -20,6 +20,7 @@ use App\Http\Controllers\SettingController;
 
 use App\Http\Controllers\DailyAttendanceController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\UserController;
 
 Route::view('/', 'welcome');
 
@@ -32,6 +33,12 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 require __DIR__.'/auth.php';
+
+Route::get('/logout', [UserController::class, 'Logout'])->name('user.logout');
+Route::get('/profile', [UserController::class, 'Profile'])->name('user.profile');
+Route::post('/profile/store', [UserController::class, 'profileStore'])->name('profile.store');
+Route::get('/change/password', [UserController::class, 'password'])->name('user.password');
+ Route::post('/update/password', [UserController::class, 'updatePassword'])->name('update.password');
 
 Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:guru'])->group(function () {
