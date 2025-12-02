@@ -1,3 +1,7 @@
+@section('title')
+   Dashboard
+@endsection
+
 <x-app-layout>
     <div class="page-content">
         @role('admin')

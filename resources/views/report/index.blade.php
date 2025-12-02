@@ -1,7 +1,14 @@
+
+@section('title')
+   Laporan Presensi Pembelajaran
+@endsection
 <x-app-layout>
-    <div class="container">
+    <div class="page-content">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
+                <!-- <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold text-primary"><i class="fas fa-users me-2"></i> Laporan Presensi</h3>
+                </div> -->
 
             <!-- CARD 1: LAPORAN UMUM (PERIODE & KELAS) -->
             <div class="mb-4 shadow card">
@@ -148,6 +155,7 @@
         </div>
     </div>
 </div>
+</x-app-layout>
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -155,7 +163,7 @@
 <style>
     .border-left-danger { border-left: 5px solid #dc3545; }
 </style>
-
+@endpush
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -198,4 +206,4 @@
         }
     }
 </script>
-</x-app-layout>
+@endpush

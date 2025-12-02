@@ -1,3 +1,7 @@
+@section('title')
+   Jadwal Pembelejaran
+@endsection
+
 <x-app-layout>
     <div class="page-content">
 

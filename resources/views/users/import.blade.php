@@ -1,11 +1,13 @@
+@section('title')
+   Import Data Guru / Admin
+@endsection
+
 <x-app-layout>
     <div class="page-content">
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
+        <div class="col-md-12">
                     <div class="shadow card">
-                        <div class="text-white card-header bg-success">
-                            <h4>Import Data Guru / Admin</h4>
+                        <div class="text-white card-header bg-primary">
+                            <h5 class="mb-0"><i class="fas fa-school me-2"></i> Import Data Guru / Admin</h5>
                         </div>
                         <div class="card-body">
 
@@ -32,7 +34,7 @@
 
                                 <div class="d-flex justify-content-between">
                                     <a href="{{ route('dashboard') }}" class="btn btn-secondary">Kembali</a>
-                                    <button type="submit" class="btn btn-success">Import User</button>
+                                    <button type="submit" class="btn btn-primary">Import User</button>
                                 </div>
                             </form>
 
@@ -66,8 +68,6 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
         </div>
     </div>
 </x-app-layout>
