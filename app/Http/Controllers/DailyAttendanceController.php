@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\DailyAttendance;
 use Carbon\Carbon;
 use App\Jobs\SendWhatsappJob; // Queue Job untuk WA
+use App\Models\AttendanceSetting; // Jangan lupa import model ini
 
 class DailyAttendanceController extends Controller
 {
@@ -44,6 +45,15 @@ class DailyAttendanceController extends Controller
                         ->where('date', $date)
                         ->first();
 
+
+        // AMBIL PENGATURAN DARI DATABASE
+        // Kita ambil data pertama (karena setting biasanya cuma 1 baris)
+        $setting = AttendanceSetting::first();
+
+        // Fallback value jika database setting kosong (safety code)
+        $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
+        $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
+
         // ==========================================================
         // SKENARIO PULANG (DATA SUDAH ADA)
         // ==========================================================
@@ -55,6 +65,19 @@ class DailyAttendanceController extends Controller
                     'message' => "Siswa {$student->name} sudah absen pulang hari ini!"
                 ]);
             }
+
+            // --- TAMBAHAN FITUR: Validasi Jam Pulang (10:00) ---
+            // Membuat objek waktu jam 10:00 hari ini
+            //$jamBatasPulang = Carbon::createFromTime(18, 0, 0);
+
+            // Cek apakah waktu sekarang kurang dari jam 10:00
+            if (Carbon::now()->lessThan($batasBolehPulang)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul" .$batasBolehPulang.""
+                ]);
+            }
+            // ------
 
             // Update Jam Pulang
             $attendance->update(['departure_time' => $time]);
@@ -75,7 +98,8 @@ class DailyAttendanceController extends Controller
         // ==========================================================
 
         // Logika Terlambat (Batas jam 07:00)
-        $jamMasukSekolah = Carbon::createFromTime(7, 0, 0);
+        // $jamMasukSekolah = Carbon::createFromTime(7, 0, 0); Lama
+        $jamMasukSekolah = Carbon::createFromTimeString($batasTerlambat); // Ambil dari DB
         $status = Carbon::now()->greaterThan($jamMasukSekolah) ? 'terlambat' : 'hadir';
 
         DailyAttendance::create([

@@ -72,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
         // Memanggil method ReportController@printStudent
         Route::get('/report/student/{id}', [ReportController::class, 'printStudent'])->name('report.student');
 
-        
+
         Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
         Route::post('/daily-attendance', [DailyAttendanceController::class, 'store'])->name('daily.store');
 
@@ -147,6 +147,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
         // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
         // Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::get('/settings/attendance', [SettingController::class, 'settingAttendance'])->name('settings.attendance');
+        Route::post('/settings/attendance', [SettingController::class, 'updateAttendance'])->name('update.attendance');
 
         Route::get('/user/all', [UserController::class, 'allUser'])->name('all.user');
         Route::post('/update-user/status',[UserController::class, 'UpdateStatusUser'])->name('update.status.user');

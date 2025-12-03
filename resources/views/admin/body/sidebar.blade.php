@@ -61,6 +61,7 @@
 						</li>
                         <li> <a href="{{url('/settings')}}"><i class='bx bx-radio-circle'></i>Sekolah</a>
                         <li> <a href="{{route('all.user')}}"><i class='bx bx-radio-circle'></i>User</a>
+                        <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
 						</li>
 
 					</ul>
@@ -122,7 +123,7 @@
 					</ul>
 				</li>
                 @endrole
-				
+
 			</ul>
 			<!--end navigation-->
 		</div>

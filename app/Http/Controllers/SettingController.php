@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Setting;
+use App\Models\AttendanceSetting;
 use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
@@ -68,5 +69,33 @@ class SettingController extends Controller
         }
 
         return redirect()->back()->with('success', 'Pengaturan Sekolah & Logo Berhasil Disimpan!');
+    }
+
+    public function settingAttendance()
+{
+    $setting = AttendanceSetting::first();
+    return view('settings.attendance', compact('setting'));
+}
+
+    public function updateAttendance(Request $request)
+    {
+        $request->validate([
+            'late_limit_time' => 'required',
+            'early_departure_time' => 'required',
+        ]);
+
+        $setting = AttendanceSetting::first();
+
+        // Jika belum ada data, buat baru. Jika ada, update.
+        if(!$setting) {
+            AttendanceSetting::create($request->all());
+        } else {
+            $setting->update([
+                'late_limit_time' => $request->late_limit_time,
+                'early_departure_time' => $request->early_departure_time
+            ]);
+        }
+
+        return back()->with('success', 'Jam operasional absensi berhasil diperbarui!');
     }
 }
