@@ -74,7 +74,7 @@ class DailyAttendanceController extends Controller
             if (Carbon::now()->lessThan($batasBolehPulang)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul" .$batasBolehPulang.""
+                    'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul " .$batasBolehPulang." "
                 ]);
             }
             // ------
