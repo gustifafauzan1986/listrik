@@ -17,8 +17,8 @@
 						<div class="card-body">
 							<div class="d-flex align-items-center">
 								<div class="me-auto">
-									<p class="mb-0 text-white">Total Siswa</p>
-									<h4 class="my-1 text-white">4805</h4>
+									<p class="mb-0 text-white">Total User</p>
+									<h4 class="my-1 text-white" id="user-aktif">0</h4>
 									<p class="mb-0 text-white font-13">+2.5% from last week</p>
 								</div>
 								<div id="chart1"></div>
@@ -45,8 +45,8 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Total Presensi</p>
-								   <h4 class="my-1 text-white">34.6%</h4>
+								   <p class="mb-0 text-white">Total Siswa</p>
+								   <h4 class="my-1 text-white" id="student">0</h4>
 								   <p class="mb-0 text-white font-13">-4.5% from last week</p>
 							   </div>
 							   <div id="chart3"></div>
@@ -59,8 +59,8 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-dark">Total Customers</p>
-								   <h4 class="my-1 text-dark">8.4K</h4>
+								   <p class="mb-0 text-dark">Total Presensi</p>
+								   <h4 class="my-1 text-dark" id="attendance">0</h4>
 								   <p class="mb-0 font-13 text-dark">+8.4% from last week</p>
 							   </div>
 							   <div id="chart4"></div>
@@ -583,7 +583,6 @@
 
 	@role('guru')
 	
-	
   	@if ($status === '1')
 		
 		<div class="page-content">
@@ -595,7 +594,7 @@
 							<div class="d-flex align-items-center">
 								<div class="me-auto">
 									<p class="mb-0 text-white">Total Siswa</p>
-									<h4 class="my-1 text-white">4805</h4>
+									<h4 class="my-1 text-white" id="count-present">0</h4>
 									<p class="mb-0 text-white font-13">+2.5% from last week</p>
 								</div>
 								<div id="chart1"></div>
@@ -609,7 +608,7 @@
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
 								   <p class="mb-0 text-white">Total Guru</p>
-								   <h4 class="my-1 text-white">$84,245</h4>
+								   <h4 class="my-1 text-white" id="user-aktif">0</h4>
 								   <p class="mb-0 text-white font-13">+5.4% from last week</p>
 							   </div>
 							   <div id="chart2"></div>
@@ -1096,8 +1095,10 @@
 
 	@else 
 		<div class="page-content">
-			<h4>Akun <b>{{ $guruId->name}} <span class="text-danger">Belum Aktif</span> </h4> 
-			<p class="text-danger"><b> Silahkan hubungi Admin untuk mengaktifkan akun</b> </p>
+					<div class="row">
+						<h4>Akun <b>{{ $guruId->name}} <span class="text-danger">Belum Aktif</span> </h4> 
+						<p class="text-danger"><b> Silahkan hubungi Admin untuk mengaktifkan akun</b> </p>
+					</div>
 				<div class="row">
 					<div class="col-12 col-lg-6">
 						<div class="card radius-10">
@@ -1166,5 +1167,32 @@
 		</div>
 	@endif
     @endrole
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+	<script>
+		function fetchStats() {
+			$.ajax({
+				url: "{{ route('api.stats') }}", // URL Route tadi
+				method: "GET",
+				success: function(response) {
+					// Update angka di HTML berdasarkan ID
+					$('#count-present').text(response.present_count);
+					$('#count-late').text(response.late_count);
+					$('#user-aktif').text(response.user);
+					$('#student').text(response.student);
+					$('#attendance').text(response.attendance);
+				},
+				error: function(xhr) {
+					console.log("Gagal mengambil data realtime");
+				}
+			});
+		}
+
+		// Jalankan fungsi pertama kali
+		fetchStats();
+
+		// Jalankan ulang setiap 3 detik (3000ms)
+		setInterval(fetchStats, 3000);
+	</script>
 	
 </x-app-layout>

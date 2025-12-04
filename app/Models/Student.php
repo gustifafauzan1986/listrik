@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\HasUuid; // <--- 1. Import Trait
 
 class Student extends Model

@@ -22,6 +22,9 @@ use App\Http\Controllers\DailyAttendanceController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\UserController;
 
+use App\Http\Controllers\UpdateController;
+use App\Http\Controllers\DashboardController;
+
 Route::view('/', 'welcome');
 
 Route::view('dashboard', 'dashboard')
@@ -83,6 +86,8 @@ Route::middleware(['auth'])->group(function () {
         // 2. Route Menyimpan Data Manual (POST)
         // Sesuai dengan method storeManual() di controller
         Route::post('/daily-attendance/manual', [DailyAttendanceController::class, 'storeManual'])->name('daily.storeManual');
+
+        Route::get('/api/realtime-stats', [DashboardController::class, 'getRealtimeStats'])->name('api.stats');
 
     });
 
@@ -152,6 +157,15 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/user/all', [UserController::class, 'allUser'])->name('all.user');
         Route::post('/update-user/status',[UserController::class, 'UpdateStatusUser'])->name('update.status.user');
+
+        // Menampilkan halaman update
+        Route::get('/system/update', [UpdateController::class, 'index'])->name('system.update.index');
+        
+        // Memproses update (POST)
+        Route::post('/system/update', [UpdateController::class, 'doUpdate'])->name('system.update.run');
+
+        
+        
     });
 
 });

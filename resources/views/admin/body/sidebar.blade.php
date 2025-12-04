@@ -62,6 +62,7 @@
                         <li> <a href="{{url('/settings')}}"><i class='bx bx-radio-circle'></i>Sekolah</a>
                         <li> <a href="{{route('all.user')}}"><i class='bx bx-radio-circle'></i>User</a>
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
+                        <li> <a href="{{route('system.update.index')}}"><i class='bx bx-radio-circle'></i>Update</a>
 						</li>
 
 					</ul>

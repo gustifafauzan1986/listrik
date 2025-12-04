@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\HasUuid; // Pastikan Trait ini ada
 
 class Classroom extends Model
