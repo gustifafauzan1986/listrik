@@ -6,6 +6,18 @@
   $id = Auth::user()->id;
   $guruId = App\Models\User::find($id);
   $status = $guruId->status;
+
+
+$countUser = App\Models\User::count();
+$countStudent = App\Models\Student::count();
+$countPresensi = App\Models\Attendance::count();
+$countHadir = App\Models\Attendance::where('status', 'hadir')->count();
+$countTerlambat = App\Models\Attendance::where('status', 'terlambat')->count();
+
+$jadwalGuru = App\Models\Schedule::where('teacher_id', $id)->first();
+$countHadirSiswa = App\Models\Attendance::where('status', 'hadir')->where('id', $jadwalGuru)->count();
+$countTerlambatSiswa = App\Models\Attendance::where('status', 'terlambat')->count();
+	
 @endphp
 
 <x-app-layout>
@@ -17,9 +29,9 @@
 						<div class="card-body">
 							<div class="d-flex align-items-center">
 								<div class="me-auto">
-									<p class="mb-0 text-white">Total User</p>
-									<h4 class="my-1 text-white" id="user-aktif">0</h4>
-									<p class="mb-0 text-white font-13">+2.5% from last week</p>
+									<p class="mb-0 text-white">User</p>
+									<h4 class="my-1 text-white" id="user-aktif">{{$countUser ?? 0}}</h4>
+									<!-- <p class="mb-0 text-white font-13">+2.5% from last week</p> -->
 								</div>
 								<div id="chart1"></div>
 							</div>
@@ -31,9 +43,9 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Total Guru</p>
+								   <p class="mb-0 text-white">Guru</p>
 								   <h4 class="my-1 text-white">$84,245</h4>
-								   <p class="mb-0 text-white font-13">+5.4% from last week</p>
+								   <!-- <p class="mb-0 text-white font-13">+5.4% from last week</p> -->
 							   </div>
 							   <div id="chart2"></div>
 						   </div>
@@ -45,9 +57,9 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Total Siswa</p>
-								   <h4 class="my-1 text-white" id="student">0</h4>
-								   <p class="mb-0 text-white font-13">-4.5% from last week</p>
+								   <p class="mb-0 text-white">Siswa</p>
+								   <h4 class="my-1 text-white" id="student">{{$countStudent ?? 0}}</h4>
+								   <!-- <p class="mb-0 text-white font-13">-4.5% from last week</p> -->
 							   </div>
 							   <div id="chart3"></div>
 						   </div>
@@ -59,9 +71,9 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-dark">Total Presensi</p>
-								   <h4 class="my-1 text-dark" id="attendance">0</h4>
-								   <p class="mb-0 font-13 text-dark">+8.4% from last week</p>
+								   <p class="mb-0 text-dark">Presensi</p>
+								   <h4 class="my-1 text-dark" id="attendance">{{$countPresensi ?? 0}}</h4>
+								   <!-- <p class="mb-0 font-13 text-dark">+8.4% from last week</p> -->
 							   </div>
 							   <div id="chart4"></div>
 						   </div>
@@ -593,9 +605,8 @@
 						<div class="card-body">
 							<div class="d-flex align-items-center">
 								<div class="me-auto">
-									<p class="mb-0 text-white">Total Siswa</p>
-									<h4 class="my-1 text-white" id="count-present">0</h4>
-									<p class="mb-0 text-white font-13">+2.5% from last week</p>
+									<p class="mb-0 text-white">Siswa</p>
+									<h4 class="my-1 text-white" id="count-present">{{$countStudent ?? 0}}</h4>
 								</div>
 								<div id="chart1"></div>
 							</div>
@@ -607,9 +618,8 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Total Guru</p>
-								   <h4 class="my-1 text-white" id="user-aktif">0</h4>
-								   <p class="mb-0 text-white font-13">+5.4% from last week</p>
+								   <p class="mb-0 text-white">Hadir</p>
+								   <h4 class="my-1 text-white" id="user-aktif">{{$countHadirSiswa ?? 0}}</h4>
 							   </div>
 							   <div id="chart2"></div>
 						   </div>
@@ -621,9 +631,8 @@
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Total Presensi</p>
-								   <h4 class="my-1 text-white">34.6%</h4>
-								   <p class="mb-0 text-white font-13">-4.5% from last week</p>
+								   <p class="mb-0 text-white">Terlambat</p>
+								   <h4 class="my-1 text-white">{{$countTerlambat ?? 0}}</h4>
 							   </div>
 							   <div id="chart3"></div>
 						   </div>
@@ -637,7 +646,6 @@
 							   <div class="me-auto">
 								   <p class="mb-0 text-dark">Total Customers</p>
 								   <h4 class="my-1 text-dark">8.4K</h4>
-								   <p class="mb-0 font-13 text-dark">+8.4% from last week</p>
 							   </div>
 							   <div id="chart4"></div>
 						   </div>
@@ -1192,7 +1200,7 @@
 		fetchStats();
 
 		// Jalankan ulang setiap 3 detik (3000ms)
-		setInterval(fetchStats, 3000);
+		setInterval(fetchStats, 18000);
 	</script>
 	
 </x-app-layout>
