@@ -2,33 +2,33 @@
    Pengaturan Kop Surat & Sekolah
 @endsection
 <x-app-layout>
-    <div class="page-content">        
-        
+    <div class="page-content">
+
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
+            <div class="col-md-12">
+                <div class="shadow card">
                     <div class="card-header bg-warning text-dark fw-bold">
                         <i class="fas fa-user-edit me-2"></i> Edit Data Guru
                     </div>
                     <div class="card-body">
-                        
+
                         <form action="{{ route('teachers.update', $teacher->id) }}" method="POST">
                             @csrf
                             @method('PUT')
 
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="mb-3 col-md-6">
                                     <label class="form-label fw-bold">Nama Lengkap</label>
                                     <input type="text" name="name" class="form-control" value="{{ old('name', $teacher->user->name) }}" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="mb-3 col-md-6">
                                     <label class="form-label fw-bold">NIP</label>
                                     <input type="text" name="nip" class="form-control" value="{{ old('nip', $teacher->nip) }}">
                                 </div>
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mb-3">
+                                <div class="mb-3 col-md-6">
                                     <label class="form-label fw-bold">Jenis Kelamin</label>
                                     <select name="gender" class="form-select">
                                         <option value="">- Pilih -</option>
@@ -36,7 +36,7 @@
                                         <option value="P" {{ $teacher->gender == 'P' ? 'selected' : '' }}>Perempuan</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="mb-3 col-md-6">
                                     <label class="form-label fw-bold">No. HP</label>
                                     <input type="number" name="phone" class="form-control" value="{{ old('phone', $teacher->phone) }}">
                                 </div>
@@ -61,4 +61,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>    
+</x-app-layout>

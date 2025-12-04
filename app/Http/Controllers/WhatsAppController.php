@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Classroom;
+use App\Models\Student;
+use App\Jobs\SendWhatsappJob;
 
 class WhatsAppController extends Controller
 {
@@ -28,8 +31,8 @@ class WhatsAppController extends Controller
             'message' => 'required|string',
         ]);
 
-        // Panggil fungsi private pengirim pesan
-        $result = $this->sendMessageToBaileys($request->target, $request->message);
+        // Panggil fungsi private pengirim pesan (Langsung tanpa Queue untuk testing)
+        $result = self::sendMessageToBaileys($request->target, $request->message);
 
         if ($result['status'] == 'success') {
             return redirect()->back()->with('success', 'Pesan berhasil dikirim via WhatsApp!');
@@ -39,8 +42,85 @@ class WhatsAppController extends Controller
     }
 
     /**
+     * [BARU] Halaman Form Broadcast Per Kelas
+     * Route: GET /whatsapp/broadcast
+     */
+    public function broadcast()
+    {
+        // Ambil data kelas untuk dropdown
+        $classrooms = Classroom::orderBy('name')->get();
+        return view('whatsapp.broadcast', compact('classrooms'));
+    }
+
+    /**
+     * [BARU] Proses Kirim Broadcast Massal
+     * Route: POST /whatsapp/broadcast
+     */
+    public function sendBroadcast(Request $request)
+    {
+        $request->validate([
+            'classroom_id' => 'required|exists:classrooms,id',
+            'message'      => 'required|string',
+            'attachment'   => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120', // Max 5MB
+        ]);
+
+        // 1. Ambil Siswa di Kelas Tersebut
+        $students = Student::where('classroom_id', $request->classroom_id)
+                           ->whereNotNull('phone')
+                           ->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('error', 'Tidak ada siswa dengan nomor HP di kelas ini.');
+        }
+
+        // 2. Handle File Upload (Jika ada lampiran)
+        $mediaUrl = null;
+        $type = 'text';
+        $fileName = null;
+        $mimeType = null;
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $fileName = $file->getClientOriginalName();
+            $mimeType = $file->getMimeType();
+
+            // Simpan di storage public agar bisa diakses Node.js via URL
+            // Pastikan Anda sudah menjalankan: php artisan storage:link
+            $path = $file->store('broadcasts', 'public');
+            $mediaUrl = asset('storage/' . $path);
+
+            // Tentukan tipe pesan (image atau document)
+            if (str_starts_with($mimeType, 'image/')) {
+                $type = 'image';
+            } else {
+                $type = 'document';
+            }
+        }
+
+        // 3. Dispatch Job untuk Setiap Siswa
+        $count = 0;
+        foreach ($students as $student) {
+            // Bersihkan nomor HP
+            if (empty($student->phone)) continue;
+
+            // Kirim ke Antrian (Queue)
+            SendWhatsappJob::dispatch(
+                $student->phone,
+                $request->message,
+                $type,
+                $mediaUrl,
+                $fileName,
+                $mimeType
+            );
+            $count++;
+        }
+
+        return back()->with('success', "Pesan sedang dikirim ke $count orang tua siswa di latar belakang.");
+    }
+
+    /**
      * API: Proses Kirim Pesan via API (Return JSON)
-     * Endpoint: POST /api/whatsapp/send (jika diaktifkan di api.php)
+     * Endpoint: POST /api/whatsapp/send
      */
     public function sendApi(Request $request)
     {
@@ -59,7 +139,7 @@ class WhatsAppController extends Controller
         }
 
         // Panggil fungsi private pengirim pesan
-        $result = $this->sendMessageToBaileys($request->target, $request->message);
+        $result = self::sendMessageToBaileys($request->target, $request->message);
 
         // Return JSON Response
         if ($result['status'] == 'success') {
@@ -77,10 +157,10 @@ class WhatsAppController extends Controller
     }
 
     /**
-     * PRIVATE: Fungsi Reusable untuk Kirim ke Node.js (Baileys)
-     * Digunakan oleh method store() dan sendApi()
+     * PRIVATE STATIC: Fungsi Reusable untuk Kirim ke Node.js (Baileys)
+     * Digunakan oleh method store() dan sendApi() untuk pengiriman langsung (bukan queue)
      */
-    private function sendMessageToBaileys($target, $message)
+    private static function sendMessageToBaileys($target, $message)
     {
         try {
             // Tembak ke Service Node.js (Port 3000)
@@ -88,6 +168,7 @@ class WhatsAppController extends Controller
             $response = Http::timeout(5)->post('http://localhost:3000/send-message', [
                 'number' => $target,
                 'message' => $message,
+                'type' => 'text'
             ]);
 
             // Cek status dari Node.js

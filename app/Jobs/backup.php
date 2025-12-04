@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -23,12 +22,13 @@ class SendWhatsappJob implements ShouldQueue
     protected $mimeType;
 
     /**
-     * Jumlah percobaan ulang jika gagal (misal bot mati sebentar)
+     * Jumlah maksimal percobaan ulang jika gagal
      */
     public $tries = 3;
 
     /**
      * Create a new job instance.
+     * Mendukung Text, Image, dan Document
      */
     public function __construct($target, $message, $type = 'text', $mediaUrl = null, $fileName = null, $mimeType = null)
     {

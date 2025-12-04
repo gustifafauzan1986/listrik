@@ -3,11 +3,11 @@
 @endsection
 <x-app-layout>
     <div class="page-content">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                
+
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+
                 <div>
-                    <a href="{{ route('teachers.import') }}" class="btn btn-success shadow-sm">
+                    <a href="{{ route('teachers.import') }}" class="shadow-sm btn btn-success">
                         <i class="fas fa-file-excel me-1"></i> Import Excel
                     </a>
                 </div>
@@ -20,9 +20,9 @@
                 </div>
             @endif
 
-            <div class="card shadow border-0">
+            <div class="border-0 shadow card">
                 <div class="card-body">
-                    
+
                     <!-- Form Pencarian -->
                     <form action="{{ route('teachers.index') }}" method="GET" class="mb-4">
                         <div class="input-group">
@@ -32,7 +32,7 @@
                     </form>
 
                     <div class="table-responsive">
-                        <table class="table table-hover table-striped align-middle">
+                        <table class="table align-middle table-hover table-striped">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Nama Lengkap</th>
@@ -53,7 +53,7 @@
                                         <td>{{ $teacher->phone ?? '-' }}</td>
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                <a href="{{ route('teachers.edit', $teacher->id) }}" class="btn btn-sm btn-warning text-white" title="Edit">
+                                                <a href="{{ route('teachers.edit', $teacher->id) }}" class="text-white btn btn-sm btn-warning" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <form action="{{ route('teachers.destroy', $teacher->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus guru ini? Akun login juga akan terhapus.');">
@@ -68,7 +68,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-4 text-muted">
+                                        <td colspan="6" class="py-4 text-center text-muted">
                                             Data guru belum tersedia. Silakan Import Data terlebih dahulu.
                                         </td>
                                     </tr>
@@ -82,6 +82,6 @@
                     </div>
                 </div>
             </div>
-        </div>
+
     </div>
-</x-app-layout>    
+</x-app-layout>

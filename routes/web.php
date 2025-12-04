@@ -183,6 +183,12 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('classrooms', ClassroomController::class);
 
         Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClassroom'])->name('students.remove_class');
+        // --- 6. WHATSAPP GATEWAY (BROADCAST) ---
+        Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index'); // Manual 1 nomor
+        Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
+
+        Route::get('/whatsapp/broadcast', [WhatsAppController::class, 'broadcast'])->name('whatsapp.broadcast'); // Broadcast Kelas
+        Route::post('/whatsapp/broadcast', [WhatsAppController::class, 'sendBroadcast'])->name('whatsapp.broadcast.send');
 
     });
 

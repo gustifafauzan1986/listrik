@@ -3,16 +3,14 @@
 @endsection
 <x-app-layout>
     <div class="page-content">
-        <div class="col-md-12">
-                <div class="container">
                     <div class="row justify-content-center">
-                        <div class="col-md-8">
-                            <div class="card shadow">
-                                <div class="card-header bg-primary text-white">
+                        <div class="col-md-12">
+                            <div class="shadow card">
+                                <div class="text-white card-header bg-primary">
                                     <h4 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i> Import Data Guru</h4>
                                 </div>
                                 <div class="card-body">
-                                    
+
                                     @if(session('success'))
                                         <div class="alert alert-success">{{ session('success') }}</div>
                                     @endif
@@ -23,11 +21,11 @@
                                     <div class="alert alert-info border-left-primary">
                                         <strong><i class="fas fa-info-circle"></i> Format Excel Wajib:</strong> <br>
                                         Pastikan header kolom Excel Anda menggunakan nama berikut (huruf kecil):<br>
-                                        <code class="text-dark fw-bold">nama</code> | 
-                                        <code class="text-dark fw-bold">email</code> | 
-                                        <code class="text-dark fw-bold">password</code> | 
-                                        <code class="text-dark fw-bold">nip</code> | 
-                                        <code class="text-dark fw-bold">jk</code> | 
+                                        <code class="text-dark fw-bold">nama</code> |
+                                        <code class="text-dark fw-bold">email</code> |
+                                        <code class="text-dark fw-bold">password</code> |
+                                        <code class="text-dark fw-bold">nip</code> |
+                                        <code class="text-dark fw-bold">jk</code> |
                                         <code class="text-dark fw-bold">hp</code>
                                     </div>
 
@@ -38,7 +36,7 @@
                                             <input type="file" name="file" class="form-control" required accept=".xlsx, .xls, .csv">
                                         </div>
                                         <div class="d-flex justify-content-between">
-                                            <a href="{{ route('dashboard') }}" class="btn btn-secondary">
+                                            <a href="{{ route('teachers.index') }}" class="btn btn-secondary">
                                                 <i class="fas fa-arrow-left me-1"></i> Kembali
                                             </a>
                                             <button type="submit" class="btn btn-success">
@@ -48,12 +46,12 @@
                                     </form>
                                 </div>
                             </div>
-                            
+
                             <!-- Contoh Tabel Preview -->
                             <div class="mt-4">
                                 <h6 class="fw-bold text-secondary">Contoh isi file Excel:</h6>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-sm mt-2 bg-white">
+                                    <table class="table mt-2 bg-white table-bordered table-sm">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>nama</th>
@@ -87,8 +85,5 @@
                                 <small class="text-muted">* Kolom lain seperti <code>alamat</code>, <code>pendidikan</code> opsional (bisa ditambahkan di Excel).</small>
                             </div>
                         </div>
-                    </div>
-                </div>
-        </div>
     </div>
-</x-app-layout>     
+</x-app-layout>

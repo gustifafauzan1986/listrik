@@ -5,7 +5,7 @@
 <x-app-layout>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="border-0 shadow card">
                     <div class="card-header bg-warning text-dark fw-bold">
                         <h5 class="mb-0"><i class="fas fa-edit me-2"></i> Edit Data Kelas</h5>
