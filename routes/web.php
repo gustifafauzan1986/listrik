@@ -27,6 +27,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ScheduleImportController;
 use App\Http\Controllers\TeacherImportController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\ClassroomController;
 
 Route::view('/', 'welcome');
 
@@ -163,7 +164,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Menampilkan halaman update
         Route::get('/system/update', [UpdateController::class, 'index'])->name('system.update.index');
-        
+
         // Memproses update (POST)
         Route::post('/system/update', [UpdateController::class, 'doUpdate'])->name('system.update.run');
 
@@ -174,14 +175,15 @@ Route::middleware(['auth'])->group(function () {
         // Import Guru (Data Lengkap) - ROUTE BARU
         Route::get('/import-teachers', [TeacherImportController::class, 'index'])->name('teachers.import');
         Route::post('/import-teachers', [TeacherImportController::class, 'store'])->name('teachers.import.store');
-        
+
         // [BARU] MANAJEMEN GURU (CRUD)
         // Ini menangani route teachers.index, teachers.edit, teachers.update, teachers.destroy
         Route::resource('teachers', TeacherController::class);
         // Route::resource('teachers', TeacherController::class)->except(['create', 'store', 'show']);
+        Route::resource('classrooms', ClassroomController::class);
 
-        
-        
+        Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClassroom'])->name('students.remove_class');
+
     });
 
 });

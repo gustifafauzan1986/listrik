@@ -84,4 +84,11 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')->with('success', 'Data siswa berhasil dihapus!');
     }
+
+    public function removeClassroom($id)
+    {
+        $student = Student::findOrFail($id);
+        $student->update(['classroom_id' => null]); // Set kelas jadi null
+        return back()->with('success', "Siswa {$student->name} berhasil dikeluarkan dari kelas.");
+    }
 }
