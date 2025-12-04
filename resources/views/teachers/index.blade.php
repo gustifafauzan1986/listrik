@@ -5,7 +5,7 @@
     <div class="page-content">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="fw-bold text-primary"><i class="fas fa-chalkboard-teacher me-2"></i> Data Guru Pengajar</h3>
+                
                 <div>
                     <a href="{{ route('teachers.import') }}" class="btn btn-success shadow-sm">
                         <i class="fas fa-file-excel me-1"></i> Import Excel
