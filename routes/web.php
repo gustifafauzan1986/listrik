@@ -24,6 +24,9 @@ use App\Http\Controllers\UserController;
 
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ScheduleImportController;
+use App\Http\Controllers\TeacherImportController;
+use App\Http\Controllers\TeacherController;
 
 Route::view('/', 'welcome');
 
@@ -163,6 +166,19 @@ Route::middleware(['auth'])->group(function () {
         
         // Memproses update (POST)
         Route::post('/system/update', [UpdateController::class, 'doUpdate'])->name('system.update.run');
+
+        // Import Skedule
+        Route::get('/import-jadwal', [ScheduleImportController::class, 'index'])->name('jadwal.import');
+        Route::post('/import-jadwal', [ScheduleImportController::class, 'store'])->name('jadwal.import.store');
+
+        // Import Guru (Data Lengkap) - ROUTE BARU
+        Route::get('/import-teachers', [TeacherImportController::class, 'index'])->name('teachers.import');
+        Route::post('/import-teachers', [TeacherImportController::class, 'store'])->name('teachers.import.store');
+        
+        // [BARU] MANAJEMEN GURU (CRUD)
+        // Ini menangani route teachers.index, teachers.edit, teachers.update, teachers.destroy
+        Route::resource('teachers', TeacherController::class);
+        // Route::resource('teachers', TeacherController::class)->except(['create', 'store', 'show']);
 
         
         

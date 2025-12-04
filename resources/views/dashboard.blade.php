@@ -15,6 +15,7 @@ $countHadir = App\Models\Attendance::where('status', 'hadir')->count();
 $countTerlambat = App\Models\Attendance::where('status', 'terlambat')->count();
 
 $jadwalGuru = App\Models\Schedule::where('teacher_id', $id)->first();
+$jadwalGuruPBM = App\Models\Schedule::where('teacher_id', $id)->count();
 $countHadirSiswa = App\Models\Attendance::where('status', 'hadir')->where('id', $jadwalGuru)->count();
 $countTerlambatSiswa = App\Models\Attendance::where('status', 'terlambat')->count();
 	
@@ -644,8 +645,8 @@ $countTerlambatSiswa = App\Models\Attendance::where('status', 'terlambat')->coun
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-dark">Total Customers</p>
-								   <h4 class="my-1 text-dark">8.4K</h4>
+								   <p class="mb-0 text-dark">Jadwal PBM</p>
+								   <h4 class="my-1 text-dark">{{$jadwalGuruPBM ?? 0}}</h4>
 							   </div>
 							   <div id="chart4"></div>
 						   </div>

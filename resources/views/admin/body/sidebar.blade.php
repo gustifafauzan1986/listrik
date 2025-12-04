@@ -49,6 +49,20 @@
 					</ul>
 				</li>
 				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class='bx bx-user'></i>
+						</div>
+						<div class="menu-title">Guru</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('teachers.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
+						</li>
+						<li> <a href="{{route('teachers.import')}}"><i class='bx bx-radio-circle'></i>Import</a>
+						</li>
+
+					</ul>
+				</li>
+				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-repeat"></i>
 						</div>
@@ -61,6 +75,7 @@
 						</li>
                         <li> <a href="{{url('/settings')}}"><i class='bx bx-radio-circle'></i>Sekolah</a>
                         <li> <a href="{{route('all.user')}}"><i class='bx bx-radio-circle'></i>User</a>
+                        <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a>
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
                         <li> <a href="{{route('system.update.index')}}"><i class='bx bx-radio-circle'></i>Update</a>
 						</li>
