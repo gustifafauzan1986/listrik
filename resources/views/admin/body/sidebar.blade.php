@@ -78,6 +78,7 @@
                         <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a>
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
                         <li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Rombel</a>
+                        <li> <a href="{{route('whatsapp.broadcast')}}"><i class='bx bx-radio-circle'></i>Broadcast WA</a>
                         <li> <a href="{{route('system.update.index')}}"><i class='bx bx-radio-circle'></i>Update</a>
 						</li>
 
