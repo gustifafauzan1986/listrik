@@ -7,10 +7,10 @@
 
         /* Mengatur Margin Halaman secara Dinamis dari Database */
         @page {
-            margin-top: {{ $school['margin_top'] ?? '2.5cm' }};
-            margin-right: {{ $school['margin_right'] ?? '2.5cm' }};
-            margin-bottom: {{ $school['margin_bottom'] ?? '2.5cm' }};
-            margin-left: {{ $school['margin_left'] ?? '2.5cm' }};
+            margin-top: {{ $school['margin_top'] ?? '2cm' }};
+            margin-right: {{ $school['margin_right'] ?? '2cm' }};
+            margin-bottom: {{ $school['margin_bottom'] ?? '2cm' }};
+            margin-left: {{ $school['margin_left'] ?? '2cm' }};
         }
         body { font-family: sans-serif; font-size: 12px; color: #333; }
 

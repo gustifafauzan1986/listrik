@@ -36,15 +36,36 @@
                 @endrole
 
                 @role('admin')
+
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class="bx bx-repeat"></i>
+						</div>
+						<div class="menu-title">Setting</div>
+					</a>
+					<ul>
+						<li> <a href="{{url('/settings')}}"><i class='bx bx-home'></i>Sekolah</a></li>
+						<li> <a href="{{route('all.user')}}"><i class='bx bx-user'></i>User</a></li>
+                        <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a></li>
+                        <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a></li>
+						<li> <a href="{{route('permissions.index')}}"><i class='bx bx-radio-circle'></i>Permission</a>
+						</li>
+                        <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
+					</li>
+                        
+					</ul>
+				</li>
                 <li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon"><i class='bx bx-user'></i>
 						</div>
-						<div class="menu-title">Murid</div>
+						<div class="menu-title">Rombel</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('students.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
+						<li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Kelas</a></li>
+						<li> <a href="{{route('students.index')}}"><i class='bx bx-radio-circle'></i>Murid</a>
 						</li>
+						
 
 					</ul>
 				</li>
@@ -57,31 +78,11 @@
 					<ul>
 						<li> <a href="{{route('teachers.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
 						</li>
-						<li> <a href="{{route('teachers.import')}}"><i class='bx bx-radio-circle'></i>Import</a>
-						</li>
+						
 
 					</ul>
 				</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class="bx bx-repeat"></i>
-						</div>
-						<div class="menu-title">Setting</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('permissions.index')}}"><i class='bx bx-radio-circle'></i>Permission</a>
-						</li>
-                        <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
-						</li>
-                        <li> <a href="{{url('/settings')}}"><i class='bx bx-home'></i>Sekolah</a>
-                        <li> <a href="{{route('all.user')}}"><i class='bx bx-user'></i>User</a>
-                        <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a>
-                        <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
-                        <li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Rombel</a>
-                       
-
-					</ul>
-				</li>
+				
                 <li class="menu-label">Forms & Tables</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">

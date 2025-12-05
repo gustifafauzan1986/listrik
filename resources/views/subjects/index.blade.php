@@ -76,28 +76,7 @@
                     </div>
                 </div>
             </div>
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
-                function confirmDelete(id, name) {
-                    Swal.fire({
-                        title: 'Apakah Anda yakin?',
-                        text: "Mata pelajaran " + name + " akan dihapus! Data jadwal yang menggunakan mapel ini mungkin akan terpengaruh.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Ya, Hapus!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('delete-form-' + id).submit();
-                        }
-                    })
-                }
-            </script>
-
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
         // Cek apakah ada session 'success' yang dikirim dari controller
         @if(session('success'))
             Swal.fire({
@@ -118,4 +97,24 @@
             });
         @endif
     </script>
+            <script>
+                function confirmDelete(id, name) {
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: "Mata pelajaran " + name + " akan dihapus! Data jadwal yang menggunakan mapel ini mungkin akan terpengaruh.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('delete-form-' + id).submit();
+                        }
+                    })
+                }
+            </script>
+
+    
 </x-app-layout>

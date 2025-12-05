@@ -28,6 +28,7 @@ class SettingController extends Controller
     {
         // 1. Validasi Input
         $request->validate([
+            // Data Sekolah
             'school_name' => 'required|string|max:255',
             'logo_left'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
             'logo_right'  => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
