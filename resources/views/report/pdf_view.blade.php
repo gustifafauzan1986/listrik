@@ -1,6 +1,5 @@
 @php
 $id = Auth::user()->id;
-$guru = App\Models\Teacher::where('user_id',$id )->get();
 @endphp
 
 <!DOCTYPE html>
