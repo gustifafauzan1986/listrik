@@ -138,7 +138,7 @@
                             <div class="school-name">SMK Negeri 1 Bukittinggi</div>
                             <h1 class="student-name">{{ Str::limit($student->name, 20) }}</h1> <div class="student-class">{{ $student->class_name }}</div>
                             <div class="nis-label">NIS: {{ $student->nis }}</div>
-                            <div class="nis-label">Kelas: {{ $student->classroom->name }}</div>
+                            <div class="nis-label">Kelas: {{ $student->classroom->name  ?? -}}</div>
                         </div>
                     </div>
                 </div>
