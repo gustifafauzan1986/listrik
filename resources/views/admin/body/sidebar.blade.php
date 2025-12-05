@@ -78,7 +78,6 @@
                         <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a>
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
                         <li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Rombel</a>
-                        <li> <a href="{{route('whatsapp.broadcast')}}"><i class='bx bx-radio-circle'></i>Broadcast WA</a>
                         <li> <a href="{{route('system.update.index')}}"><i class='bx bx-radio-circle'></i>Update</a>
 						</li>
 
@@ -119,6 +118,19 @@
 					</a>
 					<ul>
 						<li> <a href="{{route('report.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
+						</li>
+
+					</ul>
+				</li>
+
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
+						</div>
+						<div class="menu-title">WhatAPP</div>
+					</a>
+					<ul>
+						 <li> <a href="{{route('whatsapp.broadcast')}}"><i class='bx bx-radio-circle'></i>Broadcast</a>
 						</li>
 
 					</ul>
