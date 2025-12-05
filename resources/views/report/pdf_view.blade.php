@@ -1,3 +1,8 @@
+@php
+$id = Auth::user()->id;
+$guru = App\Models\Teacher::where('user_id',$id )->get();
+@endphp
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -125,14 +130,14 @@
 
     <!-- TANDA TANGAN -->
     <div style="margin-top: 50px; float: right; width: 200px; text-align: center;">
-        <p>Jakarta, {{ date('d F Y') }}</p>
+        <p>Bukittinggi, {{ date('d F Y') }}</p>
         <p>Mengetahui,</p>
         <p>Kepala Tata Usaha</p>
         <br><br><br>
         <p style="text-decoration: underline; font-weight: bold;">
             {{ Auth::user()->name ?? 'Administrator' }}
         </p>
-        <p>NIP. .......................</p>
+        <p>NIP. {{ $guru ?? '......................' }}</p>
     </div>
 
 </body>

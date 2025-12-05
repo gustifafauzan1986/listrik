@@ -39,4 +39,9 @@ class Teacher extends Model
         // Jika nanti diubah, relasinya bisa lewat sini
         return $this->hasMany(Schedule::class, 'teacher_id', 'user_id');
     }
+
+    public function teacher()
+    {
+         return $this->belongsTo(User::class);
+    }
 }
