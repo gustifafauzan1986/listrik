@@ -4,6 +4,14 @@
     <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png')}}" type="image/png"/>
     <title>Laporan Presensi Siswa</title>
     <style>
+
+        /* Mengatur Margin Halaman secara Dinamis dari Database */
+        @page {
+            margin-top: {{ $school['margin_top'] ?? '2.5cm' }};
+            margin-right: {{ $school['margin_right'] ?? '2.5cm' }};
+            margin-bottom: {{ $school['margin_bottom'] ?? '2.5cm' }};
+            margin-left: {{ $school['margin_left'] ?? '2.5cm' }};
+        }
         body { font-family: sans-serif; font-size: 12px; color: #333; }
 
         /* Header Kop Surat */
@@ -171,12 +179,22 @@
         </tbody>
     </table>
 
-    <!-- Tanda Tangan -->
-    <div style="margin-top: 50px; float: right; width: 200px; text-align: center;">
-        <p>Mengetahui,</p>
-        <p>Kepala Tata Usaha</p>
-        <br><br><br>
-        <p><strong>{{ Auth::user()->name }}</strong></p>
+    <!-- TANDA TANGAN DINAMIS -->
+    <div class="signature-section">
+        <table width="100%">
+            <tr>
+                <td width="60%"></td> <!-- Spacer Kosong di Kiri -->
+                <td width="40%" class="text-center">
+                    <p>{{ $school['sign_city'] ?? 'Jakarta' }}, {{ date('d F Y') }}</p>
+                    <p>{{ $school['sign_title'] ?? 'Kepala Sekolah' }},</p>
+                    <br><br><br>
+                    <p style="text-decoration: underline; font-weight: bold;">
+                        {{ $school['sign_name'] ?? '.........................' }}
+                    </p>
+                    <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p>
+                </td>
+            </tr>
+        </table>
     </div>
 
 </body>

@@ -8,6 +8,14 @@ $guru = App\Models\Teacher::where('user_id',$id )->get();
 <head>
     <title>Laporan Absensi</title>
     <style>
+
+        /* Mengatur Margin Halaman secara Dinamis dari Database */
+        @page {
+            margin-top: {{ $school['margin_top'] ?? '2cm' }};
+            margin-right: {{ $school['margin_right'] ?? '2cm' }};
+            margin-bottom: {{ $school['margin_bottom'] ?? '2cm' }};
+            margin-left: {{ $school['margin_left'] ?? '2cm' }};
+        }
         body { font-family: sans-serif; font-size: 12px; }
 
         /* Layout Kop Surat menggunakan Tabel agar rapi di PDF */
@@ -33,6 +41,12 @@ $guru = App\Models\Teacher::where('user_id',$id )->get();
         .bg-izin { background-color: blue; }
         .bg-sakit { background-color: purple; }
         .bg-alpa { background-color: red; }
+
+         /* Area Tanda Tangan */
+        .signature-section { 
+            margin-top: 40px; 
+            page-break-inside: avoid; /* Jangan potong tanda tangan ke halaman baru sendirian */
+        }
     </style>
 </head>
 <body>
@@ -128,16 +142,22 @@ $guru = App\Models\Teacher::where('user_id',$id )->get();
         </tbody>
     </table>
 
-    <!-- TANDA TANGAN -->
-    <div style="margin-top: 50px; float: right; width: 200px; text-align: center;">
-        <p>Bukittinggi, {{ date('d F Y') }}</p>
-        <p>Mengetahui,</p>
-        <p>Kepala Tata Usaha</p>
-        <br><br><br>
-        <p style="text-decoration: underline; font-weight: bold;">
-            {{ Auth::user()->name ?? 'Administrator' }}
-        </p>
-        <p>NIP. {{ $guru ?? '......................' }}</p>
+    <!-- TANDA TANGAN DINAMIS -->
+    <div class="signature-section">
+        <table width="100%">
+            <tr>
+                <td width="60%"></td> <!-- Spacer Kosong di Kiri -->
+                <td width="40%" class="text-center">
+                    <p>{{ $school['sign_city'] ?? 'Jakarta' }}, {{ date('d F Y') }}</p>
+                    <p>{{ $school['sign_title'] ?? 'Kepala Sekolah' }},</p>
+                    <br><br><br>
+                    <p style="text-decoration: underline; font-weight: bold;">
+                        {{ $school['sign_name'] ?? '.........................' }}
+                    </p>
+                    <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p>
+                </td>
+            </tr>
+        </table>
     </div>
 
 </body>

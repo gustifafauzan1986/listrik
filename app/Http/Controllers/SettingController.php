@@ -31,34 +31,35 @@ class SettingController extends Controller
             'school_name' => 'required|string|max:255',
             'logo_left'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
             'logo_right'  => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+
+            // Pengaturan Kertas
+            'paper_size'        => 'required|in:a4,letter,f4',
+            'paper_orientation' => 'required|in:portrait,landscape',
+            'margin_top'        => 'required|numeric|min:0',
+            'margin_right'      => 'required|numeric|min:0',
+            'margin_bottom'     => 'required|numeric|min:0',
+            'margin_left'       => 'required|numeric|min:0',
+
+            // Tanda Tangan
+            'signature_city'  => 'required|string',
+            'signature_title' => 'required|string',
+            'signature_name'  => 'required|string',
+            'signature_nip'   => 'nullable|string',
         ]);
 
-        // 2. Handle Upload Logo Kiri
-        if ($request->hasFile('logo_left')) {
-            // Hapus file lama jika ada
-            $oldLogo = Setting::value('logo_left');
-            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
-                Storage::disk('public')->delete($oldLogo);
+       // 2. Handle Upload Logo (Kiri & Kanan) - Kode lama tetap
+        foreach (['logo_left', 'logo_right'] as $logoKey) {
+            if ($request->hasFile($logoKey)) {
+                $oldLogo = Setting::value($logoKey);
+                if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+                    Storage::disk('public')->delete($oldLogo);
+                }
+                $path = $request->file($logoKey)->store('settings', 'public');
+                Setting::updateOrCreate(['key' => $logoKey], ['value' => $path]);
             }
-
-            // Simpan file baru
-            $pathLeft = $request->file('logo_left')->store('settings', 'public');
-            Setting::updateOrCreate(['key' => 'logo_left'], ['value' => $pathLeft]);
         }
 
-        // 3. Handle Upload Logo Kanan
-        if ($request->hasFile('logo_right')) {
-            $oldLogo = Setting::value('logo_right');
-            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
-                Storage::disk('public')->delete($oldLogo);
-            }
-
-            $pathRight = $request->file('logo_right')->store('settings', 'public');
-            Setting::updateOrCreate(['key' => 'logo_right'], ['value' => $pathRight]);
-        }
-
-        // 4. Simpan Data Teks Lainnya (dinamis)
-        // Kita ambil semua input kecuali token, method, dan file
+        // 3. Simpan Data Teks Lainnya (Termasuk margin, kertas, ttd)
         $data = $request->except(['_token', '_method', 'logo_left', 'logo_right']);
 
         foreach ($data as $key => $value) {
@@ -68,7 +69,7 @@ class SettingController extends Controller
             );
         }
 
-        return redirect()->back()->with('success', 'Pengaturan Sekolah & Logo Berhasil Disimpan!');
+        return redirect()->back()->with('success', 'Pengaturan Lengkap Berhasil Disimpan!');
     }
 
     public function settingAttendance()
