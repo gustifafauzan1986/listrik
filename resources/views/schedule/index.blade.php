@@ -71,9 +71,9 @@
 
 
                                         <!-- TOMBOL 2: CETAK PDF (LINK KE ROUTE BARU) -->
-                                        {{-- <a href="{{ route('report.schedule', $sched->id) }}" class="btn btn-sm btn-danger me-1" target="_blank" title="Cetak Laporan Mapel">
+                                        <a href="{{ route('report.schedule', $sched->id) }}" class="btn btn-sm btn-danger me-1" target="_blank" title="Cetak Laporan Mapel">
                                             <i class="fas fa-file-pdf"></i> PDF
-                                        </a> --}}
+                                        </a>
 
 
                                         <!-- TOMBOL 3: SCAN / HAPUS -->
