@@ -73,8 +73,8 @@
 						</li>
                         <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
 						</li>
-                        <li> <a href="{{url('/settings')}}"><i class='bx bx-radio-circle'></i>Sekolah</a>
-                        <li> <a href="{{route('all.user')}}"><i class='bx bx-radio-circle'></i>User</a>
+                        <li> <a href="{{url('/settings')}}"><i class='bx bx-home'></i>Sekolah</a>
+                        <li> <a href="{{route('all.user')}}"><i class='bx bx-user'></i>User</a>
                         <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a>
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
                         <li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Rombel</a>

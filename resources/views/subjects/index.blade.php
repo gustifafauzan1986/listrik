@@ -11,7 +11,7 @@
                     </a>
                 </div>
 
-                @if(session('success'))
+                <!-- @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -23,7 +23,7 @@
                         <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                @endif
+                @endif -->
 
                 <div class="card shadow border-0">
                     <div class="card-header bg-white py-3">
@@ -95,4 +95,27 @@
                     })
                 }
             </script>
+
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
+            });
+        @endif
+
+        // Opsional: Cek jika ada error validasi
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Mohon periksa kembali inputan Anda.',
+            });
+        @endif
+    </script>
 </x-app-layout>
