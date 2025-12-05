@@ -78,8 +78,7 @@
                         <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a>
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a>
                         <li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Rombel</a>
-                        <li> <a href="{{route('system.update.index')}}"><i class='bx bx-radio-circle'></i>Update</a>
-						</li>
+                       
 
 					</ul>
 				</li>
@@ -134,6 +133,14 @@
 						</li>
 
 					</ul>
+				</li>
+
+				<li>
+					<a href="{{route('system.update.index')}}">
+						<div class="parent-icon"><i class='bx bx-message-square-edit'></i>
+						</div>
+						<div class="menu-title">Update Aplikasi</div>
+					</a>
 				</li>
 
                 @endrole
