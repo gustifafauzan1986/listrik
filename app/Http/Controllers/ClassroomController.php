@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Classroom;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ClassroomExport;
 
 class ClassroomController extends Controller
 {
@@ -95,5 +97,10 @@ class ClassroomController extends Controller
         $classroom->delete();
 
         return redirect()->route('classrooms.index')->with('success', 'Kelas berhasil dihapus!');
+    }
+
+    public function export()
+    {
+        return Excel::download(new ClassroomExport, 'Data-Kelas.xlsx');
     }
 }

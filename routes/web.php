@@ -192,6 +192,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/whatsapp/broadcast', [WhatsAppController::class, 'broadcast'])->name('whatsapp.broadcast'); // Broadcast Kelas
         Route::post('/whatsapp/broadcast', [WhatsAppController::class, 'sendBroadcast'])->name('whatsapp.broadcast.send');
 
+        // Manajemen Siswa
+        Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); // [BARU]
+         // Manajemen Guru
+    Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); // [BARU]
+    // Manajemen Kelas
+    Route::get('/classrooms/export', [ClassroomController::class, 'export'])->name('classrooms.export'); // [BARU]
+
     });
 
 });

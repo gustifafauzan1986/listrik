@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Classroom;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\StudentExport;
 
 class StudentController extends Controller
 {
@@ -91,4 +93,10 @@ class StudentController extends Controller
         $student->update(['classroom_id' => null]); // Set kelas jadi null
         return back()->with('success', "Siswa {$student->name} berhasil dikeluarkan dari kelas.");
     }
+
+    public function export()
+    {
+        return Excel::download(new StudentExport, 'Data-Siswa.xlsx');
+    }
+    
 }

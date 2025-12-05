@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Teacher;
 use App\Models\User;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TeacherExport;
 
 class TeacherController extends Controller
 {
@@ -80,5 +82,10 @@ class TeacherController extends Controller
         $teacher->user->delete(); 
 
         return redirect()->route('teachers.index')->with('success', 'Data guru dan akun login berhasil dihapus.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new TeacherExport, 'Data-guru.xlsx');
     }
 }
