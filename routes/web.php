@@ -28,6 +28,7 @@ use App\Http\Controllers\ScheduleImportController;
 use App\Http\Controllers\TeacherImportController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\PrintController;
 
 Route::view('/', 'welcome');
 
@@ -136,10 +137,11 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Route untuk mencetak SEMUA kartu siswa sekaligus (mass print)
-        Route::get('/print-all-cards', function () {
-            $students = Student::all(); // Atau paginate jika siswanya ribuan
-            return view('print.all_cards', compact('students'));
-        });
+        Route::get('/print', [PrintController::class, 'index'])->name('print.index');
+        // Route::get('/print-all-cards', function () {
+        //     $students = Student::all(); 
+        //     return view('print.all_cards', compact('students'));
+        // });
 
         Route::get('/face/register', [FaceController::class, 'index'])->name('face.index');
         Route::get('/face/register/{id}', [FaceController::class, 'register'])->name('face.register');
