@@ -51,6 +51,7 @@ class UpdateController extends Controller
             
             // 4. PENTING: Hapus Cache DULU sebelum Migrate
             // Agar Laravel membaca .env yang benar (MySQL) dan bukan default (SQLite)
+            "php artisan optimize:clear",
             "php artisan config:clear",
             "php artisan cache:clear",
             
