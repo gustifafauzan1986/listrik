@@ -180,7 +180,7 @@ Route::middleware(['auth'])->group(function () {
 
         // [BARU] MANAJEMEN GURU (CRUD)
         // Ini menangani route teachers.index, teachers.edit, teachers.update, teachers.destroy
-        Route::resource('teachers', TeacherController::class);
+        // Route::resource('teachers', TeacherController::class);
         // Route::resource('teachers', TeacherController::class)->except(['create', 'store', 'show']);
         Route::resource('classrooms', ClassroomController::class);
 
@@ -198,6 +198,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); // [BARU]
     // Manajemen Kelas
     Route::get('/classrooms/export', [ClassroomController::class, 'export'])->name('classrooms.export'); // [BARU]
+
+        Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); 
+        // PERBAIKAN: method 'show' tidak lagi di-exclude agar halaman detail guru bisa diakses
+        Route::resource('teachers', TeacherController::class)->except(['create', 'store']);
 
     });
 

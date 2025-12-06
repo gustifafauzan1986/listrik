@@ -8,7 +8,11 @@
 
                 <div>
                     <a href="{{ route('teachers.import') }}" class="shadow-sm btn btn-success">
-                        <i class="fas fa-file-excel me-1"></i> Import Excel
+                        <i class="fas fa-file-excel me-1"></i> Import
+                    </a>
+
+                    <a href="{{ route('teachers.export') }}" class="shadow-sm btn btn-warning">
+                        <i class="fas fa-file-excel me-1"></i> Export
                     </a>
                 </div>
             </div>
@@ -53,14 +57,17 @@
                                         <td>{{ $teacher->phone ?? '-' }}</td>
                                         <td class="text-center">
                                             <div class="btn-group">
+                                                 <a href="{{ route('teachers.show', $teacher->id) }}" class="text-white btn btn-sm btn-success" title="Detail">
+                                                    <i class="bx bx-info-circle"></i>
+                                                </a>
                                                 <a href="{{ route('teachers.edit', $teacher->id) }}" class="text-white btn btn-sm btn-warning" title="Edit">
-                                                    <i class="fas fa-edit"></i>
+                                                    <i class="bx bx-message-square-edit"></i>
                                                 </a>
                                                 <form action="{{ route('teachers.destroy', $teacher->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus guru ini? Akun login juga akan terhapus.');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="bx bx-message-square-x"></i>
                                                     </button>
                                                 </form>
                                             </div>

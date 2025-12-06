@@ -10,6 +10,15 @@ use App\Exports\TeacherExport;
 
 class TeacherController extends Controller
 {
+
+    /**
+     * [BARU] Tampilkan Detail Guru
+     */
+    public function show($id)
+    {
+        $teacher = Teacher::with('user')->findOrFail($id);
+        return view('teachers.show', compact('teacher'));
+    }
     /**
      * Tampilkan Daftar Guru
      */
