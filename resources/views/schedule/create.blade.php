@@ -25,7 +25,13 @@
                                 <!-- Nama Mata Pelajaran -->
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Mata Pelajaran</label>
-                                    <input type="text" name="subject_name" class="form-control" placeholder="Contoh: Matematika Wajib" required>
+                                    <!-- <input type="text" name="subject_name" class="form-control" placeholder="Contoh: Matematika Wajib" required> -->
+                                     <select name="subject_id" class="form-select" required>
+                                        <option value="" disabled selected>-- Pilih Mapel --</option>
+                                        @foreach($subjects as $subject)
+                                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <!-- Pilih Kelas (Dari Database Classroom) -->

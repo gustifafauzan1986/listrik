@@ -62,7 +62,7 @@
                                             {{ $sched->classroom->name ?? 'Tanpa Kelas' }}
                                         </span>
                                     </td>
-                                    <td>{{ $sched->subject_name }}</td>
+                                    <td>{{ $sched->subject->name }}</td>
                                     <td class="text-center">
                                         <!-- TOMBOL 1: LIHAT DATA -->
                                         <a href="{{ route('schedule.show', $sched->id) }}" class="text-white btn btn-sm btn-info me-1" title="Lihat Detail">
@@ -89,7 +89,6 @@
                                             </a>
 
                                         @else
-                                         @role('admin')
                                             <form id="delete-form-{{ $sched->id }}" action="{{ route('schedule.destroy', $sched->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -97,7 +96,7 @@
                                                     Hapus
                                                 </button>
                                             </form>
-                                        @endrole
+                                        
                                         @endif
                                     </td>
                                 </tr>
@@ -115,8 +114,7 @@
         </div>
 
     </div>
-        {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+       
 
 
         <script>
