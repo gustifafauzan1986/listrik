@@ -228,7 +228,7 @@
 
                         <div class="card-body">
                             <div class="qr-area">
-                                {!! QrCode::size(120)->generate($student->nis) !!}
+                                {!! QrCode::size(130)->generate($student->nis) !!}
                             </div>
                             <div class="student-info">
                                 <div class="label-small">Nama Siswa:</div>
