@@ -29,6 +29,7 @@ use App\Http\Controllers\TeacherImportController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\PrintController;
+use App\Http\Controllers\StudentAreaController;
 
 Route::view('/', 'welcome');
 
@@ -220,5 +221,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/print-card/{id}', [CardController::class, 'printSingle'])->name('print.single');
 
     });
+
+    Route::middleware(['role:siswa'])->group(function () {
+
+        // Profil Siswa (Edit No HP & Alamat)
+        Route::get('/my-profile', [StudentAreaController::class, 'profile'])->name('student.profile');
+        Route::put('/my-profile', [StudentAreaController::class, 'updateProfile'])->name('student.profile.update');
+        // Riwayat Absensi
+        Route::get('/my-history/subject', [StudentAreaController::class, 'historySubject'])->name('student.history.subject');
+        Route::get('/my-history/daily', [StudentAreaController::class, 'historyDaily'])->name('student.history.daily');
+
+    });
+
+
 
 });

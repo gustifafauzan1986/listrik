@@ -62,7 +62,7 @@
                                             {{ $sched->classroom->name ?? 'Tanpa Kelas' }}
                                         </span>
                                     </td>
-                                    <td>{{ $sched->subject->name }}</td>
+                                    <td>{{ $sched->subject->name ?? 'Kosong' }}</td>
                                     <td class="text-center">
                                         <!-- TOMBOL 1: LIHAT DATA -->
                                         <a href="{{ route('schedule.show', $sched->id) }}" class="text-white btn btn-sm btn-info me-1" title="Lihat Detail">
@@ -96,7 +96,7 @@
                                                     Hapus
                                                 </button>
                                             </form>
-                                        
+
                                         @endif
                                     </td>
                                 </tr>
@@ -114,7 +114,7 @@
         </div>
 
     </div>
-       
+
 
 
         <script>
