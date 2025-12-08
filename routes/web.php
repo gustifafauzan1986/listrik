@@ -137,9 +137,9 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Route untuk mencetak SEMUA kartu siswa sekaligus (mass print)
-        Route::get('/print', [PrintController::class, 'index'])->name('print.index');
+        //Route::get('/print', [PrintController::class, 'index'])->name('print.index');
         // Route::get('/print-all-cards', function () {
-        //     $students = Student::all(); 
+        //     $students = Student::all();
         //     return view('print.all_cards', compact('students'));
         // });
 
@@ -150,7 +150,7 @@ Route::middleware(['auth'])->group(function () {
         // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
         Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
-        
+
 
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
@@ -199,11 +199,25 @@ Route::middleware(['auth'])->group(function () {
         // Manajemen Kelas
         Route::get('/classrooms/export', [ClassroomController::class, 'export'])->name('classrooms.export'); // [BARU]
 
-        Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); 
+        Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export');
         // PERBAIKAN: method 'show' tidak lagi di-exclude agar halaman detail guru bisa diakses
         Route::resource('teachers', TeacherController::class)->except(['create', 'store']);
 
         Route::resource('students', StudentController::class)->except(['create', 'show', 'store']);
+
+        // --- 4. MANAJEMEN KARTU SISWA ---
+        Route::get('/print-cards', [CardController::class, 'index'])->name('print.index');
+
+        // Cetak Full 1 Kelas
+        Route::get('/print-cards/class/{id}', [CardController::class, 'printByClass'])->name('print.class');
+
+        // [BARU] Pilih Siswa Tertentu & Cetak
+        Route::get('/print-cards/select/{id}', [CardController::class, 'selectStudents'])->name('print.select');
+        Route::post('/print-cards/print-selected', [CardController::class, 'printSelected'])->name('print.selected');
+
+        // Cetak Semua & Satuan
+        Route::get('/print-cards/all', [CardController::class, 'printAll'])->name('print.all');
+        Route::get('/print-card/{id}', [CardController::class, 'printSingle'])->name('print.single');
 
     });
 
