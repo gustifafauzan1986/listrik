@@ -62,7 +62,8 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'subject_name' => 'required|string|max:255', // Kita simpan Nama Mapelnya
+            // 'subject_name' => 'required|string|max:255', // Kita simpan Nama Mapelnya
+            'subject_id'   => 'required|exists:subjects,id', // Kita simpan Nama Mapelnya
             'classroom_id' => 'required|exists:classrooms,id',
             'day'          => 'required',
             'start_time'   => 'required',
@@ -73,7 +74,7 @@ class ScheduleController extends Controller
         Schedule::create([
             'teacher_id'   => Auth::id(),
             'classroom_id' => $request->classroom_id,
-            'subject_name' => $request->subject_name, // Simpan nama dari dropdown
+            'subject_id' => $request->subject_id, // Simpan nama dari dropdown
             'day'          => $request->day,
             'start_time'   => $request->start_time,
             'end_time'     => $request->end_time,

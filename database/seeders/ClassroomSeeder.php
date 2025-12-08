@@ -39,6 +39,7 @@ class ClassroomSeeder extends Seeder
 
         // Tambahan Manual (Jika ada kelas khusus)
         Classroom::firstOrCreate(['name' => 'XIII SIJA 1']); // Kelas 13 Program 4 Tahun
+        
 
         $this->command->info('Data Kelas (Classrooms) berhasil digenerate!');
     }

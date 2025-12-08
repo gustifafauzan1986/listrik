@@ -15,11 +15,10 @@ $countPresensi = App\Models\Attendance::count();
 $countHadir = App\Models\Attendance::where('status', 'hadir')->count();
 $countTerlambat = App\Models\Attendance::where('status', 'terlambat')->count();
 
-$jadwalGuru = App\Models\Schedule::where('teacher_id', $id)->first();
-$jadwalGuruPBM = App\Models\Schedule::where('teacher_id', $id)->count();
-$countHadirSiswa = App\Models\Attendance::where('status', 'hadir')->where('id', $jadwalGuru)->count();
-$countTerlambatSiswa = App\Models\Attendance::where('status', 'terlambat')->count();
-	
+
+$CountJadwalGuru = App\Models\Schedule::where('teacher_id', $id)->count();
+$countPresensiGuru = App\Models\Attendance::count();
+
 @endphp
 
 <x-app-layout>
@@ -721,9 +720,11 @@ $countTerlambatSiswa = App\Models\Attendance::where('status', 'terlambat')->coun
 		</div>
     @endrole
 
+	
+
 	@role('guru')
 	
-  	@if ($status === '1')
+  	@if ($status === '1' ?? '0')
 		
 		<div class="page-content">
 					<h4>Akun <b>{{ $guruId->name}} </b><span class="text-success">Aktif</span> </h4>
@@ -759,8 +760,8 @@ $countTerlambatSiswa = App\Models\Attendance::where('status', 'terlambat')->coun
 					   <div class="card-body">
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
-								   <p class="mb-0 text-white">Terlambat</p>
-								   <h4 class="my-1 text-white">{{$countTerlambat ?? 0}}</h4>
+								   <p class="mb-0 text-white">Total Presensi</p>
+								   <h4 class="my-1 text-white">{{$countPresensiGuru ?? 0}}</h4>
 							   </div>
 							   <div id="chart3"></div>
 						   </div>
@@ -773,7 +774,7 @@ $countTerlambatSiswa = App\Models\Attendance::where('status', 'terlambat')->coun
 						   <div class="d-flex align-items-center">
 							   <div class="me-auto">
 								   <p class="mb-0 text-dark">Jadwal PBM</p>
-								   <h4 class="my-1 text-dark">{{$jadwalGuruPBM ?? 0}}</h4>
+								   <h4 class="my-1 text-dark">{{$CountJadwalGuru ?? 0}}</h4>
 							   </div>
 							   <div id="chart4"></div>
 						   </div>
