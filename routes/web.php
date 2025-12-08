@@ -150,7 +150,7 @@ Route::middleware(['auth'])->group(function () {
         // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
         Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
-        Route::resource('students', StudentController::class);
+        
 
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
@@ -195,13 +195,15 @@ Route::middleware(['auth'])->group(function () {
         // Manajemen Siswa
         Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); // [BARU]
          // Manajemen Guru
-    Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); // [BARU]
-    // Manajemen Kelas
-    Route::get('/classrooms/export', [ClassroomController::class, 'export'])->name('classrooms.export'); // [BARU]
+        Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); // [BARU]
+        // Manajemen Kelas
+        Route::get('/classrooms/export', [ClassroomController::class, 'export'])->name('classrooms.export'); // [BARU]
 
         Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); 
         // PERBAIKAN: method 'show' tidak lagi di-exclude agar halaman detail guru bisa diakses
         Route::resource('teachers', TeacherController::class)->except(['create', 'store']);
+
+        Route::resource('students', StudentController::class)->except(['create', 'show', 'store']);
 
     });
 

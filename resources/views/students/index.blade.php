@@ -7,10 +7,14 @@
         <div class="col-md-12">
             
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h3 class="fw-bold text-primary"><i class="fas fa-users me-2"></i> Data Seluruh Murid</h3>
+                <!-- <h3 class="fw-bold text-primary"><i class="fas fa-users me-2"></i> Data Seluruh Murid</h3> -->
                 <div>
                     <a href="{{ route('students.import') }}" class="btn btn-success me-2">
-                        <i class="fas fa-file-excel me-1"></i> Import Excel
+                        <i class="bx bx-import"></i> Import Excel
+                    </a>
+
+                    <a href="{{ route('students.export') }}" class="shadow-sm btn btn-warning">
+                        <i class="bx bx-export"></i> Export
                     </a>
                 </div>
             </div>
@@ -72,15 +76,15 @@
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <a href="{{ route('students.edit', $student->id) }}" class="text-white btn btn-sm btn-warning" title="Edit">Edit
-                                                <i class="fas fa-edit"></i>
+                                            <a href="{{ route('students.edit', $student->id) }}" class="text-white btn btn-sm btn-warning" title="Edit">
+                                                <i class="bx bx-message-square-edit"></i>
                                             </a>
 
                                             <form action="{{ route('students.destroy', $student->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus siswa ini? Data absensi juga akan terhapus.');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
-                                                    Hapus<i class="fas fa-trash"></i>
+                                                    <i class="bx bx-message-square-x"></i>
                                                 </button>
                                             </form>
                                         </td>

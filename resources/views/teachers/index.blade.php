@@ -1,5 +1,5 @@
 @section('title')
-   Pengaturan Kop Surat & Sekolah
+   Data Guru
 @endsection
 <x-app-layout>
     <div class="page-content">
@@ -8,11 +8,11 @@
 
                 <div>
                     <a href="{{ route('teachers.import') }}" class="shadow-sm btn btn-success">
-                        <i class="fas fa-file-excel me-1"></i> Import
+                        <i class="bx bx-import"></i> Import
                     </a>
 
                     <a href="{{ route('teachers.export') }}" class="shadow-sm btn btn-warning">
-                        <i class="fas fa-file-excel me-1"></i> Export
+                        <i class="bx bx-export"></i> Export
                     </a>
                 </div>
             </div>

@@ -7,7 +7,7 @@
         <div class="mb-4 d-flex justify-content-between align-items-center">
             <!-- <h3 class="fw-bold text-primary"><i class="fas fa-school me-2"></i> Master Data Kelas</h3> -->
             <a href="{{ route('classrooms.create') }}" class="shadow-sm btn btn-primary">
-                <i class="fas fa-plus me-1"></i> Tambah Kelas
+                <i class="bx bx-plus me-1"></i> Tambah Kelas
             </a>
         </div>
 
@@ -26,7 +26,7 @@
                 <form action="{{ route('classrooms.index') }}" method="GET" class="mb-4">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Cari Nama Kelas..." value="{{ request('search') }}">
-                        <button type="submit" class="btn btn-dark"><i class="fas fa-search"></i> Cari</button>
+                        <button type="submit" class="btn btn-dark"><i class="bx bx-search"></i> Cari</button>
                     </div>
                 </form>
 
@@ -114,7 +114,7 @@
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
                                             <a href="{{ route('classrooms.edit', $room->id) }}" class="text-white btn btn-sm btn-warning" title="Edit">
-                                                <i class="fas fa-edit"></i>
+                                                <i class="bx bx-message-square-edit"></i>
                                             </a>
 
                                             <!-- Tombol Hapus dengan SweetAlert -->
@@ -122,7 +122,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="button" class="btn btn-sm btn-danger" title="Hapus" onclick="confirmDelete('{{ $room->id }}', '{{ $room->name }}')">
-                                                    <i class="fas fa-trash"></i>
+                                                    <i class="bx bx-message-square-x"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -141,9 +141,9 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-3">
+                <!-- <div class="mt-3">
                     {{ $classrooms->withQueryString()->links() }}
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
