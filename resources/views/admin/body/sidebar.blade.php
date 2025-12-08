@@ -62,8 +62,8 @@
 						<div class="menu-title">Rombel</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Kelas</a></li>
-						<li> <a href="{{route('students.index')}}"><i class='bx bx-radio-circle'></i>Murid</a>
+						<li> <a href="{{route('classrooms.index')}}"><i class='bx bxs-group'></i>Kelas</a></li>
+						<li> <a href="{{route('students.index')}}"><i class='bx bxs-user-check'></i>Murid</a>
 						</li>
 
 
@@ -138,7 +138,7 @@
 
 				<li>
 					<a href="{{route('system.update.index')}}">
-						<div class="parent-icon"><i class='bx bx-message-square-edit'></i>
+						<div class="parent-icon"><i class='bx bxl-microsoft'></i>
 						</div>
 						<div class="menu-title">Update Aplikasi</div>
 					</a>

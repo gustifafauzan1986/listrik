@@ -31,12 +31,12 @@
                     <form action="{{ route('teachers.index') }}" method="GET" class="mb-4">
                         <div class="input-group">
                             <input type="text" name="search" class="form-control" placeholder="Cari Nama, NIP, atau Email..." value="{{ request('search') }}">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Cari</button>
+                            <button type="submit" class="btn btn-primary"><i class="bx bx-search"></i> Cari</button>
                         </div>
                     </form>
 
                     <div class="table-responsive">
-                        <table class="table align-middle table-hover table-striped">
+                        <table id="example" class="table table-striped table-bordered">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Nama Lengkap</th>

@@ -5,7 +5,7 @@
 <x-app-layout>
     <div class="page-content">
         <div class="col-md-12">
-            
+
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <!-- <h3 class="fw-bold text-primary"><i class="fas fa-users me-2"></i> Data Seluruh Murid</h3> -->
                 <div>
@@ -39,7 +39,7 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Filter</button>
+                                <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i> Filter</button>
                             </div>
                         </div>
                     </form>
