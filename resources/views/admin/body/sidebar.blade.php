@@ -39,15 +39,15 @@
 
 				<li>
 					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class="bx bx-repeat"></i>
+						<div class="parent-icon"><i class="bx bx-cog"></i>
 						</div>
 						<div class="menu-title">Setting</div>
 					</a>
 					<ul>
-						<li> <a href="{{url('/settings')}}"><i class='bx bx-home'></i>Sekolah</a></li>
+						<li> <a href="{{url('/settings')}}"><i class='bx bx-home-smile'></i>Sekolah</a></li>
 						<li> <a href="{{route('all.user')}}"><i class='bx bx-user'></i>User</a></li>
-                        <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-radio-circle'></i>Presensi</a></li>
-                        <li> <a href="{{route('subjects.index')}}"><i class='bx bx-radio-circle'></i>Mapel</a></li>
+                        <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-barcode-reader'></i>Presensi</a></li>
+                        <li> <a href="{{route('subjects.index')}}"><i class='bx bx-minus-front'></i>Mapel</a></li>
 						<li> <a href="{{route('permissions.index')}}"><i class='bx bx-radio-circle'></i>Permission</a>
 						</li>
                         <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
@@ -57,7 +57,7 @@
 				</li>
                 <li>
 					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon"><i class='bx bx-user'></i>
+						<div class="parent-icon"><i class='bx bx-group'></i>
 						</div>
 						<div class="menu-title">Rombel</div>
 					</a>
@@ -71,7 +71,7 @@
 				</li>
 				<li>
 					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon"><i class='bx bx-user'></i>
+						<div class="parent-icon"><i class='bx bx-user-pin'></i>
 						</div>
 						<div class="menu-title">Guru</div>
 					</a>
@@ -86,7 +86,7 @@
                 <li class="menu-label">Forms & Tables</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class='bx bx-message-square-edit'></i>
+						<div class="parent-icon"><i class='bx bx-printer'></i>
 						</div>
 						<div class="menu-title">Print</div>
 					</a>
