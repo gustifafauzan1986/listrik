@@ -52,7 +52,7 @@
 						</li>
                         <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
 					</li>
-                        
+
 					</ul>
 				</li>
                 <li>
@@ -65,7 +65,7 @@
 						<li> <a href="{{route('classrooms.index')}}"><i class='bx bx-radio-circle'></i>Kelas</a></li>
 						<li> <a href="{{route('students.index')}}"><i class='bx bx-radio-circle'></i>Murid</a>
 						</li>
-						
+
 
 					</ul>
 				</li>
@@ -78,11 +78,11 @@
 					<ul>
 						<li> <a href="{{route('teachers.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
 						</li>
-						
+
 
 					</ul>
 				</li>
-				
+
                 <li class="menu-label">Forms & Tables</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
@@ -98,7 +98,7 @@
 					</ul>
 				</li>
 
-				<li>
+				{{-- <li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-grid-alt"></i>
 						</div>
@@ -108,11 +108,11 @@
 						<li> <a href="{{route('users.import')}}"><i class='bx bx-radio-circle'></i>Impor Guru</a>
 						</li>
 					</ul>
-				</li>
+				</li> --}}
 
 				<li>
 					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
+						<div class="parent-icon"> <i class="bx bxs-report"></i>
 						</div>
 						<div class="menu-title">Laporan</div>
 					</a>
@@ -125,7 +125,7 @@
 
 				<li>
 					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="bx bx-donate-blood"></i>
+						<div class="parent-icon"> <i class="bx bx-message-alt"></i>
 						</div>
 						<div class="menu-title">WhatAPP</div>
 					</a>
@@ -150,7 +150,7 @@
                 <li class="menu-label">Presensi</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class='bx bx-message-square-edit'></i>
+						<div class="parent-icon"><i class='bx bxs-barcode'></i>
 						</div>
 						<div class="menu-title">Scan</div>
 					</a>
