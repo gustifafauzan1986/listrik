@@ -20,9 +20,15 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        $schedules = Schedule::with('classroom')
+       // Ambil jadwal milik guru yang sedang login
+        $schedules = Schedule::with(['classroom', 'subject'])
+                        // Hitung jumlah kehadiran HANYA untuk tanggal HARI INI
+                        ->withCount(['attendances' => function ($query) {
+                            $query->where('date', date('Y-m-d'));
+                        }])
                         ->where('teacher_id', Auth::id())
                         ->get();
+
 
 
         $daysOrder = [
@@ -90,16 +96,17 @@ class ScheduleController extends Controller
      */
     public function show($id)
     {
-        $schedule = Schedule::with('classroom')
+        // 1. Cari Jadwal & Validasi Pemilik
+        $schedule = Schedule::with('classroom', 'subject')
                     ->where('id', $id)
                     ->where('teacher_id', Auth::id())
                     ->firstOrFail();
 
-
+        // 2. Ambil Data Absensi HARI INI untuk jadwal tersebut
         $attendances = Attendance::with('student')
                         ->where('schedule_id', $id)
                         ->where('date', date('Y-m-d'))
-                        ->orderBy('check_in_time', 'desc')
+                        ->orderBy('check_in_time', 'desc') // Yang baru absen ada di paling atas
                         ->get();
 
 
@@ -113,6 +120,8 @@ class ScheduleController extends Controller
     public function destroy($id)
     {
         $schedule = Schedule::where('id', $id)->where('teacher_id', Auth::id())->firstOrFail();
+        
+        // Hapus jadwal (Data absensi lama akan ikut terhapus jika onCascadeDelete aktif di database)
         $schedule->delete();
 
 

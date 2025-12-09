@@ -7,7 +7,7 @@
         
         <div class="text-center alert alert-info">
             Mengabsen Kelas: <strong>{{ $schedule->classroom->name }}</strong> <br>
-            Mapel: {{ $schedule->subject_name }}
+            Mapel: {{ $schedule->subject->name }}
         </div>
         
         <div class="container mt-5">
