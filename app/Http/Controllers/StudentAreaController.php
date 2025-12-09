@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Attendance;
 use App\Models\DailyAttendance;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // <--- Import Library QR
 
@@ -17,10 +18,12 @@ class StudentAreaController extends Controller
      */
     public function profile()
     {
+        $id = Auth::user()->id;
+        $profileData = User::find($id);
         // Ambil data siswa yang sedang login
         $students = Student::where('user_id', Auth::id())->with('classroom')->firstOrFail();
 
-        return view('student_area.profile', compact('students'));
+        return view('student_area.profile', compact('students', 'profileData'));
     }
 
     /**

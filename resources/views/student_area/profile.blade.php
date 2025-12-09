@@ -27,7 +27,9 @@
 
                 <div class="text-center mb-4">
                     <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px;">
-                        <i class="fas fa-user-graduate fa-4x text-secondary"></i>
+                        <i class="fas fa-user-graduate fa-4x text-secondary">
+                            <img id ="showImage"src="{{(!empty($profileData->photo)) ? url('upload/admin_images/'.$profileData->photo): url('upload/no_image.jpg')}}" alt="Admin" class="rounded-circle p-1 bg-primary" width="80">
+                        </i>
                     </div>
                     <h4 class="mt-3 fw-bold">{{ $students->name }}</h4>
                     <span class="badge bg-info text-dark px-3 py-2">{{ $students->classroom->name ?? 'Tanpa Kelas' }}</span>
