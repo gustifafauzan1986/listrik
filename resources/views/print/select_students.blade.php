@@ -72,4 +72,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        /**
+         * Fungsi untuk memilih atau membatalkan pilihan semua checkbox siswa.
+         * @param {boolean} checked - True untuk memilih semua, False untuk membatalkan pilihan.
+         */
+        function toggleCheckboxes(checked) {
+            // Mengambil semua elemen input yang memiliki class 'student-checkbox'
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            
+            // Mengatur properti 'checked' untuk setiap checkbox
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = checked;
+            });
+        }
+    </script>
 </x-app-layout>
