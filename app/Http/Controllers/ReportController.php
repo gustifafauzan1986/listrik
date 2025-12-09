@@ -79,7 +79,7 @@ class ReportController extends Controller
                 break;
         }
 
-            
+
         // 2. AMBIL DATA SEKOLAH (KOP SURAT)
         $school = $this->getSchoolData();
 
@@ -148,7 +148,7 @@ class ReportController extends Controller
         }
 
         $labelPeriode = "Rekapitulasi Mata Pelajaran";
-        $labelTambahan = "Mapel: " . $schedule->subject_name . " - Kelas: " . ($schedule->classroom->name ?? '-');
+        $labelTambahan = "Mapel: " . $schedule->subject->name . " - Kelas: " . ($schedule->classroom->name ?? '-');
 
 
         $school = $this->getSchoolData();
@@ -243,7 +243,7 @@ class ReportController extends Controller
             // Pengaturan Kertas
             'paper_size'        => Setting::value('paper_size', 'a4'),
             'paper_orientation' => Setting::value('paper_orientation', 'portrait'),
-            
+
             // Pengaturan Margin (Tambahkan satuan cm/mm untuk CSS)
             'margin_top'    => Setting::value('margin_top', '2.5') . 'cm',
             'margin_right'  => Setting::value('margin_right', '2.5') . 'cm',

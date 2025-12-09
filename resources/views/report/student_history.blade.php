@@ -43,7 +43,7 @@
         .status-izin { color: #d7e04fff;; font-weight: bold; }
         .status-alfa { color: red; font-weight: bold; }
         .status-terlambat { color: orange; font-weight: bold; }
-        
+
 
         /* Layout Kop Surat menggunakan Tabel agar rapi di PDF */
         .header-table-logo { width: 100%; border-bottom: 3px double #333; margin-bottom: 20px; padding-bottom: 10px; }
@@ -151,7 +151,7 @@
                 <td class="text-center-laporan">{{ $row->check_in_time }}</td>
                 <td>
                     <!-- Ambil nama mapel dari relasi subject -->
-                    {{ $row->schedule->subject_name ?? '-' }}
+                    {{ $row->schedule->subject->name ?? '-' }}
                 </td>
                 <td>
                     <!-- Ambil nama guru -->

@@ -42,8 +42,8 @@ $id = Auth::user()->id;
         .bg-alpa { background-color: red; }
 
          /* Area Tanda Tangan */
-        .signature-section { 
-            margin-top: 40px; 
+        .signature-section {
+            margin-top: 40px;
             page-break-inside: avoid; /* Jangan potong tanda tangan ke halaman baru sendirian */
         }
     </style>
@@ -118,7 +118,7 @@ $id = Auth::user()->id;
                 <td>{{ $row->student->classroom->name ?? '-' }}</td>
 
                 <!-- Mengambil nama mapel via relasi atau kolom legacy -->
-                <td>{{ $row->schedule->subject->name ?? $row->schedule->subject_name ?? '-' }}</td>
+                <td>{{ $row->schedule->subject->name ?? '-' }}</td>
 
                 <td class="text-center">
                     @php
@@ -148,7 +148,17 @@ $id = Auth::user()->id;
                 <td width="60%"></td> <!-- Spacer Kosong di Kiri -->
                 <td width="40%" class="text-center">
                     <p>{{ $school['sign_city'] ?? 'Jakarta' }}, {{ date('d F Y') }}</p>
+                    @if($id == true)
+                    <p>Guru Mata Pelajaran,</p>
+                    <br><br><br>
+                     <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">
+                        {{ Auth::user()->name ?? '.........................' }}
+                    </p>
+                    <p>NIP. {{ Auth::user()->teacher->nip ?? '-' }}</p>
+
+                    @else
                     <p>{{ $school['sign_title'] ?? 'Kepala Sekolah' }},</p>
+
                     <br><br><br>
                     <!-- <p style="text-decoration: underline; font-weight: bold;">
                         {{ $school['sign_name'] ?? '.........................' }}
@@ -168,6 +178,7 @@ $id = Auth::user()->id;
                         {{ $school['sign_name'] ?? '.........................' }}
                     </p>
                     <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p>
+                    @endif
                 </td>
             </tr>
         </table>
