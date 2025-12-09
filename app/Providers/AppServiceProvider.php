@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,14 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::before(function ($user, $ability) {
         return $user->hasRole('admin') ? true : null;
-    });
+        });
+
+        // Cek jika aplikasi berjalan di lingkungan lokal (local environment)
+        // DAN Ngrok sedang digunakan (dideteksi dari host)
+        if (env('APP_ENV') === 'local' && str_contains(request()->header('host'), '.ngrok-free.app')) {
+            
+            // Memaksa Laravel untuk menghasilkan semua URL menggunakan skema HTTPS
+            URL::forceScheme('https');
+        }
     }
 }

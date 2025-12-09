@@ -150,7 +150,21 @@ $id = Auth::user()->id;
                     <p>{{ $school['sign_city'] ?? 'Jakarta' }}, {{ date('d F Y') }}</p>
                     <p>{{ $school['sign_title'] ?? 'Kepala Sekolah' }},</p>
                     <br><br><br>
-                    <p style="text-decoration: underline; font-weight: bold;">
+                    <!-- <p style="text-decoration: underline; font-weight: bold;">
+                        {{ $school['sign_name'] ?? '.........................' }}
+                    </p>
+                    <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p> -->
+
+                    <!-- LOGIC GAMBAR TANDA TANGAN -->
+                    @if(isset($school['sign_image']) && $school['sign_image'])
+                        <div style="height: 70px; display: flex; align-items: center; justify-content: center;">
+                            <img src="{{ public_path('storage/'.$school['sign_image']) }}" style="height: 70px; max-width: 100%;">
+                        </div>
+                    @else
+                        <br><br> <!-- Spasi untuk TTD Basah -->
+                    @endif
+
+                    <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">
                         {{ $school['sign_name'] ?? '.........................' }}
                     </p>
                     <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p>

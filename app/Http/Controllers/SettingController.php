@@ -48,19 +48,43 @@ class SettingController extends Controller
             'signature_nip'   => 'nullable|string',
         ]);
 
+        // 2. Daftar File yang akan diproses
+        $filesToUpload = [
+            'logo_left',      // Logo Kop Surat Kiri (Lama)
+            'logo_right',     // Logo Kop Surat Kanan (Lama)
+            'app_favicon',    // Favicon Browser (Baru)
+            'app_logo',       // Logo Sidebar/Navbar (Baru)
+            'signature_image' // Scan Tanda Tangan (Baru)
+        ];
+
        // 2. Handle Upload Logo (Kiri & Kanan) - Kode lama tetap
-        foreach (['logo_left', 'logo_right'] as $logoKey) {
-            if ($request->hasFile($logoKey)) {
-                $oldLogo = Setting::value($logoKey);
-                if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
-                    Storage::disk('public')->delete($oldLogo);
-                }
-                $path = $request->file($logoKey)->store('settings', 'public');
-                Setting::updateOrCreate(['key' => $logoKey], ['value' => $path]);
-            }
-        }
+        // foreach (['logo_left', 'logo_right'] as $logoKey) {
+        //     if ($request->hasFile($logoKey)) {
+        //         $oldLogo = Setting::value($logoKey);
+        //         if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+        //             Storage::disk('public')->delete($oldLogo);
+        //         }
+        //         $path = $request->file($logoKey)->store('settings', 'public');
+        //         Setting::updateOrCreate(['key' => $logoKey], ['value' => $path]);
+        //     }
+        // }
 
         // 3. Simpan Data Teks Lainnya (Termasuk margin, kertas, ttd)
+
+        // 3. Loop Proses Upload File
+        foreach ($filesToUpload as $key) {
+            if ($request->hasFile($key)) {
+                // Hapus file lama
+                $oldFile = Setting::value($key);
+                if ($oldFile && Storage::disk('public')->exists($oldFile)) {
+                    Storage::disk('public')->delete($oldFile);
+                }
+
+                // Upload baru
+                $path = $request->file($key)->store('settings', 'public');
+                Setting::updateOrCreate(['key' => $key], ['value' => $path]);
+            }
+        }
         $data = $request->except(['_token', '_method', 'logo_left', 'logo_right']);
 
         foreach ($data as $key => $value) {

@@ -6,7 +6,16 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!--favicon-->
-	<link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png')}}" type="image/png"/>
+	<!-- <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png')}}" type="image/png"/> -->
+	  <!-- DYNAMIC FAVICON -->
+    @php
+        $favicon = \App\Models\Setting::value('app_favicon');
+    @endphp
+    @if($favicon)
+        <link rel="icon" href="{{ asset('storage/'.$favicon) }}" type="image/x-icon"/>
+    @else
+        <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png') }}" type="image/x-icon"/>
+    @endif
     <meta name="csrf-token" content="{{ csrf_token() }}">
 	<!--plugins-->
 	<link href="{{ asset('backend/assets/plugins/vectormap/jquery-jvectormap-2.0.2.css')}}" rel="stylesheet"/>
@@ -30,7 +39,7 @@
 	<link href="{{ asset('backend/assets/plugins/datatable/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" >
 
-	<title>@yield('title') | LISTRIK BKT</title>
+	<title>@yield('title') | LISTRIK BKT {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
 </head>
 
 <body>
@@ -223,14 +232,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script src="{{ asset('backend/assets/js/code.js') }}"></script>
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    {{-- <script src="{{ asset('backend/assets/plugins/select2/js/select2-custom.js') }}"></script> --}}
-
+    <script src="{{ asset('backend/assets/plugins/select2/js/select2-custom.js') }}"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+	<script src="{{ asset('backend/assets/plugins/datatable/js/jquery.dataTables.min.js')}}"></script>
+	<script src="{{ asset('backend/assets/plugins/datatable/js/dataTables.bootstrap5.min.js')}}"></script>
 
 	<script>
 		new PerfectScrollbar(".app-container")
 	</script>
 
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+	
 
 	<script>
 	@if(Session::has('message'))
@@ -255,8 +266,7 @@
 	@endif
 	</script>
 
-<script src="{{ asset('backend/assets/plugins/datatable/js/jquery.dataTables.min.js')}}"></script>
-<script src="{{ asset('backend/assets/plugins/datatable/js/dataTables.bootstrap5.min.js')}}"></script>
+
 <script>
 	$(document).ready(function() {
 		$('#example').DataTable();
@@ -273,7 +283,6 @@
 			.appendTo( '#example2_wrapper .col-md-6:eq(0)' );
 	} );
 </script>
-
 </body>
 
 </html>

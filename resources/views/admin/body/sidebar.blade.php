@@ -1,11 +1,21 @@
-        <div class="sidebar-wrapper" data-simplebar="true">
+        
+		<div class="sidebar-wrapper" data-simplebar="true">
 			<div class="sidebar-header">
 				<div>
-					<img src="{{ asset('backend/assets/images/logo-titl.png')}}" class="logo-icon" alt="logo titl">
+					@php
+						$appLogo = \App\Models\Setting::value('app_logo');
+						$appName = \App\Models\Setting::value('app_name', 'E-Absensi');
+					@endphp
+
+					@if($appLogo)
+						<img src="{{ asset('storage/'.$appLogo) }}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2 rounded">
+					@else
+						<img src="{{ asset('backend/assets/images/logo-titl.png')}}" class="logo-icon" alt="logo titl"> 
 				</div>
 				<div>
-					<h4 class="logo-text">Listrik
+					<h4 class="logo-text">{{ $appName }}
 				</div>
+				@endif
 				<div class="toggle-icon ms-auto"><i class='bx bx-arrow-back'></i>
 				</div>
 			 </div>
