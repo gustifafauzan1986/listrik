@@ -1,24 +1,34 @@
-
+@php
+$appLogo = \App\Models\Setting::value('app_logo');
+$appName = \App\Models\Setting::value('app_name', 'E-Absensi');
+@endphp
 		<div class="sidebar-wrapper" data-simplebar="true">
 			<div class="sidebar-header">
-				<div>
-					@php
-						$appLogo = \App\Models\Setting::value('app_logo');
-						$appName = \App\Models\Setting::value('app_name', 'E-Absensi');
-					@endphp
+            <div>
+                @if($appLogo && file_exists(storage_path('app/public/'.$appLogo)))
+                    <img src="{{ asset('storage/'.$appLogo) }}"
+                        alt="Logo"
+                        width="40"
+                        height="40"
+                        class="align-text-top rounded d-inline-block me-2"
+                        style="object-fit: cover;">
+                @else
+                    <img src="{{ asset('upload/no_image.jpg')}}"
+                        alt="logo titl"
+                        width="40"
+                        height="40"
+                        class="align-text-top rounded d-inline-block me-2"
+                        style="object-fit: cover;">
+                @endif
+            </div>
 
-					@if($appLogo)
-						<img src="{{ asset('storage/'.$appLogo) }}" alt="Logo" width="30" height="30" class="align-text-top rounded d-inline-block me-2">
-					@else
-						<img src="{{ asset('backend/assets/images/logo-titl.png')}}" class="logo-icon" alt="logo titl">
-				</div>
-				<div>
-					<h4 class="logo-text">{{ $appName }}
-				</div>
-				@endif
-				<div class="toggle-icon ms-auto"><i class='bx bx-arrow-back'></i>
-				</div>
-			 </div>
+        <div>
+            <h4 class="logo-text">{{ $appName }}</h4> </div>
+
+        <div class="toggle-icon ms-auto">
+            <i class='bx bx-arrow-back'></i>
+        </div>
+    </div>
 			<!--navigation-->
 			<ul class="metismenu" id="menu">
                 <li>
@@ -157,16 +167,16 @@
                 @endrole
 
                 @role('piket|guru|admin')
-                <li class="menu-label">Presensi</li>
+                <li class="menu-label">Rekap Datang & Pulang</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bxs-barcode'></i>
 						</div>
-						<div class="menu-title">Scan</div>
+						<div class="menu-title">Presensi</div>
 					</a>
 					<ul>
-						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-radio-circle'></i>QR</a>
-						<li> <a href="{{route('daily.face.scan')}}"><i class='bx bx-radio-circle'></i>Face</a>
+						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-barcode'></i>QR</a>
+						<li> <a href="{{route('daily.face.scan')}}"><i class='bx bx-face'></i>Face</a>
 						</li>
 
 					</ul>

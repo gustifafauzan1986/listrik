@@ -168,7 +168,7 @@ $id = Auth::user()->id;
                     <!-- LOGIC GAMBAR TANDA TANGAN -->
                     @if(isset($school['sign_image']) && $school['sign_image'])
                         <div style="height: 70px; display: flex; align-items: center; justify-content: center;">
-                            <img src="{{ public_path('storage/'.$school['sign_image']) }}" style="height: 70px; max-width: 100%;">
+                            <img src="{{ asset('storage/'.$school['sign_image']) }}" style="height: 70px; max-width: 100%;">
                         </div>
                     @else
                         <br><br> <!-- Spasi untuk TTD Basah -->

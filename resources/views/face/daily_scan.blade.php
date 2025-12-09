@@ -156,7 +156,7 @@
                     performDailyAttendance(nis, nama);
                 }
             });
-        }, 1000); // Scan tiap 1 detik
+        }, 1000); // 1000 = Scan tiap 1 detik
     });
 
     // Kirim Data ke DailyAttendanceController (Sama seperti QR Code)

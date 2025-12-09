@@ -85,7 +85,7 @@ class SettingController extends Controller
                 Setting::updateOrCreate(['key' => $key], ['value' => $path]);
             }
         }
-        $data = $request->except(['_token', '_method', 'logo_left', 'logo_right']);
+        $data = $request->except(['_token', '_method', 'logo_left', 'logo_right', 'app_favicon', 'app_logo', 'signature_image']);
 
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(
@@ -93,6 +93,7 @@ class SettingController extends Controller
                 ['value' => $value]
             );
         }
+
 
         return redirect()->back()->with('success', 'Pengaturan Lengkap Berhasil Disimpan!');
     }

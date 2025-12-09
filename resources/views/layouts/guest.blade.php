@@ -1,3 +1,9 @@
+@php
+$appLogo = \App\Models\Setting::value('app_logo');
+$appName = \App\Models\Setting::value('app_name', 'E-Absensi');
+$appSchool = \App\Models\Setting::value('school_name', 'SMK GATECH');
+$favicon = \App\Models\Setting::value('app_favicon');
+@endphp
 <!doctype html>
 <html lang="en">
 
@@ -6,7 +12,11 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!--favicon-->
-	<link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png')}}" type="image/png" />
+	@if($favicon)
+        <link rel="icon" href="{{ asset('storage/'.$favicon) }}" type="image/x-icon"/>
+    @else
+        <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png') }}" type="image/x-icon"/>
+    @endif
 	<!--plugins-->
 	<link href="{{ asset('backend/assets/plugins/simplebar/css/simplebar.css')}}" rel="stylesheet" />
 	<link href="{{ asset('backend/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css')}}" rel="stylesheet" />
@@ -20,7 +30,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 	<link href="{{ asset('backend/assets/css/app.css')}}" rel="stylesheet">
 	<link href="{{ asset('backend/assets/css/icons.css')}}" rel="stylesheet">
-	<title>Halaman Login | LISTRIK BKT</title>
+	<title>Halaman Login | {{$appName}} - {{$appSchool}}</title>
 
     <!--app JS-->
 	<script src="{{ asset('backend/assets/js/app.js')}}"></script>

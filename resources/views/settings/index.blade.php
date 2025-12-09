@@ -5,25 +5,25 @@
     <div class="page-content">
         <div class="row justify-content-center">
             <div class="col-md-12">
-                <div class="card shadow border-0">
-                    <div class="card-header bg-primary text-white">
+                <div class="border-0 shadow card">
+                    <div class="text-white card-header bg-primary">
                         <h5 class="mb-0"><i class="fas fa-cogs me-2"></i> Pengaturan Aplikasi</h5>
                     </div>
                     <div class="card-body">
-                        
-                        @if(session('success'))
+
+                        {{-- @if(session('success'))
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                        @endif
+                        @endif --}}
 
                         <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
                             <!-- NAV TABS -->
-                            <ul class="nav nav-tabs mb-4" id="settingTabs" role="tablist">
+                            <ul class="mb-4 nav nav-tabs" id="settingTabs" role="tablist">
                                 <li class="nav-item">
                                     <button class="nav-link active fw-bold" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button">
                                         <i class="fas fa-school me-2"></i> Identitas Sekolah
@@ -42,18 +42,18 @@
                             </ul>
 
                             <div class="tab-content" id="settingTabsContent">
-                                
+
                                 <!-- TAB 1: IDENTITAS SEKOLAH (Kop Surat) -->
                                 <div class="tab-pane fade show active" id="general">
-                                    <div class="row mb-4 border-bottom pb-4">
+                                    <div class="pb-4 mb-4 row border-bottom">
                                         <!-- Logo Kiri -->
-                                        <div class="col-md-6 text-center border-end">
+                                        <div class="text-center col-md-6 border-end">
                                             <label class="form-label fw-bold">Logo Kiri (Kop Surat)</label>
                                             <div class="mb-2 d-flex justify-content-center">
                                                 @if(isset($settings['logo_left']) && $settings['logo_left'])
                                                     <img src="{{ asset('storage/'.$settings['logo_left']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
                                                 @else
-                                                    <div class="text-muted border p-3 rounded" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                                    <div class="p-3 border rounded text-muted" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
                                                         <i class="fas fa-image fa-2x text-secondary"></i>
                                                     </div>
                                                 @endif
@@ -61,13 +61,13 @@
                                             <input type="file" name="logo_left" class="form-control form-control-sm accept-image">
                                         </div>
                                         <!-- Logo Kanan -->
-                                        <div class="col-md-6 text-center">
+                                        <div class="text-center col-md-6">
                                             <label class="form-label fw-bold">Logo Kanan (Kop Surat)</label>
                                             <div class="mb-2 d-flex justify-content-center">
                                                 @if(isset($settings['logo_right']) && $settings['logo_right'])
                                                     <img src="{{ asset('storage/'.$settings['logo_right']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
                                                 @else
-                                                    <div class="text-muted border p-3 rounded" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                                    <div class="p-3 border rounded text-muted" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
                                                         <i class="fas fa-image fa-2x text-secondary"></i>
                                                     </div>
                                                 @endif
@@ -85,11 +85,11 @@
                                         <textarea name="school_address" class="form-control" rows="2">{{ $settings['school_address'] ?? '' }}</textarea>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">No. Telepon</label>
                                             <input type="text" name="school_phone" class="form-control" value="{{ $settings['school_phone'] ?? '' }}">
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">Email</label>
                                             <input type="email" name="school_email" class="form-control" value="{{ $settings['school_email'] ?? '' }}">
                                         </div>
@@ -104,22 +104,22 @@
                                 <div class="tab-pane fade" id="branding">
                                     <div class="row">
                                         <!-- Sidebar Logo -->
-                                        <div class="col-md-6 mb-4 text-center">
+                                        <div class="mb-4 text-center col-md-6">
                                             <label class="form-label fw-bold d-block">Logo Sidebar (Pojok Kiri Atas)</label>
-                                            <div class="p-3 bg-primary rounded d-inline-block mb-2">
+                                            <div class="p-3 mb-2 rounded bg-primary d-inline-block">
                                                 <!-- Preview di atas background biru (seperti navbar) -->
                                                 @if(isset($settings['app_logo']) && $settings['app_logo'])
                                                     <img src="{{ asset('storage/'.$settings['app_logo']) }}" style="height: 40px;">
                                                 @else
-                                                    <i class="fas fa-qrcode fa-2x text-white"></i>
+                                                    <i class="text-white fas fa-qrcode fa-2x"></i>
                                                 @endif
                                             </div>
-                                            <input type="file" name="app_logo" class="form-control form-control-sm mt-2">
+                                            <input type="file" name="app_logo" class="mt-2 form-control form-control-sm">
                                             <div class="form-text">Format PNG transparan disarankan. Max 2MB.</div>
                                         </div>
 
                                         <!-- Favicon -->
-                                        <div class="col-md-6 mb-4 text-center">
+                                        <div class="mb-4 text-center col-md-6">
                                             <label class="form-label fw-bold d-block">Favicon (Browser Tab)</label>
                                             <div class="mb-2">
                                                 @if(isset($settings['app_favicon']) && $settings['app_favicon'])
@@ -128,11 +128,11 @@
                                                     <i class="fas fa-globe fa-2x text-secondary"></i>
                                                 @endif
                                             </div>
-                                            <input type="file" name="app_favicon" class="form-control form-control-sm mt-2">
+                                            <input type="file" name="app_favicon" class="mt-2 form-control form-control-sm">
                                             <div class="form-text">Format ICO/PNG. Ukuran kecil (32x32 px).</div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Nama Aplikasi (Di Navbar)</label>
                                         <input type="text" name="app_name" class="form-control" value="{{ $settings['app_name'] ?? 'E-Absensi' }}">
@@ -141,9 +141,9 @@
 
                                 <!-- TAB 3: KERTAS & TANDA TANGAN -->
                                 <div class="tab-pane fade" id="report">
-                                    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Format Kertas PDF</h6>
+                                    <h6 class="pb-2 mb-3 text-primary fw-bold border-bottom">Format Kertas PDF</h6>
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">Ukuran Kertas</label>
                                             <select name="paper_size" class="form-select">
                                                 <option value="a4" {{ ($settings['paper_size'] ?? '') == 'a4' ? 'selected' : '' }}>A4</option>
@@ -151,7 +151,7 @@
                                                 <option value="letter" {{ ($settings['paper_size'] ?? '') == 'letter' ? 'selected' : '' }}>Letter</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">Orientasi</label>
                                             <select name="paper_orientation" class="form-select">
                                                 <option value="portrait" {{ ($settings['paper_orientation'] ?? '') == 'portrait' ? 'selected' : '' }}>Portrait (Tegak)</option>
@@ -160,8 +160,8 @@
                                         </div>
                                     </div>
 
-                                    <label class="form-label fw-bold mt-2">Margin (cm)</label>
-                                    <div class="row mb-4">
+                                    <label class="mt-2 form-label fw-bold">Margin (cm)</label>
+                                    <div class="mb-4 row">
                                         <div class="col-md-3">
                                             <small>Atas</small>
                                             <input type="number" step="0.1" name="margin_top" class="form-control" value="{{ $settings['margin_top'] ?? '2.5' }}">
@@ -180,31 +180,31 @@
                                         </div>
                                     </div>
 
-                                    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2 mt-4">Tanda Tangan Laporan</h6>
+                                    <h6 class="pb-2 mt-4 mb-3 text-primary fw-bold border-bottom">Tanda Tangan Laporan</h6>
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">Kota/Kabupaten</label>
                                             <input type="text" name="signature_city" class="form-control" value="{{ $settings['signature_city'] ?? 'Jakarta' }}">
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">Jabatan Penandatangan</label>
                                             <input type="text" name="signature_title" class="form-control" value="{{ $settings['signature_title'] ?? 'Kepala Sekolah' }}">
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">Nama Pejabat</label>
                                             <input type="text" name="signature_name" class="form-control" value="{{ $settings['signature_name'] ?? '' }}">
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">NIP / NUPTK</label>
                                             <input type="text" name="signature_nip" class="form-control" value="{{ $settings['signature_nip'] ?? '' }}">
                                         </div>
-                                        
+
                                         <!-- INPUT TANDA TANGAN (GAMBAR) -->
-                                        <div class="col-12 mb-3">
+                                        <div class="mb-3 col-12">
                                             <label class="form-label fw-bold">Scan Tanda Tangan (Opsional)</label>
                                             <div class="d-flex align-items-center">
                                                 @if(isset($settings['signature_image']) && $settings['signature_image'])
-                                                    <div class="me-3 border p-1 rounded">
+                                                    <div class="p-1 border rounded me-3">
                                                         <img src="{{ asset('storage/'.$settings['signature_image']) }}" style="height: 60px;">
                                                     </div>
                                                 @endif
@@ -219,7 +219,7 @@
 
                             </div>
 
-                            <div class="d-grid mt-4">
+                            <div class="mt-4 d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="bx bx-save me-2"></i> Simpan Semua Pengaturan
                                 </button>
