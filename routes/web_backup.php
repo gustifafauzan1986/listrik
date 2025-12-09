@@ -49,12 +49,12 @@ Route::middleware('auth')->group(function () {
 // GROUP 1: OPERASIONAL HARIAN (Guru, Admin, Satpam)
 // =========================================================================
 Route::middleware(['auth', 'role:guru|admin|satpam'])->group(function () {
-    
+
     // --- ABSENSI HARIAN (GERBANG) ---
     // Scan Masuk & Pulang
     Route::get('/daily-attendance', [DailyAttendanceController::class, 'index'])->name('daily.index');
     Route::post('/daily-attendance', [DailyAttendanceController::class, 'store'])->name('daily.store');
-    
+
     // Input Manual Harian (Jika Lupa Kartu)
     Route::get('/daily-attendance/manual', [DailyAttendanceController::class, 'create'])->name('daily.create');
     Route::post('/daily-attendance/manual', [DailyAttendanceController::class, 'storeManual'])->name('daily.storeManual');
@@ -64,7 +64,7 @@ Route::middleware(['auth', 'role:guru|admin|satpam'])->group(function () {
 // GROUP 2: KEGIATAN BELAJAR MENGAJAR (Guru & Admin)
 // =========================================================================
 Route::middleware(['auth', 'role:guru|admin'])->group(function () {
-    
+
     // --- 1. MANAJEMEN JADWAL MENGAJAR ---
     Route::get('/my-schedule', [ScheduleController::class, 'index'])->name('schedule.index');
     Route::get('/my-schedule/create', [ScheduleController::class, 'create'])->name('schedule.create');
@@ -77,9 +77,9 @@ Route::middleware(['auth', 'role:guru|admin'])->group(function () {
     Route::post('/scan/store', [AttendanceController::class, 'store'])->name('scan.store');
 
     // --- 3. ABSENSI MANUAL KELAS (Izin/Sakit) ---
-    Route::get('/manual-attendance', [ManualAttendanceController::class, 'index'])->name('manual.index');
-    Route::get('/manual-attendance/{id}/create', [ManualAttendanceController::class, 'create'])->name('manual.create');
-    Route::post('/manual-attendance/{id}', [ManualAttendanceController::class, 'store'])->name('manual.store');
+    // Route::get('/manual-attendance', [ManualAttendanceController::class, 'index'])->name('manual.index');
+    // Route::get('/manual-attendance/{id}/create', [ManualAttendanceController::class, 'create'])->name('manual.create');
+    // Route::post('/manual-attendance/{id}', [ManualAttendanceController::class, 'store'])->name('manual.store');
 
     // --- 4. SCANNER WAJAH (FACE ID) ---
     Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
@@ -106,20 +106,20 @@ Route::middleware(['auth', 'role:guru|admin'])->group(function () {
 // GROUP 3: KHUSUS ADMIN (Master Data & Settings)
 // =========================================================================
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    
+
     // --- 1. MASTER DATA (CRUD) ---
     Route::resource('subjects', SubjectController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
     Route::resource('classrooms', ClassroomController::class);
-    
+
     // Manajemen Siswa
-    Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
+    Route::get('/students/export', [StudentController::class, 'export'])->name('students.export');
     Route::resource('students', StudentController::class)->except(['show', 'create', 'store']);
     Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClassroom'])->name('students.remove_class');
 
     // Manajemen Guru
-    Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export'); 
+    Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export');
     Route::resource('teachers', TeacherController::class)->except(['create', 'store']); // Show, Edit, Update, Destroy Aktif
 
     // Manajemen Kelas Export
@@ -133,7 +133,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Import Siswa
     Route::get('/import-students', [StudentImportController::class, 'index'])->name('students.import');
     Route::post('/import-students', [StudentImportController::class, 'store'])->name('students.import.store');
-    
+
     // Import User (Akun)
     Route::get('/import-users', [UserImportController::class, 'index'])->name('users.import');
     Route::post('/import-users', [UserImportController::class, 'store'])->name('users.import.store');
@@ -145,7 +145,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
     Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
     Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
-    
+
     Route::get('/whatsapp/broadcast', [WhatsAppController::class, 'broadcast'])->name('whatsapp.broadcast'); // Broadcast Kelas
     Route::post('/whatsapp/broadcast', [WhatsAppController::class, 'sendBroadcast'])->name('whatsapp.broadcast.send');
 
@@ -160,7 +160,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // GROUP 4: AREA KHUSUS SISWA (Self Service)
 // =========================================================================
 Route::middleware(['auth', 'role:siswa'])->group(function () {
-    
+
     // Profil Siswa (Edit No HP & Alamat)
     Route::get('/my-profile', [StudentAreaController::class, 'profile'])->name('student.profile');
     Route::put('/my-profile', [StudentAreaController::class, 'updateProfile'])->name('student.profile.update');

@@ -4,19 +4,19 @@
 
 <x-app-layout>
     <div class="page-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
             <div>
                 <h3 class="fw-bold text-primary"><i class="fas fa-chalkboard-teacher me-2"></i> Jadwal Mengajar Saya</h3>
-                <p class="text-muted mb-0">Kelola jadwal, lakukan absensi, dan pantau kehadiran siswa.</p>
+                <p class="mb-0 text-muted">Kelola jadwal, lakukan absensi, dan pantau kehadiran siswa.</p>
             </div>
             <div>
-                <a href="{{ route('schedule.create') }}" class="btn btn-success shadow-sm">
-                    <i class="fas fa-plus me-1"></i> Tambah Jadwal
+                <a href="{{ route('schedule.create') }}" class="shadow-sm btn btn-success">
+                    <i class="bx bx-plus me-1"></i> Tambah Jadwal
                 </a>
                 <!-- Tombol Shortcut untuk Cetak Kartu -->
-                <a href="{{ route('print.index') }}" class="btn btn-outline-dark shadow-sm ms-2">
+                {{-- <a href="{{ route('print.index') }}" class="shadow-sm btn btn-outline-dark ms-2">
                     <i class="fas fa-id-card me-1"></i> Cetak Kartu Siswa
-                </a>
+                </a> --}}
             </div>
         </div>
 
@@ -27,11 +27,11 @@
             </div>
         @endif
 
-        <div class="card shadow border-0">
+        <div class="border-0 shadow card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle">
-                        <thead class="table-dark text-center">
+                    <table class="table align-middle table-hover table-bordered">
+                        <thead class="text-center table-dark">
                             <tr>
                                 <th>Hari</th>
                                 <th>Jam</th>
@@ -45,7 +45,7 @@
                             @forelse($schedules as $sched)
                                 @php
                                     $dayMap = ['Sunday'=>'Minggu','Monday'=>'Senin','Tuesday'=>'Selasa','Wednesday'=>'Rabu','Thursday'=>'Kamis','Friday'=>'Jumat','Saturday'=>'Sabtu'];
-                                    $todayIs = $dayMap[date('l')]; 
+                                    $todayIs = $dayMap[date('l')];
                                     $now = date('H:i:s');
                                     // Jadwal aktif jika HARI SAMA dan JAM SEKARANG masuk dalam rentang waktu
                                     $isActive = ($sched->day == $todayIs && $now >= $sched->start_time && $now <= $sched->end_time);
@@ -55,10 +55,10 @@
                                     <td class="text-center">{{ $sched->day }}</td>
                                     <td class="text-center">{{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}</td>
                                     <td class="text-center fw-bold">{{ $sched->classroom->name ?? '-' }}</td>
-                                    
+
                                     <!-- Nama Mapel (Support Relasi & Legacy String) -->
                                     <td>{{ $sched->subject->name ?? $sched->subject_name ?? '-' }}</td>
-                                    
+
                                     <!-- MENAMPILKAN JUMLAH SISWA YANG SUDAH ABSEN HARI INI -->
                                     <td class="text-center">
                                         @if($sched->attendances_count > 0)
@@ -73,7 +73,7 @@
                                     <td class="text-center">
                                         <div class="btn-group">
                                             <!-- Lihat Detail -->
-                                            <a href="{{ route('schedule.show', $sched->id) }}" class="btn btn-sm btn-info text-white" title="Lihat Data Absen">
+                                            <a href="{{ route('schedule.show', $sched->id) }}" class="text-white btn btn-sm btn-info" title="Lihat Data Absen">
                                                 <i class="bx bxs-show"></i>
                                             </a>
 
@@ -101,17 +101,17 @@
                                                 </form>
                                             @endif
                                         </div>
-                                        
+
                                         <!-- Shortcut Cetak Kartu Kelas Ini -->
                                         <div class="mt-1">
-                                            <a href="{{ route('print.select', $sched->classroom_id) }}" class="text-decoration-none small text-muted">
+                                            <a href="{{ route('print.siswa.select', $sched->classroom_id) }}" class="text-decoration-none small text-muted">
                                                 <i class="fas fa-print"></i> Kartu Kelas
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="text-center py-5 text-muted">Belum ada jadwal. Silakan klik tombol "Tambah Jadwal".</td></tr>
+                                <tr><td colspan="6" class="py-5 text-center text-muted">Belum ada jadwal. Silakan klik tombol "Tambah Jadwal".</td></tr>
                             @endforelse
                         </tbody>
                     </table>

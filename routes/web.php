@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\StudentImportController;
 use App\Http\Controllers\ReportController;
+use App\Models\Student;
 
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
@@ -63,6 +64,17 @@ Route::middleware(['auth'])->group(function () {
          // --- 3. ABSENSI MANUAL (BARU) ---
         Route::get('/schedule/manual/{id}', [AttendanceController::class, 'createManual'])->name('attendance.manual');
         Route::post('/schedule/manual/{id}', [AttendanceController::class, 'storeManual'])->name('attendance.storeManual');
+        Route::get('/print-cards-siswa', [StudentAreaController::class, 'index'])->name('print.siswa.index');
+        // Cetak Full 1 Kelas
+        Route::get('/print-cards-siswa/class/{id}', [StudentAreaController::class, 'printByClass'])->name('print.siswa.class');
+
+        // [BARU] Pilih Siswa Tertentu & Cetak
+        Route::get('/print-cards-siswa/select/{id}', [StudentAreaController::class, 'selectStudents'])->name('print.siswa.select');
+        Route::post('/print-cards-siswa/print-selected', [StudentAreaController::class, 'printSelected'])->name('print.siswa.selected');
+
+        // Cetak Semua & Satuan
+        Route::get('/print-cards-siswa/all', [StudentAreaController::class, 'printAll'])->name('print.siswa.all');
+        Route::get('/print-card-siswa/{id}', [StudentAreaController::class, 'printSingle'])->name('print.siswa.single');
 
     });
     // =========================================================================
@@ -231,6 +243,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/my-history/daily', [StudentAreaController::class, 'historyDaily'])->name('student.history.daily');
 
          // [BARU] Cetak Kartu Sendiri
+        // Cetak Kartu Sendiri
         Route::get('/my-card', [StudentAreaController::class, 'printCard'])->name('student.print.card');
 
     });

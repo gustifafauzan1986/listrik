@@ -1,8 +1,7 @@
 <x-app-layout>
     <div class="page-content">
-        <div class="container mt-5">
             <div class="row justify-content-center">
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <div class="shadow card">
                         <div class="text-white card-header bg-primary">
                             <h4 class="mb-0">Buat Jadwal Pelajaran Baru</h4>
@@ -86,7 +85,6 @@
                             </form>
                         </div>
                     </div>
-                </div>
             </div>
         </div>
     </div>

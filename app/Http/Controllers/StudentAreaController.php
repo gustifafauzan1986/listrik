@@ -8,6 +8,7 @@ use App\Models\Attendance;
 use App\Models\DailyAttendance;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Classroom;
 use Illuminate\Support\Facades\Auth;
 use SimpleSoftwareIO\QrCode\Facades\QrCode; // <--- Import Library QR
 
@@ -84,10 +85,10 @@ class StudentAreaController extends Controller
         $settings = $this->getSchoolData();
         // Ambil data siswa yang sedang login
         $students = Student::where('user_id', Auth::id())->with('classroom')->firstOrFail();
-        
+
         // Generate QR Code berdasarkan NIS
         $qrcode = QrCode::size(120)->generate($students->nis);
-        
+
         // Gunakan view yang SAMA dengan milik Admin agar desain konsisten
         return view('print.single_card', compact('students', 'qrcode', 'settings'));
     }
@@ -107,7 +108,7 @@ class StudentAreaController extends Controller
             // Pengaturan Kertas
             'paper_size'        => Setting::value('paper_size', 'a4'),
             'paper_orientation' => Setting::value('paper_orientation', 'portrait'),
-            
+
             // Pengaturan Margin (Tambahkan satuan cm/mm untuk CSS)
             'margin_top'    => Setting::value('margin_top', '2.5') . 'cm',
             'margin_right'  => Setting::value('margin_right', '2.5') . 'cm',
@@ -120,5 +121,96 @@ class StudentAreaController extends Controller
             'sign_name'  => Setting::value('signature_name', 'Administrator'),
             'sign_nip'   => Setting::value('signature_nip', '-'),
         ];
+    }
+
+    /**
+     * Halaman Pemilihan Kelas (Dashboard Cetak)
+     */
+    public function index()
+    {
+        // Ambil semua kelas beserta jumlah siswanya
+        $classrooms = Classroom::withCount('students')->orderBy('name')->get();
+
+        return view('print.select_class', compact('classrooms'));
+    }
+
+    /**
+     * Cetak Kartu Berdasarkan Kelas Spesifik
+     */
+    public function printByClass($id)
+    {
+        $classroom = Classroom::findOrFail($id);
+        $settings = Setting::pluck('value', 'key')->toArray();
+
+        // Ambil siswa HANYA dari kelas tersebut
+        $students = Student::where('classroom_id', $id)->orderBy('name')->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()->with('error', 'Kelas ini belum memiliki siswa.');
+        }
+
+        // Kita gunakan view 'print.all_cards' yang sudah ada (Reusable)
+        return view('print.all_cards', compact('students', 'classroom', 'settings'));
+    }
+
+    /**
+     * Cetak Semua Kartu (Massal Satu Sekolah)
+     */
+    public function printAll()
+    {
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $students = Student::with('classroom')->orderBy('classroom_id')->orderBy('name')->get();
+        return view('student_area.all_cards', compact('students', 'settings'));
+    }
+
+    /**
+     * Cetak Satu Kartu Saja (Perorangan)
+     */
+    public function printSingle($id)
+    {
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $student = Student::with('classroom')->findOrFail($id);
+        $qrcode = QrCode::size(120)->generate($student->nis);
+
+        return view('print.single_card', compact('student', 'qrcode', 'settings'));
+    }
+
+
+    /**
+     * [BARU] Halaman Pilih Siswa (Checkbox)
+     */
+    public function selectStudents($id)
+    {
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $classroom = Classroom::findOrFail($id);
+        $students = Student::where('classroom_id', $id)->orderBy('name')->get();
+
+        return view('student_area.select_students', compact('classroom', 'students', 'settings'));
+    }
+
+    /**
+     * [BARU] Proses Cetak Siswa Terpilih
+     */
+    public function printSelected(Request $request)
+    {
+        $request->validate([
+            'student_ids' => 'required|array',
+            'student_ids.*' => 'exists:students,id',
+        ]);
+        $settings = Setting::pluck('value', 'key')->toArray();
+
+        $students = Student::with('classroom')
+                    ->whereIn('id', $request->student_ids)
+                    ->orderBy('name')
+                    ->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada siswa yang dipilih.');
+        }
+
+        // Ambil kelas dari siswa pertama untuk judul (opsional)
+        $classroom = $students->first()->classroom;
+
+        return view('print.all_cards', compact('students', 'classroom', 'settings'));
     }
 }

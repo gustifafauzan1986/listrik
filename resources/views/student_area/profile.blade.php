@@ -7,17 +7,17 @@
 
 <div class="row justify-content-center">
     <div class="col-md-12">
-        <div class="card shadow border-0">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="border-0 shadow card">
+            <div class="text-white card-header bg-primary d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i> Profil Saya</h5>
-                
+
                 <!-- TOMBOL CETAK KARTU (BARU) -->
                 <a href="{{ route('student.print.card') }}" target="_blank" class="btn btn-light btn-sm text-primary fw-bold">
                     <i class="fas fa-id-card me-1"></i> Cetak Kartu
                 </a>
             </div>
             <div class="card-body">
-                
+
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show">
                         <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
@@ -25,16 +25,16 @@
                     </div>
                 @endif
 
-                <div class="text-center mb-4">
-                    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px;">
+                <div class="mb-4 text-center">
+                    <div class="shadow-sm bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
                         <i class="fas fa-user-graduate fa-4x text-secondary">
-                            <img id ="showImage"src="{{(!empty($profileData->photo)) ? url('upload/admin_images/'.$profileData->photo): url('upload/no_image.jpg')}}" alt="Admin" class="rounded-circle p-1 bg-primary" width="80">
+                            <img id ="showImage"src="{{(!empty($profileData->photo)) ? url('upload/admin_images/'.$profileData->photo): url('upload/no_image.jpg')}}" alt="Admin" class="p-1 rounded-circle bg-primary" width="80">
                         </i>
                     </div>
                     <h4 class="mt-3 fw-bold">{{ $students->name }}</h4>
-                    <span class="badge bg-info text-dark px-3 py-2">{{ $students->classroom->name ?? 'Tanpa Kelas' }}</span>
-                    <div class="text-muted small mt-2">NIS: {{ $students->nis }}</div>
-                    
+                    <span class="px-3 py-2 badge bg-info text-dark">{{ $students->classroom->name ?? 'Tanpa Kelas' }}</span>
+                    <div class="mt-2 text-muted small">NIS: {{ $students->nis }}</div>
+
                     <!-- Opsi Tambahan: Tombol Cetak Besar di Tengah -->
                     <div class="mt-3">
                         <a href="{{ route('student.print.card') }}" target="_blank" class="btn btn-outline-primary btn-sm">
@@ -62,7 +62,7 @@
                         <textarea name="address" class="form-control" rows="3" placeholder="Alamat lengkap...">{{ old('address', $students->address) }}</textarea>
                     </div>
 
-                    <div class="d-grid mt-4">
+                    <div class="mt-4 d-grid">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save me-2"></i> Simpan Perubahan
                         </button>
