@@ -216,4 +216,6 @@ class DailyAttendanceController extends Controller
             SendWhatsappJob::dispatch($student->phone, $msg);
         }
     }
+
+
 }

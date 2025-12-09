@@ -118,4 +118,63 @@ class FaceController extends Controller
 
         return view('face.scan', compact('schedule'));
     }
+
+    // =============================================================
+    // [BARU] FITUR ABSENSI WAJAH HARIAN (GERBANG)
+    // =============================================================
+
+    /**
+     * Halaman Scanner Wajah Harian (Tanpa Jadwal - Datang/Pulang)
+     * Route: /daily-face-scan
+     */
+    public function dailyScan()
+    {
+        return view('face.daily_scan');
+    }
+
+    /**
+     * API: Ambil SELURUH Data Wajah Siswa (Untuk Scanner Gerbang)
+     * Route: /face/all-descriptors
+     */
+    public function getAllDescriptors()
+    {
+        // Ambil semua siswa yang sudah punya data wajah tanpa filter kelas
+        return $this->fetchDescriptors();
+    }
+
+    /**
+     * Helper Private untuk mengambil dan memformat data wajah
+     */
+    private function fetchDescriptors($conditions = [])
+    {
+        try {
+            $query = Student::whereNotNull('face_descriptor');
+
+            if (!empty($conditions)) {
+                $query->where($conditions);
+            }
+
+            // Ambil kolom yang diperlukan saja agar ringan
+            $students = $query->select('nis', 'name', 'face_descriptor')->get();
+
+            $labeledDescriptors = [];
+            foreach($students as $student) {
+                // Decode JSON string dari database
+                $descriptor = json_decode($student->face_descriptor);
+
+                // Pastikan data valid sebelum dikirim
+                if (is_array($descriptor) && count($descriptor) > 0) {
+                    $labeledDescriptors[] = [
+                        // Format Label: "NIS - NAMA" (Penting untuk parsing di JS)
+                        'label' => $student->nis . ' - ' . $student->name,
+                        'descriptor' => $descriptor
+                    ];
+                }
+            }
+
+            return response()->json($labeledDescriptors);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

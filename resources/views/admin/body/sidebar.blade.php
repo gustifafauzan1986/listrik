@@ -1,4 +1,4 @@
-        
+
 		<div class="sidebar-wrapper" data-simplebar="true">
 			<div class="sidebar-header">
 				<div>
@@ -8,9 +8,9 @@
 					@endphp
 
 					@if($appLogo)
-						<img src="{{ asset('storage/'.$appLogo) }}" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2 rounded">
+						<img src="{{ asset('storage/'.$appLogo) }}" alt="Logo" width="30" height="30" class="align-text-top rounded d-inline-block me-2">
 					@else
-						<img src="{{ asset('backend/assets/images/logo-titl.png')}}" class="logo-icon" alt="logo titl"> 
+						<img src="{{ asset('backend/assets/images/logo-titl.png')}}" class="logo-icon" alt="logo titl">
 				</div>
 				<div>
 					<h4 class="logo-text">{{ $appName }}
@@ -166,6 +166,7 @@
 					</a>
 					<ul>
 						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-radio-circle'></i>QR</a>
+						<li> <a href="{{route('daily.face.scan')}}"><i class='bx bx-radio-circle'></i>Face</a>
 						</li>
 
 					</ul>

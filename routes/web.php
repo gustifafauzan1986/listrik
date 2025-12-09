@@ -106,6 +106,11 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/api/realtime-stats', [DashboardController::class, 'getRealtimeStats'])->name('api.stats');
 
+        // --- B. ABSENSI HARIAN (GERBANG WAJAH) [BARU] ---
+    // Scan Masuk & Pulang via Wajah
+        Route::get('/daily-face-scan', [FaceController::class, 'dailyScan'])->name('daily.face.scan');
+        Route::get('/face/all-descriptors', [FaceController::class, 'getAllDescriptors'])->name('face.descriptors.all');
+
     });
 
     // =========================================================================
@@ -247,7 +252,4 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/my-card', [StudentAreaController::class, 'printCard'])->name('student.print.card');
 
     });
-
-
-
 });
