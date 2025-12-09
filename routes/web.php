@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
-use App\Models\Student;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\StudentImportController;
 use App\Http\Controllers\ReportController;
