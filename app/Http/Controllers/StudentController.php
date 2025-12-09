@@ -98,5 +98,7 @@ class StudentController extends Controller
     {
         return Excel::download(new StudentExport, 'Data-Siswa.xlsx');
     }
+
+    
     
 }

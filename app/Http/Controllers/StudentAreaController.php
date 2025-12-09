@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Attendance;
 use App\Models\DailyAttendance;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
+use SimpleSoftwareIO\QrCode\Facades\QrCode; // <--- Import Library QR
 
 class StudentAreaController extends Controller
 {
@@ -16,9 +18,9 @@ class StudentAreaController extends Controller
     public function profile()
     {
         // Ambil data siswa yang sedang login
-        $student = Student::where('user_id', Auth::id())->with('classroom')->firstOrFail();
+        $students = Student::where('user_id', Auth::id())->with('classroom')->firstOrFail();
 
-        return view('student_area.profile', compact('student'));
+        return view('student_area.profile', compact('students'));
     }
 
     /**
@@ -69,5 +71,51 @@ class StudentAreaController extends Controller
                     ->paginate(10);
 
         return view('student_area.history_daily', compact('dailies'));
+    }
+
+    /**
+     * [BARU] Cetak Kartu Sendiri
+     */
+    public function printCard()
+    {
+        $settings = $this->getSchoolData();
+        // Ambil data siswa yang sedang login
+        $students = Student::where('user_id', Auth::id())->with('classroom')->firstOrFail();
+        
+        // Generate QR Code berdasarkan NIS
+        $qrcode = QrCode::size(120)->generate($students->nis);
+        
+        // Gunakan view yang SAMA dengan milik Admin agar desain konsisten
+        return view('print.single_card', compact('students', 'qrcode', 'settings'));
+    }
+
+    private function getSchoolData()
+    {
+        return [
+            // Identitas Sekolah
+            'name'       => Setting::value('school_name', 'SMK DEFAULT'),
+            'address'    => Setting::value('school_address', 'Alamat Sekolah'),
+            'phone'      => Setting::value('school_phone', '-'),
+            'web'        => Setting::value('school_web', '-'),
+            'email'      => Setting::value('school_email', '-'),
+            'logo_left'  => Setting::value('logo_left'),
+            'logo_right' => Setting::value('logo_right'),
+
+            // Pengaturan Kertas
+            'paper_size'        => Setting::value('paper_size', 'a4'),
+            'paper_orientation' => Setting::value('paper_orientation', 'portrait'),
+            
+            // Pengaturan Margin (Tambahkan satuan cm/mm untuk CSS)
+            'margin_top'    => Setting::value('margin_top', '2.5') . 'cm',
+            'margin_right'  => Setting::value('margin_right', '2.5') . 'cm',
+            'margin_bottom' => Setting::value('margin_bottom', '2.5') . 'cm',
+            'margin_left'   => Setting::value('margin_left', '2.5') . 'cm',
+
+            // Tanda Tangan
+            'sign_city'  => Setting::value('signature_city', 'Jakarta'),
+            'sign_title' => Setting::value('signature_title', 'Kepala Sekolah'),
+            'sign_name'  => Setting::value('signature_name', 'Administrator'),
+            'sign_nip'   => Setting::value('signature_nip', '-'),
+        ];
     }
 }

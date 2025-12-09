@@ -221,7 +221,7 @@
 
                             <div class="d-grid mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-save me-2"></i> Simpan Semua Pengaturan
+                                    <i class="bx bx-save me-2"></i> Simpan Semua Pengaturan
                                 </button>
                             </div>
 

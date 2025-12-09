@@ -231,6 +231,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/my-history/subject', [StudentAreaController::class, 'historySubject'])->name('student.history.subject');
         Route::get('/my-history/daily', [StudentAreaController::class, 'historyDaily'])->name('student.history.daily');
 
+         // [BARU] Cetak Kartu Sendiri
+        Route::get('/my-card', [StudentAreaController::class, 'printCard'])->name('student.print.card');
+
     });
 
 

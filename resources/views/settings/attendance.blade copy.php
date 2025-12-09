@@ -3,19 +3,16 @@
 @endsection
 <x-app-layout>
     <div class="page-content">
-        <div class="row justify-content-center">
             <div class="col-md-12">
-                <div class="card shadow border-0">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i> Pengaturan Aplikasi</h5>
+                <div class="shadow card">
+                    <div class="text-white card-header bg-primary">
+                        <h5 class="mb-0"><i class="fas fa-school me-2"></i> Pengaturan Jam Absensi</h5>
                     </div>
-                    <div class="card-body">
-                        
-                       
-
                     <form action="{{ route('update.attendance') }}" method="POST">
                         @csrf
+                        <div class="card">
                             <div class="card-body">
+
                                 <div class="mb-3 form-group">
                                     <label>Batas Jam Masuk (Lewat ini dianggap Terlambat)</label>
                                     <input type="time" name="late_limit_time" class="form-control"
@@ -28,20 +25,13 @@
                                         value="{{ $setting->early_departure_time ?? '10:00' }}">
                                 </div>
 
-                                <!-- <button type="submit" class="btn btn-primary">Simpan Pengaturan</button> -->
-                                 <div class="d-grid mt-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bx bx-save me-2"></i> Simpan
-                                    </button>
-                                </div>
+                                <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
                             </div>
+                        </div>
                     </form>
-                    </div>
                 </div>
             </div>
-        </div>
     </div>
-    
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
