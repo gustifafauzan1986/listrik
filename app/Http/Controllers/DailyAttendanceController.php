@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\DailyAttendance;
+
 use App\Models\Classroom;
 use Carbon\Carbon;
 use App\Jobs\SendWhatsappJob; // Queue Job untuk WA
@@ -266,11 +267,11 @@ class DailyAttendanceController extends Controller
         $data = $attendances->map(function($item) {
             $jam = $item->departure_time ? $item->departure_time : $item->arrival_time;
             $statusLabel = 'DATANG';
-            $badgeColor = 'success'; 
+            $badgeColor = 'success';
 
             if ($item->departure_time) {
                 $statusLabel = 'PULANG';
-                $badgeColor = 'primary'; 
+                $badgeColor = 'primary';
             } elseif ($item->status == 'terlambat') {
                 $statusLabel = 'TERLAMBAT';
                 $badgeColor = 'warning';
@@ -369,7 +370,7 @@ class DailyAttendanceController extends Controller
 
         // 4. Hitung Summary (Total Hadir/Pulang) - Juga difilter
         $summaryQuery = DailyAttendance::where('date', date('Y-m-d'));
-        
+
         if ($request->filled('classroom_id')) {
             $summaryQuery->whereHas('student', function($q) use ($request) {
                 $q->where('classroom_id', $request->classroom_id);
@@ -387,6 +388,82 @@ class DailyAttendanceController extends Controller
                 'pulang' => $pulangCount
             ]
         ]);
+    }
+
+    /**
+     * Menampilkan laporan absensi dengan filter lengkap.
+     */
+    public function report(Request $request)
+    {
+        // 1. Ambil data siswa untuk dropdown filter
+        $students = Student::orderBy('name', 'asc')->get();
+
+        // 2. Query Builder Dasar
+        // Load relasi 'student' dan 'classroom' agar tidak N+1 Query
+        $query = DailyAttendance::with(['student', 'student.classroom']);
+
+        // --- FILTER 1: SPESIFIK SISWA ---
+        if ($request->filled('student_id')) {
+            $query->where('student_id', $request->student_id);
+        }
+
+        // --- FILTER 2: PERIODE WAKTU ---
+        // Jika tidak ada filter, default ke hari ini
+        $filterType = $request->filter_type ?? 'harian';
+
+        switch ($filterType) {
+            case 'harian':
+                $date = $request->date ?? now()->format('Y-m-d');
+                $query->whereDate('created_at', $date);
+                break;
+
+            case 'mingguan':
+                // Menggunakan rentang tanggal manual (Start Date s/d End Date)
+                $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : now()->startOfWeek();
+                $endDate   = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : now()->endOfWeek();
+
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+                break;
+
+            case 'bulanan':
+                $month = $request->month ?? now()->month;
+                $year  = $request->year ?? now()->year;
+
+                $query->whereMonth('created_at', $month)
+                      ->whereYear('created_at', $year);
+                break;
+
+            case 'semester':
+                $year = $request->year ?? now()->year;
+                $semester = $request->semester; // 'ganjil' atau 'genap'
+
+                if ($semester == 'ganjil') {
+                    // Semester Ganjil: 1 Juli - 31 Desember
+                    $start = Carbon::create($year, 7, 1)->startOfDay();
+                    $end   = Carbon::create($year, 12, 31)->endOfDay();
+                } else {
+                    // Semester Genap: 1 Januari - 30 Juni
+                    $start = Carbon::create($year, 1, 1)->startOfDay();
+                    $end   = Carbon::create($year, 6, 30)->endOfDay();
+                }
+
+                $query->whereBetween('created_at', [$start, $end]);
+                break;
+        }
+
+        // 3. Urutkan data: Terbaru di atas
+        $attendances = $query->latest()->get();
+
+        // 4. Hitung Ringkasan (Opsional, untuk header laporan)
+        $summary = [
+            'hadir' => $attendances->where('status', 'present')->count(),
+            'telat' => $attendances->where('status', 'late')->count(),
+            'izin'  => $attendances->where('status', 'permission')->count(),
+            'sakit' => $attendances->where('status', 'sick')->count(),
+            'alpha' => $attendances->where('status', 'alpha')->count(),
+        ];
+
+        return view('daily_attendance.report', compact('attendances', 'students', 'summary'));
     }
 
 

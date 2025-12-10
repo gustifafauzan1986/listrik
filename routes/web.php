@@ -111,6 +111,8 @@ Route::middleware(['auth'])->group(function () {
         // Sesuai dengan method create() di controller
         Route::get('/daily-attendance/manual', [DailyAttendanceController::class, 'create'])->name('daily.create');
 
+        Route::get('/absensi/laporan', [DailyAttendanceController::class, 'report'])->name('daily_attendance.report');
+
         // 2. Route Menyimpan Data Manual (POST)
         // Sesuai dengan method storeManual() di controller
         Route::post('/daily-attendance/manual', [DailyAttendanceController::class, 'storeManual'])->name('daily.storeManual');
