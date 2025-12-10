@@ -1,10 +1,53 @@
-
+@php
+        $setting = App\Models\AttendanceSetting::first();
+        $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
+        $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
+@endphp
 @section('title')
    Scan Datanng dan Pulang
 @endsection
 <x-app-layout>
     <div class="page-content">
         <div class="container-fluid">
+            <!-- INFO JADWAL ABSENSI (BARU) -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-light border shadow-sm d-flex flex-wrap justify-content-between align-items-center py-3">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bx bxs-stopwatch fa-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Jadwal Absensi Hari Ini</h5>
+                        <small class="text-muted">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</small>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-4">
+                    <!-- Jam Masuk -->
+                    <div class="d-flex align-items-center">
+                        <div class="me-2 text-end">
+                            <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Absen Datang</small>
+                            <span class="fw-bold text-success fs-5">06:00 - {{$batasTerlambat}}</span>
+                        </div>
+                        <i class="fas fa-sign-in-alt text-success fa-2x opacity-50"></i>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="vr opacity-25"></div>
+
+                    <!-- Jam Pulang -->
+                    <div class="d-flex align-items-center">
+                        <div class="me-2 text-end">
+                            <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Absen Pulang</small>
+                            <span class="fw-bold text-primary fs-5">Mulai {{$batasBolehPulang}}</span>
+                        </div>
+                        <i class="fas fa-sign-out-alt text-primary fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
             
             <!-- Statistik Cepat (Cards) -->
             <div class="row mb-4">
