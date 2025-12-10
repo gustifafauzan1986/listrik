@@ -142,12 +142,12 @@ class AttendanceController extends Controller
 
             $message = "*LAPORAN KEHADIRAN SISWA*\n\n" .
                        "Yth. Orang Tua/Wali,\n" .
-                       "Putra/Putri Anda: *{$student->name}*\n" .
-                       "Kelas: {$student->classroom->name}\n" .
-                       "Mapel: {$mapel}\n" .
-                       "Waktu: {$waktu} WIB ($tgl)\n" .
-                       "Status: *{$statText}* {$emoji}\n\n" .
-                       "_Pesan otomatis sistem._";
+                       "👤 Putra/Putri Anda: *{$student->name}*\n" .
+                       "🏫 Kelas: {$student->classroom->name}\n" .
+                       "📚 Mapel: {$mapel}\n" .
+                       "📅 Waktu: {$waktu} WIB ($tgl)\n" .
+                       "📝 Status: *{$statText}* {$emoji}\n\n" .
+                       "_Sistem Absensi Sekolah._";
 
             // Masukkan ke Antrian (Tidak menunggu WA terkirim)
             SendWhatsappJob::dispatch($student->phone, $message);
