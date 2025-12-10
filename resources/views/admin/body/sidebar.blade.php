@@ -43,7 +43,7 @@ $status = $guruId->status;
 				</li>
 				@if ($status === '1' ?? '0')
                  @role('guru')
-				 
+
 				<li class="menu-label">Pembelajaran</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
@@ -57,7 +57,7 @@ $status = $guruId->status;
 
 					</ul>
 				</li>
-				
+
                 @endrole
 
                 @role('admin')
@@ -141,7 +141,8 @@ $status = $guruId->status;
 						<div class="menu-title">Laporan</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Lihat</a>
+						<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
+						<li> <a href=""><i class='bx bx-border-all'></i>Datang & Pulang</a>
 						</li>
 
 					</ul>

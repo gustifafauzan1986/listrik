@@ -1,6 +1,4 @@
-@section('title')
-   Data Seluruh Murid
-@endsection
+@section('title', 'Data Seluruh Murid')
 
 <x-app-layout>
     <div class="page-content">

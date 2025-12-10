@@ -9,7 +9,13 @@ use App\Traits\HasUuid; // <--- 1. Import Trait
 class Student extends Model
 {
     use HasUuid; // <--- 2. Pasang Trait
-    protected $guarded = [];
+    // protected $guarded = [];
+    protected $fillable = [
+    'nis',
+    'name',
+    'classroom_id',
+    'phone' // Pastikan ini ada jika Anda mengimport no_hp
+];
 
     public function user()
     {
