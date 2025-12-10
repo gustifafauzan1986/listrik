@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\DailyAttendance;
+use App\Models\Classroom;
 use Carbon\Carbon;
 use App\Jobs\SendWhatsappJob; // Queue Job untuk WA
 use App\Models\AttendanceSetting; // Jangan lupa import model ini
+use Illuminate\Support\Facades\DB; // Tambahkan import DB
 
 class DailyAttendanceController extends Controller
 {
@@ -215,6 +217,176 @@ class DailyAttendanceController extends Controller
         if (!empty($msg)) {
             SendWhatsappJob::dispatch($student->phone, $msg);
         }
+    }
+
+    /**
+     * Halaman Dashboard Realtime (Monitor)
+     * Route: GET /daily-attendance/monitor
+     */
+    public function monitor()
+    {
+        return view('daily_attendance.monitor');
+    }
+
+     /**
+     * Halaman Dashboard Realtime (Monitor)
+     * Route: GET /daily-attendance/monitor
+     */
+    public function monitorKelas()
+    {
+        // Ambil daftar kelas untuk dropdown filter
+        $classrooms = Classroom::orderBy('name')->get();
+        return view('daily_attendance.monitor', compact('classrooms'));
+    }
+
+
+    /**
+     * API JSON untuk Data Realtime
+     * Route: GET /daily-attendance/api/latest
+     */
+    /**
+     * API JSON untuk Data Realtime (Updated)
+     */
+    public function getRealtimeData(Request $request)
+    {
+        $today = date('Y-m-d');
+
+        // 1. Query Data Live (Tabel)
+        $query = DailyAttendance::with(['student.classroom'])
+                        ->where('date', $today);
+
+        if ($request->filled('classroom_id')) {
+            $query->whereHas('student', function($q) use ($request) {
+                $q->where('classroom_id', $request->classroom_id);
+            });
+        }
+
+        $attendances = $query->orderBy('updated_at', 'desc')->take(20)->get();
+
+        $data = $attendances->map(function($item) {
+            $jam = $item->departure_time ? $item->departure_time : $item->arrival_time;
+            $statusLabel = 'DATANG';
+            $badgeColor = 'success'; 
+
+            if ($item->departure_time) {
+                $statusLabel = 'PULANG';
+                $badgeColor = 'primary'; 
+            } elseif ($item->status == 'terlambat') {
+                $statusLabel = 'TERLAMBAT';
+                $badgeColor = 'warning';
+            }
+
+            return [
+                'nis' => $item->student->nis,
+                'name' => $item->student->name,
+                'class' => $item->student->classroom->name ?? '-',
+                'time' => Carbon::parse($jam)->format('H:i:s'),
+                'status_label' => $statusLabel,
+                'badge_color' => $badgeColor,
+            ];
+        });
+
+        // 2. Hitung Summary Global
+        $summaryQuery = DailyAttendance::where('date', $today);
+        if ($request->filled('classroom_id')) {
+            $summaryQuery->whereHas('student', function($q) use ($request) {
+                $q->where('classroom_id', $request->classroom_id);
+            });
+        }
+        $hadirCount = (clone $summaryQuery)->count();
+        $pulangCount = (clone $summaryQuery)->whereNotNull('departure_time')->count();
+
+
+        // 3. [BARU] Hitung Rekapitulasi Per Kelas
+        // Kita join tabel agar bisa group by nama kelas
+        $rekapKelas = DailyAttendance::join('students', 'daily_attendances.student_id', '=', 'students.id')
+            ->join('classrooms', 'students.classroom_id', '=', 'classrooms.id')
+            ->where('daily_attendances.date', $today)
+            ->select(
+                'classrooms.name as nama_kelas',
+                DB::raw('count(daily_attendances.arrival_time) as total_datang'),
+                DB::raw('count(daily_attendances.departure_time) as total_pulang')
+            )
+            ->groupBy('classrooms.id', 'classrooms.name')
+            ->orderBy('classrooms.name', 'asc')
+            ->get();
+
+        return response()->json([
+            'data' => $data,
+            'summary' => [
+                'hadir' => $hadirCount,
+                'pulang' => $pulangCount
+            ],
+            'rekap_kelas' => $rekapKelas // Kirim data rekap ke view
+        ]);
+    }
+
+    /**
+     * API JSON untuk Data Realtime
+     * Route: GET /daily-attendance/api/latest
+     */
+    public function getRealtimeDataKelas(Request $request)
+    {
+        // 1. Query Dasar
+        $query = DailyAttendance::with(['student.classroom'])
+                        ->where('date', date('Y-m-d'));
+
+        // 2. Filter Berdasarkan Kelas (Jika ada input)
+        if ($request->filled('classroom_id')) {
+            $query->whereHas('student', function($q) use ($request) {
+                $q->where('classroom_id', $request->classroom_id);
+            });
+        }
+
+        // 3. Ambil Data Tabel (20 Terakhir)
+        $attendances = $query->orderBy('updated_at', 'desc')
+                        ->take(20)
+                        ->get();
+
+        // Format data agar mudah dibaca JS
+        $data = $attendances->map(function($item) {
+            $jam = $item->departure_time ? $item->departure_time : $item->arrival_time;
+            $statusLabel = 'DATANG';
+            $badgeColor = 'success'; // Hijau
+
+            if ($item->departure_time) {
+                $statusLabel = 'PULANG';
+                $badgeColor = 'primary'; // Biru
+            } elseif ($item->status == 'terlambat') {
+                $statusLabel = 'TERLAMBAT';
+                $badgeColor = 'warning'; // Kuning
+            }
+
+            return [
+                'nis' => $item->student->nis,
+                'name' => $item->student->name,
+                'class' => $item->student->classroom->name ?? '-',
+                'time' => Carbon::parse($jam)->format('H:i:s'),
+                'status_label' => $statusLabel,
+                'badge_color' => $badgeColor,
+            ];
+        });
+
+        // 4. Hitung Summary (Total Hadir/Pulang) - Juga difilter
+        $summaryQuery = DailyAttendance::where('date', date('Y-m-d'));
+        
+        if ($request->filled('classroom_id')) {
+            $summaryQuery->whereHas('student', function($q) use ($request) {
+                $q->where('classroom_id', $request->classroom_id);
+            });
+        }
+
+        // Clone query agar tidak tumpang tindih
+        $hadirCount = (clone $summaryQuery)->count();
+        $pulangCount = (clone $summaryQuery)->whereNotNull('departure_time')->count();
+
+        return response()->json([
+            'data' => $data,
+            'summary' => [
+                'hadir' => $hadirCount,
+                'pulang' => $pulangCount
+            ]
+        ]);
     }
 
 

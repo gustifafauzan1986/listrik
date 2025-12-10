@@ -49,6 +49,17 @@ Route::post('/profile/store', [UserController::class, 'profileStore'])->name('pr
 Route::get('/change/password', [UserController::class, 'password'])->name('user.password');
 Route::post('/update/password', [UserController::class, 'updatePassword'])->name('update.password');
 
+// =========================================================================
+// GROUP : MONITORING REALTIME (Semua User Login)
+// =========================================================================
+Route::middleware(['auth'])->group(function () {
+    // Halaman Monitor Dashboard (AJAX Polling)
+    //Route::get('/daily-attendance/monitor', [DailyAttendanceController::class, 'monitor'])->name('daily.monitor');
+    Route::get('/daily-attendance/monitor-kelas', [DailyAttendanceController::class, 'monitorKelas'])->name('daily.monitor.kelas');
+    // API Data JSON untuk Monitor
+    Route::get('/daily-attendance/api/latest', [DailyAttendanceController::class, 'getRealtimeData'])->name('daily.api.latest');
+});
+
 
 Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:guru'])->group(function () {
