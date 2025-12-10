@@ -28,7 +28,7 @@
     <!--end breadcrumb-->
     <div class="mb-3">
         {{-- <a href="" class="btn btn-primary">Tambah User</a> --}}
-        <a href="" class="btn btn-primary" title="Import User" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="bx bx-import"></i> User</a>
+        <a href="{{url('user/add')}}" class="btn btn-primary"><i class="bx bx-plus"></i> User</a>
         <a href="" class="btn btn-danger" title="Print Pengguna Siswa" target="_blank"><i class="lni lni-printer"></i> All</a>
         <a href="" class="btn btn-warning" title="Print Pengguna Guru" target="_blank"><i class="lni lni-printer"></i> Guru</a>
         <a href="" class="btn btn-primary" title="Print Pengguna Wakil" target="_blank"><i class="lni lni-printer"></i> Wakil</a>
@@ -45,7 +45,6 @@
                             <th>Nama Pengguna</th>
                             <th>Email</th>
                             <th>Hak Akses</th>
-                            <th>Barcode</th>
                             <th>Status</th>
                             <th style="width: 40px;">Action</th>
                         </tr>
@@ -60,15 +59,16 @@
                                 @if ($item->jenis_user == 'siswa')
                                     <span class="badge bg-success">Siswa</span>
                                 @elseif($item->jenis_user == 'guru')
-                                    <span class="badge bg-danger">Guru</span>
+                                    <span class="badge bg-dark">Guru</span>
                                 @elseif($item->jenis_user == 'wakil')
-                                    <span class="badge bg-danger">Wakil</span>
+                                    <span class="badge bg-success">Wakil</span>
+                                @elseif($item->jenis_user == 'piket')
+                                    <span class="badge bg-danger">Piket</span>
                                 @elseif($item->jenis_user == 'admin')
-                                    <span class="badge bg-danger">Admin</span>
+                                    <span class="badge bg-primary">Admin</span>
                                 @endif
                             </td>
-                            
-                            <td>Barcode</td>
+
                             <td>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input large-chexbox status-toggle" type="checkbox" role="switch" id="flexSwitchCheckDefault1" data-user="{{$item->id}}" {{$item->status ? 'checked' : ''}} >
@@ -92,7 +92,7 @@
                 <!-- {{-- Awal Modal --}} -->
         <div class="col">
             <!-- Button trigger modal -->
-           
+
             <!-- Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

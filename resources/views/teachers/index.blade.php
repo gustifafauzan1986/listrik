@@ -91,4 +91,20 @@
             </div>
 
     </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Script untuk menangkap notifikasi dari Controller -->
+@if(session('swal'))
+    <script>
+        Swal.fire({
+            icon: "{{ session('swal.icon') }}",
+            title: "{{ session('swal.title') }}",
+            // Gunakan 'html' jika ada tag html (untuk list), gunakan 'text' jika polos
+            html: `{!! session('swal.html') ?? '' !!}`,
+            text: "{{ session('swal.text') ?? '' }}",
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6',
+        });
+    </script>
+@endif
 </x-app-layout>

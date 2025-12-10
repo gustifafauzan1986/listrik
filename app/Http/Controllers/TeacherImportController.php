@@ -16,14 +16,47 @@ class TeacherImportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
-        ]);
+        'file' => 'required|mimes:xlsx,xls,csv|max:5120'
+    ]);
 
-        try {
-            Excel::import(new TeacherImport, $request->file('file'));
-            return redirect()->back()->with('success', 'Data Guru & Profil Berhasil Diimport!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal Import: ' . $e->getMessage());
+        $import = new TeacherImport();
+        Excel::import($import, $request->file('file'));
+
+        // Ambil Data
+        $successCount = $import->getSuccessCount();
+        $duplicates   = $import->getDuplicates();
+
+        // Logika Notifikasi
+        if (count($duplicates) > 0) {
+            // Susun List HTML untuk Duplikat
+            $listHtml = '<ul style="text-align: left; font-size: 0.9em;">';
+
+            // Tampilkan maks 5 error agar tidak kepanjangan
+            foreach (array_slice($duplicates, 0, 5) as $msg) {
+                $listHtml .= "<li>- $msg</li>";
+            }
+            if (count($duplicates) > 5) {
+                $sisa = count($duplicates) - 5;
+                $listHtml .= "<li>... dan <b>$sisa</b> data duplikat lainnya.</li>";
+            }
+            $listHtml .= '</ul>';
+
+            $notification = [
+                'icon'  => ($successCount > 0) ? 'warning' : 'error',
+                'title' => 'Import Selesai dengan Catatan',
+                'html'  => "Berhasil menyimpan: <b>{$successCount}</b> Guru.<br><br>
+                            Gagal (Duplikat): <b>" . count($duplicates) . "</b> Guru:<br>
+                            {$listHtml}"
+            ];
+        } else {
+            // Sukses Sempurna
+            $notification = [
+                'icon'  => 'success',
+                'title' => 'Berhasil!',
+                'text'  => "Total $successCount data guru berhasil ditambahkan."
+            ];
         }
+
+        return redirect()->back()->with('swal', $notification);
     }
 }

@@ -190,6 +190,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/settings/attendance', [SettingController::class, 'updateAttendance'])->name('update.attendance');
 
         Route::get('/user/all', [UserController::class, 'allUser'])->name('all.user');
+        Route::get('/user/add', [UserController::class, 'addUser'])->name('add.user');
+        Route::post('/user/store', [UserController::class, 'storeUser'])->name('store.user');
         Route::post('/update-user/status',[UserController::class, 'UpdateStatusUser'])->name('update.status.user');
 
         // Menampilkan halaman update
