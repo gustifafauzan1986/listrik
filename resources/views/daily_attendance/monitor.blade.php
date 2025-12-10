@@ -15,7 +15,7 @@
             <div class="alert alert-light border shadow-sm d-flex flex-wrap justify-content-between align-items-center py-3">
                 <div class="d-flex align-items-center mb-2 mb-md-0">
                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                        <i class="bx bxs-stopwatch fa-lg"></i>
+                        <i class="bx bxs-time fa-lg"></i>
                     </div>
                     <div>
                         <h5 class="fw-bold text-dark mb-0">Jadwal Absensi Hari Ini</h5>

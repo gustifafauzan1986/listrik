@@ -83,8 +83,8 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 					</a>
 					<ul>
 						<li> <a href="{{route('classrooms.index')}}"><i class='bx bxs-group'></i>Kelas</a></li>
-						<li> <a href="{{route('students.index')}}"><i class='bx bxs-user-check'></i>Murid</a>
-						</li>
+						<li> <a href="{{route('students.index')}}"><i class='bx bxs-user-check'></i>Murid</a></li>
+						<li> <a href="{{url('/face/register')}}"><i class='bx bx-radio-circle'></i>Scan Wajah</a></li>
 
 
 					</ul>
@@ -111,9 +111,8 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 						<div class="menu-title">Print</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('print.index')}}"><i class='bx bx-radio-circle'></i>Kartu</a>
-						<li> <a href="{{url('/face/register')}}"><i class='bx bx-radio-circle'></i>Scan Wajah</a>
-						</li>
+						<li> <a href="{{route('print.index')}}"><i class='bx bx-id-card'></i>Kartu</a></li>
+
 
 					</ul>
 				</li>
@@ -137,7 +136,7 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 						<div class="menu-title">Laporan</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('report.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
+						<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Lihat</a>
 						</li>
 
 					</ul>
@@ -150,7 +149,7 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 						<div class="menu-title">WhatAPP</div>
 					</a>
 					<ul>
-						 <li> <a href="{{route('whatsapp.broadcast')}}"><i class='bx bx-radio-circle'></i>Broadcast</a>
+						 <li> <a href="{{route('whatsapp.broadcast')}}"><i class='bx bx-broadcast'></i>Broadcast</a>
 						</li>
 
 					</ul>
