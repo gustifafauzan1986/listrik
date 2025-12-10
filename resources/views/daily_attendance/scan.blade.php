@@ -13,6 +13,10 @@
                         <small>Absensi Harian (Datang & Pulang)</small>
                     </div>
                     <div class="text-center card-body bg-light">
+                            <!-- Info Autoplay -->
+                        <div id="audio-alert" class="alert alert-warning small mb-2" style="display:none;">
+                            <i class="fas fa-volume-mute"></i> Klik di mana saja pada halaman ini agar suara notifikasi aktif.
+                        </div>
 
                         <div id="reader" style="width: 100%;"></div>
 
@@ -43,45 +47,25 @@
     $(document).ready(function() {
         let html5QrcodeScanner;
 
-        // --- FUNGSI AUDIO GENERATOR (TANPA FILE MP3) ---
+
+        // --- 1. SETUP AUDIO MP3 ---
+        // Pastikan file success.mp3 dan error.mp3 ada di folder public/audio/
+        const audioSuccess = new Audio("{{ asset('audio/success.mp3') }}");
+        const audioError = new Audio("{{ asset('audio/error.mp3') }}");
+
+        // Fungsi Play Sound
         function playSound(status) {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return; // Browser tidak support
-                
-                const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                
-                if (status === 'success') {
-                    // SUARA BERHASIL: "Tinggg" (High Pitch Sine Wave)
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(800, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.2);
-                    
-                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-                    
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.2);
-                } else {
-                    // SUARA GAGAL: "Buzz/Tettt" (Low Pitch Sawtooth Wave)
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(150, ctx.currentTime); // Nada rendah
-                    osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
-                    
-                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                    
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.3);
-                }
-            } catch(e) {
-                console.error("Audio Error:", e);
-            }
+            let sound = (status === 'success') ? audioSuccess : audioError;
+            
+            // Reset durasi agar bisa diputar berulang cepat
+            sound.currentTime = 0;
+            
+            // Coba putar
+            sound.play().catch(error => {
+                console.warn("Autoplay dicegah oleh browser:", error);
+                // Tampilkan alert jika browser memblokir
+                $('#audio-alert').show();
+            });
         }
         
         // Expose function ke global agar tombol Test bisa akses
@@ -106,6 +90,9 @@
                 },
                 success: function(res) {
                     if(res.status == 'success') {
+
+                         // --- PUTAR MP3 SUKSES ---
+                        playSound('success');
                         let color = res.type == 'in' ? '#28a745' : '#17a2b8'; // Hijau Masuk, Biru Pulang
                         Swal.fire({
                             title: res.message,
@@ -119,6 +106,8 @@
                             try { html5QrcodeScanner.resume(); } catch(e){}
                         });
                     } else {
+                        // --- PUTAR MP3 GAGAL ---
+                        playSound('error');
                         Swal.fire('Gagal', res.message, 'error')
                             .then(() => {
                                 try { html5QrcodeScanner.resume(); } catch(e){}
@@ -126,6 +115,8 @@
                     }
                 },
                 error: function(xhr) {
+                    // --- PUTAR MP3 GAGAL ---
+                        playSound('error');
                     // --- PERBAIKAN DEBUGGING ERROR 500 ---
                     console.error("Full Error Log:", xhr);
 
