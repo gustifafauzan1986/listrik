@@ -1,6 +1,9 @@
 @php
 $appLogo = \App\Models\Setting::value('app_logo');
 $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
+$id = Auth::user()->id;
+$guruId = App\Models\User::find($id);
+$status = $guruId->status;
 @endphp
 		<div class="sidebar-wrapper" data-simplebar="true">
 			<div class="sidebar-header">
@@ -38,8 +41,9 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 						<div class="menu-title">Dashboard</div>
 					</a>
 				</li>
-
+				@if ($status === '1' ?? '0')
                  @role('guru')
+				 
 				<li class="menu-label">Pembelajaran</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
@@ -53,6 +57,7 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 
 					</ul>
 				</li>
+				
                 @endrole
 
                 @role('admin')
@@ -199,6 +204,7 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 					</ul>
 				</li>
                 @endrole
+				@endif
 
 			</ul>
 			<!--end navigation-->
