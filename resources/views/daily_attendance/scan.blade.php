@@ -20,6 +20,13 @@
                             <p class="text-muted small">Scan QR Siswa saat tiba dan saat pulang.</p>
                         </div>
 
+                        <!-- Tombol Test Suara (Opsional, untuk cek speaker) -->
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="playSound('success')">
+                                <i class="fas fa-volume-up"></i> Test Suara
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
@@ -35,6 +42,50 @@
 <script>
     $(document).ready(function() {
         let html5QrcodeScanner;
+
+        // --- FUNGSI AUDIO GENERATOR (TANPA FILE MP3) ---
+        function playSound(status) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return; // Browser tidak support
+                
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                if (status === 'success') {
+                    // SUARA BERHASIL: "Tinggg" (High Pitch Sine Wave)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.2);
+                    
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                } else {
+                    // SUARA GAGAL: "Buzz/Tettt" (Low Pitch Sawtooth Wave)
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, ctx.currentTime); // Nada rendah
+                    osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+                    
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                }
+            } catch(e) {
+                console.error("Audio Error:", e);
+            }
+        }
+        
+        // Expose function ke global agar tombol Test bisa akses
+        window.playSound = playSound;
 
         function onScanSuccess(decodedText, decodedResult) {
             try { html5QrcodeScanner.pause(); } catch(e){}
