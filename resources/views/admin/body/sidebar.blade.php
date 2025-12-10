@@ -84,7 +84,7 @@ $appName = \App\Models\Setting::value('app_name', 'E-Absensi');
 					<ul>
 						<li> <a href="{{route('classrooms.index')}}"><i class='bx bxs-group'></i>Kelas</a></li>
 						<li> <a href="{{route('students.index')}}"><i class='bx bxs-user-check'></i>Murid</a></li>
-						<li> <a href="{{url('/face/register')}}"><i class='bx bx-radio-circle'></i>Scan Wajah</a></li>
+						<li> <a href="{{url('/face/register')}}"><i class='bx bxs-file-find'></i>Scan Wajah</a></li>
 
 
 					</ul>
