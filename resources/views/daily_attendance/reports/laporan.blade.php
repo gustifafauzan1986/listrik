@@ -300,4 +300,19 @@
                 toggleInputs();
             });
         </script>
+        <script>
+            function toggleFilterInputs() {
+                // Sembunyikan semua input dulu
+                document.querySelectorAll('.filter-input').forEach(el => el.classList.add('d-none'));
+                
+                // Ambil value dropdown
+                const type = document.getElementById('filter_type').value;
+                
+                // Tampilkan input yang sesuai
+                document.getElementById('input_' + type).classList.remove('d-none');
+            }
+
+            // Jalankan saat halaman diload agar input tetap sesuai pilihan terakhir
+            document.addEventListener('DOMContentLoaded', toggleFilterInputs);
+        </script>
 </x-app-layout>

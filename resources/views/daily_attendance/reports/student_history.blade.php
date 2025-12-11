@@ -1,8 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png')}}" type="image/png"/>
-    <title>Laporan Presensi Siswa</title>
+    @php
+        $favicon = \App\Models\Setting::value('app_favicon');
+    @endphp
+    @if($favicon)
+        <link rel="icon" href="{{ asset('storage/'.$favicon) }}" type="image/x-icon"/>
+    @else
+        <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png') }}" type="image/x-icon"/>
+    @endif
+    <title>LAPORAN | LISTRIK BKT {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
     <style>
 
         /* Mengatur Margin Halaman secara Dinamis dari Database */
@@ -165,7 +172,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="text-center-laporan">Belum ada riwayat absensi untuk siswa ini.</td>
+                <td colspan="4" class="text-center-laporan">Belum ada riwayat absensi untuk siswa ini.</td>
             </tr>
             @endforelse
         </tbody>

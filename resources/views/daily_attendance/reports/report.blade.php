@@ -41,7 +41,7 @@
                         <div id="filter_harian" class="filter-section">
                             <div class="mb-3">
                                 <label>Pilih Tanggal</label>
-                                <input type="date" name="tanggal" class="form-control" value="{{ date('Y-m-d') }}">
+                                <input type="date" name="tanggal" id="input_tanggal" class="form-control" value="{{ date('Y-m-d') }}">
                             </div>
                         </div>
 
@@ -50,11 +50,11 @@
                             <div class="row">
                                 <div class="col">
                                     <label>Dari Tanggal</label>
-                                    <input type="date" name="start_date" class="form-control">
+                                    <input type="date" name="start_date" id="input_start_date" class="form-control">
                                 </div>
                                 <div class="col">
                                     <label>Sampai Tanggal</label>
-                                    <input type="date" name="end_date" class="form-control">
+                                    <input type="date" name="end_date" id="input_end_date" class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -254,6 +254,48 @@
                 btn.addClass('disabled');
             }
         });
+
+        // 4. VALIDASI UTAMA: Form Filter Laporan
+            $('#filterForm').on('submit', function(e) {
+                let periode = $('#periode_selector').val();
+                let isValid = true;
+                let errorMessage = '';
+
+                // Validasi Harian
+                if (periode === 'harian') {
+                    let tanggal = $('#input_tanggal').val();
+                    if (!tanggal) {
+                        isValid = false;
+                        errorMessage = 'Mohon pilih Tanggal untuk laporan harian.';
+                    }
+                }
+
+                // Validasi Mingguan
+                if (periode === 'mingguan') {
+                    let start = $('#input_start_date').val();
+                    let end = $('#input_end_date').val();
+
+                    if (!start || !end) {
+                        isValid = false;
+                        errorMessage = 'Mohon lengkapi Tanggal Awal dan Tanggal Akhir.';
+                    } else if (new Date(start) > new Date(end)) {
+                        isValid = false;
+                        errorMessage = 'Tanggal Awal tidak boleh lebih besar dari Tanggal Akhir.';
+                    }
+                }
+
+                // Jika Tidak Valid, Munculkan SweetAlert
+                if (!isValid) {
+                    e.preventDefault(); // Stop form submission
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        text: errorMessage,
+                        confirmButtonText: 'Oke, Saya Lengkapi',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
     });
 
     // Logic Toggle Filter Periode (Switch Case Tampilan)

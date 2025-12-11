@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\StudentImportController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\DailyReportController;
 use App\Models\Student;
 
 use App\Http\Controllers\RoleController;
@@ -113,8 +114,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/absensi/report', [DailyAttendanceController::class, 'report'])->name('daily_attendance.report');
         Route::get('/absensi/laporan', [DailyAttendanceController::class, 'laporan'])->name('daily_attendance.report');
-        Route::post('/report/absensi/print', [DailyAttendanceController::class, 'printAbsensi'])->name('report.print.absensi');
-        Route::get('/report/absensi/student/{id}', [DailyAttendanceController::class, 'printStudentAbsensi'])->name('report.absensi.student');
+        Route::get('/report/absensi/student/{id}', [DailyReportController::class, 'printStudentAbsensi'])->name('report.absensi.student');
+        Route::get('/absensi/report', [DailyReportController::class, 'reportDaily'])->name('daily_attendance.report');
+        Route::post('/report/absensi/print', [DailyReportController::class, 'printAbsensi'])->name('report.print.absensi');
 
         // 2. Route Menyimpan Data Manual (POST)
         // Sesuai dengan method storeManual() di controller
