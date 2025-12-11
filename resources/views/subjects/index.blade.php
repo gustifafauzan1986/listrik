@@ -1,11 +1,7 @@
-@section('title')
-   Jadwal Pelajaran
-@endsection
-
-<x-app-layout>         
-            <div class="container">
+@section('title', 'Mata Pelajaran')
+<x-app-layout>
+    <div class="page-content">       
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-bold text-primary"><i class="fas fa-book me-2"></i> Master Data Mata Pelajaran</h3>
                     <a href="{{ route('subjects.create') }}" class="btn btn-primary shadow-sm">
                         <i class="fas fa-plus me-1"></i> Tambah Mapel
                     </a>
@@ -75,8 +71,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <script>
+    </div>
+    <script>
         // Cek apakah ada session 'success' yang dikirim dari controller
         @if(session('success'))
             Swal.fire({
