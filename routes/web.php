@@ -31,6 +31,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\StudentAreaController;
+use App\Http\Controllers\TranscriptController;
 
 Route::view('/', 'welcome');
 
@@ -113,7 +114,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/daily-attendance/manual', [DailyAttendanceController::class, 'create'])->name('daily.create');
 
         Route::get('/absensi/report', [DailyAttendanceController::class, 'report'])->name('daily_attendance.report');
-        Route::get('/absensi/laporan', [DailyAttendanceController::class, 'laporan'])->name('daily_attendance.report');
+        //Route::get('/absensi/laporan', [DailyAttendanceController::class, 'laporan'])->name('daily_attendance.report');
         Route::get('/report/absensi/student/{id}', [DailyReportController::class, 'printStudentAbsensi'])->name('report.absensi.student');
         Route::get('/absensi/report', [DailyReportController::class, 'reportDaily'])->name('daily_attendance.report');
         Route::post('/report/absensi/print', [DailyReportController::class, 'printAbsensi'])->name('report.print.absensi');
@@ -255,6 +256,10 @@ Route::middleware(['auth'])->group(function () {
         // Cetak Semua & Satuan
         Route::get('/print-cards/all', [CardController::class, 'printAll'])->name('print.all');
         Route::get('/print-card/{id}', [CardController::class, 'printSingle'])->name('print.single');
+
+        Route::get('/transkrip', [TranscriptController::class, 'index'])->name('reports.transcript.index');
+        Route::get('/transkrip/cetak', [TranscriptController::class, 'show'])->name('reports.transcript.show');
+        Route::get('/transkrip/cetak-kelas', [TranscriptController::class, 'printByClass'])->name('reports.transcript.class');
 
     });
 

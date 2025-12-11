@@ -143,6 +143,7 @@ $status = $guruId->status;
 					<ul>
 						<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
 						<li> <a href="{{url('/absensi/report')}}"><i class='bx bx-border-all'></i>Kehadiran</a>
+						<li> <a href="{{url('/transkrip')}}"><i class='bx bx-border-all'></i>Transkip</a>
 						</li>
 
 					</ul>
