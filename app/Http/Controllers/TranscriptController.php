@@ -23,9 +23,6 @@ class TranscriptController extends Controller
         return view('report.transcript_index', compact('students', 'classrooms'));
     }
 
-    /**
-     * Menampilkan Transkrip Lengkap Siswa.
-     */
     public function show(Request $request)
     {
         $request->validate([
@@ -41,48 +38,13 @@ class TranscriptController extends Controller
         $year  = $request->year ?? now()->year;
         $dateObj = Carbon::create($year, $month, 1);
 
-        // --- 1. DATA ABSENSI HARIAN (Datang & Pulang) ---
-        // Menggunakan Model: DailyAttendance
-        $dailyLogs = DailyAttendance::where('student_id', $student->id)
-            ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year)
-            ->orderBy('created_at', 'asc')
-            ->get();
+        // Panggil fungsi private untuk ambil data (supaya codingan tidak berulang)
+        $data = $this->getStudentAttendanceData($student, $month, $year);
 
-        // Statistik Harian
-        $dailySummary = [
-            'hadir' => $dailyLogs->where('status', 'hadir')->count(),
-            'terlambat' => $dailyLogs->where('status', 'terlambat')->count(),
-            'izin'  => $dailyLogs->where('status', 'izin')->count(),
-            'sakit' => $dailyLogs->where('status', 'sakit')->count(),
-            'alpa' => $dailyLogs->where('status', 'alpa')->count(),
-        ];
-
-        // --- 2. DATA ABSENSI PEMBELAJARAN (Per Mapel) ---
-        // Menggunakan Model: Attendance (Diasumsikan tabel ini punya subject_id)
-        $lessonSummary = Attendance::select(
-                'subjects.name as subject_name',
-                DB::raw('count(*) as total_meetings'),
-                DB::raw('sum(case when attendances.status = "hadir" then 1 else 0 end) as total_present'),
-                DB::raw('sum(case when attendances.status = "terlambat" then 1 else 0 end) as total_late'),
-                DB::raw('sum(case when attendances.status = "sakit" then 1 else 0 end) as total_sick'),
-                DB::raw('sum(case when attendances.status = "izin" then 1 else 0 end) as total_permission'),
-                DB::raw('sum(case when attendances.status = "alpa" then 1 else 0 end) as total_alpha')
-            )
-            ->join('subjects', 'attendances.subject_id', '=', 'subjects.id')
-            ->where('attendances.student_id', $student->id)
-            ->whereMonth('attendances.created_at', $month)
-            ->whereYear('attendances.created_at', $year)
-            ->groupBy('subjects.name')
-            ->get();
-
-        return view('report.transcript_print', compact(
-            'student',
-            'dailyLogs',
-            'dailySummary',
-            'lessonSummary',
-            'dateObj'
-        ));
+        return view('report.transcript_print', array_merge([
+            'student' => $student,
+            'dateObj' => $dateObj
+        ], $data));
     }
 
     /**
@@ -109,44 +71,44 @@ class TranscriptController extends Controller
 
         // 2. Loop setiap siswa untuk ambil data absensinya
         foreach ($classroom->students as $student) {
-            // Re-use logika pengambilan data (saya ekstrak jadi private method biar rapi)
-            $transcripts[] = $this->getStudentAttendanceData($student, $month, $year);
+            // Gabungkan data siswa dengan data absensinya
+            $attendanceData = $this->getStudentAttendanceData($student, $month, $year);
+            
+            $transcripts[] = [
+                'student' => $student,
+                'dailyLogs' => $attendanceData['dailyLogs'],
+                'dailySummary' => $attendanceData['dailySummary'],
+                'lessonSummary' => $attendanceData['lessonSummary'],
+            ];
         }
 
         return view('report.transcript_class_print', compact('classroom', 'transcripts', 'dateObj'));
     }
 
-    // --- Helper Private Method ---
-    // Digunakan oleh show() dan printByClass() agar codingan tidak berulang
-    private function generateTranscriptData($studentId, $month, $year) {
-        $student = Student::with('classroom')->findOrFail($studentId);
-        $month = $month ?? now()->month;
-        $year  = $year ?? now()->year;
-        $dateObj = Carbon::create($year, $month, 1);
-
-        $data = $this->getStudentAttendanceData($student, $month, $year);
-
-        return view('reports.transcript_print', array_merge(['dateObj' => $dateObj], $data));
-    }
-
+    /**
+     * PRIVATE HELPER: Logika Utama Pengambilan Data
+     * Digunakan oleh function show() dan printByClass()
+     */
     private function getStudentAttendanceData($student, $month, $year)
     {
-        // 1. DATA HARIAN
+        // --- 1. DATA ABSENSI HARIAN (Datang & Pulang) ---
         $dailyLogs = DailyAttendance::where('student_id', $student->id)
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->orderBy('created_at', 'asc')
             ->get();
 
+        // Statistik Harian
         $dailySummary = [
-            'hadir' => $dailyLogs->where('status', 'hadir')->count(),
+            'hadir'     => $dailyLogs->where('status', 'hadir')->count(),
             'terlambat' => $dailyLogs->where('status', 'terlambat')->count(),
-            'izin'  => $dailyLogs->where('status', 'izin')->count(),
-            'sakit' => $dailyLogs->where('status', 'sakit')->count(),
-            'alpa' => $dailyLogs->where('status', 'alpa')->count(),
+            'izin'      => $dailyLogs->where('status', 'izin')->count(),
+            'sakit'     => $dailyLogs->where('status', 'sakit')->count(),
+            'alpa'      => $dailyLogs->where('status', 'alpa')->count(),
         ];
 
-        // 2. DATA PER MAPEL
+        // --- 2. DATA ABSENSI PEMBELAJARAN (Per Mapel) ---
+        // PERBAIKAN DI SINI: Join ke schedules dulu, baru ke subjects
         $lessonSummary = Attendance::select(
                 'subjects.name as subject_name',
                 DB::raw('count(*) as total_meetings'),
@@ -156,18 +118,21 @@ class TranscriptController extends Controller
                 DB::raw('sum(case when attendances.status = "izin" then 1 else 0 end) as total_permission'),
                 DB::raw('sum(case when attendances.status = "alpa" then 1 else 0 end) as total_alpha')
             )
-            ->join('subjects', 'attendances.subject_id', '=', 'subjects.id')
+            // Join 1: Attendance ke Schedule (untuk dapat subject_id)
+            ->join('schedules', 'attendances.schedule_id', '=', 'schedules.id') 
+            // Join 2: Schedule ke Subject (untuk dapat nama mapel)
+            ->join('subjects', 'schedules.subject_id', '=', 'subjects.id')      
+            
             ->where('attendances.student_id', $student->id)
             ->whereMonth('attendances.created_at', $month)
             ->whereYear('attendances.created_at', $year)
-            ->groupBy('subjects.name')
+            ->groupBy('subjects.name') // Group berdasarkan nama mapel
             ->get();
 
         return [
-            'student' => $student,
-            'dailyLogs' => $dailyLogs,
-            'dailySummary' => $dailySummary,
-            'lessonSummary' => $lessonSummary
+            'dailyLogs'     => $dailyLogs,
+            'dailySummary'  => $dailySummary,
+            'lessonSummary' => $lessonSummary,
         ];
     }
 }
