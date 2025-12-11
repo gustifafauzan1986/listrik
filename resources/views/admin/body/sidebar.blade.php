@@ -142,7 +142,7 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
-						<li> <a href=""><i class='bx bx-border-all'></i>Datang & Pulang</a>
+						<li> <a href="{{url('/absensi/report')}}"><i class='bx bx-border-all'></i>Kehadiran</a>
 						</li>
 
 					</ul>
@@ -180,6 +180,7 @@ $status = $guruId->status;
 						<div class="menu-title">Presensi</div>
 					</a>
 					<ul>
+						<li> <a href="{{url('/absensi/laporan')}}"><i class='bx bx-border-all'></i>Datang & Pulang</a>
 						<li> <a href="{{url('/daily-attendance/monitor-kelas')}}"><i class='bx bx-barcode'></i>Realtime</a>
 						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-barcode'></i>QR</a>
 						<li> <a href="{{route('daily.face.scan')}}"><i class='bx bx-face'></i>Face</a>
