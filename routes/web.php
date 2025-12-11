@@ -261,7 +261,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:siswa'])->group(function () {
 
         // Profil Siswa (Edit No HP & Alamat)
-        Route::get('/my-profile', [StudentAreaController::class, 'profile'])->name('student.profile');
+        Route::get('/my-profile', [StudentAreaController::class, 'profileStudent'])->name('student.profile');
         Route::put('/my-profile', [StudentAreaController::class, 'updateProfile'])->name('student.profile.update');
         // Riwayat Absensi
         Route::get('/my-history/subject', [StudentAreaController::class, 'historySubject'])->name('student.history.subject');

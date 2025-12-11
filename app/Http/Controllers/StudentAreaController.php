@@ -17,7 +17,7 @@ class StudentAreaController extends Controller
     /**
      * Halaman Profil Siswa (Edit HP & Alamat)
      */
-    public function profile()
+    public function profileStudent()
     {
         $id = Auth::user()->id;
         $profileData = User::find($id);
