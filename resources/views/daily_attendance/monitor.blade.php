@@ -8,81 +8,86 @@
 @endsection
 <x-app-layout>
     <div class="page-content">
-        <div class="container-fluid">
+        
+                <div class="row">
+                    <div class="col">
+                        <div class="alert alert-light border shadow-sm d-flex flex-wrap justify-content-between align-items-center py-3">
+                            <div class="d-flex align-items-center mb-2 mb-md-0">
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-blues text-white ms-auto text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                    <i class="bx bxs-time fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-0">Jadwal Absensi Hari Ini</h5>
+                                    <small class="text-muted">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-4">
+                                <!-- Jam Masuk -->
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2 text-end">
+                                        <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Absen Datang</small>
+                                        <span class="fw-bold text-success fs-5">06:00 - {{$batasTerlambat}}</span>
+                                    </div>
+                                    <i class="fas fa-sign-in-alt text-success fa-2x opacity-50"></i>
+                                </div>
+
+                                <!-- Divider -->
+                                <div class="vr opacity-25"></div>
+
+                                <!-- Jam Pulang -->
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2 text-end">
+                                        <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Absen Pulang</small>
+                                        <span class="fw-bold text-primary fs-5">Mulai {{$batasBolehPulang}}</span>
+                                    </div>
+                                    <i class="fas fa-sign-out-alt text-primary fa-2x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <!-- INFO JADWAL ABSENSI (BARU) -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="alert alert-light border shadow-sm d-flex flex-wrap justify-content-between align-items-center py-3">
-                <div class="d-flex align-items-center mb-2 mb-md-0">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                        <i class="bx bxs-time fa-lg"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold text-dark mb-0">Jadwal Absensi Hari Ini</h5>
-                        <small class="text-muted">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</small>
-                    </div>
-                </div>
-                
-                <div class="d-flex gap-4">
-                    <!-- Jam Masuk -->
-                    <div class="d-flex align-items-center">
-                        <div class="me-2 text-end">
-                            <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Absen Datang</small>
-                            <span class="fw-bold text-success fs-5">06:00 - {{$batasTerlambat}}</span>
-                        </div>
-                        <i class="fas fa-sign-in-alt text-success fa-2x opacity-50"></i>
-                    </div>
-
-                    <!-- Divider -->
-                    <div class="vr opacity-25"></div>
-
-                    <!-- Jam Pulang -->
-                    <div class="d-flex align-items-center">
-                        <div class="me-2 text-end">
-                            <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Absen Pulang</small>
-                            <span class="fw-bold text-primary fs-5">Mulai {{$batasBolehPulang}}</span>
-                        </div>
-                        <i class="fas fa-sign-out-alt text-primary fa-2x opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
             
             <!-- Statistik Cepat (Cards) -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card shadow border-left-success h-100 py-2">
-                        <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-2">
+					<div class="col">
+						<div class="card radius-10 border-left-success">
+							<div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Datang Hari Ini</div>
-                                    <div class="h1 mb-0 font-weight-bold text-gray-800" id="count-hadir">0</div>
+                                    <div class="h1 mb-4 font-weight-bold text-gray-800" id="count-hadir">0</div>
                                 </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-blues text-white ms-auto"><i class='bx bx-log-in-circle'></i>
+								</div>
                                 <div class="col-auto">
                                     <i class="fas fa-sign-in-alt fa-3x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="card shadow border-left-primary h-100 py-2">
-                        <div class="card-body">
+						</div>
+					</div>
+
+                    <div class="col">
+						<div class="card radius-10 border-left-primary">
+							<div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Pulang Hari Ini</div>
-                                    <div class="h1 mb-0 font-weight-bold text-gray-800" id="count-pulang">0</div>
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Pulang Hari Ini</div>
+                                    <div class="h1 mb-4 font-weight-bold text-gray-800" id="count-pulang">0</div>
                                 </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-orange text-white ms-auto"><i class='bx bx-log-out-circle'></i>
+								</div>
                                 <div class="col-auto">
-                                    <i class="fas fa-home fa-3x text-gray-300"></i>
+                                    <i class="fas fa-sign-in-alt fa-3x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+						</div>
+					</div>
+					
+				</div>
 
             <div class="row">
                 
@@ -151,8 +156,8 @@
                 </div>
 
             </div>
-        </div>
-
+      
+    </div>
 <style>
     .border-left-success { border-left: 5px solid #1cc88a !important; }
     .border-left-primary { border-left: 5px solid #4e73df !important; }
@@ -250,5 +255,5 @@
         });
     });
 </script>
-    </div>
+
 </x-app-layout>
