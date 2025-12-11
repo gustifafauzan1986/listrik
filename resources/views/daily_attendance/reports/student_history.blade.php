@@ -172,7 +172,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="4" class="text-center-laporan">Belum ada riwayat absensi untuk siswa ini.</td>
+                <td colspan="5" class="text-center-laporan">Belum ada riwayat absensi untuk siswa ini.</td>
             </tr>
             @endforelse
         </tbody>
