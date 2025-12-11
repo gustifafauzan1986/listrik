@@ -108,10 +108,15 @@
                     } else {
                         // --- PUTAR MP3 GAGAL ---
                         playSound('error');
-                        Swal.fire('Gagal', res.message, 'error')
-                            .then(() => {
-                                try { html5QrcodeScanner.resume(); } catch(e){}
-                            });
+                        Swal.fire({
+                            title: 'Gagal',
+                            text: res.message,
+                            icon: 'error',
+                            showConfirmButton: false, // Menghilangkan tombol
+                            timer: 1500               // Alert menutup otomatis setelah 1.5 detik
+                        }).then(() => {
+                            try { html5QrcodeScanner.resume(); } catch(e){}
+                        });
                     }
                 },
                 error: function(xhr) {
