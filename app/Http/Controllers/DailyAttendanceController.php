@@ -466,7 +466,7 @@ class DailyAttendanceController extends Controller
             'alpa' => $attendances->where('status', 'alpa')->count(),
         ];
 
-        return view('daily_attendance.laporan', compact('attendances', 'students', 'summary'));
+        return view('daily_attendance.reports.laporan', compact('attendances', 'students', 'summary'));
     }
 
     
