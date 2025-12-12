@@ -209,22 +209,7 @@
 
                     <div class="main-content">
 
-                        <div class="card-header">
-                            <img src="{{asset('storage/'.$settings['logo_left'])}}" class="header-logo" alt="Logo 1">
-                            {{-- <img src="{{ asset('images/logo_kiri.png') }}" class="header-logo" alt="Logo 1" onerror="this.src='https://placehold.co/100x100/png?text=Logo1'"> --}}
-
-                            <div class="school-header-text">
-                                {{ strtoupper($settings['school_name']) ?? 'NAMA SEKOLAH ANDA' }}
-                                <div class="school-address">{{ $settings['school_address'] ?? 'Pasaman Barat' }}</div>
-                                <div class="school-address">Telp: {{ $settings['school_phone'] ?? '-' }} | Email: {{ $settings['school_email'] ?? '-' }}</div>
-                                <div class="school-address">Website: {{ $settings['school_web'] ?? '-' }}</div>
-
-                            </div>
-
-
-                            <img src="{{asset('storage/'.$settings['logo_right'])}}" class="header-logo" alt="Logo 2">
-                            {{-- <img src="{{ asset('images/logo_kanan.png') }}" class="header-logo" alt="Logo 2" onerror="this.src='https://placehold.co/100x100/png?text=Logo2'"> --}}
-                        </div>
+                       @include('print.card_header')
 
                         <div class="card-body">
                             <div class="qr-area">
@@ -241,16 +226,8 @@
                             </div>
                         </div>
 
-                        <div class="signature-area">
-                            <div class="sig-date">{{ $settings['signature_date'] ?? 'Bukittinggi' }}, {{ date('Y') }}</div>
-                            <div class="sig-title">{{$settings['signature_title'] ?? 'Kepala Sekolah'}}</div>
-                            <br>
-
-                            {{-- <img src="{{ asset('images/ttd_kepsek.png') }}" class="sig-img" alt="TTD" onerror="this.style.opacity='0.2'"> --}}
-
-                            <div class="sig-name">{{ $settings['signature_name'] ?? 'Nama Kepala Sekolah' }}</div>
-                            <div class="sig-nip">NIP. {{ $settings['signature_nip'] ?? '-' }}</div>
-                        </div>
+                        @include('print.card_signature')
+                        
 
                     </div>
                 </div>
