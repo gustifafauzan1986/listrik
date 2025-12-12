@@ -267,7 +267,8 @@ Route::middleware(['auth'])->group(function () {
         // Route::resource('teaching-assignments', TeachingAssignmentController::class);
         Route::get('/teaching-assignments', [TeachingAssignmentController::class, 'index'])->name('teaching-assignments.index');
         Route::get('/teaching-assignments/create', [TeachingAssignmentController::class, 'create'])->name('teaching-assignments.create');
-        Route::get('/teaching-assignments/destroy/{id}', [TeachingAssignmentController::class, 'create'])->name('teaching-assignments.destroy');
+        Route::post('/teaching-assignments/store', [TeachingAssignmentController::class, 'store'])->name('teaching-assignments.store');
+        Route::post('/teaching-assignments/destroy/{id}', [TeachingAssignmentController::class, 'create'])->name('teaching-assignments.destroy');
 
     });
 
