@@ -2,12 +2,12 @@
 <x-app-layout>
     <div class="page-content">
         <div class="container py-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+            <div class="shadow card">
+                <div class="text-white card-header bg-primary">
                     <h5 class="mb-0">Tambah Jadwal Mengajar (Mapping)</h5>
                 </div>
                 <div class="card-body">
-                    
+
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul class="mb-0">
@@ -29,7 +29,7 @@
                                 @foreach($teachers as $teacher)
                                     <!-- Simpan ID Jurusan di atribut data-major untuk validasi JS -->
                                     <option value="{{ $teacher->id }}" data-major="{{ $teacher->major_id }}">
-                                        {{ $teacher->name }} 
+                                        {{ $teacher->user->name }}
                                         {{ $teacher->major ? '('.$teacher->major->code.')' : '(Guru Umum)' }}
                                     </option>
                                 @endforeach
@@ -43,7 +43,7 @@
                                 <option value="">-- Pilih Mapel --</option>
                                 @foreach($subjects as $subject)
                                     <option value="{{ $subject->id }}">
-                                        {{ $subject->name }} 
+                                        {{ $subject->name }}
                                         {{ $subject->major ? '('.$subject->major->code.')' : '(Umum)' }}
                                     </option>
                                 @endforeach
@@ -57,7 +57,7 @@
                                 <option value="" data-major="">-- Pilih Kelas --</option>
                                 @foreach($classrooms as $class)
                                     <option value="{{ $class->id }}" data-major="{{ $class->major_id }}">
-                                        {{ $class->name }} 
+                                        {{ $class->name }}
                                         {{ $class->major ? '('.$class->major->code.')' : '' }}
                                     </option>
                                 @endforeach

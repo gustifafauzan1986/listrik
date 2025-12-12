@@ -81,6 +81,20 @@ $status = $guruId->status;
 
 					</ul>
 				</li>
+
+                <li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class="bx bx-cog"></i>
+						</div>
+						<div class="menu-title">Maping</div>
+					</a>
+					<ul>
+						<li> <a href="{{url('/teaching-assignments')}}"><i class='bx bx-home-smile'></i>PBM</a></li>
+
+					</li>
+
+					</ul>
+				</li>
                 <li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon"><i class='bx bx-group'></i>

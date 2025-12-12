@@ -24,7 +24,7 @@ class SubjectController extends Controller
     public function create()
     {
        // Ambil data jurusan untuk dropdown
-        $majors = Major::all(); 
+        $majors = Major::all();
         return view('subjects.create', compact('majors'));
     }
 
@@ -49,9 +49,10 @@ class SubjectController extends Controller
         // 2. SIMPAN KE DATABASE
         Subject::create([
             // ucwords: Membuat Huruf Besar Di Awal Kata (Contoh: Bahasa Indonesia)
-            'name' => ucwords(strtolower($request->name)), 
+            'name' => ucwords(strtolower($request->name)),
             // strtoupper: Membuat HURUF BESAR SEMUA (Contoh: BINDO)
-            'code' => strtoupper($request->code)
+            'code' => strtoupper($request->code),
+            'major_id' => $request->major_id
         ]);
 
         return redirect()->route('subjects.index')
@@ -101,7 +102,7 @@ class SubjectController extends Controller
     public function destroy($id)
     {
         $subject = Subject::findOrFail($id);
-        
+
         // Opsional: Cek apakah mapel sedang dipakai di jadwal?
         // if($subject->schedules()->exists()) {
         //    return back()->with('error', 'Gagal hapus! Mapel ini sedang digunakan di jadwal.');

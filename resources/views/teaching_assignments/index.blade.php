@@ -2,10 +2,10 @@
 <x-app-layout>
     <div class="page-content">
         <div class="container py-4">
-            
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Jadwal Mengajar (Mapping)</h1>
-                <a href="{{ route('teaching-assignments.create') }}" class="btn btn-primary shadow-sm">
+
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <h1 class="mb-0 text-gray-800 h3">Jadwal Mengajar (Mapping)</h1>
+                <a href="{{ route('teaching-assignments.create') }}" class="shadow-sm btn btn-primary">
                     <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Mapping Baru
                 </a>
             </div>
@@ -17,14 +17,14 @@
                 </div>
             @endif
 
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
+            <div class="mb-4 shadow card">
+                <div class="py-3 card-header">
                     <h6 class="m-0 font-weight-bold text-primary">Daftar Guru & Mata Pelajaran</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped table-hover" id="dataTable" width="100%" cellspacing="0">
-                            <thead class="bg-dark text-white">
+                            <thead class="text-white bg-dark">
                                 <tr>
                                     <th width="5%">No</th>
                                     <th>Nama Guru</th>
@@ -39,7 +39,7 @@
                                 @forelse($assignments as $key => $assignment)
                                 <tr>
                                     <td>{{ $key + 1 }}</td>
-                                    <td class="fw-bold">{{ $assignment->teacher->name ?? 'Guru Terhapus' }}</td>
+                                    <td class="fw-bold">{{ $assignment->teacher->user->name ?? 'Guru Terhapus' }}</td>
                                     <td>
                                         {{ $assignment->subject->name ?? 'Mapel Terhapus' }}
                                         @if(optional($assignment->subject)->major)
@@ -53,7 +53,7 @@
                                         @if(optional($assignment->teacher)->major)
                                             <span class="badge bg-primary">{{ $assignment->teacher->major->code }}</span>
                                         @else
-                                            <span class="badge bg-light text-dark border">Umum</span>
+                                            <span class="border badge bg-light text-dark">Umum</span>
                                         @endif
                                     </td>
                                     <td>{{ $assignment->academic_year ?? '-' }}</td>
@@ -69,8 +69,8 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
-                                        <i class="fas fa-clipboard-list fa-3x mb-3"></i><br>
+                                    <td colspan="7" class="py-5 text-center text-muted">
+                                        <i class="mb-3 fas fa-clipboard-list fa-3x"></i><br>
                                         Belum ada data jadwal mengajar. Silakan tambahkan mapping baru.
                                     </td>
                                 </tr>
