@@ -58,25 +58,6 @@
                     }
                 });
             }
-
-            // --- BAGIAN 2: SWEETALERT NOTIFICATION ---
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: "{{ session('success') }}",
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-            @endif
-
-            @if($errors->any())
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: 'Mohon periksa kembali inputan Anda.',
-                });
-            @endif
         });
     </script>
 </x-app-layout>

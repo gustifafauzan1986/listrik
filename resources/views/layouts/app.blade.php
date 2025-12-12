@@ -244,7 +244,7 @@
 	</script>
 
 	
-
+<!-- 
 	<script>
 	@if(Session::has('message'))
 	var type = "{{ Session::get('alert-type','info') }}"
@@ -266,7 +266,7 @@
 		break;
 	}
 	@endif
-	</script>
+	</script> -->
 
 
 <script>
