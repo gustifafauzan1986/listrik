@@ -21,6 +21,22 @@
                                 <small class="text-muted">Kode akan terisi otomatis, namun tetap bisa diedit manual.</small>
                             </div>
 
+                            <div class="mb-3">
+                               <label for="major_id" class="block text-gray-700 font-bold mb-2">Jurusan (Opsional)</label>
+                                <select name="major_id" id="major_id" class="form-control">
+                                    
+                                    <option value="">-- Umum / Muatan Nasional --</option>
+                                    
+                                    @foreach($majors as $major)
+                                        <option value="{{ $major->id }}" {{ old('major_id') == $major->id ? 'selected' : '' }}>
+                                            {{ $major->name }} ({{ $major->code ?? '-' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="text-gray-500 text-xs mt-1">Biarkan kosong jika ini adalah mata pelajaran umum.</p>
+                            </div>
+
+
                             <div class="d-flex justify-content-between">
                                 <a href="{{ route('subjects.index') }}" class="btn btn-secondary">
                                      <i class="fas fa-arrow-left me-1"></i> Batal

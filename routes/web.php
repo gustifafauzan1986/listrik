@@ -33,6 +33,7 @@ use App\Http\Controllers\MajorController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\StudentAreaController;
 use App\Http\Controllers\TranscriptController;
+use App\Http\Controllers\TeachingAssignmentController;
 
 Route::view('/', 'welcome');
 
@@ -262,6 +263,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transkrip', [TranscriptController::class, 'index'])->name('reports.transcript.index');
         Route::get('/transkrip/cetak', [TranscriptController::class, 'show'])->name('reports.transcript.show');
         Route::get('/transkrip/cetak-kelas', [TranscriptController::class, 'printByClass'])->name('reports.transcript.class');
+
+        Route::resource('teaching-assignments', TeachingAssignmentController::class);
 
     });
 

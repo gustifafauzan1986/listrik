@@ -10,5 +10,15 @@ class Subject extends Model
 {
     use HasFactory, HasUuid;
 
-    protected $fillable = ['name', 'code'];
+    protected $fillable = ['code', 'name', 'major_id'];
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(TeachingAssignment::class);
+    }
 }

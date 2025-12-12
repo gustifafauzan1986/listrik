@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Subject;
+use App\Models\Major;
 
 class SubjectController extends Controller
 {
@@ -22,7 +23,9 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        return view('subjects.create');
+       // Ambil data jurusan untuk dropdown
+        $majors = Major::all(); 
+        return view('subjects.create', compact('majors'));
     }
 
     /**
