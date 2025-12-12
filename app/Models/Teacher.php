@@ -18,7 +18,8 @@ class Teacher extends Model
         'place_of_birth',
         'date_of_birth',
         'address',
-        'education_level'
+        'education_level',
+        'major_id'
     ];
 
     /**
@@ -43,5 +44,10 @@ class Teacher extends Model
     public function teacher()
     {
          return $this->belongsTo(User::class);
+    }
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class);
     }
 }

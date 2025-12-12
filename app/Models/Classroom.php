@@ -10,7 +10,7 @@ class Classroom extends Model
 {
     use HasUuid;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'major_id'];
 
     // Relasi: Satu Kelas punya banyak Siswa
     public function students()
@@ -22,6 +22,11 @@ class Classroom extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class);
     }
 
 

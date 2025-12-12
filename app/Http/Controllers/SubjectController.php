@@ -12,7 +12,7 @@ class SubjectController extends Controller
      */
     public function index()
     {
-        // Ambil data urut abjad
+        // Ambil data urut abjad nama
         $subjects = Subject::orderBy('name')->get();
         return view('subjects.index', compact('subjects'));
     }
@@ -30,15 +30,29 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
+        // 1. VALIDASI DATA
         $request->validate([
-            'name' => 'required|string|max:255|unique:subjects,name', // Nama harus unik
+            'name' => 'required|string|max:255|unique:subjects,name',
+            'code' => 'required|string|max:20|unique:subjects,code', // Kode harus unik
+        ], [
+            // Custom Error Message (Indonesia)
+            'name.required' => 'Nama mata pelajaran wajib diisi.',
+            'name.unique'   => 'Nama mata pelajaran ini sudah ada.',
+            'code.required' => 'Kode mata pelajaran wajib diisi.',
+            'code.unique'   => 'Kode mata pelajaran ini sudah digunakan.',
+            'code.max'      => 'Kode maksimal 20 karakter.',
         ]);
 
+        // 2. SIMPAN KE DATABASE
         Subject::create([
-            'name' => $request->name
+            // ucwords: Membuat Huruf Besar Di Awal Kata (Contoh: Bahasa Indonesia)
+            'name' => ucwords(strtolower($request->name)), 
+            // strtoupper: Membuat HURUF BESAR SEMUA (Contoh: BINDO)
+            'code' => strtoupper($request->code)
         ]);
 
-        return redirect()->route('subjects.index')->with('success', 'Mata Pelajaran berhasil ditambahkan!');
+        return redirect()->route('subjects.index')
+            ->with('success', 'Mata Pelajaran berhasil ditambahkan!');
     }
 
     /**
@@ -55,14 +69,27 @@ class SubjectController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // 1. VALIDASI UPDATE (Penting: Pengecualian ID)
         $request->validate([
+            // unique:table,column,except_id
             'name' => 'required|string|max:255|unique:subjects,name,' . $id,
+            'code' => 'required|string|max:20|unique:subjects,code,' . $id,
+        ], [
+            'name.required' => 'Nama mata pelajaran wajib diisi.',
+            'name.unique'   => 'Nama mata pelajaran ini sudah ada.',
+            'code.required' => 'Kode mata pelajaran wajib diisi.',
+            'code.unique'   => 'Kode mata pelajaran ini sudah digunakan mapel lain.',
         ]);
 
+        // 2. UPDATE DATABASE
         $subject = Subject::findOrFail($id);
-        $subject->update(['name' => $request->name]);
+        $subject->update([
+            'name' => ucwords(strtolower($request->name)),
+            'code' => strtoupper($request->code)
+        ]);
 
-        return redirect()->route('subjects.index')->with('success', 'Mata Pelajaran berhasil diperbarui!');
+        return redirect()->route('subjects.index')
+            ->with('success', 'Mata Pelajaran berhasil diperbarui!');
     }
 
     /**
@@ -79,6 +106,7 @@ class SubjectController extends Controller
 
         $subject->delete();
 
-        return redirect()->route('subjects.index')->with('success', 'Mata Pelajaran dihapus!');
+        return redirect()->route('subjects.index')
+            ->with('success', 'Mata Pelajaran dihapus!');
     }
 }

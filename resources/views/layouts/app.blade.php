@@ -230,7 +230,8 @@
 	<!--app JS-->
 	<script src="{{ asset('backend/assets/js/app.js')}}"></script>
 	<script src="{{ asset('backend/assets/js/validate.min.js')}}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
+	 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('backend/assets/js/code.js') }}"></script>
 	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('backend/assets/plugins/select2/js/select2-custom.js') }}"></script>
@@ -283,6 +284,49 @@
 		table.buttons().container()
 			.appendTo( '#example2_wrapper .col-md-6:eq(0)' );
 	} );
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Notifikasi Error dari Controller (Redirect with error)
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Tutup'
+            });
+        @endif
+
+        // 2. Notifikasi Sukses (Jika ada)
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
+
+        // 3. Notifikasi Validasi Form (Contoh: Lupa centang checkbox siswa)
+        @if($errors->any())
+            let errorMsg = '';
+            @foreach ($errors->all() as $error)
+                errorMsg += '{{ $error }}\n';
+            @endforeach
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian!',
+                text: errorMsg, // Menampilkan pesan: "Anda belum memilih siswa satupun."
+                confirmButtonColor: '#f0ad4e',
+            });
+        @endif
+
+    });
 </script>
 </body>
 

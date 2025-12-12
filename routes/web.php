@@ -29,6 +29,7 @@ use App\Http\Controllers\ScheduleImportController;
 use App\Http\Controllers\TeacherImportController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\MajorController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\StudentAreaController;
 use App\Http\Controllers\TranscriptController;
@@ -221,6 +222,7 @@ Route::middleware(['auth'])->group(function () {
         // Route::resource('teachers', TeacherController::class);
         // Route::resource('teachers', TeacherController::class)->except(['create', 'store', 'show']);
         Route::resource('classrooms', ClassroomController::class);
+        Route::resource('majors', MajorController::class);
 
         Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClassroom'])->name('students.remove_class');
         // --- 6. WHATSAPP GATEWAY (BROADCAST) ---

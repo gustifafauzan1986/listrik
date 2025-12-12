@@ -1,29 +1,15 @@
-@section('title', 'Mata Pelajaran')
+@section('title', 'Jurusan')
 <x-app-layout>
     <div class="page-content">       
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <a href="{{ route('subjects.create') }}" class="btn btn-primary shadow-sm">
-                        <i class="fas fa-plus me-1"></i> Tambah Mapel
+                    <a href="{{ route('majors.create') }}" class="btn btn-primary shadow-sm">
+                        <i class="fas fa-plus me-1"></i> Tambah Jurusan
                     </a>
                 </div>
 
-                <!-- @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif -->
-
                 <div class="card shadow border-0">
                     <div class="card-header bg-white py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">List Mata Pelajaran</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">List Jurusan</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -31,28 +17,28 @@
                                 <thead class="table-dark text-center">
                                     <tr>
                                         <th width="10%">No</th>
-                                        <th>Nama Mata Pelajaran</th>
-                                        <th>Kode Mata Pelajaran</th>
+                                        <th>Nama Jurusan</th>
+                                        <th>Kode</th>
                                         <th width="20%">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($subjects as $key => $subject)
+                                    @forelse($majors as $key => $major)
                                         <tr>
                                             <td class="text-center">{{ $key + 1 }}</td>
-                                            <td class="fw-bold text-dark">{{ $subject->name }}</td>
-                                            <td class="fw-bold text-dark">{{ $subject->code }}</td>
+                                            <td class="fw-bold text-dark">{{ $major->name }}</td>
+                                            <td class="fw-bold text-dark">{{ $major->code }}</td>
                                             <td class="text-center">
                                                 <div class="btn-group" role="group">
-                                                    <a href="{{ route('subjects.edit', $subject->id) }}" class="btn btn-sm btn-warning text-white" title="Edit">Edit
+                                                    <a href="{{ route('majors.edit', $major->id) }}" class="btn btn-sm btn-warning text-white" title="Edit">Edit
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     
                                                     <!-- Form Hapus dengan SweetAlert -->
-                                                    <form id="delete-form-{{ $subject->id }}" action="{{ route('subjects.destroy', $subject->id) }}" method="POST" class="d-inline">
+                                                    <form id="delete-form-{{ $major->id }}" action="{{ route('majors.destroy', $major->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button" class="btn btn-sm btn-danger" title="Hapus" onclick="confirmDelete('{{ $subject->id }}', '{{ $subject->name }}')">
+                                                        <button type="button" class="btn btn-sm btn-danger" title="Hapus" onclick="confirmDelete('{{ $major->id }}', '{{ $major->name }}')">
                                                             <i class="fas fa-trash"></i>Hapus
                                                         </button>
                                                     </form>
@@ -63,8 +49,8 @@
                                         <tr>
                                             <td colspan="4" class="text-center py-5 text-muted">
                                                 <img src="https://img.icons8.com/ios/100/cccccc/books.png" width="60" class="mb-3 opacity-50">
-                                                <p class="mb-0">Belum ada data mata pelajaran.</p>
-                                                <small>Silakan klik tombol "Tambah Mapel" untuk memulai.</small>
+                                                <p class="mb-0">Belum ada data Jurusan.</p>
+                                                <small>Silakan klik tombol "Tambah Jurusan" untuk memulai.</small>
                                             </td>
                                         </tr>
                                     @endforelse
@@ -74,29 +60,9 @@
                     </div>
                 </div>
     </div>
-    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Notifikasi Berhasil Simpan/Update/Hapus
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: "{{ session('success') }}",
-                showConfirmButton: false,
-                timer: 2000
-            });
-        @endif
-
-        // Notifikasi Gagal (Opsional)
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: "{{ session('error') }}",
-            });
-        @endif
-
+        
         
                 function confirmDelete(id, name) {
                     Swal.fire({
@@ -115,6 +81,8 @@
                     })
                 }
             </script>
+
+           
 
     
 </x-app-layout>

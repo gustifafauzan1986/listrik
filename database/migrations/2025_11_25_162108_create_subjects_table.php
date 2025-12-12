@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->uuid('id')->primary(); // UUID
+            $table->string('code')->unique(); // Contoh: RPL, TKJ, AKL
             $table->string('name')->unique(); // Contoh: Matematika, Bahasa Inggris
             $table->timestamps();
         });

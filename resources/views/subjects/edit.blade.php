@@ -28,6 +28,20 @@
                                 </div>
                             </div>
 
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Kode Mata Pelajaran</label>
+                                <input type="text" name="code" class="form-control @error('name') is-invalid @enderror" 
+                                    value="{{ old('code', $subject->code) }}" required>
+                                
+                                @error('code')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                
+                                <div class="form-text text-muted">
+                                    Pastikan nama mata pelajaran unik (tidak kembar).
+                                </div>
+                            </div>
+
                             <hr>
 
                             <div class="d-flex justify-content-between">
