@@ -1,12 +1,23 @@
 @section('title', 'Mata Pelajaran')
 <x-app-layout>
     <div class="page-content">       
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <a href="{{ route('subjects.create') }}" class="btn btn-primary shadow-sm">
-                        <i class="fas fa-plus me-1"></i> Tambah Mapel
-                    </a>
-                </div>
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-primary"><i class="fa-solid fa-book me-2"></i> Daftar Mata Pelajaran</h3>
+                        <p class="mb-0 text-muted">Kelola Mata Pelajaran, sesuai dengan Kurikulum.</p>
+                    </div>
+                    <div>
+                        <a href="{{ route('subjects.create') }}" class="shadow-sm btn btn-success">
+                            <i class="fas fa-plus me-1"></i> Tambah Mapel
+                        </a>
+                        <!-- Tombol Shortcut untuk Cetak Kartu -->
+                        {{-- <a href="{{ route('print.index') }}" class="shadow-sm btn btn-outline-dark ms-2">
+                            <i class="fas fa-id-card me-1"></i> Cetak Kartu Siswa
+                        </a> --}}
+                    </div>
+                </div>   
 
+                
                 <!-- @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
