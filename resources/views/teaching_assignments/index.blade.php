@@ -10,12 +10,12 @@
                 </a>
             </div>
 
-            @if(session('success'))
+            <!-- @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            @endif
+            @endif -->
 
             <div class="mb-4 shadow card">
                 <div class="py-3 card-header">
@@ -91,4 +91,35 @@
         </script>
         @endpush
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Notifikasi Error dari Controller (Redirect with error)
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Tutup'
+            });
+        @endif
+
+        // 2. Notifikasi Sukses (Jika ada)
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
+
+        // 3. Notifikasi Validasi Form (Contoh: Lupa centang checkbox siswa)
+       
+
+    });
+</script>
 </x-app-layout>

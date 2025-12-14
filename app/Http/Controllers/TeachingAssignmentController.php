@@ -56,7 +56,7 @@ class TeachingAssignmentController extends Controller
             'academic_year' => date('Y') // Default tahun ini
         ]);
 
-        return redirect()->route('teaching_assignments.index')->with('success', 'Jadwal mengajar berhasil ditambahkan!');
+        return redirect()->route('teaching-assignments.index')->with('success', 'Jadwal mengajar berhasil ditambahkan!');
     }
 
     public function destroy($id)

@@ -16,6 +16,7 @@
                             @csrf
                             @method('PUT')
 
+
                             <div class="row">
                                 <div class="mb-3 col-md-6">
                                     <label class="form-label fw-bold">Nama Lengkap</label>
@@ -41,6 +42,22 @@
                                     <input type="number" name="phone" class="form-control" value="{{ old('phone', $teacher->phone) }}">
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <div class="mb-3 col-md-12">
+                                    <label class="form-label fw-bold">Jurusan Mengajar</label>
+                                   <select name="major_id" class="form-select">
+                                    <option value="">- Pilih -</option>
+                                    @foreach($majors as $major)
+                                        <option value="{{$major->id}}" {{ $major->id == $teacher->id ? 'selected' : '' }}>
+                                            {{$major->name}}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                </div>
+                                
+                            </div>
+
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Alamat</label>

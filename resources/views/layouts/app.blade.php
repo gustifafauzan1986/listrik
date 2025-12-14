@@ -290,26 +290,26 @@
     document.addEventListener('DOMContentLoaded', function() {
         
         // 1. Notifikasi Error dari Controller (Redirect with error)
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: "{{ session('error') }}",
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Tutup'
-            });
-        @endif
+        // @if(session('error'))
+        //     Swal.fire({
+        //         icon: 'error',
+        //         title: 'Gagal!',
+        //         text: "{{ session('error') }}",
+        //         confirmButtonColor: '#d33',
+        //         confirmButtonText: 'Tutup'
+        //     });
+        // @endif
 
-        // 2. Notifikasi Sukses (Jika ada)
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                timer: 2000,
-                showConfirmButton: false
-            });
-        @endif
+        // // 2. Notifikasi Sukses (Jika ada)
+        // @if(session('success'))
+        //     Swal.fire({
+        //         icon: 'success',
+        //         title: 'Berhasil!',
+        //         text: "{{ session('success') }}",
+        //         timer: 2000,
+        //         showConfirmButton: false
+        //     });
+        // @endif
 
         // 3. Notifikasi Validasi Form (Contoh: Lupa centang checkbox siswa)
         @if($errors->any())

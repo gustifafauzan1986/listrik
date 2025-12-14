@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\Major;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TeacherExport;
 
@@ -46,8 +47,9 @@ class TeacherController extends Controller
      */
     public function edit($id)
     {
+        $majors = Major::get();
         $teacher = Teacher::with('user')->findOrFail($id);
-        return view('teachers.edit', compact('teacher'));
+        return view('teachers.edit', compact('teacher', 'majors'));
     }
 
     /**
@@ -75,6 +77,7 @@ class TeacherController extends Controller
             'phone'   => $request->phone,
             'gender'  => $request->gender,
             'address' => $request->address,
+            'major_id' => $request->major_id,
         ]);
 
         return redirect()->route('teachers.index')->with('success', 'Data guru berhasil diperbarui.');
