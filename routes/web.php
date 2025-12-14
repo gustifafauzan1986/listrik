@@ -244,7 +244,10 @@ Route::middleware(['auth'])->group(function () {
         // PERBAIKAN: method 'show' tidak lagi di-exclude agar halaman detail guru bisa diakses
         Route::resource('teachers', TeacherController::class)->except(['create', 'store']);
 
-        Route::resource('students', StudentController::class)->except(['create', 'show', 'store']);
+        // Route::resource('students', StudentController::class)->except(['create', 'show', 'store', 'index']);
+        Route::get('/students', [StudentController::class, 'index'])->name('students.index'); 
+        Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students.edit'); 
+        Route::get('/students/destroy/{id}', [StudentController::class, 'destroy'])->name('students.destroy'); 
 
         // --- 4. MANAJEMEN KARTU SISWA ---
         Route::get('/print-cards', [CardController::class, 'index'])->name('print.index');
@@ -269,6 +272,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/teaching-assignments/create', [TeachingAssignmentController::class, 'create'])->name('teaching-assignments.create');
         Route::post('/teaching-assignments/store', [TeachingAssignmentController::class, 'store'])->name('teaching-assignments.store');
         Route::post('/teaching-assignments/destroy/{id}', [TeachingAssignmentController::class, 'create'])->name('teaching-assignments.destroy');
+
+       
 
     });
 
