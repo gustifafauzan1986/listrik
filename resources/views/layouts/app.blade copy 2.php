@@ -216,18 +216,17 @@
 	</div>
 
 	<!--end switcher-->
-		<!--plugins-->
-	<script src="{{ asset('backend/assets/js/jquery.min.js')}}"></script>
 	<!-- Bootstrap JS -->
 	<script src="{{ asset('backend/assets/js/bootstrap.bundle.min.js')}}"></script>
-
+	<!--plugins-->
+	<script src="{{ asset('backend/assets/js/jquery.min.js')}}"></script>
 	<script src="{{ asset('backend/assets/plugins/simplebar/js/simplebar.min.js')}}"></script>
 	<script src="{{ asset('backend/assets/plugins/metismenu/js/metisMenu.min.js')}}"></script>
 	<script src="{{ asset('backend/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js')}}"></script>
 	<script src="{{ asset('backend/assets/plugins/vectormap/jquery-jvectormap-2.0.2.min.js')}}"></script>
     <script src="{{ asset('backend/assets/plugins/vectormap/jquery-jvectormap-world-mill-en.js')}}"></script>
 	<script src="{{ asset('backend/assets/plugins/chartjs/js/chart.js')}}"></script>
-	
+	<script src="{{ asset('backend/assets/js/index.js')}}"></script>
 	<!--app JS-->
 	<script src="{{ asset('backend/assets/js/app.js')}}"></script>
 	<script src="{{ asset('backend/assets/js/validate.min.js')}}"></script>
@@ -239,104 +238,96 @@
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 	<script src="{{ asset('backend/assets/plugins/datatable/js/jquery.dataTables.min.js')}}"></script>
 	<script src="{{ asset('backend/assets/plugins/datatable/js/dataTables.bootstrap5.min.js')}}"></script>
-	<script src="{{ asset('backend/assets/js/index.js')}}"></script>
-	<!-- <script>
+
+	<script>
 		new PerfectScrollbar(".app-container")
-	</script> -->
+	</script>
 
 	
- <script>
-        $(document).ready(function() {
-            // --- Perbaikan PerfectScrollbar ---
-            // Hanya inisialisasi jika elemen app-container ada dan PerfectScrollbar dimuat.
-            const appContainer = document.querySelector(".app-container");
-            if (typeof PerfectScrollbar !== 'undefined') {
-                if (appContainer) {
-                    new PerfectScrollbar(appContainer);
-                } else {
-                    // Jika tidak ada .app-container, mungkin inisialisasi pada body
-                    // (Tergantung struktur template Anda, ini untuk mencegah error 'no element specified')
-                    // new PerfectScrollbar(document.body); 
-                }
-            }
-            
-            // --- DataTables ---
-            if ($.fn.DataTable) {
-                // Example 1
-                if ($.fn.DataTable.isDataTable('#example')) {
-                    $('#example').DataTable();
-                } else {
-                    $('#example').DataTable(); // Inisialisasi default
-                }
+<!-- 
+	<script>
+	@if(Session::has('message'))
+	var type = "{{ Session::get('alert-type','info') }}"
+	switch(type){
+		case 'info':
+		toastr.info(" {{ Session::get('message') }} ");
+		break;
 
-                // Example 2
-                if ($.fn.DataTable.isDataTable('#example2')) {
-                    var table = $('#example2').DataTable( {
-                        lengthChange: false,
-                        buttons: [ 'copy', 'excel', 'pdf', 'print']
-                    } );
+		case 'success':
+		toastr.success(" {{ Session::get('message') }} ");
+		break;
 
-                    table.buttons().container()
-                        .appendTo( '#example2_wrapper .col-md-6:eq(0)' );
-                } else {
-                    var table = $('#example2').DataTable( { // Inisialisasi default
-                        lengthChange: false,
-                        buttons: [ 'copy', 'excel', 'pdf', 'print']
-                    } );
-                    table.buttons().container()
-                        .appendTo( '#example2_wrapper .col-md-6:eq(0)' );
-                }
-            }
-            // Catatan: Jika Anda tidak ingin DataTables menginisialisasi pada setiap halaman, 
-            // pindahkan bagian ini ke @push('scripts') pada view yang memerlukannya.
-        });
-    </script>
+		case 'warning':
+		toastr.warning(" {{ Session::get('message') }} ");
+		break;
 
-    {{-- Skrip SweetAlert & Toastr (Diaktifkan kembali) --}}
-    @if(Session::has('message'))
-    <script>
-        var type = "{{ Session::get('alert-type','info') }}"
-        switch(type){
-            case 'info':
-            toastr.info(" {{ Session::get('message') }} ");
-            break;
+		case 'error':
+		toastr.error(" {{ Session::get('message') }} ");
+		break;
+	}
+	@endif
+	</script> -->
 
-            case 'success':
-            toastr.success(" {{ Session::get('message') }} ");
-            break;
 
-            case 'warning':
-            toastr.warning(" {{ Session::get('message') }} ");
-            break;
+<script>
+	$(document).ready(function() {
+		$('#example').DataTable();
+	  } );
+</script>
+<script>
+	$(document).ready(function() {
+		var table = $('#example2').DataTable( {
+			lengthChange: false,
+			buttons: [ 'copy', 'excel', 'pdf', 'print']
+		} );
 
-            case 'error':
-            toastr.error(" {{ Session::get('message') }} ");
-            break;
-        }
-    </script>
-    @endif
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if($errors->any())
-                let errorMsg = '';
-                @foreach ($errors->all() as $error)
-                    errorMsg += '{{ $error }}\n';
-                @endforeach
+		table.buttons().container()
+			.appendTo( '#example2_wrapper .col-md-6:eq(0)' );
+	} );
+</script>
 
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Perhatian!',
-                    html: errorMsg.replace(/\n/g, '<br>'), 
-                    confirmButtonColor: '#f0ad4e',
-                });
-            @endif
-        });
-    </script>
-    
-    {{-- Stack untuk kode JS spesifik halaman (e.g., filterClassrooms dari thread sebelumnya) --}}
-    @stack('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Notifikasi Error dari Controller (Redirect with error)
+        // @if(session('error'))
+        //     Swal.fire({
+        //         icon: 'error',
+        //         title: 'Gagal!',
+        //         text: "{{ session('error') }}",
+        //         confirmButtonColor: '#d33',
+        //         confirmButtonText: 'Tutup'
+        //     });
+        // @endif
 
+        // // 2. Notifikasi Sukses (Jika ada)
+        // @if(session('success'))
+        //     Swal.fire({
+        //         icon: 'success',
+        //         title: 'Berhasil!',
+        //         text: "{{ session('success') }}",
+        //         timer: 2000,
+        //         showConfirmButton: false
+        //     });
+        // @endif
+
+        // 3. Notifikasi Validasi Form (Contoh: Lupa centang checkbox siswa)
+        @if($errors->any())
+            let errorMsg = '';
+            @foreach ($errors->all() as $error)
+                errorMsg += '{{ $error }}\n';
+            @endforeach
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian!',
+                text: errorMsg, // Menampilkan pesan: "Anda belum memilih siswa satupun."
+                confirmButtonColor: '#f0ad4e',
+            });
+        @endif
+
+    });
+</script>
 </body>
 
 </html>

@@ -6,6 +6,7 @@ use App\Models\TeachingAssignment;
 use App\Models\Teacher;
 use App\Models\Subject;
 use App\Models\Classroom;
+use App\Models\Major;
 use Illuminate\Http\Request;
 
 class TeachingAssignmentController extends Controller
@@ -23,10 +24,11 @@ class TeachingAssignmentController extends Controller
     {
         $teachers = Teacher::with('major')->orderBy('name')->get();
         $subjects = Subject::with('major')->orderBy('name')->get();
+        $majors = Major::get();
         // Load kelas dengan major untuk filtering di frontend/backend
         $classrooms = Classroom::with('major')->orderBy('name')->get();
 
-        return view('teaching_assignments.create', compact('teachers', 'subjects', 'classrooms'));
+        return view('teaching_assignments.create', compact('teachers', 'subjects', 'classrooms', 'majors'));
     }
 
     public function store(Request $request)

@@ -4,10 +4,12 @@
             <div class="mobile-toggle-menu"><i class='bx bx-menu'></i>
             </div>
 
-              <div class="position-relative search-bar d-lg-block d-none">
-                
-                <span class="position-absolute top-50 search-show ms-3 translate-middle-y start-0 fs-5">{{ strtoupper(\App\Models\Setting::value('school_name', 'Sekolah')) }}</span>
-              </div>
+
+    <div class="d-flex justify-content-left align-items-center d-lg-flex d-none" style="width: 100%;">
+    <h6 class="fs-4 text-nowrap">
+        <b>{{ strtoupper(\App\Models\Setting::value('school_name', 'Sekolah')) }}</b>
+    </h6>
+</div>
 
 
               <div class="top-menu ms-auto">
