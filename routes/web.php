@@ -34,6 +34,7 @@ use App\Http\Controllers\PrintController;
 use App\Http\Controllers\StudentAreaController;
 use App\Http\Controllers\TranscriptController;
 use App\Http\Controllers\TeachingAssignmentController;
+use App\Http\Controllers\CertificateController;
 
 Route::view('/', 'welcome');
 
@@ -273,6 +274,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/teaching-assignments/store', [TeachingAssignmentController::class, 'store'])->name('teaching-assignments.store');
         Route::delete('/teaching-assignments/destroy/{id}', [TeachingAssignmentController::class, 'destroy'])->name('teaching-assignments.destroy');
 
+        Route::get('/reward/sertifikat', [CertificateController::class, 'index'])->name('certificates.index');
+        Route::post('/reward/sertifikat/cetak', [CertificateController::class, 'generate'])->name('certificates.generate');
        
 
     });

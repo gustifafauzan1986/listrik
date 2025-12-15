@@ -1,6 +1,7 @@
 @section('title')
-   Data Guru
+    Data Guru
 @endsection
+
 <x-app-layout>
     <div class="page-content">
 
@@ -15,6 +16,11 @@
                         <i class="bx bx-export"></i> Export
                     </a>
                 </div>
+                
+                {{-- Tombol Tambah Manual (Opsional, jika ada route create) --}}
+                <a href="" class="btn btn-primary shadow-sm">
+                    <i class="bx bx-plus"></i> Tambah Guru
+                </a>
             </div>
 
             @if(session('success'))
@@ -36,33 +42,53 @@
                     </form>
 
                     <div class="table-responsive">
-                        <table id="example" class="table table-striped table-bordered">
-                            <thead class="table-dark">
+                        <table id="example" class="table table-striped table-bordered align-middle">
+                            <thead class="table-dark text-center">
                                 <tr>
                                     <th>Nama Lengkap</th>
                                     <th>NIP</th>
                                     <th>L/P</th>
                                     <th>Email (Login)</th>
                                     <th>No. HP</th>
-                                    <th class="text-center">Aksi</th>
+                                    <th>Keterangan</th> <!-- Kolom Baru -->
+                                    <th class="text-center" width="15%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($teachers as $teacher)
                                     <tr>
                                         <td class="fw-bold">{{ $teacher->user->name ?? '-' }}</td>
-                                        <td>{{ $teacher->nip ?? '-' }}</td>
-                                        <td>{{ $teacher->gender ?? '-' }}</td>
+                                        <td class="text-center">{{ $teacher->nip ?? '-' }}</td>
+                                        <td class="text-center">{{ $teacher->gender ?? '-' }}</td>
                                         <td>{{ $teacher->user->email ?? '-' }}</td>
-                                        <td>{{ $teacher->phone ?? '-' }}</td>
+                                        <td class="text-center">{{ $teacher->phone ?? '-' }}</td>
+                                        
+                                        {{-- LOGIKA KETERANGAN GURU --}}
+                                        <td class="text-center">
+                                            @if($teacher->major)
+                                                <span class="badge bg-info text-dark">Guru Jurusan {{ $teacher->major->code ?? '' }}</span>
+                                            @else
+                                                <span class="badge bg-secondary">Guru Umum</span>
+                                            @endif
+
+                                            @if($teacher->role_type == 'piket')
+                                                <div class="mt-1">
+                                                    <span class="badge bg-warning text-dark">Petugas Piket</span>
+                                                </div>
+                                            @endif
+                                        </td>
+
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                 <a href="{{ route('teachers.show', $teacher->id) }}" class="text-white btn btn-sm btn-success" title="Detail">
+                                                <a href="{{ route('teachers.show', $teacher->id) }}" class="text-white btn btn-sm btn-success" title="Detail">
                                                     <i class="bx bx-info-circle"></i>
                                                 </a>
-                                                <a href="{{ route('teachers.edit', $teacher->id) }}" class="text-white btn btn-sm btn-warning" title="Edit">
+
+                                                <!-- TOMBOL MODAL EDIT -->
+                                                <button type="button" class="btn btn-sm btn-warning text-white" data-bs-toggle="modal" data-bs-target="#editTeacherModal{{ $teacher->id }}" title="Edit">
                                                     <i class="bx bx-message-square-edit"></i>
-                                                </a>
+                                                </button>
+
                                                 <form action="{{ route('teachers.destroy', $teacher->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus guru ini? Akun login juga akan terhapus.');">
                                                     @csrf
                                                     @method('DELETE')
@@ -71,11 +97,102 @@
                                                     </button>
                                                 </form>
                                             </div>
+
+                                            <!-- MODAL EDIT GURU -->
+                                            <div class="modal fade" id="editTeacherModal{{ $teacher->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header bg-warning text-dark">
+                                                            <h5 class="modal-title fw-bold">
+                                                                <i class="bx bx-edit me-2"></i> Edit Data Guru
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <form action="{{ route('teachers.update', $teacher->id) }}" method="POST">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <div class="modal-body text-start">
+                                                                
+                                                                <div class="row">
+                                                                    <!-- Data Akun (User) -->
+                                                                    <div class="col-md-6">
+                                                                        <h6 class="fw-bold text-primary mb-3">Informasi Akun</h6>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Nama Lengkap</label>
+                                                                            <input type="text" name="name" class="form-control" value="{{ $teacher->user->name ?? '' }}" required>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Email (Login)</label>
+                                                                            <input type="email" name="email" class="form-control" value="{{ $teacher->user->email ?? '' }}" required>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Password <small class="text-muted">(Kosongkan jika tidak ubah)</small></label>
+                                                                            <input type="password" name="password" class="form-control" placeholder="******">
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Data Profil (Teacher) -->
+                                                                    <div class="col-md-6">
+                                                                        <h6 class="fw-bold text-primary mb-3">Data Profil</h6>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">NIP</label>
+                                                                            <input type="text" name="nip" class="form-control" value="{{ $teacher->nip }}">
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Jenis Kelamin</label>
+                                                                            <select name="gender" class="form-select">
+                                                                                <option value="L" {{ $teacher->gender == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                                                                <option value="P" {{ $teacher->gender == 'P' ? 'selected' : '' }}>Perempuan</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">No. HP</label>
+                                                                            <input type="text" name="phone" class="form-control" value="{{ $teacher->phone }}">
+                                                                        </div>
+                                                                        
+                                                                        <!-- Jika ada kolom jurusan (major_id) di table teachers -->
+                                                                        @if(\Schema::hasColumn('teachers', 'major_id'))
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Jurusan (Opsional)</label>
+                                                                            <select name="major_id" class="form-select">
+                                                                                <option value="">-- Umum / Tidak Ada --</option>
+                                                                                @foreach(\App\Models\Major::all() as $major)
+                                                                                    <option value="{{ $major->id }}" {{ $teacher->major_id == $major->id ? 'selected' : '' }}>{{ $major->name }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            <small class="text-muted">Pilih jurusan jika Guru Produktif.</small>
+                                                                        </div>
+                                                                        @endif
+
+                                                                        <!-- Role Type (Guru / Piket) -->
+                                                                        @if(\Schema::hasColumn('teachers', 'role_type'))
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Tugas Tambahan</label>
+                                                                            <select name="role_type" class="form-select">
+                                                                                <option value="guru" {{ $teacher->role_type == 'guru' ? 'selected' : '' }}>Hanya Guru Mapel</option>
+                                                                                <option value="piket" {{ $teacher->role_type == 'piket' ? 'selected' : '' }}>Guru Piket</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- END MODAL -->
+
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="py-4 text-center text-muted">
+                                        <td colspan="7" class="py-4 text-center text-muted">
                                             Data guru belum tersedia. Silakan Import Data terlebih dahulu.
                                         </td>
                                     </tr>

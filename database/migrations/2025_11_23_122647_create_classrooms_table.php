@@ -14,6 +14,24 @@ return new class extends Migration
         Schema::create('classrooms', function (Blueprint $table) {
             $table->uuid('id')->primary(); // UUID
             $table->string('name')->unique(); // Contoh: XII RPL 1
+            // Wali Kelas (Relasi ke tabel teachers)
+            $table->foreignId('homeroom_teacher_id')
+                  ->nullable()
+                  ->constrained('teachers')
+                  ->onDelete('set null');
+
+            // Guru BK (Relasi ke tabel teachers)
+            $table->foreignId('counseling_teacher_id')
+                  ->nullable()
+                  ->constrained('teachers')
+                  ->onDelete('set null');
+
+            // Ketua Kelas (Relasi ke tabel students)
+            // Menggunakan foreignUuid karena tabel students Anda menggunakan UUID
+            $table->foreignUuid('class_leader_id')
+                  ->nullable()
+                  ->constrained('students')
+                  ->onDelete('set null');
             $table->timestamps();
         });
     }

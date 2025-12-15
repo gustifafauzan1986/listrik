@@ -2,105 +2,119 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Classroom;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ClassroomExport;
+use App\Models\Major;
+use App\Models\Teacher;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule; // Import Rule
 
 class ClassroomController extends Controller
 {
     /**
-     * Tampilkan Daftar Kelas
+     * Menampilkan daftar kelas.
      */
     public function index(Request $request)
     {
-        //$query = Classroom::query();
+        $query = Classroom::with(['major', 'students', 'homeroomTeacher', 'counselingTeacher', 'classLeader']);
 
-        // Tambahkan with('students') untuk eager loading data siswa (Mencegah N+1 Query)
-        $query = Classroom::with('students');
-
-        // Fitur Pencarian
         if ($request->has('search')) {
-            $query->where('name', 'LIKE', '%' . $request->search . '%');
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $classrooms = $query->orderBy('name', 'asc')->paginate(10);
+        $classrooms = $query->latest()->paginate(10);
 
         return view('classrooms.index', compact('classrooms'));
     }
 
     /**
-     * Form Tambah Kelas
+     * Menampilkan form tambah kelas.
      */
     public function create()
     {
-        return view('classrooms.create');
+        $majors = Major::all();
+        // Hanya tampilkan guru yang BELUM jadi wali kelas
+        $assignedTeacherIds = Classroom::whereNotNull('homeroom_teacher_id')->pluck('homeroom_teacher_id');
+        $teachers = Teacher::whereNotIn('id', $assignedTeacherIds)->orderBy('name')->get(); 
+        
+        return view('classrooms.create', compact('majors', 'teachers'));
     }
 
     /**
-     * Simpan Kelas Baru
+     * Menyimpan data kelas baru.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:50|unique:classrooms,name',
+            'name' => 'required|string|max:255|unique:classrooms,name',
+            'major_id' => 'nullable|exists:majors,id',
+            // Validasi: Wali Kelas harus unik di tabel classrooms
+            'homeroom_teacher_id' => [
+                'nullable', 
+                'exists:teachers,id',
+                'unique:classrooms,homeroom_teacher_id' // Guru tidak boleh dipakai di kelas lain
+            ],
+            'counseling_teacher_id' => 'nullable|exists:teachers,id',
         ], [
-            'name.unique' => 'Nama kelas ini sudah ada, gunakan nama lain.'
+            'homeroom_teacher_id.unique' => 'Guru tersebut sudah menjadi Wali Kelas di kelas lain.',
         ]);
 
-        Classroom::create([
-            'name' => strtoupper($request->name) // Paksa huruf besar
-        ]);
+        Classroom::create($request->all());
 
-        return redirect()->route('classrooms.index')->with('success', 'Kelas berhasil ditambahkan!');
+        return redirect()->route('classrooms.index')->with('success', 'Kelas berhasil ditambahkan.');
     }
 
     /**
-     * Form Edit Kelas
+     * Menampilkan form edit kelas.
      */
-    public function edit($id)
+    public function edit(Classroom $classroom)
     {
-        $classroom = Classroom::findOrFail($id);
-        return view('classrooms.edit', compact('classroom'));
+        $majors = Major::all();
+        // Ambil semua guru untuk edit, filtering logic bisa di handle di view atau disini lebih kompleks
+        $teachers = Teacher::orderBy('name')->get();
+
+        return view('classrooms.edit', compact('classroom', 'majors', 'teachers'));
     }
 
     /**
-     * Update Data Kelas
+     * Memperbarui data kelas.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Classroom $classroom)
     {
         $request->validate([
-            // Unique validasi kecuali ID ini sendiri
-            'name' => 'required|string|max:50|unique:classrooms,name,' . $id,
+            'name' => [
+                'required', 
+                'string', 
+                'max:255', 
+                Rule::unique('classrooms', 'name')->ignore($classroom->id)
+            ],
+            'major_id' => 'nullable|exists:majors,id',
+            
+            // Validasi Unik Wali Kelas (Kecuali untuk kelas ini sendiri)
+            'homeroom_teacher_id' => [
+                'nullable',
+                'exists:teachers,id',
+                Rule::unique('classrooms', 'homeroom_teacher_id')->ignore($classroom->id),
+            ],
+            
+            'counseling_teacher_id' => 'nullable|exists:teachers,id',
+            'class_leader_id' => 'nullable|exists:students,id',
+        ], [
+            'homeroom_teacher_id.unique' => 'Guru tersebut sudah menjadi Wali Kelas di kelas lain.',
         ]);
 
-        $classroom = Classroom::findOrFail($id);
-        $classroom->update([
-            'name' => strtoupper($request->name)
-        ]);
+        $classroom->update($request->all());
 
-        return redirect()->route('classrooms.index')->with('success', 'Data kelas berhasil diperbarui!');
+        return redirect()->route('classrooms.index')->with('success', 'Data kelas berhasil diperbarui.');
     }
 
-    /**
-     * Hapus Kelas
-     */
-    public function destroy($id)
+    public function destroy(Classroom $classroom)
     {
-        $classroom = Classroom::findOrFail($id);
-
-        // Opsional: Cek relasi sebelum hapus (agar tidak error constraint)
         if ($classroom->students()->count() > 0) {
-            return back()->with('error', 'Gagal hapus! Masih ada siswa di kelas ini.');
+            return back()->with('error', 'Gagal menghapus! Masih ada siswa di dalam kelas ini.');
         }
 
         $classroom->delete();
 
-        return redirect()->route('classrooms.index')->with('success', 'Kelas berhasil dihapus!');
-    }
-
-    public function export()
-    {
-        return Excel::download(new ClassroomExport, 'Data-Kelas.xlsx');
+        return redirect()->route('classrooms.index')->with('success', 'Kelas berhasil dihapus.');
     }
 }

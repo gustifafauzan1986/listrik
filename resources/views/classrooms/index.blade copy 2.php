@@ -11,15 +11,18 @@
             </a>
         </div>
 
-        {{-- LOGIC: Ambil Data Guru & Filter Wali Kelas untuk Modal --}}
+        {{-- Mengambil data Guru untuk Dropdown (Bisa dipindahkan ke Controller untuk best practice) --}}
         @php
-            // Ambil semua guru untuk dropdown (Wali Kelas & BK)
-            $allTeachers = \App\Models\Teacher::orderBy('name')->get();
-            
-            // Ambil ID guru yang sudah menjadi wali kelas di kelas manapun
-            // Ini digunakan untuk memfilter dropdown agar satu guru tidak memegang 2 kelas
-            $takenHomeroomIds = \App\Models\Classroom::whereNotNull('homeroom_teacher_id')->pluck('homeroom_teacher_id')->toArray();
+            $teachers = \App\Models\Teacher::orderBy('name')->get();
         @endphp
+
+        <!-- Alert dari Controller (Fallback jika SweetAlert JS gagal) -->
+        {{-- @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif --}}
 
         <div class="border-0 shadow card">
             <div class="card-body">
@@ -31,18 +34,6 @@
                         <button type="submit" class="btn btn-dark"><i class="bx bx-search"></i> Cari</button>
                     </div>
                 </form>
-
-                <!-- Menampilkan Error Validasi (jika ada duplicate entry dari modal) -->
-                <!-- @if ($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif -->
 
                 <div class="table-responsive">
                     <table class="table align-middle table-hover table-striped">
@@ -84,7 +75,7 @@
                                     {{-- Kolom Ketua Kelas --}}
                                     <td>
                                         @if($room->classLeader)
-                                            <div class="d-flex align-items-center justify-content-center">
+                                            <div class="d-flex align-items-center">
                                                 <i class="fas fa-crown text-warning me-1"></i>
                                                 <span class="fw-bold text-dark">{{ $room->classLeader->name }}</span>
                                             </div>
@@ -107,25 +98,31 @@
                                                         <h5 class="modal-title fw-bold">
                                                             <i class="fas fa-user-graduate me-2"></i> Siswa Kelas {{ $room->name }}
                                                         </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body text-start">
                                                         @if($room->students->count() > 0)
                                                             <div class="list-group list-group-flush">
                                                                 @foreach($room->students as $student)
                                                                     <div class="p-2 list-group-item d-flex justify-content-between align-items-center">
+                                                                        <!-- Info Siswa -->
                                                                         <div>
-                                                                            <span class="fw-bold">{{ $student->name }}</span><br>
+                                                                            <span class="fw-bold">{{ $student->name }}</span>
+                                                                            <br>
                                                                             <small class="text-muted">NIS: {{ $student->nis }}</small>
                                                                         </div>
+
+                                                                        <!-- Badge & Action -->
                                                                         <div class="gap-2 d-flex align-items-center">
+                                                                            <!-- Status Wajah -->
                                                                             @if($student->face_descriptor)
                                                                                 <span class="badge bg-success" title="Wajah Terdaftar"><i class="fas fa-smile"></i></span>
                                                                             @else
                                                                                 <span class="badge bg-secondary" title="Belum Rekam Wajah"><i class="fas fa-user-slash"></i></span>
                                                                             @endif
-                                                                            
-                                                                            <!-- Form remove student -->
+
+                                                                            <!-- Tombol Keluarkan Siswa (Unassign) -->
+                                                                            <!-- Asumsi Route: route('students.remove_class', $id) -->
                                                                             <form id="remove-student-form-{{ $student->id }}" action="{{ route('students.remove_class', $student->id) }}" method="POST">
                                                                                 @csrf
                                                                                 @method('PATCH')
@@ -150,16 +147,17 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </td>
+                                        <!-- END MODAL SISWA -->
 
+                                    </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <!-- Tombol Setting -->
+                                            <!-- Tombol Setting Wali/BK/Ketua -->
                                             <button type="button" class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#officialsModal{{ $room->id }}" title="Atur Wali Kelas & BK">
                                                 <i class="fas fa-user-cog"></i>
                                             </button>
 
-                                            <!-- Tombol Edit -->
+                                            <!-- Tombol Edit Kelas -->
                                             <a href="{{ route('classrooms.edit', $room->id) }}" class="text-white btn btn-sm btn-warning" title="Edit Nama">
                                                 <i class="bx bx-message-square-edit"></i>
                                             </a>
@@ -184,53 +182,37 @@
                                                         </h5>
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    
+                                                    <!-- Form Update ke Classrooms.update atau route khusus -->
                                                     <form action="{{ route('classrooms.update', $room->id) }}" method="POST">
                                                         @csrf
                                                         @method('PUT')
-                                                        <!-- Kirim nama kelas agar validasi unique tidak error -->
+                                                        
+                                                        <!-- Pastikan mengirim nama kelas juga agar tidak error validasi (hidden) -->
                                                         <input type="hidden" name="name" value="{{ $room->name }}">
                                                         
                                                         <div class="modal-body text-start">
-                                                            
-                                                            <!-- WALI KELAS (FILTERED) -->
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-bold">Wali Kelas</label>
                                                                 <select name="homeroom_teacher_id" class="form-select select2-modal">
                                                                     <option value="">-- Pilih Wali Kelas --</option>
-                                                                    @foreach($allTeachers as $teacher)
-                                                                        {{-- 
-                                                                            LOGIKA FILTER:
-                                                                            Tampilkan Guru JIKA:
-                                                                            1. ID Guru ini TIDAK ADA di daftar 'takenHomeroomIds'
-                                                                            2. ATAU ID Guru ini ADALAH Wali Kelas saat ini (agar selected value tetap muncul)
-                                                                        --}}
-                                                                        @if(!in_array($teacher->id, $takenHomeroomIds) || $room->homeroom_teacher_id == $teacher->id)
-                                                                            <option value="{{ $teacher->id }}" {{ $room->homeroom_teacher_id == $teacher->id ? 'selected' : '' }}>
-                                                                                {{ $teacher->user->name }}
-                                                                            </option>
-                                                                        @endif
+                                                                    @foreach($teachers as $teacher)
+                                                                        <option value="{{ $teacher->id }}" {{ $room->homeroom_teacher_id == $teacher->id ? 'selected' : '' }}>
+                                                                            {{ $teacher->user->name }}
+                                                                        </option>
                                                                     @endforeach
                                                                 </select>
-                                                                <div class="form-text text-muted small">
-                                                                    *Hanya menampilkan guru yang belum menjadi wali kelas.
-                                                                </div>
                                                             </div>
-
-                                                            <!-- GURU BK -->
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-bold">Guru BK</label>
                                                                 <select name="counseling_teacher_id" class="form-select select2-modal">
                                                                     <option value="">-- Pilih Guru BK --</option>
-                                                                    @foreach($allTeachers as $teacher)
+                                                                    @foreach($teachers as $teacher)
                                                                         <option value="{{ $teacher->id }}" {{ $room->counseling_teacher_id == $teacher->id ? 'selected' : '' }}>
                                                                             {{ $teacher->user->name }}
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
-
-                                                            <!-- KETUA KELAS -->
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-bold">Ketua Kelas</label>
                                                                 <select name="class_leader_id" class="form-select select2-modal">
@@ -241,12 +223,12 @@
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
-                                                                <div class="form-text text-muted small">Hanya siswa dari kelas ini.</div>
+                                                                <div class="form-text">Hanya siswa yang terdaftar di kelas ini.</div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -259,6 +241,7 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="py-5 text-center text-muted">
+                                        <img src="https://img.icons8.com/ios/100/cccccc/classroom.png" width="60" class="mb-3 opacity-50">
                                         <p class="mb-0">Data kelas belum tersedia.</p>
                                     </td>
                                 </tr>
@@ -274,45 +257,62 @@
             </div>
         </div>
     </div>
-    
-    <script>
-        function confirmDelete(id, name) {
-            Swal.fire({
-                title: 'Hapus Kelas?',
-                text: "Hapus kelas " + name + "?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Ya',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
-                }
-            })
-        }
+<script>
+    // SweetAlert untuk Konfirmasi Hapus Kelas
+    function confirmDelete(id, name) {
+        Swal.fire({
+            title: 'Hapus Kelas?',
+            text: "Anda akan menghapus kelas " + name + ". Data siswa di dalamnya mungkin akan kehilangan relasi kelas!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        })
+    }
 
-        function confirmRemoveStudent(id, name) {
-            Swal.fire({
-                title: 'Keluarkan Siswa?',
-                text: "Keluarkan " + name + " dari kelas?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Ya',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('remove-student-form-' + id).submit();
-                }
-            })
-        }
+    // SweetAlert untuk Konfirmasi Keluarkan Siswa dari Kelas
+    function confirmRemoveStudent(id, name) {
+        Swal.fire({
+            title: 'Keluarkan Siswa?',
+            text: "Siswa " + name + " akan dikeluarkan dari kelas ini (Data siswa tidak terhapus).",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Keluarkan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('remove-student-form-' + id).submit();
+            }
+        })
+    }
 
-        @if(session('success'))
-            Swal.fire({ icon: 'success', title: 'Berhasil!', text: {!! json_encode(session('success')) !!}, timer: 2000, showConfirmButton: false });
-        @endif
-        @if(session('error'))
-            Swal.fire({ icon: 'error', title: 'Gagal!', text: {!! json_encode(session('error')) !!} });
-        @endif
-    </script>
+    // SweetAlert untuk Notifikasi Sukses (Session)
+    // FIX: Menggunakan json_encode agar string aman dari karakter spesial/newline
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: {!! json_encode(session('success')) !!},
+            timer: 2000,
+            showConfirmButton: false
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: {!! json_encode(session('error')) !!},
+        });
+    @endif
+</script>
+
 </x-app-layout>
