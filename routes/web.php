@@ -35,6 +35,7 @@ use App\Http\Controllers\StudentAreaController;
 use App\Http\Controllers\TranscriptController;
 use App\Http\Controllers\TeachingAssignmentController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\ScannerDeviceController;
 
 Route::view('/', 'welcome');
 
@@ -246,9 +247,9 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('teachers', TeacherController::class)->except(['create', 'store']);
 
         // Route::resource('students', StudentController::class)->except(['create', 'show', 'store', 'index']);
-        Route::get('/students', [StudentController::class, 'index'])->name('students.index'); 
-        Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students.edit'); 
-        Route::get('/students/destroy/{id}', [StudentController::class, 'destroy'])->name('students.destroy'); 
+        Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+        Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students.edit');
+        Route::get('/students/destroy/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 
         // --- 4. MANAJEMEN KARTU SISWA ---
         Route::get('/print-cards', [CardController::class, 'index'])->name('print.index');
@@ -276,7 +277,13 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/reward/sertifikat', [CertificateController::class, 'index'])->name('certificates.index');
         Route::post('/reward/sertifikat/cetak', [CertificateController::class, 'generate'])->name('certificates.generate');
-       
+       // Route untuk Manajemen Perangkat Scanner & CCTV
+        // Kita exclude 'create', 'store', 'show' karena registrasi dilakukan dari Frontend (Kiosk)
+        // dan detail ditampilkan langsung di index/modal.
+        Route::resource('scanner-devices', ScannerDeviceController::class)
+            ->except(['create', 'show']);
+
+        Route::get('/scan-camera', [ScannerDeviceController::class, 'scan'])->name('scan.camera');
 
     });
 

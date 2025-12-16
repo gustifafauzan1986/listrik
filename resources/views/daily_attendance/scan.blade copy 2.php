@@ -7,6 +7,42 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
 
+                <!-- STATUS PERANGKAT (FITUR BARU) -->
+                <div class="mb-3 shadow-sm card border-left-info">
+                    <div class="py-2 card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted fw-bold d-block">STATUS PERANGKAT</small>
+                            <span id="device-name-display" class="fw-bold text-dark">Memeriksa...</span>
+                        </div>
+                        <button id="btn-device-settings" class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#deviceConfig">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                    <div class="collapse" id="deviceConfig">
+                        <div class="bg-white card-footer">
+                            <!-- Form Registrasi (Jika belum ada token) -->
+                            <div id="form-register-device" style="display: none;">
+                                <label class="small text-muted">Daftarkan perangkat ini ke sistem:</label>
+                                <div class="mt-1 input-group input-group-sm">
+                                    <input type="text" id="input-device-name" class="form-control" placeholder="Contoh: POS SATPAM 1">
+                                    <button class="btn btn-primary" id="btn-register-device">Simpan</button>
+                                </div>
+                            </div>
+
+                            <!-- Info Terdaftar (Jika sudah ada token) -->
+                            <div id="info-registered-device" style="display: none;">
+                                <div class="py-2 mb-2 alert alert-success small">
+                                    <i class="fas fa-check-circle"></i> Perangkat Terdaftar.
+                                </div>
+                                <small class="text-muted d-block">Token: <code id="display-token">-</code></small>
+                                <button class="mt-2 btn btn-sm btn-danger w-100" id="btn-reset-device">
+                                    <i class="fas fa-trash"></i> Hapus Registrasi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="shadow card border-bottom-primary">
                     <div class="text-center text-white card-header bg-primary">
                         <h4 class="mb-0"><i class="fas fa-school me-2"></i> SCANNER GERBANG</h4>
@@ -19,7 +55,7 @@
                             <i class="fas fa-volume-mute"></i> Klik di mana saja pada halaman ini agar suara notifikasi aktif.
                         </div>
 
-                        <!-- MENU PILIH KAMERA (FITUR BARU) -->
+                        <!-- MENU PILIH KAMERA -->
                         <div class="mb-3 text-start">
                             <label for="camera-select" class="form-label fw-bold">Pilih Kamera:</label>
                             <div class="input-group">
@@ -68,6 +104,79 @@
             const html5QrCode = new Html5Qrcode("reader");
             let isScanning = false;
 
+            // --- 0. LOGIC REGISTRASI PERANGKAT ---
+            function checkDeviceRegistration() {
+                const token = localStorage.getItem('device_token');
+                const name = localStorage.getItem('device_name');
+
+                if (token && name) {
+                    // SUDAH TERDAFTAR
+                    $('#device-name-display').text(name).removeClass('text-danger').addClass('text-success');
+                    $('#form-register-device').hide();
+                    $('#info-registered-device').show();
+                    $('#display-token').text(token);
+                } else {
+                    // BELUM TERDAFTAR
+                    $('#device-name-display').text('Belum Terdaftar').removeClass('text-success').addClass('text-danger');
+                    $('#form-register-device').show();
+                    $('#info-registered-device').hide();
+                    $('#deviceConfig').collapse('show'); // Buka menu setting otomatis jika belum terdaftar
+                }
+            }
+
+            // Init Cek Status
+            checkDeviceRegistration();
+
+            // Handle Register Button
+            $('#btn-register-device').click(function() {
+                const name = $('#input-device-name').val();
+                if(!name) {
+                    Swal.fire('Error', 'Nama perangkat tidak boleh kosong', 'warning');
+                    return;
+                }
+
+                // Kirim ke API Laravel untuk dapat token
+                $.ajax({
+                    url: "{{ url('/api/device/register') }}", // Pastikan route API ini ada
+                    type: "POST",
+                    data: {
+                        device_name: name,
+                        _token: "{{ csrf_token() }}" // CSRF jika lewat web routes, atau abaikan jika murni API stateless
+                    },
+                    success: function(res) {
+                        if(res.success) {
+                            localStorage.setItem('device_token', res.data.device_token);
+                            localStorage.setItem('device_name', res.data.device_name);
+                            Swal.fire('Berhasil', 'Perangkat berhasil didaftarkan!', 'success');
+                            checkDeviceRegistration();
+                            $('#deviceConfig').collapse('hide');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error(xhr);
+                        Swal.fire('Gagal', 'Gagal mendaftarkan perangkat. Cek koneksi.', 'error');
+                    }
+                });
+            });
+
+            // Handle Reset Button
+            $('#btn-reset-device').click(function() {
+                Swal.fire({
+                    title: 'Hapus Registrasi?',
+                    text: "Perangkat ini tidak akan dikenali lagi oleh sistem.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Hapus'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        localStorage.removeItem('device_token');
+                        localStorage.removeItem('device_name');
+                        checkDeviceRegistration();
+                    }
+                });
+            });
+
+
             // --- 1. SETUP AUDIO MP3 ---
             const audioSuccess = new Audio("{{ asset('audio/success.mp3') }}");
             const audioError = new Audio("{{ asset('audio/error.mp3') }}");
@@ -82,15 +191,13 @@
             }
             window.playSound = playSound;
 
-            // --- 2. SETUP KAMERA (FITUR BARU) ---
-            // Mendapatkan daftar kamera yang tersedia
+            // --- 2. SETUP KAMERA ---
             Html5Qrcode.getCameras().then(devices => {
                 const cameraSelect = $('#camera-select');
-                cameraSelect.empty(); // Kosongkan opsi loading
+                cameraSelect.empty();
 
                 if (devices && devices.length) {
                     devices.forEach((device, index) => {
-                        // Tambahkan opsi ke dropdown
                         const option = $('<option></option>').attr('value', device.id).text(device.label || `Kamera ${index + 1}`);
                         cameraSelect.append(option);
                     });
@@ -111,22 +218,18 @@
                     return;
                 }
 
-                if (isScanning) return; // Cegah double click
+                if (isScanning) return;
 
-                // Konfigurasi Scanner
                 const config = {
                     fps: 10,
                     qrbox: { width: 250, height: 250 }
                 };
 
-                // Mulai Scanning
                 html5QrCode.start(
                     cameraId,
                     config,
-                    onScanSuccess, // Fungsi saat sukses scan
-                    (errorMessage) => {
-                        // console.log(errorMessage); // Ignore error scanning frames
-                    }
+                    onScanSuccess,
+                    (errorMessage) => { }
                 ).then(() => {
                     isScanning = true;
                     $('#btn-start').prop('disabled', true);
@@ -146,7 +249,6 @@
                     $('#btn-start').prop('disabled', false);
                     $('#btn-stop').prop('disabled', true);
                     $('#camera-select').prop('disabled', false);
-                    // Bersihkan area
                     html5QrCode.clear();
                 }).catch(err => {
                     console.log("Gagal stop scanner", err);
@@ -157,8 +259,10 @@
             function onScanSuccess(decodedText, decodedResult) {
                 if (!isScanning) return;
 
-                // Pause sementara agar tidak scan berulang kali cepat
                 html5QrCode.pause();
+
+                // Ambil token dari localstorage (opsional, jika ingin dikirim ke server untuk validasi)
+                const deviceToken = localStorage.getItem('device_token');
 
                 Swal.fire({
                     title: 'Memproses...',
@@ -172,7 +276,8 @@
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        nis: decodedText
+                        nis: decodedText,
+                        device_token: deviceToken // Kirim token perangkat (jika backend membutuhkannya)
                     },
                     success: function(res) {
                         if(res.status == 'success') {
@@ -188,8 +293,7 @@
                                 background: '#fff',
                                 iconColor: color
                             }).then(() => {
-                                // Resume scanning setelah alert tutup
-                                try { html5Qrcode.resume(); } catch(e){}
+                                try { html5QrCode.resume(); } catch(e){}
                             });
                         } else {
                             playSound('error');
@@ -200,7 +304,7 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             }).then(() => {
-                                try { html5Qrcode.resume(); } catch(e){}
+                                try { html5QrCode.resume(); } catch(e){}
                             });
                         }
                     },
