@@ -82,7 +82,7 @@ $status = $guruId->status;
 					</ul>
 				</li>
 
-                
+
                 <li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon"><i class='bx bx-group'></i>
@@ -160,6 +160,19 @@ $status = $guruId->status;
 						<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
 						<li> <a href="{{url('/absensi/report')}}"><i class='bx bx-border-all'></i>Kehadiran</a>
 						<li> <a href="{{url('/transkrip')}}"><i class='bx bx-border-all'></i>Transkip</a>
+						</li>
+
+					</ul>
+				</li>
+
+                <li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="bx bxs-report"></i>
+						</div>
+						<div class="menu-title">Sertifkat</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('certificates.index')}}"><i class='bx bx-border-all'></i>Print</a>
 						</li>
 
 					</ul>
