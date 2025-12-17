@@ -37,6 +37,8 @@ use App\Http\Controllers\TeachingAssignmentController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ScannerDeviceController;
 
+use App\Http\Controllers\StudentPermissionController;
+
 Route::view('/', 'welcome');
 
 Route::view('dashboard', 'dashboard')
@@ -133,6 +135,8 @@ Route::middleware(['auth'])->group(function () {
     // Scan Masuk & Pulang via Wajah
         Route::get('/daily-face-scan', [FaceController::class, 'dailyScan'])->name('daily.face.scan');
         Route::get('/face/all-descriptors', [FaceController::class, 'getAllDescriptors'])->name('face.descriptors.all');
+
+
 
     });
 
@@ -284,6 +288,12 @@ Route::middleware(['auth'])->group(function () {
             ->except(['create', 'show']);
 
         Route::get('/scan-camera', [ScannerDeviceController::class, 'scan'])->name('scan.camera');
+
+        Route::post('/izin/store', [StudentPermissionController::class, 'store'])->name('izin.store');
+        Route::post('/izin/show', [StudentPermissionController::class, 'show'])->name('izin.show');
+        Route::post('/izin/check', [StudentPermissionController::class, 'check'])->name('izin.check');
+        Route::post('/izin/return', [StudentPermissionController::class, 'markReturn'])->name('izin.return');
+        Route::get('/izin/print/{id}', [StudentPermissionController::class, 'print'])->name('izin.print');
 
     });
 
