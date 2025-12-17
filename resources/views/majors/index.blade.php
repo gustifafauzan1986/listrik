@@ -13,7 +13,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered align-middle">
+                            <table id="example" class="table table-hover table-bordered align-middle">
                                 <thead class="table-dark text-center">
                                     <tr>
                                         <th width="10%">No</th>
@@ -62,8 +62,26 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        
-        
+        // Cek apakah ada session 'success' yang dikirim dari controller
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
+            });
+        @endif
+
+        // Opsional: Cek jika ada error validasi
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Mohon periksa kembali inputan Anda.',
+            });
+        @endif
+
                 function confirmDelete(id, name) {
                     Swal.fire({
                         title: 'Apakah Anda yakin?',

@@ -45,7 +45,7 @@
                 @endif -->
 
                 <div class="table-responsive">
-                    <table class="table align-middle table-hover table-striped">
+                    <table id="example" class="table align-middle table-hover table-striped">
                         <thead class="text-center table-dark">
                             <tr>
                                 <th width="5%">No</th>
@@ -274,8 +274,29 @@
             </div>
         </div>
     </div>
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
+            });
+        @endif
+
+        // Opsional: Cek jika ada error validasi
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Mohon periksa kembali inputan Anda.',
+            });
+        @endif
+
         function confirmDelete(id, name) {
             Swal.fire({
                 title: 'Hapus Kelas?',
