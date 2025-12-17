@@ -15,13 +15,13 @@ return new class extends Migration
             $table->uuid('id')->primary(); // UUID
             $table->string('name')->unique(); // Contoh: XII RPL 1
             // Wali Kelas (Relasi ke tabel teachers)
-            $table->foreignId('homeroom_teacher_id')
+            $table->foreignUuid('homeroom_teacher_id')
                   ->nullable()
                   ->constrained('teachers')
                   ->onDelete('set null');
 
             // Guru BK (Relasi ke tabel teachers)
-            $table->foreignId('counseling_teacher_id')
+            $table->foreignUuid('counseling_teacher_id')
                   ->nullable()
                   ->constrained('teachers')
                   ->onDelete('set null');

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             // Relasi ke Users (Untuk Login)
+            $table->string('name');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             // Data Profil Guru
             $table->string('nip')->unique()->nullable(); // Nomor Induk Pegawai

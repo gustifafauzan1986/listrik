@@ -53,6 +53,7 @@ class TeacherImport implements ToModel, WithHeadingRow
         // B. Buat Data Guru Baru
         Teacher::create([
             'user_id'         => $user->id,
+            'name'            => $row['nama'],
             'nip'             => $row['nip'] ?? null,
             'gender'          => $row['jk'] ?? null,
             'phone'           => $row['hp'] ?? null,

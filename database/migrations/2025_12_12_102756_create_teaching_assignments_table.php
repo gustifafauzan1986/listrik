@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('teaching_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
-            $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
-            $table->foreignId('classroom_id')->constrained('classrooms')->onDelete('cascade');
+            $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
+            $table->foreignUuid('classroom_id')->constrained('classrooms')->onDelete('cascade');
             $table->string('academic_year')->nullable(); // Tahun Ajaran (opsional)
             $table->timestamps();
         });
