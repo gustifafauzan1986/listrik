@@ -2,7 +2,16 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Cetak Sertifikat Reward</title>
+      <!-- DYNAMIC FAVICON -->
+    @php
+        $favicon = \App\Models\Setting::value('app_favicon');
+    @endphp
+    @if($favicon)
+        <link rel="icon" href="{{ asset('storage/'.$favicon) }}" type="image/x-icon"/>
+    @else
+        <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png') }}" type="image/x-icon"/>
+    @endif
+    <title>Cetak Sertifikat Reward || {{$school['name'] ?? 'SMK N 1 CONTOH'}}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap');
 
