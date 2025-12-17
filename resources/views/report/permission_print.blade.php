@@ -20,7 +20,7 @@
     <div class="border-box">
         <div class="header">
             <h3>SURAT IZIN MENINGGALKAN SEKOLAH</h3>
-            <small>SMK NEGERI TEKNOLOGI</small>
+            <small>{{$school['name'] ?? 'SMK GATECH'}}</small>
         </div>
 
         <table>
