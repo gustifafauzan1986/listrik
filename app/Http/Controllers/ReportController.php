@@ -118,6 +118,8 @@ class ReportController extends Controller
         $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
 
         return $pdf->stream('Laporan-Absensi.pdf');
+
+
     }
 
     /**

@@ -139,8 +139,10 @@ class StudentPermissionController extends Controller
     // Cetak Surat Izin (Format sesuai permintaan upload)
     public function print($id)
     {
-        $school = $this->getSchoolData();
+        // $school = $this->getSchoolData();
         $permit = StudentPermission::with(['student.classroom'])->findOrFail($id);
+        // FIX: Menambahkan variabel $school
+        $school = $this->getSchoolData();
         return view('report.permission_print', compact('permit', 'school' ));
     }
 
