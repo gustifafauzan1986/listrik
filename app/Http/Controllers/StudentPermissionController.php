@@ -107,7 +107,7 @@ class StudentPermissionController extends Controller
 
         // 3. Simpan File PDF ke Storage
         // Nama file: IZIN-{NIS}-{TIMESTAMP}.pdf
-        $filename = 'IZIN-' . $student->nis . '-' . time() . '.pdf';
+        $filename = 'IZIN-' . $student->nis . '-' . $student->name . '-' . time() . '.pdf';
         $path = 'permissions/' . $filename;
 
         // Simpan ke storage/app/public/permissions/
