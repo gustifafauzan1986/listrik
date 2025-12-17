@@ -174,7 +174,7 @@
     <div class="certificate-container">
         <div class="border-pattern">
             <div class="content">
-                <div class="logo">SMK NEGERI TEKNOLOGI</div>
+                <div class="logo">{{$school['school_name'] ?? 'SMK N 1 CONTOH'}}</div>
                 
                 <!-- Judul dari Input -->
                 <div class="title">Certificate of Achievement</div>
