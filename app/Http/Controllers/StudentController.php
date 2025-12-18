@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Classroom;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentController extends Controller
 {
@@ -99,6 +100,32 @@ class StudentController extends Controller
         return Excel::download(new StudentExport, 'Data-Siswa.xlsx');
     }
 
-    
-    
+    /**
+     * Cetak ID Card Siswa (Ukuran 9cm x 4cm).
+     */
+    public function printIdCard($id)
+    {
+        // Ambil data siswa beserta kelasnya
+        $student = Student::with('classroom')->findOrFail($id);
+
+        return view('students.print_id_card', compact('student'));
+    }
+
+
+    public function printIdCardPdf($id)
+{
+    $student = \App\Models\Student::with('classroom')->findOrFail($id);
+
+    // Set ukuran kertas kustom sesuai ID Card (9cm x 5.5cm atau 9cm x 4cm)
+    // array(0, 0, width_in_points, height_in_points) -> 1cm ≈ 28.35 points
+    $customPaper = array(0, 0, 255.1, 113.4); // ~9cm x 4cm
+
+    $pdf = Pdf::loadView('students.pdf_id_card', compact('student'))
+                ->setPaper($customPaper, 'landscape');
+
+    return $pdf->stream('ID-CARD-' . $student->nis . '.pdf');
+}
+
+
+
 }

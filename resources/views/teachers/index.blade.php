@@ -16,19 +16,19 @@
                         <i class="bx bx-export"></i> Export
                     </a>
                 </div>
-                
+
                 {{-- Tombol Tambah Manual (Opsional, jika ada route create) --}}
-                <a href="" class="btn btn-primary shadow-sm">
+                <a href="" class="shadow-sm btn btn-primary">
                     <i class="bx bx-plus"></i> Tambah Guru
                 </a>
             </div>
 
-            @if(session('success'))
+            {{-- @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+            @endif --}}
 
             <div class="border-0 shadow card">
                 <div class="card-body">
@@ -42,8 +42,8 @@
                     </form>
 
                     <div class="table-responsive">
-                        <table id="example" class="table table-striped table-bordered align-middle">
-                            <thead class="table-dark text-center">
+                        <table id="example" class="table align-middle table-striped table-bordered">
+                            <thead class="text-center table-dark">
                                 <tr>
                                     <th>Nama Lengkap</th>
                                     <th>NIP</th>
@@ -62,7 +62,7 @@
                                         <td class="text-center">{{ $teacher->gender ?? '-' }}</td>
                                         <td>{{ $teacher->user->email ?? '-' }}</td>
                                         <td class="text-center">{{ $teacher->phone ?? '-' }}</td>
-                                        
+
                                         {{-- LOGIKA KETERANGAN GURU --}}
                                         <td class="text-center">
                                             @if($teacher->major)
@@ -85,7 +85,7 @@
                                                 </a>
 
                                                 <!-- TOMBOL MODAL EDIT -->
-                                                <button type="button" class="btn btn-sm btn-warning text-white" data-bs-toggle="modal" data-bs-target="#editTeacherModal{{ $teacher->id }}" title="Edit">
+                                                <button type="button" class="text-white btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editTeacherModal{{ $teacher->id }}" title="Edit">
                                                     <i class="bx bx-message-square-edit"></i>
                                                 </button>
 
@@ -112,11 +112,11 @@
                                                             @csrf
                                                             @method('PUT')
                                                             <div class="modal-body text-start">
-                                                                
+
                                                                 <div class="row">
                                                                     <!-- Data Akun (User) -->
                                                                     <div class="col-md-6">
-                                                                        <h6 class="fw-bold text-primary mb-3">Informasi Akun</h6>
+                                                                        <h6 class="mb-3 fw-bold text-primary">Informasi Akun</h6>
                                                                         <div class="mb-3">
                                                                             <label class="form-label">Nama Lengkap</label>
                                                                             <input type="text" name="name" class="form-control" value="{{ $teacher->user->name ?? '' }}" required>
@@ -133,7 +133,7 @@
 
                                                                     <!-- Data Profil (Teacher) -->
                                                                     <div class="col-md-6">
-                                                                        <h6 class="fw-bold text-primary mb-3">Data Profil</h6>
+                                                                        <h6 class="mb-3 fw-bold text-primary">Data Profil</h6>
                                                                         <div class="mb-3">
                                                                             <label class="form-label">NIP</label>
                                                                             <input type="text" name="nip" class="form-control" value="{{ $teacher->nip }}">
@@ -149,7 +149,7 @@
                                                                             <label class="form-label">No. HP</label>
                                                                             <input type="text" name="phone" class="form-control" value="{{ $teacher->phone }}">
                                                                         </div>
-                                                                        
+
                                                                         <!-- Jika ada kolom jurusan (major_id) di table teachers -->
                                                                         @if(\Schema::hasColumn('teachers', 'major_id'))
                                                                         <div class="mb-3">
@@ -208,4 +208,27 @@
             </div>
 
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
+            });
+        @endif
+
+        // Opsional: Cek jika ada error validasi
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Mohon periksa kembali inputan Anda.',
+            });
+        @endif
+    </script>
 </x-app-layout>

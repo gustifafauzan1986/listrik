@@ -147,62 +147,6 @@
             </div>
         </div>
     </div>
-<script>
-    // SweetAlert untuk Konfirmasi Hapus Kelas
-    function confirmDelete(id, name) {
-        Swal.fire({
-            title: 'Hapus Kelas?',
-            text: "Anda akan menghapus kelas " + name + ". Data siswa di dalamnya mungkin akan kehilangan relasi kelas!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-form-' + id).submit();
-            }
-        })
-    }
 
-    // SweetAlert untuk Konfirmasi Keluarkan Siswa dari Kelas
-    function confirmRemoveStudent(id, name) {
-        Swal.fire({
-            title: 'Keluarkan Siswa?',
-            text: "Siswa " + name + " akan dikeluarkan dari kelas ini (Data siswa tidak terhapus).",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, Keluarkan!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('remove-student-form-' + id).submit();
-            }
-        })
-    }
-
-    // SweetAlert untuk Notifikasi Sukses (Session)
-    // FIX: Menggunakan json_encode agar string aman dari karakter spesial/newline
-    @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: {!! json_encode(session('success')) !!},
-            timer: 2000,
-            showConfirmButton: false
-        });
-    @endif
-
-    @if(session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: {!! json_encode(session('error')) !!},
-        });
-    @endif
-</script>
 
 </x-app-layout>

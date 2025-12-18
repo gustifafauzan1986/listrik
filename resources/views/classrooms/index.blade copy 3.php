@@ -17,6 +17,7 @@
             $allTeachers = \App\Models\Teacher::orderBy('name')->get();
 
             // Ambil ID guru yang sudah menjadi wali kelas di kelas manapun
+            // Ini digunakan untuk memfilter dropdown agar satu guru tidak memegang 2 kelas
             $takenHomeroomIds = \App\Models\Classroom::whereNotNull('homeroom_teacher_id')->pluck('homeroom_teacher_id')->toArray();
         @endphp
 
@@ -31,8 +32,8 @@
                     </div>
                 </form>
 
-                <!-- Menampilkan Error Validasi -->
-                @if ($errors->any())
+                <!-- Menampilkan Error Validasi (jika ada duplicate entry dari modal) -->
+                <!-- @if ($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <ul class="mb-0">
                             @foreach ($errors->all() as $error)
@@ -41,10 +42,10 @@
                         </ul>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                @endif
+                @endif -->
 
                 <div class="table-responsive">
-                    <table class="table align-middle table-hover table-striped">
+                    <table id="example" class="table align-middle table-hover table-striped">
                         <thead class="text-center table-dark">
                             <tr>
                                 <th width="5%">No</th>
@@ -65,7 +66,7 @@
                                     {{-- Kolom Wali Kelas --}}
                                     <td>
                                         @if($room->homeroomTeacher)
-                                            <span class="badge bg-primary">{{ $room->homeroomTeacher->name }}</span>
+                                            <span class="badge bg-primary">{{ $room->homeroomTeacher->user->name }}</span>
                                         @else
                                             <span class="text-muted small text-italic">- Belum ada -</span>
                                         @endif
@@ -74,7 +75,7 @@
                                     {{-- Kolom Guru BK --}}
                                     <td>
                                         @if($room->counselingTeacher)
-                                            <span class="badge bg-info text-dark">{{ $room->counselingTeacher->name }}</span>
+                                            <span class="badge bg-info text-dark">{{ $room->counselingTeacher->user->name }}</span>
                                         @else
                                             <span class="text-muted small text-italic">- Belum ada -</span>
                                         @endif
@@ -124,6 +125,7 @@
                                                                                 <span class="badge bg-secondary" title="Belum Rekam Wajah"><i class="fas fa-user-slash"></i></span>
                                                                             @endif
 
+                                                                            <!-- Form remove student -->
                                                                             <form id="remove-student-form-{{ $student->id }}" action="{{ route('students.remove_class', $student->id) }}" method="POST">
                                                                                 @csrf
                                                                                 @method('PATCH')
@@ -157,11 +159,6 @@
                                                 <i class="fas fa-user-cog"></i>
                                             </button>
 
-                                            <!-- Tombol Cetak ID Massal (PDF) -->
-                                            <a href="{{ route('classrooms.print_ids', $room->id) }}" class="text-white btn btn-sm btn-dark" target="_blank" title="Cetak ID Card Se-Kelas">
-                                                <i class="fas fa-id-card"></i>
-                                            </a>
-
                                             <!-- Tombol Edit -->
                                             <a href="{{ route('classrooms.edit', $room->id) }}" class="text-white btn btn-sm btn-warning" title="Edit Nama">
                                                 <i class="bx bx-message-square-edit"></i>
@@ -191,19 +188,26 @@
                                                     <form action="{{ route('classrooms.update', $room->id) }}" method="POST">
                                                         @csrf
                                                         @method('PUT')
+                                                        <!-- Kirim nama kelas agar validasi unique tidak error -->
                                                         <input type="hidden" name="name" value="{{ $room->name }}">
 
                                                         <div class="modal-body text-start">
 
-                                                            <!-- WALI KELAS -->
+                                                            <!-- WALI KELAS (FILTERED) -->
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-bold">Wali Kelas</label>
                                                                 <select name="homeroom_teacher_id" class="form-select select2-modal">
                                                                     <option value="">-- Pilih Wali Kelas --</option>
                                                                     @foreach($allTeachers as $teacher)
+                                                                        {{--
+                                                                            LOGIKA FILTER:
+                                                                            Tampilkan Guru JIKA:
+                                                                            1. ID Guru ini TIDAK ADA di daftar 'takenHomeroomIds'
+                                                                            2. ATAU ID Guru ini ADALAH Wali Kelas saat ini (agar selected value tetap muncul)
+                                                                        --}}
                                                                         @if(!in_array($teacher->id, $takenHomeroomIds) || $room->homeroom_teacher_id == $teacher->id)
                                                                             <option value="{{ $teacher->id }}" {{ $room->homeroom_teacher_id == $teacher->id ? 'selected' : '' }}>
-                                                                                {{ $teacher->name }}
+                                                                                {{ $teacher->user->name }}
                                                                             </option>
                                                                         @endif
                                                                     @endforeach
@@ -220,7 +224,7 @@
                                                                     <option value="">-- Pilih Guru BK --</option>
                                                                     @foreach($allTeachers as $teacher)
                                                                         <option value="{{ $teacher->id }}" {{ $room->counseling_teacher_id == $teacher->id ? 'selected' : '' }}>
-                                                                            {{ $teacher->name }}
+                                                                            {{ $teacher->user->name }}
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
@@ -264,52 +268,13 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-3">
+                <!-- <div class="mt-3">
                     {{ $classrooms->withQueryString()->links() }}
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
 
-    <script>
-        function confirmDelete(id, name) {
-            Swal.fire({
-                title: 'Hapus Kelas?',
-                text: "Hapus kelas " + name + "?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
-                }
-            })
-        }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        function confirmRemoveStudent(id, name) {
-            Swal.fire({
-                title: 'Keluarkan Siswa?',
-                text: "Keluarkan " + name + " dari kelas?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Ya',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('remove-student-form-' + id).submit();
-                }
-            })
-        }
-
-        @if(session('success'))
-            Swal.fire({ icon: 'success', title: 'Berhasil!', text: {!! json_encode(session('success')) !!}, timer: 2000, showConfirmButton: false });
-        @endif
-        @if(session('error'))
-            Swal.fire({ icon: 'error', title: 'Gagal!', text: {!! json_encode(session('error')) !!} });
-        @endif
-    </script>
 </x-app-layout>

@@ -232,6 +232,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('majors', MajorController::class);
 
         Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClassroom'])->name('students.remove_class');
+
+         // Route khusus cetak ID Card (Fitur yang baru ditambahkan)
+        Route::get('/students/{id}/print-id', [StudentController::class, 'printIdCard'])->name('students.print_id');
+        // Route khusus cetak ID Card (PDF Download/Stream) - FITUR BARU
+        Route::get('/students/{id}/print-id-pdf', [StudentController::class, 'printIdCardPdf'])->name('students.print_id_pdf');
+
+        // Route untuk mengeluarkan siswa dari kelas (Unassign)
+        Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClass'])->name('students.remove_class');
         // --- 6. WHATSAPP GATEWAY (BROADCAST) ---
         Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index'); // Manual 1 nomor
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
@@ -246,6 +254,8 @@ Route::middleware(['auth'])->group(function () {
         // Manajemen Kelas
         Route::get('/classrooms/export', [ClassroomController::class, 'export'])->name('classrooms.export'); // [BARU]
 
+          // Route Cetak ID Card Massal per Kelas (PDF)
+        Route::get('/classrooms/{id}/print-ids', [ClassroomController::class, 'printAllIdsPdf'])->name('classrooms.print_ids');
         Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export');
         // PERBAIKAN: method 'show' tidak lagi di-exclude agar halaman detail guru bisa diakses
         Route::resource('teachers', TeacherController::class)->except(['create', 'store']);

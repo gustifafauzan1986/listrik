@@ -78,6 +78,10 @@
                                                 <i class="bx bx-message-square-edit"></i>
                                             </a>
 
+                                            <a href="{{ route('students.print_id', $student->id) }}" class="text-white btn btn-sm btn-warning" title="Edit">
+                                                <i class="bx bx-message-square-edit"></i>
+                                            </a>
+
                                             <form action="{{ route('students.destroy', $student->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus siswa ini? Data absensi juga akan terhapus.');">
                                                 @csrf
                                                 @method('DELETE')

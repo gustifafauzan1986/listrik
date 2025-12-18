@@ -7,6 +7,7 @@ use App\Models\Major;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule; // Import Rule
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClassroomController extends Controller
 {
@@ -34,8 +35,8 @@ class ClassroomController extends Controller
         $majors = Major::all();
         // Hanya tampilkan guru yang BELUM jadi wali kelas
         $assignedTeacherIds = Classroom::whereNotNull('homeroom_teacher_id')->pluck('homeroom_teacher_id');
-        $teachers = Teacher::whereNotIn('id', $assignedTeacherIds)->orderBy('name')->get(); 
-        
+        $teachers = Teacher::whereNotIn('id', $assignedTeacherIds)->orderBy('name')->get();
+
         return view('classrooms.create', compact('majors', 'teachers'));
     }
 
@@ -49,7 +50,7 @@ class ClassroomController extends Controller
             'major_id' => 'nullable|exists:majors,id',
             // Validasi: Wali Kelas harus unik di tabel classrooms
             'homeroom_teacher_id' => [
-                'nullable', 
+                'nullable',
                 'exists:teachers,id',
                 'unique:classrooms,homeroom_teacher_id' // Guru tidak boleh dipakai di kelas lain
             ],
@@ -82,20 +83,20 @@ class ClassroomController extends Controller
     {
         $request->validate([
             'name' => [
-                'required', 
-                'string', 
-                'max:255', 
+                'required',
+                'string',
+                'max:255',
                 Rule::unique('classrooms', 'name')->ignore($classroom->id)
             ],
             'major_id' => 'nullable|exists:majors,id',
-            
+
             // Validasi Unik Wali Kelas (Kecuali untuk kelas ini sendiri)
             'homeroom_teacher_id' => [
                 'nullable',
                 'exists:teachers,id',
                 Rule::unique('classrooms', 'homeroom_teacher_id')->ignore($classroom->id),
             ],
-            
+
             'counseling_teacher_id' => 'nullable|exists:teachers,id',
             'class_leader_id' => 'nullable|exists:students,id',
         ], [
@@ -116,5 +117,23 @@ class ClassroomController extends Controller
         $classroom->delete();
 
         return redirect()->route('classrooms.index')->with('success', 'Kelas berhasil dihapus.');
+    }
+
+    /**
+     * Cetak Semua ID Card Siswa dalam Satu Kelas (PDF A4 Portrait)
+     * Method ini yang sebelumnya hilang/undefined.
+     */
+    public function printAllIdsPdf($id)
+    {
+        // Ambil data kelas beserta siswanya, urutkan nama siswa abjad
+        $classroom = Classroom::with(['students' => function($query) {
+            $query->orderBy('name', 'asc');
+        }])->findOrFail($id);
+
+        // Load View PDF
+        $pdf = Pdf::loadView('classrooms.pdf_all_ids', compact('classroom'))
+                  ->setPaper('a4', 'portrait'); // Set kertas A4 Portrait
+
+        return $pdf->stream('ID-CARDS-' . $classroom->name . '.pdf');
     }
 }
