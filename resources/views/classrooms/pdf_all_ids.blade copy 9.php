@@ -20,38 +20,24 @@
             text-align: left;
         }
 
+        /* Kotak Kartu */
         .card-container {
-    width: 8cm;
-    height: 4cm;
-    
-    /* Layout */
-    display: inline-block;
-    vertical-align: top;
-    position: relative;
-    
-    /* --- GAYA GARIS MENARIK --- */
-    /* Garis pinggir tipis abu-abu */
-    border: 1px solid #e0e0e0; 
-    
-    /* Garis Atas Tebal (Warna Utama/Biru) */
-    border-top: 6px solid #1a73e8; 
-    
-    /* Garis Bawah Sedang (Hitam/Gelap) */
-    border-bottom: 3px solid #333; 
-    
-    /* Sudut sedikit melengkung */
-    border-radius: 8px; 
-    
-    /* Agar garis tebal tidak mengubah ukuran total 9cm */
-    box-sizing: border-box; 
-    
-    /* Spasi */
-    margin-right: 0.2cm;
-    margin-bottom: 0.5cm;
-    background-color: #fff;
-    page-break-inside: avoid;
-    overflow: hidden; /* Agar isi tidak keluar dari sudut lengkung */
-}
+            width: 9cm;
+            height: 4cm;
+
+            /* PENTING: Gunakan inline-block agar page-break berfungsi normal di PDF */
+            display: inline-block;
+            vertical-align: top;
+
+            border: 1px dashed #aaa; /* Garis potong */
+            margin-right: 0.2cm;     /* Jarak antar kolom */
+            margin-bottom: 0.5cm;    /* Jarak antar baris */
+            position: relative;
+            background-color: #fff;
+
+            /* Mencegah kartu terbelah di akhir halaman */
+            page-break-inside: avoid;
+        }
 
         /* Latar Belakang Kartu */
         .card-bg {
