@@ -46,6 +46,7 @@ class SettingController extends Controller
             'signature_title' => 'required|string',
             'signature_name'  => 'required|string',
             'signature_nip'   => 'nullable|string',
+            'info_aplikasi'   => 'nullable|string',
         ]);
 
         // 2. Daftar File yang akan diproses

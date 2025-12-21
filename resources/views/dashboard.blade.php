@@ -7,6 +7,7 @@
     $user = Auth::user();
     $status = $user->status ?? '0'; // Amankan dari null
     $id = $user->id;
+    $userGuru = $user->name;
 
     // --- Data Statik Umum (Admin) ---
     // Gunakan cache atau Service Provider untuk data ini jika sering diakses.

@@ -1,5 +1,5 @@
 <div class="page-content">
-					<h4>Akun <b>{{ $guruId->name}} </b><span class="text-success">Aktif</span> </h4>
+					<h4>Akun <b>{{ $userGuru}} </b><span class="text-success">Aktif</span> </h4>
 				<div class="row row-cols-1 row-cols-md-2 row-cols-xl-2 row-cols-xxl-4">
                    <div class="col">
 					 <div class="card radius-10 bg-gradient-cosmic">

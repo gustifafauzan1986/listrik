@@ -39,6 +39,12 @@
                                         <i class="fas fa-file-pdf me-2"></i> Kertas & Tanda Tangan
                                     </button>
                                 </li>
+
+                                 <li class="nav-item">
+                                    <button class="nav-link fw-bold" id="absensi-tab" data-bs-toggle="tab" data-bs-target="#absensi" type="button">
+                                        <i class="fas fa-file-pdf me-2"></i> Info Absensi
+                                    </button>
+                                </li>
                             </ul>
 
                             <div class="tab-content" id="settingTabsContent">
@@ -216,6 +222,15 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                 <!-- TAB 4: Info Aplikasi -->
+                                <div class="tab-pane fade show active" id="absensi">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Info Aplikasi</label>
+                                        <input type="text" name="inf_app" class="form-control" value="{{ $settings['info_app'] ?? 'Sistem Absensi Sekolah.' }}">
+                                    </div>
+                                </div>
+                                
 
                             </div>
 

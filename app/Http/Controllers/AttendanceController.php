@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Schedule;
+use App\Models\Setting;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -118,6 +119,8 @@ class AttendanceController extends Controller
             $status = 'terlambat';
         }
 
+       
+
         // ---------------------------------------------------------
         // 5. SIMPAN KE DATABASE
         // ---------------------------------------------------------
@@ -206,6 +209,10 @@ class AttendanceController extends Controller
             'attendances' => 'required|array', // Key: student_id, Value: status
         ]);
 
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $inf_app = $settings['inf_app'];
+        //dd($inf_app);
+
         $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
 
         if ($schedule->teacher_id !== Auth::id()) {
@@ -277,7 +284,7 @@ class AttendanceController extends Controller
                            "📅 Tanggal : $tgl\n" .
                            "📝 Status : *" . strtoupper($status) . "* $emoji\n" .
                            "ℹ️ Ket : $keterangan\n\n" .
-                           "_Data ini diinput manual oleh Guru Pengampu._";
+                           "_$inf_app, Data ini diinput manual oleh Guru Pengampu._";
 
                 // Masukkan ke Antrian (Background Job)
                 // Ini penting agar proses simpan tidak lemot
