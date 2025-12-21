@@ -227,7 +227,7 @@
                                 <div class="tab-pane fade show active" id="absensi">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Info Aplikasi</label>
-                                        <input type="text" name="inf_app" class="form-control" value="{{ $settings['info_app'] ?? 'Sistem Absensi Sekolah.' }}">
+                                        <input type="text" name="inf_app" class="form-control" value="{{ $settings['inf_app'] ?? 'Sistem Absensi Sekolah.' }}">
                                     </div>
                                 </div>
                                 

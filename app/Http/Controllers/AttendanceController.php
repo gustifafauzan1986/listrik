@@ -119,7 +119,7 @@ class AttendanceController extends Controller
             $status = 'terlambat';
         }
 
-       
+        $settings = Setting::pluck('value', 'key')->toArray();
 
         // ---------------------------------------------------------
         // 5. SIMPAN KE DATABASE
