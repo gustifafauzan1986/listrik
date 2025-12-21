@@ -180,6 +180,8 @@ class DailyAttendanceController extends Controller
      */
     private function sendNotification($student, $type, $time, $status = '')
     {
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $inf_app = $settings['inf_app'] ?? 'Sistem Sekolah'; // Pakai default jika null
         if (empty($student->phone)) return;
 
         $tgl = date('d-m-Y');
@@ -191,28 +193,28 @@ class DailyAttendanceController extends Controller
 
         if ($type == 'datang') {
             $msg = "*LAPORAN KEDATANGAN (GERBANG)*\n\n" .
-                   "Yth. Orang Tua,\n" .
-                   "Putra/i: *{$student->name}*\n" .
-                   "Kelas: {$kelas}\n" .
-                   "Waktu: {$time} WIB\n" .
-                   "Status: *" . strtoupper($status) . "*\n\n" .
-                   "_Sistem Absensi Sekolah_";
+                   "Yth. Orang Tua/Wali,\n" .
+                   "👤 Nama: *{$student->name}*\n" .
+                   "🏫 Kelas: {$kelas}\n" .
+                   "📅 Waktu: {$time} WIB\n" .
+                   "📝 Status: *" . strtoupper($status) . "*\n\n" .
+                   "_$inf_app_";
         } elseif ($type == 'pulang') {
             $msg = "*LAPORAN KEPULANGAN (GERBANG)*\n\n" .
-                   "Yth. Orang Tua,\n" .
-                   "Putra/i: *{$student->name}*\n" .
-                   "Kelas: {$kelas}\n" .
-                   "Waktu: {$time} WIB\n" .
-                   "Status: *PULANG SEKOLAH*\n\n" .
-                   "_Sistem Absensi Sekolah_";
+                   "Yth. Orang Tua/Wali,\n" .
+                   "👤 Nama: *{$student->name}*\n" .
+                   "🏫 Kelas: {$kelas}\n" .
+                   "📅 Waktu: {$time} WIB\n" .
+                   "📝 Status: *PULANG SEKOLAH*\n\n" .
+                   "$inf_app";
         } elseif ($type == 'manual') {
             // Format pesan untuk input manual
             $msg = "*LAPORAN PRESENSI (MANUAL)*\n\n" .
-                   "Putra/i: *{$student->name}*\n" .
-                   "Kelas: {$kelas}\n" .
-                   "Status: *" . strtoupper($status) . "*\n" .
+                   "👤 Nama: *{$student->name}*\n" .
+                   "🏫 Kelas: {$kelas}\n" .
+                   "📝 Status: *" . strtoupper($status) . "*\n" .
                    "Ket: Data diinput manual oleh petugas.\n\n" .
-                   "_Sistem Absensi Sekolah_";
+                   "$inf_app";
         }
 
         // Hanya dispatch job jika pesan berhasil dibuat
