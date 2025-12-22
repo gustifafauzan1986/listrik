@@ -45,6 +45,7 @@ class TeacherImport implements ToModel, WithHeadingRow
         $user = User::create([
             'email'    => $row['email'],
             'name'     => $row['nama'],
+            'jenis_user'     => 'guru',
             'password' => Hash::make($row['password'] ?? 'guru123'),
         ]);
 
