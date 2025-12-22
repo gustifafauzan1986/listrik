@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Schedule;
 use App\Models\Setting;
 use App\Models\Attendance;
+use App\Models\Teacher;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http; // <--- WAJIB IMPORT HTTP CLIENT
@@ -18,15 +19,35 @@ class AttendanceController extends Controller
      * Menampilkan Halaman Scanner
      * URL: /scan/{schedule_id}
      */
+    // public function index($schedule_id)
+    // {
+    //     // 1. Cari Jadwal
+    //     // - with('classroom'): Kita butuh nama kelas untuk ditampilkan di judul halaman
+    //     // - where('teacher_id', Auth::id()): Keamanan, hanya pemilik jadwal yang bisa buka
+    //     $schedule = Schedule::with('classroom')
+    //                 ->where('id', $schedule_id)
+    //                 ->where('teacher_id', Auth::id())
+    //                 ->firstOrFail(); // Jika tidak ketemu/bukan pemiliknya, muncul 404
+
+    //     return view('scan', compact('schedule'));
+    // }
+
+
     public function index($schedule_id)
     {
-        // 1. Cari Jadwal
-        // - with('classroom'): Kita butuh nama kelas untuk ditampilkan di judul halaman
-        // - where('teacher_id', Auth::id()): Keamanan, hanya pemilik jadwal yang bisa buka
+        // 1. Ambil data Guru berdasarkan User yang login
+        $teacher = Teacher::where('user_id', Auth::id())->first();
+
+        // Validasi jika akun tidak terhubung ke data guru
+        if (!$teacher) {
+            abort(403, 'Akun Anda tidak terdaftar sebagai Guru.');
+        }
+
+        // 2. Cari Jadwal menggunakan ID GURU ($teacher->id), bukan ID USER
         $schedule = Schedule::with('classroom')
                     ->where('id', $schedule_id)
-                    ->where('teacher_id', Auth::id())
-                    ->firstOrFail(); // Jika tidak ketemu/bukan pemiliknya, muncul 404
+                    ->where('teacher_id', $teacher->id) // PERBAIKAN DI SINI
+                    ->firstOrFail();
 
         return view('scan', compact('schedule'));
     }
@@ -291,10 +312,19 @@ class AttendanceController extends Controller
      */
     public function createManual($schedule_id)
     {
+
+         $teacher = Teacher::where('user_id', Auth::id())->first();
+
+        // Validasi jika akun tidak terhubung ke data guru
+        if (!$teacher) {
+            abort(403, 'Akun Anda tidak terdaftar sebagai Guru.');
+        }
+
+
         // 1. Cari Jadwal & Validasi Pemilik
         $schedule = Schedule::with(['classroom', 'subject'])
                     ->where('id', $schedule_id)
-                    ->where('teacher_id', Auth::id())
+                    ->where('teacher_id', $teacher->id)
                     ->firstOrFail();
 
         // 2. Ambil semua siswa di kelas tersebut

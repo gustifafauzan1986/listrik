@@ -39,6 +39,7 @@ use App\Http\Controllers\ScannerDeviceController;
 
 use App\Http\Controllers\StudentPermissionController;
 use App\Http\Controllers\RecapController;
+use App\Http\Controllers\TeacherDashboardController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -106,6 +107,9 @@ Route::middleware(['auth'])->group(function () {
         // Cetak Semua & Satuan
         Route::get('/print-cards-siswa/all', [StudentAreaController::class, 'printAll'])->name('print.siswa.all');
         Route::get('/print-card-siswa/{id}', [StudentAreaController::class, 'printSingle'])->name('print.siswa.single');
+
+        // Route Khusus Dashboard Guru
+        Route::get('/guru/jadwal', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
 
     });
     // =========================================================================

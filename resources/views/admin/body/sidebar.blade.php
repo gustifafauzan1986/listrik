@@ -133,34 +133,35 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{route('print.index')}}"><i class='bx bx-id-card'></i>Kartu</a></li>
-
-
+						
+						
 					</ul>
 				</li>
-
+				
 				{{-- <li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-grid-alt"></i>
-						</div>
-						<div class="menu-title">GTK</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('users.import')}}"><i class='bx bx-radio-circle'></i>Impor Guru</a>
-						</li>
-					</ul>
-				</li> --}}
-
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"> <i class="bx bxs-report"></i>
-						</div>
-						<div class="menu-title">Laporan</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
-						<li> <a href="{{url('/absensi/report')}}"><i class='bx bx-border-all'></i>Kehadiran</a>
-						<li> <a href="{{url('/transkrip')}}"><i class='bx bx-border-all'></i>Transkip</a>
-						</li>
+					</div>
+					<div class="menu-title">GTK</div>
+				</a>
+				<ul>
+					<li> <a href="{{route('users.import')}}"><i class='bx bx-radio-circle'></i>Impor Guru</a>
+				</li>
+			</ul>
+		</li> --}}
+		
+		<li>
+			<a class="has-arrow" href="javascript:;">
+				<div class="parent-icon"> <i class="bx bxs-report"></i>
+			</div>
+			<div class="menu-title">Laporan</div>
+		</a>
+		<ul>
+			<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
+			<li> <a href="{{url('/absensi/report')}}"><i class='bx bx-border-all'></i>Kehadiran</a>
+			<li> <a href="{{url('/transkrip')}}"><i class='bx bx-border-all'></i>Transkip</a>
+			<li> <a href="{{route('recap.index')}}"><i class='bx bx-id-card'></i>Rekap</a>
+		</li>
 
 					</ul>
 				</li>

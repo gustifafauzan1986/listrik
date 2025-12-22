@@ -2,6 +2,24 @@
 
 <x-app-layout>
     <div class="page-content">
+        
+        <!-- CSS FIX: Membatasi ukuran icon SVG pada pagination -->
+        <style>
+            nav[role="navigation"] svg {
+                width: 20px;
+                height: 20px;
+            }
+            /* Jika menggunakan class w-5 h-5 dari tailwind default laravel pagination */
+            .w-5 { width: 20px; }
+            .h-5 { height: 20px; }
+            
+            /* Penyesuaian agar pagination terlihat rapi */
+            .pagination {
+                justify-content: center;
+                margin-top: 20px;
+            }
+        </style>
+
         <div class="mb-3">
             <a href="{{ route('recap.index') }}" class="text-decoration-none text-muted"><i class="fas fa-arrow-left"></i> Kembali ke Dashboard Rekap</a>
         </div>
@@ -33,7 +51,7 @@
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table align-middle table-hover table-bordered">
+                    <table id="example" class="table align-middle table-hover table-bordered">
                         <thead class="text-center table-light">
                             <tr>
                                 <th>No</th>
@@ -64,9 +82,10 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    {{ $students->links() }}
-                </div>
+                <!-- <div class="mt-3">
+                    {{-- Tambahkan appends agar filter tidak hilang saat pindah halaman --}}
+                    {{ $students->appends(request()->query())->links() }}
+                </div> -->
             </div>
         </div>
     </div>

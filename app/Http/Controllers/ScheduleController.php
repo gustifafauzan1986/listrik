@@ -1,66 +1,79 @@
 <?php
 
-
 namespace App\Http\Controllers;
-
 
 use Illuminate\Http\Request;
 use App\Models\Schedule;
-use App\Models\Classroom;
-use App\Models\Subject; // <--- Pastikan Model Subject di-import
 use App\Models\Attendance;
+use App\Models\Teacher; 
+use App\Models\TeachingAssignment; // Model Mapping
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
-
 class ScheduleController extends Controller
 {
+    /**
+     * Helper untuk mendapatkan Guru yang sedang login
+     */
+    private function getTeacher()
+    {
+        return Teacher::where('user_id', Auth::id())->first();
+    }
+
     /**
      * Menampilkan Daftar Jadwal Guru
      */
     public function index()
     {
-       // Ambil jadwal milik guru yang sedang login
+        $teacher = $this->getTeacher();
+        
+        if (!$teacher) {
+            return redirect()->back()->with('error', 'Akun Anda tidak terdaftar sebagai Guru.');
+        }
+
+        // Ambil jadwal guru
         $schedules = Schedule::with(['classroom', 'subject'])
-                        // Hitung jumlah kehadiran HANYA untuk tanggal HARI INI
-                        ->withCount(['attendances' => function ($query) {
-                            $query->where('date', date('Y-m-d'));
-                        }])
-                        ->where('teacher_id', Auth::id())
-                        ->get();
+            // Hitung jumlah siswa yang sudah diabsen pada jadwal ini (HARI INI)
+            ->withCount(['attendances' => function ($query) {
+                // Asumsi tabel attendances menggunakan timestamps created_at untuk tanggal
+                $query->whereDate('created_at', Carbon::today());
+            }])
+            ->where('teacher_id', $teacher->id)
+            ->get();
 
-
-
+        // Urutkan berdasarkan Hari (Senin -> Minggu) dan Jam Mulai
         $daysOrder = [
             'Senin' => 1, 'Selasa' => 2, 'Rabu' => 3,
             'Kamis' => 4, 'Jumat' => 5, 'Sabtu' => 6, 'Minggu' => 7
         ];
 
-
         $schedules = $schedules->sortBy(function ($schedule) use ($daysOrder) {
-            return $daysOrder[$schedule->day] ?? 99;
-        })->sortBy('start_time');
-
+            return ($daysOrder[$schedule->day] ?? 99) * 10000 + (int)str_replace(':', '', $schedule->start_time);
+        });
 
         return view('schedule.index', compact('schedules'));
     }
 
-
     /**
-     * Form Tambah Jadwal Baru (UPDATED)
-     * Mengambil data Kelas dan Mata Pelajaran untuk Dropdown
+     * Form Tambah Jadwal Baru (FILTERED BY MAPPING)
      */
     public function create()
     {
-        // Ambil daftar kelas urut nama
-        $classrooms = Classroom::orderBy('name')->get();
+        $teacher = $this->getTeacher();
+        if (!$teacher) abort(403, 'Akses khusus Guru');
 
-        // Ambil daftar mata pelajaran urut nama
-        $subjects = Subject::orderBy('name')->get();
+        // 1. Ambil semua Mapping milik Guru ini
+        // Kita load classroom dan subject agar bisa ditampilkan di dropdown
+        $assignments = TeachingAssignment::with(['classroom', 'subject'])
+                        ->where('teacher_id', $teacher->id)
+                        ->get();
 
-        return view('schedule.create', compact('classrooms', 'subjects'));
+        // 2. Ambil daftar Kelas Unik dari mapping tersebut untuk dropdown pertama
+        $classrooms = $assignments->pluck('classroom')->unique('id')->sortBy('name');
+
+        // Kirim $assignments ke view untuk filter JS dinamis (Kelas -> Mapel)
+        return view('schedule.create', compact('classrooms', 'assignments'));
     }
-
 
     /**
      * Simpan Jadwal ke Database
@@ -68,62 +81,75 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // 'subject_name' => 'required|string|max:255', // Kita simpan Nama Mapelnya
-            'subject_id'   => 'required|exists:subjects,id', // Kita simpan Nama Mapelnya
             'classroom_id' => 'required|exists:classrooms,id',
+            'subject_id'   => 'required|exists:subjects,id',
             'day'          => 'required',
             'start_time'   => 'required',
             'end_time'     => 'required|after:start_time',
         ]);
 
+        $teacher = $this->getTeacher();
 
+        // Validasi Tambahan: Pastikan Guru benar-benar punya mapping di kelas & mapel ini
+        $isValid = TeachingAssignment::where('teacher_id', $teacher->id)
+                    ->where('classroom_id', $request->classroom_id)
+                    ->where('subject_id', $request->subject_id)
+                    ->exists();
+
+        if (!$isValid) {
+            return back()
+                ->withErrors(['subject_id' => 'Anda tidak terdaftar mengajar mapel ini di kelas tersebut (Cek Mapping).'])
+                ->withInput();
+        }
+
+        // Simpan Jadwal
         Schedule::create([
-            'teacher_id'   => Auth::id(),
+            'teacher_id'   => $teacher->id,
             'classroom_id' => $request->classroom_id,
-            'subject_id' => $request->subject_id, // Simpan nama dari dropdown
+            'subject_id'   => $request->subject_id,
             'day'          => $request->day,
             'start_time'   => $request->start_time,
             'end_time'     => $request->end_time,
         ]);
 
-
         return redirect()->route('schedule.index')->with('success', 'Jadwal Berhasil Dibuat!');
     }
-
 
     /**
      * Lihat Detail Absensi
      */
     public function show($id)
     {
-        // 1. Cari Jadwal & Validasi Pemilik
-        $schedule = Schedule::with('classroom', 'subject')
+        $teacher = $this->getTeacher();
+
+        $schedule = Schedule::with(['classroom', 'subject'])
                     ->where('id', $id)
-                    ->where('teacher_id', Auth::id())
+                    ->where('teacher_id', $teacher->id)
                     ->firstOrFail();
 
-        // 2. Ambil Data Absensi HARI INI untuk jadwal tersebut
+        // Ambil Absensi Hari Ini (Mapel)
         $attendances = Attendance::with('student')
                         ->where('schedule_id', $id)
-                        ->where('date', date('Y-m-d'))
-                        ->orderBy('check_in_time', 'desc') // Yang baru absen ada di paling atas
+                        ->whereDate('created_at', Carbon::today())
+                        ->latest()
                         ->get();
-
 
         return view('schedule.show', compact('schedule', 'attendances'));
     }
-
 
     /**
      * Hapus Jadwal
      */
     public function destroy($id)
     {
-        $schedule = Schedule::where('id', $id)->where('teacher_id', Auth::id())->firstOrFail();
+        $teacher = $this->getTeacher();
         
-        // Hapus jadwal (Data absensi lama akan ikut terhapus jika onCascadeDelete aktif di database)
+        // Pastikan hanya pemilik jadwal yang bisa menghapus
+        $schedule = Schedule::where('id', $id)
+                    ->where('teacher_id', $teacher->id)
+                    ->firstOrFail();
+        
         $schedule->delete();
-
 
         return redirect()->route('schedule.index')->with('success', 'Jadwal Berhasil Dihapus!');
     }

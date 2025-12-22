@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Classroom;
 use App\Models\Schedule;
+use App\Models\Teacher;
 use Illuminate\Support\Facades\Auth;
 
 class FaceController extends Controller
@@ -111,10 +112,19 @@ class FaceController extends Controller
      */
     public function scan($schedule_id)
     {
+
+        $teacher = Teacher::where('user_id', Auth::id())->first();
+
+        // Validasi jika akun tidak terhubung ke data guru
+        if (!$teacher) {
+            abort(403, 'Akun Anda tidak terdaftar sebagai Guru.');
+        }
+
         $schedule = Schedule::with('classroom')
                     ->where('id', $schedule_id)
-                    ->where('teacher_id', Auth::id())
+                    ->where('teacher_id', $teacher->id)
                     ->firstOrFail();
+                    
 
         return view('face.scan', compact('schedule'));
     }

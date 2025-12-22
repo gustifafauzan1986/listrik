@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
            // Foreign Key ke Users (Guru) juga harus UUID
             // Gunakan foreignUuid(), BUKAN foreignId()
-            $table->foreignUuid('teacher_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
             $table->foreignUuid('classroom_id')->constrained('classrooms')->onDelete('cascade');
             // $table->string('subject_name');
             $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');

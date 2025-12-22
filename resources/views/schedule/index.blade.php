@@ -1,176 +1,330 @@
-@section('title')
-   Jadwal Pembelejaran
-@endsection
+@section('title', 'Jadwal Mengajar')
 
 <x-app-layout>
     <div class="page-content">
-        <div class="mb-4 d-flex justify-content-between align-items-center">
-            <div>
-                <h3 class="fw-bold text-primary"><i class="fas fa-chalkboard-teacher me-2"></i> Jadwal Mengajar Saya</h3>
-                <p class="mb-0 text-muted">Kelola jadwal, lakukan absensi, dan pantau kehadiran siswa.</p>
-            </div>
-            <div>
-                <a href="{{ route('schedule.create') }}" class="shadow-sm btn btn-success">
-                    <i class="bx bx-plus me-1"></i> Tambah Jadwal
-                </a>
-                <!-- Tombol Shortcut untuk Cetak Kartu -->
-                {{-- <a href="{{ route('print.index') }}" class="shadow-sm btn btn-outline-dark ms-2">
-                    <i class="fas fa-id-card me-1"></i> Cetak Kartu Siswa
-                </a> --}}
-            </div>
-        </div>
-
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show">
-                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        <div class="border-0 shadow card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table align-middle table-hover table-bordered">
-                        <thead class="text-center table-dark">
-                            <tr>
-                                <th>Hari</th>
-                                <th>Jam</th>
-                                <th>Kelas</th>
-                                <th>Mata Pelajaran</th>
-                                <th>Kehadiran Hari Ini</th>
-                                <th width="25%">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($schedules as $sched)
-                                @php
-                                    $dayMap = ['Sunday'=>'Minggu','Monday'=>'Senin','Tuesday'=>'Selasa','Wednesday'=>'Rabu','Thursday'=>'Kamis','Friday'=>'Jumat','Saturday'=>'Sabtu'];
-                                    $todayIs = $dayMap[date('l')];
-                                    $now = date('H:i:s');
-                                    // Jadwal aktif jika HARI SAMA dan JAM SEKARANG masuk dalam rentang waktu
-                                    $isActive = ($sched->day == $todayIs && $now >= $sched->start_time && $now <= $sched->end_time);
-                                @endphp
-
-                                <tr class="{{ $isActive ? 'table-success border-success' : '' }}">
-                                    <td class="text-center">{{ $sched->day }}</td>
-                                    <td class="text-center">{{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}</td>
-                                    <td class="text-center fw-bold">{{ $sched->classroom->name ?? '-' }}</td>
-
-                                    <!-- Nama Mapel (Support Relasi & Legacy String) -->
-                                    <td>{{ $sched->subject->name ?? $sched->subject_name ?? '-' }}</td>
-
-                                    <!-- MENAMPILKAN JUMLAH SISWA YANG SUDAH ABSEN HARI INI -->
-                                    <td class="text-center">
-                                        @if($sched->attendances_count > 0)
-                                            <span class="badge bg-info text-dark" style="font-size: 0.9rem;">
-                                                <i class="fas fa-user-check me-1"></i> {{ $sched->attendances_count }} Tercatat
-                                            </span>
-                                        @else
-                                            <span class="badge bg-secondary">Belum ada</span>
-                                        @endif
-                                    </td>
-
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <!-- Lihat Detail -->
-                                            <a href="{{ route('schedule.show', $sched->id) }}" class="text-white btn btn-sm btn-info" title="Lihat Data Absen">
-                                                <i class="bx bxs-show"></i>
-                                            </a>
-
-                                            <!-- Cetak PDF Laporan -->
-                                            <a href="{{ route('report.schedule', $sched->id) }}" class="btn btn-sm btn-danger" target="_blank" title="Cetak Laporan">
-                                                <i class="bx bxs-file-pdf"></i>
-                                            </a>
-
-                                            <!-- Scan / Hapus -->
-                                            @if($isActive)
-                                                <!-- Tombol Scan Berdenyut jika Aktif -->
-                                                <a href="{{ route('scan.index', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary pulse-button" title="Mulai Scan">
-                                                    <i class="bx bx-barcode"></i>
-                                                </a>
-                                                <a href="{{ url('/schedule/manual', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-primary">
-                                                    <i class="bx bx-message-square-add"></i>
-                                                </a>
-                                                <a href="{{ route('scan.face', ['schedule_id' => $sched->id]) }}" class="btn btn-sm btn-warning" title="Mode Scan Wajah">
-                                                    <i class="bx bx-camera"></i>
-                                                </a>
-                                            @else
-                                                <form action="{{ route('schedule.destroy', $sched->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus jadwal ini? Data absensi lama mungkin ikut terhapus.');">
-                                                    @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-outline-danger" title="Hapus Jadwal"><i class="bx bx-trash"></i></button>
-                                                </form>
-                                            @endif
-                                        </div>
-
-                                        <!-- Shortcut Cetak Kartu Kelas Ini -->
-                                        <div class="mt-1">
-                                            <a href="{{ route('print.siswa.select', $sched->classroom_id) }}" class="text-decoration-none small text-muted">
-                                                <i class="fas fa-print"></i> Kartu Kelas
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="6" class="py-5 text-center text-muted">Belum ada jadwal. Silakan klik tombol "Tambah Jadwal".</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+        <div class="container py-4">
+            
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-0 text-primary fw-bold"><i class="fas fa-calendar-alt me-2"></i> Jadwal Mengajar Saya</h4>
+                    <p class="text-muted small mb-0">Kelola jadwal pelajaran dan pantau absensi harian.</p>
                 </div>
+                <a href="{{ route('schedule.create') }}" class="btn btn-primary shadow-sm">
+                    <i class="fas fa-plus me-1"></i> Buat Jadwal Baru
+                </a>
+            </div>
+
+            <!-- Alert Success -->
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            <!-- TAB NAVIGASI -->
+            <ul class="nav nav-tabs mb-4" id="scheduleTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-view" type="button" role="tab">
+                        <i class="fas fa-list me-1"></i> Tampilan List
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-view" type="button" role="tab">
+                        <i class="fas fa-calendar-week me-1"></i> Tampilan Kalender
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="scheduleTabsContent">
+                
+                <!-- 1. LIST VIEW (KARTU) -->
+                <div class="tab-pane fade show active" id="list-view" role="tabpanel">
+                    <div class="row">
+                        @forelse($schedules as $schedule)
+                            @php
+                                $now = \Carbon\Carbon::now();
+                                $isToday = $schedule->day == $now->translatedFormat('l');
+                                
+                                $startTime = \Carbon\Carbon::parse($schedule->start_time)->setDate($now->year, $now->month, $now->day);
+                                $endTime = \Carbon\Carbon::parse($schedule->end_time)->setDate($now->year, $now->month, $now->day);
+                                
+                                $isActive = $isToday && $now->between($startTime, $endTime);
+
+                                if ($isActive) {
+                                    $cardBorder = 'border-warning';
+                                    $badgeBg = 'bg-warning text-dark';
+                                    $activeClass = 'card-active'; // Class khusus untuk styling
+                                } elseif ($isToday) {
+                                    $cardBorder = 'border-success';
+                                    $badgeBg = 'bg-success';
+                                    $activeClass = '';
+                                } else {
+                                    $cardBorder = 'border-primary';
+                                    $badgeBg = 'bg-primary';
+                                    $activeClass = '';
+                                }
+                            @endphp
+
+                            <div class="col-md-6 col-lg-4 mb-4 card-column position-relative"> <!-- Tambahkan position-relative -->
+                                <div class="card shadow-sm h-100 border-start border-4 {{ $cardBorder }} {{ $activeClass }} hover-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge {{ $badgeBg }} rounded-pill px-3">
+                                                {{ $schedule->day }}
+                                                @if($isActive) 
+                                                    <i class="fas fa-circle ms-1 text-danger small animate-pulse"></i> LIVE 
+                                                @endif
+                                            </span>
+                                            <span class="fw-bold text-dark font-monospace">
+                                                {{ $startTime->format('H:i') }} - {{ $endTime->format('H:i') }}
+                                            </span>
+                                        </div>
+                                        
+                                        <h5 class="card-title fw-bold text-dark mb-1 text-truncate" title="{{ $schedule->subject->name ?? 'Mapel Dihapus' }}">
+                                            {{ $schedule->subject->name ?? 'Mapel Dihapus' }}
+                                        </h5>
+                                        <p class="card-text text-muted mb-3">
+                                            <i class="fas fa-door-open me-1"></i> {{ $schedule->classroom->name ?? 'Kelas Dihapus' }}
+                                        </p>
+
+                                        <hr class="my-2 border-light">
+
+                                        <div class="d-flex justify-content-between align-items-end mt-3">
+                                            <div class="small text-muted mb-1" title="Jumlah siswa yang sudah absen hari ini">
+                                                <i class="fas fa-user-check text-success"></i> Hadir: 
+                                                <span class="fw-bold text-dark">{{ $schedule->attendances_count ?? 0 }}</span>
+                                            </div>
+                                            
+                                            <div class="d-flex gap-1">
+                                                <!-- MENU ABSENSI -->
+                                                <div class="btn-group dropdown-container">
+                                                    <button type="button" class="btn btn-sm {{ $isActive ? 'btn-warning text-dark fw-bold' : 'btn-success' }} dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
+                                                        <i class="fas fa-camera me-1"></i> Absen
+                                                    </button>
+                                                     <ul class="dropdown-menu">
+                                                        <li><h6 class="dropdown-header">Metode Absensi</h6></li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ url('/schedule/manual', ['schedule_id' => $schedule->id]) }}">
+                                                                <i class="fas fa-clipboard-list me-2 text-secondary"></i> Input Manual
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('scan.index', ['schedule_id' => $schedule->id]) }}">
+                                                                <i class="fas fa-qrcode me-2 text-dark"></i> Scan QR Code
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('scan.face', ['schedule_id' => $schedule->id]) }}">
+                                                                <i class="fas fa-user-circle me-2 text-primary"></i> Face ID
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+                                                <div class="btn-group">
+                                                    <a href="{{ route('schedule.show', $schedule->id) }}" class="btn btn-sm btn-outline-primary" title="Detail">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <form action="{{ route('schedule.destroy', $schedule->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus jadwal ini? Data absensi terkait mungkin ikut terhapus.');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete(this.form)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="alert alert-light border text-center py-5">
+                                    <img src="https://img.icons8.com/ios/100/cccccc/calendar.png" width="60" class="mb-3 opacity-50">
+                                    <h5 class="text-muted fw-bold">Belum Ada Jadwal</h5>
+                                    <p class="text-muted mb-3">Silakan buat jadwal untuk mulai mengabsen.</p>
+                                    <a href="{{ route('schedule.create') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i> Buat Jadwal Sekarang
+                                    </a>
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- 2. CALENDAR VIEW -->
+                <div class="tab-pane fade" id="calendar-view" role="tabpanel">
+                    <div class="card shadow border-0">
+                        <div class="card-body p-0">
+                            <div class="alert alert-info m-3 mb-0 small">
+                                <i class="fas fa-info-circle me-1"></i> <strong>Tips:</strong> Klik pada area kosong di kalender untuk menambahkan jadwal baru di jam tersebut.
+                            </div>
+                            <!-- Tempat Kalender Dirender -->
+                            <div id="calendar" class="p-3"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-<style>
-    /* Animasi tombol berdenyut untuk jadwal aktif */
-    .pulse-button {
-        animation: pulse 1.5s infinite;
-        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
-    }
-    @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
-    }
 
-</style>
+    <!-- PREPARE DATA UNTUK FULLCALENDAR -->
+    @php
+        $events = [];
+        $dayMap = [
+            'minggu' => 0, 'senin' => 1, 'selasa' => 2, 'rabu' => 3, 
+            'kamis' => 4, 'jumat' => 5, 'sabtu' => 6
+        ];
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        foreach($schedules as $s) {
+            $dayKey = strtolower(trim($s->day));
+            if (!isset($dayMap[$dayKey])) continue;
+
+            $events[] = [
+                'id' => $s->id,
+                'title' => ($s->subject->name ?? 'Mapel') . "\n(" . ($s->classroom->name ?? 'Kelas') . ")",
+                'startTime' => \Carbon\Carbon::parse($s->start_time)->format('H:i'),
+                'endTime' => \Carbon\Carbon::parse($s->end_time)->format('H:i'),
+                'daysOfWeek' => [$dayMap[$dayKey]], 
+                'color' => '#4e73df', 
+                'url' => route('schedule.show', $s->id),
+                'allDay' => false
+            ];
+        }
+    @endphp
+
+    <!-- STYLES -->
+    <style>
+        /* Perbaikan CSS: Menghilangkan transform scale yang merusak z-index dropdown */
+        .hover-card { 
+            transition: box-shadow 0.2s, border-color 0.2s; 
+        }
+        
+        .hover-card:hover { 
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15)!important; 
+            z-index: 10; 
+            position: relative;
+        }
+
+        /* Style untuk Kartu Aktif (LIVE) */
+        .card-active {
+            box-shadow: 0 0.25rem 0.75rem rgba(255, 193, 7, 0.4) !important;
+            background-color: #fff;
+            border-width: 0 0 0 5px !important;
+        }
+
+        /* Helper z-index tinggi untuk kolom saat dropdown terbuka */
+        .z-index-high {
+            z-index: 1050 !important; /* Di atas elemen lain */
+        }
+        
+        @keyframes pulse-red {
+            0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
+        }
+        .animate-pulse { animation: pulse-red 1.5s infinite; }
+
+        /* FullCalendar Customization */
+        #calendar { min-height: 600px; font-family: inherit; }
+        .fc-event { cursor: pointer; border: none; padding: 2px 4px; font-size: 0.85rem; border-radius: 4px; }
+        .fc-event-title { font-weight: bold; white-space: pre-line; } 
+        .fc-toolbar-title { font-size: 1.25rem !important; font-weight: bold; color: #4e73df; }
+        .fc-col-header-cell { background-color: #f8f9fa; padding: 10px 0 !important; }
+    </style>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
     <script>
-        // Cek apakah ada session 'success' yang dikirim dari controller
-        @if(session('success'))
+        function confirmDelete(form) {
             Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                showConfirmButton: false,
-                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
-            });
-        @endif
+                title: 'Hapus Jadwal?',
+                text: "Jadwal yang dihapus tidak bisa dikembalikan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
+        }
 
-        // Opsional: Cek jika ada error validasi
-        @if($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: 'Mohon periksa kembali inputan Anda.',
-            });
-        @endif
-
-            function confirmDelete(id, mapel) {
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Jadwal " + mapel + " akan dihapus permanen!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('delete-form-' + id).submit();
-                    }
-                })
+        // --- MANAJEMEN Z-INDEX DROPDOWN (FIX BUG) ---
+        // Saat dropdown dibuka, naikkan z-index kartu induknya agar tampil di atas kartu lain
+        document.addEventListener('show.bs.dropdown', function (e) {
+            const dropdown = e.target;
+            const cardColumn = dropdown.closest('.card-column');
+            if (cardColumn) {
+                cardColumn.classList.add('z-index-high');
             }
-        </script>
+        });
 
+        document.addEventListener('hide.bs.dropdown', function (e) {
+            const dropdown = e.target;
+            const cardColumn = dropdown.closest('.card-column');
+            if (cardColumn) {
+                cardColumn.classList.remove('z-index-high');
+            }
+        });
+
+        // --- FULLCALENDAR INIT ---
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek', 
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'timeGridWeek,timeGridDay'
+                },
+                locale: 'id', 
+                slotMinTime: '06:00:00', 
+                slotMaxTime: '17:00:00', 
+                allDaySlot: false,
+                contentHeight: 'auto',
+                selectable: true, 
+                events: @json($events),
+
+                // EVENT: Klik Jadwal
+                eventClick: function(info) {
+                    if (info.event.url) {
+                        info.jsEvent.preventDefault(); 
+                        window.location.href = info.event.url;
+                    }
+                },
+
+                // EVENT: Klik Slot Kosong
+                dateClick: function(info) {
+                    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                    const date = info.date;
+                    const dayName = days[date.getDay()];
+                    
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const time = `${hours}:${minutes}`;
+
+                    const url = `{{ route('schedule.create') }}?day=${dayName}&start_time=${time}`;
+                    window.location.href = url;
+                }
+            });
+
+            var calendarTab = document.getElementById('calendar-tab');
+            if (calendarTab) {
+                calendarTab.addEventListener('shown.bs.tab', function (e) {
+                    calendar.render();
+                });
+                calendarTab.addEventListener('click', function (e) {
+                    setTimeout(() => { calendar.render(); }, 200);
+                });
+            }
+        });
+    </script>
 </x-app-layout>
