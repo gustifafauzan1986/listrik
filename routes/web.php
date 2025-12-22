@@ -38,6 +38,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ScannerDeviceController;
 
 use App\Http\Controllers\StudentPermissionController;
+use App\Http\Controllers\RecapController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -315,6 +316,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/izin/check', [StudentPermissionController::class, 'check'])->name('izin.check');
         Route::post('/izin/return', [StudentPermissionController::class, 'markReturn'])->name('izin.return');
         Route::get('/izin/print/{id}', [StudentPermissionController::class, 'print'])->name('izin.print');
+
+
+        // --- REKAPITULASI MENYELURUH (MASTER RECAP) ---
+        // Pastikan RecapController sudah dibuat
+        Route::prefix('recap')->name('recap.')->group(function() {
+        Route::get('/', [RecapController::class, 'index'])->name('index'); 
+        Route::get('/daily', [RecapController::class, 'dailyLog'])->name('daily');
+        Route::get('/learning', [RecapController::class, 'learningLog'])->name('learning');
+    });
 
     });
 
