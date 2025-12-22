@@ -32,7 +32,6 @@ class RecapController extends Controller
         $attendanceRate = $totalStudents > 0 ? round(($dailyStats['hadir'] + $dailyStats['terlambat']) / $totalStudents * 100, 1) : 0;
 
         // 2. Data Grafik (7 Hari Terakhir)
-        // Kita siapkan array tanggal untuk sumbu X (Labels)
         $chartLabels = [];
         $dataHadir = [];
         $dataTerlambat = [];
@@ -46,7 +45,6 @@ class RecapController extends Controller
             $chartLabels[] = $date->translatedFormat('D, d M');
 
             // Hitung data per tanggal tersebut
-            // Catatan: Ini cara sederhana (loop query). Untuk optimasi data besar, gunakan groupBy SQL.
             $dataHadir[] = DailyAttendance::whereDate('date', $formattedDate)->where('status', 'hadir')->count();
             $dataTerlambat[] = DailyAttendance::whereDate('date', $formattedDate)->where('status', 'terlambat')->count();
             $dataAlpa[] = DailyAttendance::whereDate('date', $formattedDate)->where('status', 'alpa')->count();
@@ -110,7 +108,9 @@ class RecapController extends Controller
         }
 
         if ($request->filled('classroom_id')) {
-            $query->where('classroom_id', $request->classroom_id);
+            $query->whereHas('student', function($q) use ($request) {
+                $q->where('classroom_id', $request->classroom_id);
+            });
         }
 
         if ($request->filled('subject_id')) {
@@ -120,5 +120,61 @@ class RecapController extends Controller
         $logs = $query->latest('created_at')->paginate(20)->withQueryString();
 
         return view('recap.learning_list', compact('logs', 'classrooms', 'subjects'));
+    }
+
+    /**
+     * Daftar Semua Siswa untuk Dipilih Detailnya
+     */
+    public function studentsList(Request $request)
+    {
+        $classrooms = Classroom::orderBy('name')->get();
+        
+        $query = Student::with(['classroom']);
+
+        // Filter Kelas
+        if ($request->filled('classroom_id')) {
+            $query->where('classroom_id', $request->classroom_id);
+        }
+
+        // Pencarian Nama/NIS
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('nis', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $students = $query->orderBy('name')->paginate(15)->withQueryString();
+
+        return view('recap.student_list', compact('students', 'classrooms'));
+    }
+
+    /**
+     * Detail Lengkap Satu Siswa (Gerbang + Mapel)
+     */
+    public function studentDetail($id)
+    {
+        $student = Student::with('classroom')->findOrFail($id);
+
+        // 1. Data Absensi Harian (Gerbang)
+        $dailyLogs = DailyAttendance::where('student_id', $id)
+            ->orderBy('date', 'desc')
+            ->paginate(10, ['*'], 'daily_page');
+
+        // 2. Data Absensi Pembelajaran (Mapel)
+        $learningLogs = Attendance::with('subject')
+            ->where('student_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10, ['*'], 'learning_page');
+
+        // 3. Statistik Global Siswa Ini
+        $stats = [
+            'hadir' => DailyAttendance::where('student_id', $id)->where('status', 'hadir')->count(),
+            'terlambat' => DailyAttendance::where('student_id', $id)->where('status', 'terlambat')->count(),
+            'alpa' => DailyAttendance::where('student_id', $id)->where('status', 'alpa')->count(),
+            'mapel_hadir' => Attendance::where('student_id', $id)->where('status', 'present')->count(),
+        ];
+
+        return view('recap.student_detail', compact('student', 'dailyLogs', 'learningLogs', 'stats'));
     }
 }

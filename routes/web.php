@@ -324,6 +324,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [RecapController::class, 'index'])->name('index'); 
         Route::get('/daily', [RecapController::class, 'dailyLog'])->name('daily');
         Route::get('/learning', [RecapController::class, 'learningLog'])->name('learning');
+        Route::get('/students', [RecapController::class, 'studentsList'])->name('students');
+        Route::get('/students/{id}', [RecapController::class, 'studentDetail'])->name('student.detail');
     });
 
     });

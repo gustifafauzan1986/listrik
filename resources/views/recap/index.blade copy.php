@@ -112,20 +112,6 @@
                                 <i class="fas fa-chevron-right ms-auto text-muted"></i>
                             </div>
                         </a>
-
-                        <!-- NEW MENU: REKAP PER SISWA -->
-                        <a href="{{ route('recap.students') }}" class="card text-decoration-none shadow-sm hover-scale mb-3">
-                            <div class="card-body d-flex align-items-center p-3">
-                                <div class="bg-success text-white p-3 rounded-circle me-3">
-                                    <i class="fas fa-user-graduate fa-lg"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold text-dark mb-1">Rekap Per Siswa</h6>
-                                    <p class="text-muted small mb-0">Detail lengkap individu siswa</p>
-                                </div>
-                                <i class="fas fa-chevron-right ms-auto text-muted"></i>
-                            </div>
-                        </a>
                         
                         <div class="alert alert-info small">
                             <i class="fas fa-info-circle me-1"></i> Grafik di samping menunjukkan perbandingan siswa yang <b>Hadir Tepat Waktu</b>, <b>Terlambat</b>, dan <b>Alpa</b> dalam satu minggu terakhir.
