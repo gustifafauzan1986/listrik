@@ -160,7 +160,7 @@
                     <div class="card shadow border-0">
                         <div class="card-body p-0">
                             <div class="alert alert-info m-3 mb-0 small">
-                                <i class="fas fa-info-circle me-1"></i> <strong>Tips:</strong> Klik pada area kosong di kalender untuk menambahkan jadwal baru di jam tersebut.
+                                <i class="fas fa-info-circle me-1"></i> <strong>Tips:</strong> Klik pada area kosong di kalender untuk menambahkan jadwal baru di jam tersebut. Klik jadwal untuk melihat detail.
                             </div>
                             <!-- Tempat Kalender Dirender -->
                             <div id="calendar" class="p-3"></div>
@@ -184,22 +184,29 @@
             $dayKey = strtolower(trim($s->day));
             if (!isset($dayMap[$dayKey])) continue;
 
+            $subjectName = $s->subject->name ?? 'Mapel';
+            $classroomName = $s->classroom->name ?? 'Kelas';
+
             $events[] = [
                 'id' => $s->id,
-                'title' => ($s->subject->name ?? 'Mapel') . "\n(" . ($s->classroom->name ?? 'Kelas') . ")",
+                'title' => $subjectName, // Fallback Title
                 'startTime' => \Carbon\Carbon::parse($s->start_time)->format('H:i'),
                 'endTime' => \Carbon\Carbon::parse($s->end_time)->format('H:i'),
                 'daysOfWeek' => [$dayMap[$dayKey]], 
                 'color' => '#4e73df', 
                 'url' => route('schedule.show', $s->id),
-                'allDay' => false
+                'allDay' => false,
+                // PERBAIKAN: Kirim data detail melalui extendedProps agar bisa dirender kustom di JS
+                'extendedProps' => [
+                    'subject' => $subjectName,
+                    'classroom' => $classroomName
+                ]
             ];
         }
     @endphp
 
     <!-- STYLES -->
     <style>
-        /* Perbaikan CSS: Menghilangkan transform scale yang merusak z-index dropdown */
         .hover-card { 
             transition: box-shadow 0.2s, border-color 0.2s; 
         }
@@ -210,16 +217,14 @@
             position: relative;
         }
 
-        /* Style untuk Kartu Aktif (LIVE) */
         .card-active {
             box-shadow: 0 0.25rem 0.75rem rgba(255, 193, 7, 0.4) !important;
             background-color: #fff;
             border-width: 0 0 0 5px !important;
         }
 
-        /* Helper z-index tinggi untuk kolom saat dropdown terbuka */
         .z-index-high {
-            z-index: 1050 !important; /* Di atas elemen lain */
+            z-index: 1050 !important; 
         }
         
         @keyframes pulse-red {
@@ -229,8 +234,8 @@
 
         /* FullCalendar Customization */
         #calendar { min-height: 600px; font-family: inherit; }
-        .fc-event { cursor: pointer; border: none; padding: 2px 4px; font-size: 0.85rem; border-radius: 4px; }
-        .fc-event-title { font-weight: bold; white-space: pre-line; } 
+        .fc-event { cursor: pointer; border: none; padding: 2px 4px; border-radius: 4px; transition: transform 0.1s; }
+        .fc-event:hover { transform: scale(1.02); }
         .fc-toolbar-title { font-size: 1.25rem !important; font-weight: bold; color: #4e73df; }
         .fc-col-header-cell { background-color: #f8f9fa; padding: 10px 0 !important; }
     </style>
@@ -257,8 +262,6 @@
             })
         }
 
-        // --- MANAJEMEN Z-INDEX DROPDOWN (FIX BUG) ---
-        // Saat dropdown dibuka, naikkan z-index kartu induknya agar tampil di atas kartu lain
         document.addEventListener('show.bs.dropdown', function (e) {
             const dropdown = e.target;
             const cardColumn = dropdown.closest('.card-column');
@@ -292,6 +295,23 @@
                 contentHeight: 'auto',
                 selectable: true, 
                 events: @json($events),
+
+                // PERBAIKAN: Custom Event Content untuk Menampilkan Mapel & Kelas
+                eventContent: function(arg) {
+                    let subject = arg.event.extendedProps.subject;
+                    let classroom = arg.event.extendedProps.classroom;
+                    let timeText = arg.timeText;
+
+                    let content = document.createElement('div');
+                    content.innerHTML = `
+                        <div class="fc-event-time" style="font-size:0.75rem; opacity:0.9;">${timeText}</div>
+                        <div class="fc-event-title" style="font-weight:bold; font-size:0.85rem; margin-bottom:2px;">${subject}</div>
+                        <div style="font-size:0.75rem; display:flex; align-items:center; gap:3px;">
+                            <i class="fas fa-door-open"></i> ${classroom}
+                        </div>
+                    `;
+                    return { domNodes: [content] };
+                },
 
                 // EVENT: Klik Jadwal
                 eventClick: function(info) {
