@@ -38,6 +38,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ScannerDeviceController;
 
 use App\Http\Controllers\StudentPermissionController;
+use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
 
@@ -48,6 +49,16 @@ Route::view('dashboard', 'dashboard')
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+
+// Route untuk Halaman Blokir jika aplikasi kedaluwarsa (Fitur GitHub Check)
+Route::get('/update-required', function () {
+    $checker = new GithubVersionChecker();
+    if (!$checker->isOutdated()) {
+        return redirect('/');
+    }
+    return view('errors.update_required');
+})->name('app.update_required');
 
 require __DIR__.'/auth.php';
 
