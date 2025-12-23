@@ -44,7 +44,7 @@
                 @endif
 
                 <div class="table-responsive">
-                    <table class="table align-middle table-hover table-striped">
+                    <table id="example" class="table align-middle table-hover table-striped">
                         <thead class="text-center table-dark">
                             <tr>
                                 <th width="5%">No</th>
@@ -264,9 +264,9 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-3">
+                <!-- <div class="mt-3">
                     {{ $classrooms->withQueryString()->links() }}
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

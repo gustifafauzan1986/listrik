@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Student;
 use App\Models\Classroom;
+use App\Models\Teacher;
 
 class UserSeeder extends Seeder
 {
@@ -25,13 +26,30 @@ class UserSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        $guru = User::create([
-            'name' => 'Pak Guru Gatech',
-            'email' => 'guru@sekolah.com',
-            'jenis_user' => 'guru',
-            'password' => Hash::make('password'),
-        ]);
-        $guru->assignRole('guru');
+        // 1. Create atau Update Akun User (Login)
+        $user = User::updateOrCreate(
+            ['email' => 'guru@sekolah.com'], // Kunci pencarian agar tidak duplikat
+            [
+                'name' => 'Pak Guru Gatech',
+                'jenis_user' => 'guru',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Assign Role Spatie
+        $user->assignRole('guru');
+
+        // 2. Create atau Update Data Guru (Profil)
+        // Langkah ini WAJIB agar ScheduleController tidak error (karena butuh teacher_id)
+        Teacher::updateOrCreate(
+            ['user_id' => $user->id], // Hubungkan dengan user yang baru dibuat/diupdate
+            [
+                'nip' => 'GURU001',      // NIP Dummy
+                'name' => $user->name,   // Samakan nama dengan user
+                //'status' => '1'
+            ]
+        );
 
         $piket = User::create([
             'name' => 'Pak Piket Gatech',

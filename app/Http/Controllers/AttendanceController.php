@@ -444,129 +444,131 @@ class AttendanceController extends Controller
     // }
 
     public function storeManual(Request $request, $schedule_id)
-{
-    $request->validate([
-        'attendances' => 'required|array', // Key: student_id, Value: status
-    ]);
+    {
+        $request->validate([
+            'attendances' => 'required|array', // Key: student_id, Value: status
+        ]);
 
-    $settings = Setting::pluck('value', 'key')->toArray();
-    $inf_app = $settings['inf_app'] ?? 'Sistem Sekolah'; // Pakai default jika null
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $inf_app = $settings['inf_app'] ?? 'Sistem Sekolah'; // Pakai default jika null
 
-    $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
+        $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
 
-    if ($schedule->teacher_id !== Auth::id()) {
-        abort(403, 'Unauthorized action.');
-    }
+        $teacher = Teacher::where('user_id', Auth::id())->first();
 
-    $date = date('Y-m-d');
-    $now = date('H:i:s');
-
-    $updatedCount = 0; // Opsional: untuk menghitung berapa siswa yang diupdate
-
-    // Loop setiap input dari guru
-    foreach ($request->attendances as $studentId => $status) {
-        // Jika status tidak dipilih (kosong), lewati
-        if (!$status) continue;
-
-        // ---------------------------------------------------------
-        // 1. CEK DATA LAMA (EXISTING)
-        // ---------------------------------------------------------
-        $attendance = Attendance::where('student_id', $studentId)
-            ->where('schedule_id', $schedule_id)
-            ->where('date', $date)
-            ->first();
-
-        $shouldSendNotif = false; // Flag penanda kirim WA
-
-        if ($attendance) {
-            // SKENARIO A: DATA SUDAH ADA
-            
-            // Cek apakah statusnya sama persis?
-            if ($attendance->status === $status) {
-                // JIKA SAMA: Lewati loop ini. Jangan simpan, jangan kirim WA.
-                continue; 
-            }
-
-            // JIKA BEDA: Update datanya
-            $attendance->update([
-                'check_in_time' => $now,
-                'status'        => $status
-            ]);
-            $shouldSendNotif = true; // Status berubah, perlu kirim WA
-
-        } else {
-            // SKENARIO B: DATA BELUM ADA (BARU)
-            Attendance::create([
-                'student_id'  => $studentId,
-                'schedule_id' => $schedule_id,
-                'date'        => $date,
-                'check_in_time' => $now,
-                'status'      => $status
-            ]);
-            $shouldSendNotif = true; // Data baru, perlu kirim WA
+        if ($schedule->teacher_id !== $teacher->id) {
+            abort(403, 'Unauthorized action.');
         }
 
-        // ==========================================================
-        // 2. LOGIKA KIRIM WA (HANYA JIKA ADA PERUBAHAN)
-        // ==========================================================
-        if ($shouldSendNotif) {
-            $updatedCount++; // Counter update bertambah
+        $date = date('Y-m-d');
+        $now = date('H:i:s');
 
-            // Ambil data siswa HANYA jika notif akan dikirim (Hemat Query)
-            $student = Student::find($studentId);
+        $updatedCount = 0; // Opsional: untuk menghitung berapa siswa yang diupdate
 
-            if ($student && !empty($student->phone)) {
+        // Loop setiap input dari guru
+        foreach ($request->attendances as $studentId => $status) {
+            // Jika status tidak dipilih (kosong), lewati
+            if (!$status) continue;
 
-                // Tentukan Emoji & Pesan berdasarkan status
-                $emoji = '✅';
-                $keterangan = 'Hadir di sekolah';
+            // ---------------------------------------------------------
+            // 1. CEK DATA LAMA (EXISTING)
+            // ---------------------------------------------------------
+            $attendance = Attendance::where('student_id', $studentId)
+                ->where('schedule_id', $schedule_id)
+                ->where('date', $date)
+                ->first();
 
-                switch ($status) {
-                    case 'izin':
-                        $emoji = '📩';
-                        $keterangan = 'Izin (Diketahui Guru)';
-                        break;
-                    case 'sakit':
-                        $emoji = '💊';
-                        $keterangan = 'Sakit (Diketahui Guru)';
-                        break;
-                    case 'alpa':
-                        $emoji = '❌';
-                        $keterangan = 'ALPA / Tanpa Keterangan';
-                        break;
-                    case 'terlambat':
-                        $emoji = '⚠️';
-                        $keterangan = 'Hadir (Terlambat)';
-                        break;
+            $shouldSendNotif = false; // Flag penanda kirim WA
+
+            if ($attendance) {
+                // SKENARIO A: DATA SUDAH ADA
+                
+                // Cek apakah statusnya sama persis?
+                if ($attendance->status === $status) {
+                    // JIKA SAMA: Lewati loop ini. Jangan simpan, jangan kirim WA.
+                    continue; 
                 }
 
-                // Susun Pesan
-                $mapel = $schedule->subject->name ?? $schedule->subject_name ?? '-';
-                $tgl = date('d-m-Y');
+                // JIKA BEDA: Update datanya
+                $attendance->update([
+                    'check_in_time' => $now,
+                    'status'        => $status
+                ]);
+                $shouldSendNotif = true; // Status berubah, perlu kirim WA
 
-                $message = "*LAPORAN PRESENSI MANUAL*\n\n" .
-                            "Yth. Orang Tua/Wali,\n" .
-                            "Informasi kehadiran putra/putri Anda:\n\n" .
-                            "👤 Nama : *$student->name*\n" .
-                            "🏫 Kelas : {$schedule->classroom->name}\n" .
-                            "📚 Mapel : $mapel\n" .
-                            "📅 Tanggal : $tgl\n" .
-                            "📝 Status : *" . strtoupper($status) . "* $emoji\n" .
-                            "ℹ️ Ket : $keterangan\n\n" .
-                            "_$inf_app, Data ini diinput manual oleh Guru Pengampu._";
-
-                // Masukkan ke Antrian (Background Job)
-                SendWhatsappJob::dispatch($student->phone, $message);
+            } else {
+                // SKENARIO B: DATA BELUM ADA (BARU)
+                Attendance::create([
+                    'student_id'  => $studentId,
+                    'schedule_id' => $schedule_id,
+                    'date'        => $date,
+                    'check_in_time' => $now,
+                    'status'      => $status
+                ]);
+                $shouldSendNotif = true; // Data baru, perlu kirim WA
             }
-        }
-        // ==========================================================
-    }
 
-    // Pesan feedback disesuaikan
-    if ($updatedCount > 0) {
-        return redirect()->route('schedule.index')->with('success', "Berhasil menyimpan $updatedCount data siswa & notifikasi diproses.");
-    } else {
-        return redirect()->route('schedule.index')->with('warning', 'Tidak ada perubahan data absensi.');
+            // ==========================================================
+            // 2. LOGIKA KIRIM WA (HANYA JIKA ADA PERUBAHAN)
+            // ==========================================================
+            if ($shouldSendNotif) {
+                $updatedCount++; // Counter update bertambah
+
+                // Ambil data siswa HANYA jika notif akan dikirim (Hemat Query)
+                $student = Student::find($studentId);
+
+                if ($student && !empty($student->phone)) {
+
+                    // Tentukan Emoji & Pesan berdasarkan status
+                    $emoji = '✅';
+                    $keterangan = 'Hadir di sekolah';
+
+                    switch ($status) {
+                        case 'izin':
+                            $emoji = '📩';
+                            $keterangan = 'Izin (Diketahui Guru)';
+                            break;
+                        case 'sakit':
+                            $emoji = '💊';
+                            $keterangan = 'Sakit (Diketahui Guru)';
+                            break;
+                        case 'alpa':
+                            $emoji = '❌';
+                            $keterangan = 'ALPA / Tanpa Keterangan';
+                            break;
+                        case 'terlambat':
+                            $emoji = '⚠️';
+                            $keterangan = 'Hadir (Terlambat)';
+                            break;
+                    }
+
+                    // Susun Pesan
+                    $mapel = $schedule->subject->name ?? $schedule->subject_name ?? '-';
+                    $tgl = date('d-m-Y');
+
+                    $message = "*LAPORAN PRESENSI MANUAL*\n\n" .
+                                "Yth. Orang Tua/Wali,\n" .
+                                "Informasi kehadiran putra/putri Anda:\n\n" .
+                                "👤 Nama : *$student->name*\n" .
+                                "🏫 Kelas : {$schedule->classroom->name}\n" .
+                                "📚 Mapel : $mapel\n" .
+                                "📅 Tanggal : $tgl\n" .
+                                "📝 Status : *" . strtoupper($status) . "* $emoji\n" .
+                                "ℹ️ Ket : $keterangan\n\n" .
+                                "_$inf_app, Data ini diinput manual oleh Guru Pengampu._";
+
+                    // Masukkan ke Antrian (Background Job)
+                    SendWhatsappJob::dispatch($student->phone, $message);
+                }
+            }
+            // ==========================================================
+        }
+
+        // Pesan feedback disesuaikan
+        if ($updatedCount > 0) {
+            return redirect()->route('schedule.index')->with('success', "Berhasil menyimpan $updatedCount data siswa & notifikasi diproses.");
+        } else {
+            return redirect()->route('schedule.index')->with('warning', 'Tidak ada perubahan data absensi.');
+        }
     }
-}
 }

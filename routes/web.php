@@ -91,7 +91,14 @@ Route::middleware(['auth'])->group(function () {
         // Scanner Wajah (API & View)
         Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
         Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
-        Route::resource('schedule', ScheduleController::class);
+        // Route::resource('schedule', ScheduleController::class);
+        Route::prefix('schedule')->name('schedule.')->group(function() {
+            Route::get('/', [ScheduleController::class, 'index'])->name('index'); 
+            Route::get('/create', [ScheduleController::class, 'create'])->name('create');
+            Route::post('/store', [ScheduleController::class, 'store'])->name('store');
+            Route::get('/show/{id}', [ScheduleController::class, 'show'])->name('show');
+            Route::get('/destroy/{id}', [ScheduleController::class, 'destroy'])->name('destroy');
+        });
 
          // --- 3. ABSENSI MANUAL (BARU) ---
         Route::get('/schedule/manual/{id}', [AttendanceController::class, 'createManual'])->name('attendance.manual');
@@ -115,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
     // =========================================================================
     // GROUP 1: AREA GURU & ADMIN (Operasional Harian)
     // =========================================================================
+
     Route::middleware(['role:admin|guru|piket'])->group(function () {
 
         Route::get('/report', [ReportController::class, 'index'])->name('report.index');
@@ -151,9 +159,6 @@ Route::middleware(['auth'])->group(function () {
     // Scan Masuk & Pulang via Wajah
         Route::get('/daily-face-scan', [FaceController::class, 'dailyScan'])->name('daily.face.scan');
         Route::get('/face/all-descriptors', [FaceController::class, 'getAllDescriptors'])->name('face.descriptors.all');
-
-
-
     });
 
     // =========================================================================
@@ -325,12 +330,16 @@ Route::middleware(['auth'])->group(function () {
         // --- REKAPITULASI MENYELURUH (MASTER RECAP) ---
         // Pastikan RecapController sudah dibuat
         Route::prefix('recap')->name('recap.')->group(function() {
-        Route::get('/', [RecapController::class, 'index'])->name('index'); 
-        Route::get('/daily', [RecapController::class, 'dailyLog'])->name('daily');
-        Route::get('/learning', [RecapController::class, 'learningLog'])->name('learning');
-        Route::get('/students', [RecapController::class, 'studentsList'])->name('students');
-        Route::get('/students/{id}', [RecapController::class, 'studentDetail'])->name('student.detail');
-    });
+            Route::get('/', [RecapController::class, 'index'])->name('index'); 
+            Route::get('/daily', [RecapController::class, 'dailyLog'])->name('daily');
+            Route::get('/learning', [RecapController::class, 'learningLog'])->name('learning');
+            Route::get('/students', [RecapController::class, 'studentsList'])->name('students');
+            Route::get('/students/{id}', [RecapController::class, 'studentDetail'])->name('student.detail');
+        });
+
+        // Menu Jadwal Semua Guru (Master Schedule)
+        Route::get('/schedule/all', [ScheduleController::class, 'allSchedules'])->name('schedule.all');
+        Route::post('/schedule/admin/store', [ScheduleController::class, 'storeAsAdmin'])->name('schedule.store_admin');
 
     });
 

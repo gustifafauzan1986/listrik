@@ -118,6 +118,7 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{url('/teaching-assignments')}}"><i class='bx bx-home-smile'></i>PBM</a></li>
+						<li> <a href="{{url('/schedule/all')}}"><i class='bx bx-home-smile'></i>Jadwal</a></li>
 
 					</li>
 
