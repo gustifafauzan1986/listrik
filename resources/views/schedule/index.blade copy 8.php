@@ -42,8 +42,6 @@
                 <!-- 1. LIST VIEW (KARTU) -->
                 <div class="tab-pane fade show active" id="list-view" role="tabpanel">
                     <div class="row">
-                        @php $activeAlerts = []; @endphp <!-- Init Array Notifikasi -->
-                        
                         @forelse($schedules as $schedule)
                             @php
                                 $now = \Carbon\Carbon::now();
@@ -54,14 +52,7 @@
                                 
                                 $isActive = $isToday && $now->between($startTime, $endTime);
 
-                                // Kumpulkan Data Jadwal Aktif untuk Notifikasi
                                 if ($isActive) {
-                                    $activeAlerts[] = [
-                                        'subject' => $schedule->subject->name ?? 'Mapel',
-                                        'classroom' => $schedule->classroom->name ?? 'Kelas',
-                                        'time' => $startTime->format('H:i') . ' - ' . $endTime->format('H:i')
-                                    ];
-                                    
                                     $cardBorder = 'border-warning';
                                     $badgeBg = 'bg-warning text-dark';
                                     $activeClass = 'card-active'; 
@@ -208,7 +199,7 @@
 
             $events[] = [
                 'id' => $s->id,
-                'title' => $subjectName . " (" . $classroomName . ")",
+                'title' => $subjectName, 
                 'startTime' => \Carbon\Carbon::parse($s->start_time)->format('H:i'),
                 'endTime' => \Carbon\Carbon::parse($s->end_time)->format('H:i'),
                 'daysOfWeek' => [$dayMap[$dayKey]], 
@@ -321,7 +312,7 @@
                 selectable: true, 
                 events: @json($events),
 
-                // Custom Event Content
+                // PERBAIKAN: Custom Event Content untuk Menampilkan Mapel & Kelas
                 eventContent: function(arg) {
                     let subject = arg.event.extendedProps.subject;
                     let classroom = arg.event.extendedProps.classroom;
@@ -331,9 +322,11 @@
                     content.className = 'fc-custom-content';
                     content.innerHTML = `
                         <div class="fc-event-time" style="font-size:0.75rem; opacity:0.9;">${timeText}</div>
-                        <div class="fc-event-title" style="font-weight:bold; font-size:0.85rem; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${subject}</div>
+                        <div class="fc-event-title" style="font-weight:bold; font-size:0.85rem; margin-bottom:4px; line-height:1.1;">${subject}</div>
+                        
+                        <!-- Kelas dengan background semi-transparan agar jelas -->
                         <div style="
-                            font-size:0.8rem; 
+                            font-size:0.7rem; 
                             font-weight:bold;
                             display:inline-flex; 
                             align-items:center; 
@@ -382,42 +375,6 @@
                 });
                 calendarTab.addEventListener('click', function (e) {
                     setTimeout(() => { calendar.render(); }, 200);
-                });
-            }
-
-            // --- NOTIFIKASI JADWAL AKTIF (FITUR BARU) ---
-            const activeAlerts = @json($activeAlerts);
-            
-            if (activeAlerts.length > 0) {
-                // Request permission untuk notifikasi desktop jika belum
-                if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-                    Notification.requestPermission();
-                }
-
-                activeAlerts.forEach(alert => {
-                    // 1. Tampilkan Toast SweetAlert
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'info',
-                        title: 'Sedang Berlangsung!',
-                        html: `<b>${alert.subject}</b><br>${alert.classroom} (${alert.time})`,
-                        showConfirmButton: false,
-                        timer: 8000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                        }
-                    });
-
-                    // 2. Tampilkan Notifikasi Desktop (Jika diizinkan)
-                    if ("Notification" in window && Notification.permission === "granted") {
-                        new Notification("Jadwal Mengajar Aktif", {
-                            body: `${alert.subject} di ${alert.classroom}\nJam: ${alert.time}`,
-                            icon: "https://img.icons8.com/color/48/classroom.png" // Ikon opsional
-                        });
-                    }
                 });
             }
         });
