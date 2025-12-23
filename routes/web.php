@@ -99,7 +99,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/show/{id}', [ScheduleController::class, 'show'])->name('show');
             Route::get('/edit/{id}', [ScheduleController::class, 'edit'])->name('edit');
             Route::put('/update/{id}', [ScheduleController::class, 'update'])->name('update');
-            Route::get('/destroy/{id}', [ScheduleController::class, 'destroy'])->name('destroy');
+            Route::delete('/destroy/{id}', [ScheduleController::class, 'destroy'])->name('destroy');
         });
 
          // --- 3. ABSENSI MANUAL (BARU) ---
@@ -286,6 +286,7 @@ Route::middleware(['auth'])->group(function () {
         // Route::resource('students', StudentController::class)->except(['create', 'show', 'store', 'index']);
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
         Route::get('/students/edit/{id}', [StudentController::class, 'edit'])->name('students.edit');
+        Route::put('/students/update/{id}', [StudentController::class, 'update'])->name('students.update');
         Route::get('/students/destroy/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 
         // --- 4. MANAJEMEN KARTU SISWA ---

@@ -331,7 +331,7 @@
                     content.className = 'fc-custom-content';
                     content.innerHTML = `
                         <div class="fc-event-time" style="font-size:0.75rem; opacity:0.9;">${timeText}</div>
-                        <div class="fc-event-title" style="font-weight:bold; font-size:0.85rem; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${subject}</div>
+                        <div class="fc-event-title" style="font-weight:bold; font-size:0.65rem; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${subject}</div>
                         <div style="
                             font-size:0.8rem; 
                             font-weight:bold;
@@ -421,5 +421,28 @@
                 });
             }
         });
+    </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
+            });
+        @endif
+
+        // Opsional: Cek jika ada error validasi
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Mohon periksa kembali inputan Anda.',
+            });
+        @endif
     </script>
 </x-app-layout>

@@ -3,13 +3,14 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\WhatsappLog; // Pastikan Model Log diimport
+use App\Models\WhatsappLog; // Import Model Log
 
 class SendWhatsappJob implements ShouldQueue
 {
@@ -64,39 +65,20 @@ class SendWhatsappJob implements ShouldQueue
             // Timeout 15 detik untuk memberi waktu download file jika ada media
             $response = Http::timeout(15)->post('http://localhost:3000/send-message', $payload);
 
-            // LOGIKA PENCATATAN LOG KE DATABASE
-            $status = $response->successful() ? 'success' : 'failed';
-            $apiResponse = $response->body();
-
             // Cek Respon
             if ($response->failed()) {
-                Log::error("Gagal kirim WA ke {$this->target}: " . $apiResponse);
-            } else {
-                Log::info("WA Terkirim ke: " . $this->target . " | Tipe: " . $this->type);
+                // Catat error di log, jangan throw exception agar worker tidak crash berulang
+                Log::error("Gagal kirim WA ke {$this->target}: " . $response->body());
+                return;
             }
 
-            // Simpan ke Tabel WhatsappLog
-            WhatsappLog::create([
-                'recipient_number' => $this->target,
-                'message'          => $this->message, // Bisa dipotong Str::limit() jika terlalu panjang
-                'status'           => $status,
-                'api_response'     => $apiResponse,
-            ]);
+            Log::info("WA Terkirim ke: " . $this->target . " | Tipe: " . $this->type);
 
         } catch (\Exception $e) {
             // Tangkap error koneksi (misal Node.js mati)
             Log::error("Queue WA Error ({$this->target}): " . $e->getMessage());
 
-            // Simpan Log Error Sistem
-            WhatsappLog::create([
-                'recipient_number' => $this->target,
-                'message'          => $this->message,
-                'status'           => 'error', // Status khusus error sistem
-                'api_response'     => "Exception: " . $e->getMessage(),
-            ]);
-
             // Opsional: throw $e; jika ingin Job ini masuk ke tabel failed_jobs untuk di-retry nanti
-            // throw $e; 
         }
     }
 }
