@@ -97,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', [ScheduleController::class, 'create'])->name('create');
             Route::post('/store', [ScheduleController::class, 'store'])->name('store');
             Route::get('/show/{id}', [ScheduleController::class, 'show'])->name('show');
+            Route::get('/edit/{id}', [ScheduleController::class, 'edit'])->name('edit');
+            Route::put('/update/{id}', [ScheduleController::class, 'update'])->name('update');
             Route::get('/destroy/{id}', [ScheduleController::class, 'destroy'])->name('destroy');
         });
 

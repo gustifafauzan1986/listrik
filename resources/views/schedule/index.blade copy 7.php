@@ -82,17 +82,12 @@
                                             </span>
                                         </div>
                                         
-                                        <h5 class="card-title fw-bold text-dark mb-2 text-truncate" title="{{ $schedule->subject->name ?? 'Mapel Dihapus' }}">
+                                        <h5 class="card-title fw-bold text-dark mb-1 text-truncate" title="{{ $schedule->subject->name ?? 'Mapel Dihapus' }}">
                                             {{ $schedule->subject->name ?? 'Mapel Dihapus' }}
                                         </h5>
-                                        
-                                        <!-- TAMPILAN KELAS DIPERJELAS -->
-                                        <div class="mb-3">
-                                            <span class="d-inline-flex align-items-center px-2 py-1 rounded bg-light text-primary border border-primary-subtle fw-bold">
-                                                <i class="fas fa-door-open me-2"></i> 
-                                                {{ $schedule->classroom->name ?? 'Kelas Dihapus' }}
-                                            </span>
-                                        </div>
+                                        <p class="card-text text-muted mb-3">
+                                            <i class="fas fa-door-open me-1"></i> {{ $schedule->classroom->name ?? 'Kelas Dihapus' }}
+                                        </p>
 
                                         <hr class="my-2 border-light">
 
@@ -109,7 +104,7 @@
                                                         <i class="fas fa-camera me-1"></i> Absen
                                                     </button>
                                                     <ul class="dropdown-menu shadow">
-                                                        <li><h6 class="dropdown-header">Metode Absensi</h6></li>
+                                                                                                                <li><h6 class="dropdown-header">Metode Absensi</h6></li>
                                                         <li>
                                                             <a class="dropdown-item" href="{{ url('/schedule/manual', ['schedule_id' => $schedule->id]) }}">
                                                                 <i class="fas fa-clipboard-list me-2 text-secondary"></i> Input Manual
@@ -199,13 +194,15 @@
 
             $events[] = [
                 'id' => $s->id,
-                'title' => $subjectName, 
+                // PERBAIKAN: Masukkan nama kelas ke dalam title sebagai fallback
+                'title' => $subjectName . " (" . $classroomName . ")",
                 'startTime' => \Carbon\Carbon::parse($s->start_time)->format('H:i'),
                 'endTime' => \Carbon\Carbon::parse($s->end_time)->format('H:i'),
                 'daysOfWeek' => [$dayMap[$dayKey]], 
                 'color' => '#4e73df', 
                 'url' => route('schedule.edit', $s->id),
                 'allDay' => false,
+                // Data untuk custom render
                 'extendedProps' => [
                     'subject' => $subjectName,
                     'classroom' => $classroomName
@@ -314,32 +311,19 @@
 
                 // PERBAIKAN: Custom Event Content untuk Menampilkan Mapel & Kelas
                 eventContent: function(arg) {
-                    let subject = arg.event.extendedProps.subject;
-                    let classroom = arg.event.extendedProps.classroom;
+                    // Ambil data dari extendedProps jika ada, jika tidak fallback ke title
+                    let props = arg.event.extendedProps || {};
+                    let subject = props.subject || arg.event.title;
+                    let classroom = props.classroom || '';
                     let timeText = arg.timeText;
 
                     let content = document.createElement('div');
                     content.className = 'fc-custom-content';
                     content.innerHTML = `
                         <div class="fc-event-time" style="font-size:0.75rem; opacity:0.9;">${timeText}</div>
-                        <div class="fc-event-title" style="font-weight:bold; font-size:0.85rem; margin-bottom:4px; line-height:1.1;">${subject}</div>
-                        
-                        <!-- Kelas dengan background semi-transparan agar jelas -->
-                        <div style="
-                            font-size:0.9rem; 
-                            font-weight:bold;
-                            display:inline-flex; 
-                            align-items:center; 
-                            gap:4px; 
-                            background-color:rgba(255,255,255,0.9); 
-                            color: #333;
-                            padding:3px 8px; 
-                            border-radius:4px;
-                            border:1px solid rgba(0,0,0,0.1);
-                            margin-top: 2px;
-                        ">
-                            <i class="fas fa-door-open" style="font-size:0.8rem;"></i> 
-                            ${classroom}
+                        <div class="fc-event-title" style="font-weight:bold; font-size:0.85rem; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${subject}</div>
+                        <div style="font-size:0.75rem; display:flex; align-items:center; gap:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            ${classroom ? '<i class="fas fa-door-open"></i> ' + classroom : ''}
                         </div>
                     `;
                     return { domNodes: [content] };

@@ -7,6 +7,8 @@ use App\Models\Schedule;
 use App\Models\Attendance;
 use App\Models\Teacher; 
 use App\Models\TeachingAssignment; // Model Mapping
+use App\Models\Classroom; // Tambahan untuk Admin View
+use App\Models\Subject;   // Tambahan untuk Admin View
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -140,6 +142,71 @@ class ScheduleController extends Controller
         return redirect()->route('schedule.index')->with('success', 'Jadwal Berhasil Dibuat!');
     }
 
+
+    /**
+     * Form Edit Jadwal
+     */
+    public function edit($id)
+    {
+        $teacher = $this->getTeacher();
+        
+        // Pastikan jadwal milik guru yang login
+        $schedule = Schedule::where('id', $id)
+                    ->where('teacher_id', $teacher->id)
+                    ->firstOrFail();
+
+        // Ambil data mapping untuk dropdown (Sama seperti create)
+        $assignments = TeachingAssignment::with(['classroom', 'subject'])
+                        ->where('teacher_id', $teacher->id)
+                        ->get();
+
+        $classrooms = $assignments->pluck('classroom')->unique('id')->sortBy('name');
+
+        return view('schedule.edit', compact('schedule', 'classrooms', 'assignments'));
+    }
+
+    /**
+     * Update Jadwal
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'classroom_id' => 'required|exists:classrooms,id',
+            'subject_id'   => 'required|exists:subjects,id',
+            'day'          => 'required',
+            'start_time'   => 'required',
+            'end_time'     => 'required|after:start_time',
+        ]);
+
+        $teacher = $this->getTeacher();
+        $schedule = Schedule::where('id', $id)->where('teacher_id', $teacher->id)->firstOrFail();
+
+        // 1. Cek Validitas Mapping
+        $isValidMapping = TeachingAssignment::where('teacher_id', $teacher->id)
+                    ->where('classroom_id', $request->classroom_id)
+                    ->where('subject_id', $request->subject_id)
+                    ->exists();
+
+        if (!$isValidMapping) {
+            return back()->withErrors(['subject_id' => 'Mapping tidak valid.'])->withInput();
+        }
+
+        // 2. Cek Bentrok (Kirim ID jadwal saat ini untuk dikecualikan)
+        if ($this->checkConflict($teacher->id, $request, $id)) {
+             return back()->withErrors(['start_time' => 'Jadwal bentrok dengan jadwal lain!'])->withInput();
+        }
+
+        $schedule->update([
+            'classroom_id' => $request->classroom_id,
+            'subject_id'   => $request->subject_id,
+            'day'          => $request->day,
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
+        ]);
+
+        return redirect()->route('schedule.index')->with('success', 'Jadwal Berhasil Diperbarui!');
+    }
+
     /**
      * Lihat Detail Absensi
      */
@@ -234,20 +301,49 @@ class ScheduleController extends Controller
     }
 
     // Helper Cek Bentrok
-    private function checkConflict($teacherId, $request) {
+    // private function checkConflict($teacherId, $request) {
+    //     // 1. Cek Bentrok Jadwal GURU
+    //     $teacherConflict = Schedule::where('teacher_id', $teacherId)
+    //         ->where('day', $request->day)
+    //         ->where('start_time', '<', $request->end_time)
+    //         ->where('end_time', '>', $request->start_time)
+    //         ->exists();
+            
+    //     // 2. Cek Bentrok Jadwal KELAS
+    //     $classConflict = Schedule::where('classroom_id', $request->classroom_id)
+    //         ->where('day', $request->day)
+    //         ->where('start_time', '<', $request->end_time)
+    //         ->where('end_time', '>', $request->start_time)
+    //         ->exists();
+
+    //     return $teacherConflict || $classConflict;
+    // }
+
+     // Helper Cek Bentrok (Updated dengan ignore ID)
+    private function checkConflict($teacherId, $request, $ignoreId = null) {
         // 1. Cek Bentrok Jadwal GURU
-        $teacherConflict = Schedule::where('teacher_id', $teacherId)
+        $queryTeacher = Schedule::where('teacher_id', $teacherId)
             ->where('day', $request->day)
             ->where('start_time', '<', $request->end_time)
-            ->where('end_time', '>', $request->start_time)
-            ->exists();
+            ->where('end_time', '>', $request->start_time);
+        
+        if ($ignoreId) {
+            $queryTeacher->where('id', '!=', $ignoreId);
+        }
+        
+        $teacherConflict = $queryTeacher->exists();
             
         // 2. Cek Bentrok Jadwal KELAS
-        $classConflict = Schedule::where('classroom_id', $request->classroom_id)
+        $queryClass = Schedule::where('classroom_id', $request->classroom_id)
             ->where('day', $request->day)
             ->where('start_time', '<', $request->end_time)
-            ->where('end_time', '>', $request->start_time)
-            ->exists();
+            ->where('end_time', '>', $request->start_time);
+
+        if ($ignoreId) {
+            $queryClass->where('id', '!=', $ignoreId);
+        }
+
+        $classConflict = $queryClass->exists();
 
         return $teacherConflict || $classConflict;
     }
