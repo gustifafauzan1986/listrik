@@ -13,7 +13,7 @@
                         
                        
 
-                    <form action="{{ route('update.attendance') }}" method="POST">
+                    <form action="{{ route('settings.update.attendance') }}" method="POST">
                         @csrf
                             <div class="card-body">
                                 <div class="mb-3 form-group">

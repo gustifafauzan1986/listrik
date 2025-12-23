@@ -99,7 +99,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
         Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
         // Route::resource('schedule', ScheduleController::class);
-        Route::prefix('schedule')->name('schedule.')->group(function() {
+        Route::prefix('guru/schedule')->name('schedule.')->group(function() {
             Route::get('/', [ScheduleController::class, 'index'])->name('index'); 
             Route::get('/create', [ScheduleController::class, 'create'])->name('create');
             Route::post('/store', [ScheduleController::class, 'store'])->name('store');
@@ -230,13 +230,16 @@ Route::middleware(['auth'])->group(function () {
 
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
-        // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
-        // Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
-        Route::get('/settings/attendance', [SettingController::class, 'settingAttendance'])->name('settings.attendance');
-        Route::post('/settings/attendance', [SettingController::class, 'updateAttendance'])->name('update.attendance');
-
+        Route::prefix('admin/settings')->name('settings.')->group(function() {
+            Route::get('/', [SettingController::class, 'index'])->name('index');
+            Route::put('/update', [SettingController::class, 'update'])->name('update');
+            // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+            // Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+        
+        
+            Route::get('/attendance', [SettingController::class, 'settingAttendance'])->name('attendance');
+            Route::post('/attendance', [SettingController::class, 'updateAttendance'])->name('update.attendance');
+        });
         Route::get('/user/all', [UserController::class, 'allUser'])->name('all.user');
         Route::get('/user/add', [UserController::class, 'addUser'])->name('add.user');
         Route::post('/user/store', [UserController::class, 'storeUser'])->name('store.user');
@@ -341,7 +344,7 @@ Route::middleware(['auth'])->group(function () {
 
         // --- REKAPITULASI MENYELURUH (MASTER RECAP) ---
         // Pastikan RecapController sudah dibuat
-        Route::prefix('recap')->name('recap.')->group(function() {
+        Route::prefix('rekapitulasi')->name('recap.')->group(function() {
             Route::get('/', [RecapController::class, 'index'])->name('index'); 
             Route::get('/daily', [RecapController::class, 'dailyLog'])->name('daily');
             Route::get('/learning', [RecapController::class, 'learningLog'])->name('learning');

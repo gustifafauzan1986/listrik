@@ -69,7 +69,7 @@ $status = $guruId->status;
 						<div class="menu-title">Setting</div>
 					</a>
 					<ul>
-						<li> <a href="{{url('/settings')}}"><i class='bx bx-home-smile'></i>Sekolah</a></li>
+						<li> <a href="{{route('settings.index')}}"><i class='bx bx-home-smile'></i>Sekolah</a></li>
 						<li> <a href="{{route('all.user')}}"><i class='bx bx-user'></i>User</a></li>
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-barcode-reader'></i>Presensi</a></li>
                         <li> <a href="{{route('majors.index')}}"><i class='bx bx-minus-front'></i>Jurusan</a></li>
