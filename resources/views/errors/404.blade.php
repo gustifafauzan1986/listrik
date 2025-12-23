@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 - Akses Ditolak</title>
+    <title>404 - Halaman Tidak Ditemukan</title>
     <!-- Menggunakan Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome untuk Ikon -->
@@ -30,25 +30,25 @@
             width: 90%;
             position: relative;
             overflow: hidden;
-            border-top: 5px solid #ffc107; /* Kuning Peringatan */
+            border-top: 5px solid #dc3545;
         }
 
         .error-code {
             font-size: 8rem;
             font-weight: 900;
-            color: #ffc107; /* Kuning Peringatan */
+            color: #dc3545; /* Merah Error */
             line-height: 1;
             margin-bottom: 10px;
-            text-shadow: 4px 4px 0px rgba(255, 193, 7, 0.1);
+            text-shadow: 4px 4px 0px rgba(220, 53, 69, 0.1);
             position: relative;
             z-index: 2;
         }
 
         .error-icon {
             font-size: 3rem;
-            color: #dc3545; /* Merah untuk ikon gembok */
+            color: #ffc107;
             margin-bottom: 20px;
-            animation: shake 3s infinite;
+            animation: bounce 2s infinite;
         }
 
         .error-title {
@@ -90,12 +90,10 @@
             color: white;
         }
 
-        @keyframes shake {
-            0%, 100% {transform: rotate(0deg);}
-            20% {transform: rotate(-10deg);}
-            40% {transform: rotate(10deg);}
-            60% {transform: rotate(-10deg);}
-            80% {transform: rotate(10deg);}
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
         }
     </style>
 </head>
@@ -103,16 +101,16 @@
 
     <div class="error-card">
         <div class="error-icon">
-            <i class="fas fa-user-lock"></i>
+            <i class="fas fa-ghost"></i>
         </div>
         
-        <div class="error-code">403</div>
+        <div class="error-code">404</div>
         
-        <h1 class="error-title">Akses Ditolak!</h1>
+        <h1 class="error-title">Oops! Halaman Hilang</h1>
         
         <p class="error-desc">
-            Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.<br>
-            Silakan hubungi administrator jika ini kesalahan.
+            Maaf, halaman yang Anda cari tidak ditemukan.<br>
+            Mungkin tautan rusak atau halaman telah dihapus oleh admin.
         </p>
 
         <a href="{{ url('/dashboard') }}" class="btn-home">

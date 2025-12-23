@@ -40,6 +40,9 @@ use App\Http\Controllers\ScannerDeviceController;
 use App\Http\Controllers\StudentPermissionController;
 use App\Http\Controllers\RecapController;
 use App\Http\Controllers\TeacherDashboardController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PiketDashboardController;
+use App\Http\Controllers\SiswaDashboardController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -79,6 +82,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/daily-attendance/monitor-kelas', [DailyAttendanceController::class, 'monitorKelas'])->name('daily.monitor.kelas');
     // API Data JSON untuk Monitor
     Route::get('/daily-attendance/api/latest', [DailyAttendanceController::class, 'getRealtimeData'])->name('daily.api.latest');
+
+    // --- DASHBOARD REDIRECTOR (UPDATED) ---
+    // Logika pengalihan user ke halaman yang sesuai role-nya
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 
@@ -118,7 +125,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/print-card-siswa/{id}', [StudentAreaController::class, 'printSingle'])->name('print.siswa.single');
 
         // Route Khusus Dashboard Guru
-        Route::get('/guru/jadwal', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
+        Route::get('/guru/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
 
     });
     // =========================================================================
@@ -127,6 +134,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['role:admin|guru|piket'])->group(function () {
 
+        Route::get('/piket/dashboard', [PiketDashboardController::class, 'dashboard'])->name('piket.dashboard');
         Route::get('/report', [ReportController::class, 'index'])->name('report.index');
         Route::post('/report/print', [ReportController::class, 'print'])->name('report.print');
         // [BARU] Route Cetak Laporan Per Jadwal (Direct Link)
@@ -171,6 +179,7 @@ Route::middleware(['auth'])->group(function () {
         // ... route import siswa yang lama ...
 
         // ROUTE BARU: IMPORT USER
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('/import-users', [UserImportController::class, 'index'])->name('users.import');
         Route::post('/import-users', [UserImportController::class, 'store'])->name('users.import.store');
 
@@ -349,6 +358,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:siswa'])->group(function () {
 
         // Profil Siswa (Edit No HP & Alamat)
+        Route::get('/siswa/dashboard', [SiswaDashboardController::class, 'dashboard'])->name('students.dashboard');
         Route::get('/my-profile', [StudentAreaController::class, 'profileStudent'])->name('student.profile');
         Route::put('/my-profile', [StudentAreaController::class, 'updateProfile'])->name('student.profile.update');
         // Riwayat Absensi
