@@ -16,6 +16,7 @@ return new class extends Migration
             // Relasi ke Siswa & Jadwal (Keduanya sudah UUID)
             $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
             $table->foreignUuid('schedule_id')->constrained('schedules')->onDelete('cascade');
+            $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
             $table->date('date');
             $table->time('check_in_time');
             $table->enum('status', ['hadir', 'terlambat', 'izin', 'sakit', 'alpa']);

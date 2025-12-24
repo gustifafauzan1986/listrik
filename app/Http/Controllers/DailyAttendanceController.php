@@ -198,7 +198,7 @@ class DailyAttendanceController extends Controller
                    "🏫 Kelas: {$kelas}\n" .
                    "📅 Waktu: {$time} WIB\n" .
                    "📝 Status: *" . strtoupper($status) . "*\n\n" .
-                   "_$inf_app_";
+                   "_Absensi_Sekolah_";
         } elseif ($type == 'pulang') {
             $msg = "*LAPORAN KEPULANGAN (GERBANG)*\n\n" .
                    "Yth. Orang Tua/Wali,\n" .
@@ -206,7 +206,7 @@ class DailyAttendanceController extends Controller
                    "🏫 Kelas: {$kelas}\n" .
                    "📅 Waktu: {$time} WIB\n" .
                    "📝 Status: *PULANG SEKOLAH*\n\n" .
-                   "$inf_app";
+                   "_Absensi_Sekolah_";
         } elseif ($type == 'manual') {
             // Format pesan untuk input manual
             $msg = "*LAPORAN PRESENSI (MANUAL)*\n\n" .
@@ -214,7 +214,7 @@ class DailyAttendanceController extends Controller
                    "🏫 Kelas: {$kelas}\n" .
                    "📝 Status: *" . strtoupper($status) . "*\n" .
                    "Ket: Data diinput manual oleh petugas.\n\n" .
-                   "$inf_app";
+                   "_Absensi_Sekolah_";
         }
 
         // Hanya dispatch job jika pesan berhasil dibuat
@@ -469,6 +469,45 @@ class DailyAttendanceController extends Controller
         ];
 
         return view('daily_attendance.reports.laporan', compact('attendances', 'students', 'summary'));
+    }
+
+
+    
+    /**
+     * FITUR BARU: Simpan Absensi Gerbang Massal (Bantuan Guru)
+     * Digunakan jika scanner rusak atau antrian panjang, guru bisa mem-bypass.
+     */
+    public function storeBulk(Request $request)
+    {
+        $request->validate([
+            'student_ids' => 'required|array',
+            'status' => 'required|in:hadir,terlambat,izin,sakit,alpa',
+        ]);
+
+        // 1. Cari Siswa
+        $student = Student::with('classroom')->where('nis', $request->nis)->first();
+        $date = Carbon::now()->format('Y-m-d');
+        $time = Carbon::now()->format('H:i:s');
+        $count = 0;
+
+        foreach ($request->student_ids as $studentId) {
+            // Cek apakah sudah ada data (untuk menghindari duplikat)
+            $exists = DailyAttendance::where('student_id', $studentId)
+                        ->where('date', $date)
+                        ->exists();
+
+            if (!$exists) {
+                DailyAttendance::create([
+                    'student_id'   => $studentId,
+                    'date'         => $date,
+                    'arrival_time' => $time, // Set jam sekarang sebagai jam datang
+                    'status'       => $request->status,
+                ]);
+                $count++;
+            }
+        }
+
+        return redirect()->back()->with('success', "Berhasil menambahkan absensi gerbang manual untuk $count siswa.");
     }
 
     

@@ -147,7 +147,7 @@
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
                 locale: 'id',
                 slotMinTime: '06:00:00',
-                slotMaxTime: '17:00:00',
+                slotMaxTime: '23:00:00',
                 allDaySlot: false,
                 contentHeight: 'auto',
                 events: @json($events),

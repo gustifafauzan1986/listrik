@@ -94,7 +94,7 @@ Route::middleware(['auth'])->group(function () {
         // Halaman Scanner (Hanya bisa diakses Guru yang login)
         Route::get('/scan/{schedule_id}', [AttendanceController::class, 'index'])->name('scan.index');
         // Proses Data Scan (Ajax)
-        Route::post('/scan/store', [AttendanceController::class, 'store'])->name('scan.store');
+        Route::post('/scan/store', [AttendanceController::class, 'store'])->name('attendance.store_scan');
         // Scanner Wajah (API & View)
         Route::get('/face/descriptors/{schedule_id}', [FaceController::class, 'getDescriptors']);
         Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
@@ -126,6 +126,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Route Khusus Dashboard Guru
         Route::get('/guru/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
+
+        // Route simpan absensi gerbang massal (Bantuan Guru)
+    Route::post('/daily-attendance/bulk', [DailyAttendanceController::class, 'storeBulk'])->name('daily.store_bulk');
 
     });
     // =========================================================================
@@ -227,7 +230,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
 
-
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
         Route::prefix('admin/settings')->name('settings.')->group(function() {
@@ -235,8 +237,6 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/update', [SettingController::class, 'update'])->name('update');
             // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
             // Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
-        
-        
             Route::get('/attendance', [SettingController::class, 'settingAttendance'])->name('attendance');
             Route::post('/attendance', [SettingController::class, 'updateAttendance'])->name('update.attendance');
         });
