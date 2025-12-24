@@ -81,35 +81,6 @@ $status = $guruId->status;
 
 					</ul>
 				</li>
-
-
-                <li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon"><i class='bx bx-group'></i>
-						</div>
-						<div class="menu-title">Rombel</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('classrooms.index')}}"><i class='bx bxs-group'></i>Kelas</a></li>
-						<li> <a href="{{route('students.index')}}"><i class='bx bxs-user-check'></i>Murid</a></li>
-						<li> <a href="{{url('/face/register')}}"><i class='bx bxs-file-find'></i>Scan Wajah</a></li>
-
-
-					</ul>
-				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon"><i class='bx bx-user-pin'></i>
-						</div>
-						<div class="menu-title">Guru</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('teachers.index')}}"><i class='bx bx-radio-circle'></i>Lihat</a>
-						</li>
-
-
-					</ul>
-				</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-cog"></i>
@@ -117,6 +88,10 @@ $status = $guruId->status;
 						<div class="menu-title">Maping</div>
 					</a>
 					<ul>
+						<li> <a href="{{route('teachers.index')}}"><i class='bx bx-radio-circle'></i>Guru</a></li>
+						<li> <a href="{{route('classrooms.index')}}"><i class='bx bxs-group'></i>Rombel</a></li>
+						<li> <a href="{{route('students.index')}}"><i class='bx bxs-user-check'></i>Murid</a></li>
+						<!-- <li> <a href="{{url('/face/register')}}"><i class='bx bxs-file-find'></i>Scan Wajah</a></li> -->
 						<li> <a href="{{url('/teaching-assignments')}}"><i class='bx bx-home-smile'></i>PBM</a></li>
 						<li> <a href="{{url('/schedule/all')}}"><i class='bx bx-home-smile'></i>Jadwal</a></li>
 

@@ -105,7 +105,7 @@
             },
             success: function(res) {
                 Swal.fire('Berhasil', res.message, 'success').then(() => {
-                    window.location.href = "{{ route('face.index', ['classroom_id' => $student->classroom_id]) }}";
+                    window.location.href = "{{ route('students.index', ['classroom_id' => $student->classroom_id]) }}";
                 });
             },
             error: function() {

@@ -507,6 +507,8 @@ class DailyAttendanceController extends Controller
             }
         }
 
+        
+
         return redirect()->back()->with('success', "Berhasil menambahkan absensi gerbang manual untuk $count siswa.");
     }
 
