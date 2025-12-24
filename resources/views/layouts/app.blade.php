@@ -334,10 +334,113 @@
                 });
             @endif
         });
+
+
+
+		// Untuk membuat pilihan tema menjadi permanen (tetap tersimpan 
+		// meskipun halaman di-refresh atau browser ditutup), kita perlu 
+		// menggunakan fitur localStorage pada browser.
+		$(document).ready(function () {
+			
+			// --- 1. FUNGSI UNTUK MENYIMPAN DAN LOAD TEMA UTAMA (Light/Dark/Semi) ---
+
+			// Cek Local Storage saat halaman dimuat
+			var storedTheme = localStorage.getItem('theme');
+			if (storedTheme) {
+				$('html').attr('class', storedTheme); // Terapkan class ke tag html
+				
+				// Update status Radio Button agar sesuai dengan tema yang aktif
+				if (storedTheme === 'dark-theme') $('#darkmode').prop('checked', true);
+				else if (storedTheme === 'semi-dark') $('#semidark').prop('checked', true);
+				else if (storedTheme === 'minimal-theme') $('#minimaltheme').prop('checked', true);
+				else $('#lightmode').prop('checked', true);
+			}
+
+			// Event Listener untuk tombol Light Mode
+			$('#lightmode').on('click', function () {
+				$('html').attr('class', 'light-theme');
+				localStorage.setItem('theme', 'light-theme');
+			});
+
+			// Event Listener untuk tombol Dark Mode
+			$('#darkmode').on('click', function () {
+				$('html').attr('class', 'dark-theme');
+				localStorage.setItem('theme', 'dark-theme');
+			});
+
+			// Event Listener untuk tombol Semi Dark
+			$('#semidark').on('click', function () {
+				$('html').attr('class', 'semi-dark');
+				localStorage.setItem('theme', 'semi-dark');
+			});
+
+			// Event Listener untuk Minimal Theme
+			$('#minimaltheme').on('click', function () {
+				$('html').attr('class', 'minimal-theme');
+				localStorage.setItem('theme', 'minimal-theme');
+			});
+
+
+			// --- 2. FUNGSI UNTUK HEADER COLORS ---
+
+			// Cek Local Storage Header
+			var storedHeaderColor = localStorage.getItem('headerColor');
+			if (storedHeaderColor) {
+				$('html').addClass(storedHeaderColor);
+			}
+
+			// Event Listener klik warna Header
+			$(".header-colors-indigators .indigator").on('click', function () {
+				var colorId = $(this).attr("id"); // Ambil ID (misal: headercolor1)
+				
+				// Hapus class header lama (headercolor1 s/d headercolor8)
+				$('html').removeClass('headercolor1 headercolor2 headercolor3 headercolor4 headercolor5 headercolor6 headercolor7 headercolor8');
+				
+				// Tambahkan class baru dan simpan
+				$('html').addClass(colorId);
+				localStorage.setItem('headerColor', colorId);
+			});
+
+
+			// --- 3. FUNGSI UNTUK SIDEBAR COLORS ---
+
+			// Cek Local Storage Sidebar
+			var storedSidebarColor = localStorage.getItem('sidebarColor');
+			if (storedSidebarColor) {
+				$('html').addClass(storedSidebarColor);
+			}
+
+			// Event Listener klik warna Sidebar
+			$(".sidebar-colors-indigators .indigator").on('click', function () { // Perhatikan: saya asumsikan class wrapper sidebar adalah .sidebar-colors-indigators sesuai pola
+				var colorId = $(this).attr("id"); // Ambil ID (misal: sidebarcolor1)
+				
+				// Hapus class sidebar lama
+				$('html').removeClass('sidebarcolor1 sidebarcolor2 sidebarcolor3 sidebarcolor4 sidebarcolor5 sidebarcolor6 sidebarcolor7 sidebarcolor8');
+				
+				// Tambahkan class baru dan simpan
+				$('html').addClass(colorId);
+				localStorage.setItem('sidebarColor', colorId);
+			});
+			
+			// --- 4. FUNGSI TOMBOL RESET (Opsional) ---
+			// Jika Anda ingin tombol untuk reset ke default
+			$(".reset-theme").on('click', function() {
+				localStorage.clear();
+				location.reload();
+			});
+
+		});
+
+
+
     </script>
+
+	
     
     {{-- Stack untuk kode JS spesifik halaman (e.g., filterClassrooms dari thread sebelumnya) --}}
     @stack('scripts')
+
+	
 
 </body>
 
