@@ -13,8 +13,13 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('nis')->unique(); // Ini yang akan jadi isi QR Code
             $table->string('name');
+            // Menyimpan array descriptor wajah (JSON text)
+            $table->text('face_descriptor')->nullable();
+            $table->string('phone')->nullable();
+             $table->text('address')->nullable();
             // Ganti $table->string('class_name'); Menjadi:
             // $table->foreignUuid('classroom_id')->constrained('classrooms')->onDelete('cascade');
             // $table->foreignUuid('classroom_id')->nullable()->constrained('classrooms')->onDelete('cascade');

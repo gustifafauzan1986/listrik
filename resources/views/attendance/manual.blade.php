@@ -5,7 +5,7 @@
 <x-app-layout>
     <div class="page-content">
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-md-12">
                 
                 <!-- Header -->
                 <div class="mb-4 d-flex justify-content-between align-items-center">

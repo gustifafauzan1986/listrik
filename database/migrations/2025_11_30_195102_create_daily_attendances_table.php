@@ -16,6 +16,7 @@ return new class extends Migration
             $table->time('departure_time')->nullable(); // Jam Pulang
             // Status kehadiran harian
             $table->enum('status', ['hadir', 'terlambat', 'izin', 'sakit', 'alpa'])->default('alpa');
+            $table->string('recorded_by')->nullable()->comment('Nama User/Device yang melakukan input');
             $table->timestamps();
         });
     }

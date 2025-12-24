@@ -4,6 +4,7 @@
     <div class="page-content">
         <div class="container py-4">
             
+            <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="mb-0 text-primary fw-bold"><i class="fas fa-calendar-alt me-2"></i> Jadwal Mengajar Saya</h4>
@@ -14,6 +15,7 @@
                 </a>
             </div>
 
+            <!-- Alert Success -->
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
@@ -21,6 +23,7 @@
                 </div>
             @endif
 
+            <!-- TAB NAVIGASI -->
             <ul class="nav nav-tabs mb-4" id="scheduleTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active fw-bold" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-view" type="button" role="tab">
@@ -36,9 +39,12 @@
 
             <div class="tab-content" id="scheduleTabsContent">
                 
+                <!-- 1. LIST VIEW (KARTU) -->
                 <div class="tab-pane fade show active" id="list-view" role="tabpanel">
                     <div class="row">
-                        @php $activeAlerts = []; @endphp @forelse($schedules as $schedule)
+                        @php $activeAlerts = []; @endphp <!-- Init Array Notifikasi -->
+                        
+                        @forelse($schedules as $schedule)
                             @php
                                 $now = \Carbon\Carbon::now();
                                 $isToday = $schedule->day == $now->translatedFormat('l');
@@ -46,10 +52,9 @@
                                 $startTime = \Carbon\Carbon::parse($schedule->start_time)->setDate($now->year, $now->month, $now->day);
                                 $endTime = \Carbon\Carbon::parse($schedule->end_time)->setDate($now->year, $now->month, $now->day);
                                 
-                                // Cek apakah jam sekarang berada di antara jam mulai dan selesai
                                 $isActive = $isToday && $now->between($startTime, $endTime);
 
-                                // Kumpulkan Data Jadwal Aktif untuk Notifikasi Desktop/Toast
+                                // Kumpulkan Data Jadwal Aktif untuk Notifikasi
                                 if ($isActive) {
                                     $activeAlerts[] = [
                                         'subject' => $schedule->subject->name ?? 'Mapel',
@@ -90,6 +95,7 @@
                                             {{ $schedule->subject->name ?? 'Mapel Dihapus' }}
                                         </h5>
                                         
+                                        <!-- TAMPILAN KELAS DIPERJELAS -->
                                         <div class="mb-3">
                                             <span class="d-inline-flex align-items-center px-2 py-1 rounded bg-light text-primary border border-primary-subtle fw-bold">
                                                 <i class="fas fa-door-open me-2"></i> 
@@ -106,39 +112,33 @@
                                             </div>
                                             
                                             <div class="d-flex gap-1">
-                                                
-                                                @if($isActive)
-                                                    <div class="btn-group dropdown-container">
-                                                        <button type="button" class="btn btn-sm btn-warning text-dark fw-bold dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
-                                                            <i class="fas fa-camera me-1"></i> Absen
-                                                        </button>
-                                                        <ul class="dropdown-menu shadow">
-                                                            <li><h6 class="dropdown-header">Metode Absensi</h6></li>
-                                                            <li>
-                                                                <a class="dropdown-item" href="{{ url('/schedule/manual', ['schedule_id' => $schedule->id]) }}">
-                                                                    <i class="fas fa-clipboard-list me-2 text-secondary"></i> Input Manual
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item" href="{{ route('scan.index', ['schedule_id' => $schedule->id]) }}">
-                                                                    <i class="fas fa-qrcode me-2 text-dark"></i> Scan QR Code
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item" href="{{ route('scan.face', ['schedule_id' => $schedule->id]) }}">
-                                                                    <i class="fas fa-user-circle me-2 text-primary"></i> Face ID
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                @else
-                                                    {{-- Pastikan route report.schedule menerima parameter ID jadwal --}}
-                                                    <a href="{{ route('report.schedule', $schedule->id) }}" class="btn btn-sm btn-success text-white" title="Lihat Laporan">
-                                                        <i class="fas fa-file-alt me-1"></i> Laporan
-                                                    </a>
-                                                @endif
+                                                <!-- MENU ABSENSI -->
+                                                <div class="btn-group dropdown-container">
+                                                    <button type="button" class="btn btn-sm {{ $isActive ? 'btn-warning text-dark fw-bold' : 'btn-success' }} dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
+                                                        <i class="fas fa-camera me-1"></i> Absen
+                                                    </button>
+                                                    <ul class="dropdown-menu shadow">
+                                                        <li><h6 class="dropdown-header">Metode Absensi</h6></li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ url('/schedule/manual', ['schedule_id' => $schedule->id]) }}">
+                                                                <i class="fas fa-clipboard-list me-2 text-secondary"></i> Input Manual
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('scan.index', ['schedule_id' => $schedule->id]) }}">
+                                                                <i class="fas fa-qrcode me-2 text-dark"></i> Scan QR Code
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('scan.face', ['schedule_id' => $schedule->id]) }}">
+                                                                <i class="fas fa-user-circle me-2 text-primary"></i> Face ID
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
 
                                                 <div class="btn-group">
+                                                    <!-- TOMBOL EDIT -->
                                                     <a href="{{ route('schedule.edit', $schedule->id) }}" class="btn btn-sm btn-outline-warning" title="Edit Jadwal">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
@@ -146,7 +146,6 @@
                                                     <a href="{{ route('schedule.show', $schedule->id) }}" class="btn btn-sm btn-outline-primary" title="Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    
                                                     <form action="{{ route('schedule.destroy', $schedule->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus jadwal ini? Data absensi terkait mungkin ikut terhapus.');">
                                                         @csrf
                                                         @method('DELETE')
@@ -175,12 +174,14 @@
                     </div>
                 </div>
 
+                <!-- 2. CALENDAR VIEW -->
                 <div class="tab-pane fade" id="calendar-view" role="tabpanel">
                     <div class="card shadow border-0">
                         <div class="card-body p-0">
                             <div class="alert alert-info m-3 mb-0 small">
                                 <i class="fas fa-info-circle me-1"></i> <strong>Tips:</strong> Klik pada area kosong di kalender untuk menambahkan jadwal baru di jam tersebut. Klik jadwal untuk mengedit.
                             </div>
+                            <!-- Tempat Kalender Dirender -->
                             <div id="calendar" class="p-3"></div>
                         </div>
                     </div>
@@ -190,6 +191,7 @@
         </div>
     </div>
 
+    <!-- PREPARE DATA UNTUK FULLCALENDAR -->
     @php
         $events = [];
         $dayMap = [
@@ -221,6 +223,7 @@
         }
     @endphp
 
+    <!-- STYLES -->
     <style>
         .hover-card { 
             transition: box-shadow 0.2s, border-color 0.2s; 
@@ -262,6 +265,7 @@
         }
     </style>
 
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 
@@ -419,6 +423,7 @@
         });
     </script>
 
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Cek apakah ada session 'success' yang dikirim dari controller
         @if(session('success'))

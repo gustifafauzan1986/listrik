@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\Jobs\SendWhatsappJob; // Queue Job untuk WA
 use App\Models\AttendanceSetting; // Jangan lupa import model ini
 use Illuminate\Support\Facades\DB; // Tambahkan import DB
+use Illuminate\Support\Facades\Auth;
 
 class DailyAttendanceController extends Controller
 {
@@ -484,6 +485,8 @@ class DailyAttendanceController extends Controller
             'status' => 'required|in:hadir,terlambat,izin,sakit,alpa',
         ]);
 
+        $user = Auth::user();
+
         // 1. Cari Siswa
         $student = Student::with('classroom')->where('nis', $request->nis)->first();
         $date = Carbon::now()->format('Y-m-d');
@@ -502,6 +505,8 @@ class DailyAttendanceController extends Controller
                     'date'         => $date,
                     'arrival_time' => $time, // Set jam sekarang sebagai jam datang
                     'status'       => $request->status,
+                    // RECORDED BY: Nama Guru (Bantuan Manual)
+                    'recorded_by'  => $user->name . ' (Bantuan Manual)'
                 ]);
                 $count++;
             }

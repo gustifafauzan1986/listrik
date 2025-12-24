@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('teaching_assignments', function (Blueprint $table) {
-            $table->id();
+            // $table->id();
+            $table->uuid('id')->primary();
             $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
+            // $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
             $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
             $table->foreignUuid('classroom_id')->constrained('classrooms')->onDelete('cascade');
             $table->string('academic_year')->nullable(); // Tahun Ajaran (opsional)

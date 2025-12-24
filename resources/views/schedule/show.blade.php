@@ -14,7 +14,6 @@
             </div>
 
             <div class="row">
-                <!-- Card Ringkasan -->
                 <div class="mb-3 col-md-2">
                     <div class="text-white card bg-success">
                         <div class="text-center card-body">
@@ -31,7 +30,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Card Ringkasan -->
                 <div class="mb-3 col-md-2">
                     <div class="text-white card bg-success">
                         <div class="text-center card-body">
@@ -51,20 +49,21 @@
                 <div class="mb-3 col-md-2">
                     <div class="card bg-warning text-dark">
                         <div class="text-center card-body">
-                            <h3>{{ $attendances->where('status', 'alfa')->count() }}</h3>
+                            <h3>{{ $attendances->where('status', 'alpa')->count() }}</h3>
                             <small>Alfa</small>
                         </div>
                     </div>
                 </div>
+                
                 <div class="mb-3 col-md-2">
                     <div class="text-white card bg-secondary">
                         <div class="text-center card-body">
-                            <h3>{{ $attendances->count() }}</h3>
+                            <h3>{{ $attendances->whereIn('status', ['hadir', 'terlambat'])->count() }}</h3>
                             <small>Total Masuk</small>
                         </div>
                     </div>
                 </div>
-            </div>
+                </div>
 
             <div class="shadow card">
                 <div class="card-body">
@@ -92,8 +91,10 @@
                                             <span class="badge bg-warning text-dark">Sakit</span>
                                         @elseif ($row->status == 'izin')
                                             <span class="badge bg-warning text-dark">Izin</span>
-                                        @else
+                                        @elseif ($row->status == 'terlambat')
                                             <span class="badge bg-warning text-dark">Terlambat</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark">Alpa</span>
                                         @endif
                                     </td>
                                 </tr>

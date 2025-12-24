@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasUuid; // <--- 1. Import Trait
 
 class TeachingAssignment extends Model
 {
+    use HasUuid; // <--- 2. Pasang Trait
     protected $fillable = ['teacher_id', 'subject_id', 'classroom_id', 'academic_year'];
 
     public function teacher()

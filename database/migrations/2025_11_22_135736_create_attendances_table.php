@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('date');
             $table->time('check_in_time');
             $table->enum('status', ['hadir', 'terlambat', 'izin', 'sakit', 'alpa']);
+            $table->string('recorded_by')->nullable()->comment('Nama User/Device yang melakukan input');
             $table->timestamps();
             });
     }
