@@ -113,6 +113,19 @@ $status = $guruId->status;
 						
 					</ul>
 				</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class='bx bx-printer'></i>
+						</div>
+						<div class="menu-title">Aplikasi</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('system.update.index')}}"><i class='bx bx-id-card'></i>Update</a></li>
+						<li> <a href="{{route('database.index')}}"><i class='bx bx-id-card'></i>Database</a></li>
+						
+						
+					</ul>
+				</li>
 				
 				{{-- <li>
 					<a class="has-arrow" href="javascript:;">
@@ -167,14 +180,14 @@ $status = $guruId->status;
 
 					</ul>
 				</li>
-
+<!-- 
 				<li>
 					<a href="{{route('system.update.index')}}">
 						<div class="parent-icon"><i class='bx bxl-microsoft'></i>
 						</div>
 						<div class="menu-title">Update Aplikasi</div>
 					</a>
-				</li>
+				</li> -->
 
                 @endrole
 

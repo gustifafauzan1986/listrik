@@ -43,6 +43,7 @@ use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PiketDashboardController;
 use App\Http\Controllers\SiswaDashboardController;
+use App\Http\Controllers\DatabaseController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -359,6 +360,11 @@ Route::middleware(['auth'])->group(function () {
         // Menu Jadwal Semua Guru (Master Schedule)
         Route::get('/schedule/all', [ScheduleController::class, 'allSchedules'])->name('schedule.all');
         Route::post('/schedule/admin/store', [ScheduleController::class, 'storeAsAdmin'])->name('schedule.store_admin');
+
+        // --- PENGATURAN DATABASE (BACKUP & RESTORE) ---
+        Route::get('/settings/database', [DatabaseController::class, 'index'])->name('database.index');
+        Route::post('/settings/database/backup', [DatabaseController::class, 'backup'])->name('database.backup');
+        Route::post('/settings/database/restore', [DatabaseController::class, 'restore'])->name('database.restore');
 
     });
 

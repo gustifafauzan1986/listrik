@@ -89,6 +89,53 @@ class TranscriptController extends Controller
      * PRIVATE HELPER: Logika Utama Pengambilan Data
      * Digunakan oleh function show() dan printByClass()
      */
+    // private function getStudentAttendanceData($student, $month, $year)
+    // {
+    //     // --- 1. DATA ABSENSI HARIAN (Datang & Pulang) ---
+    //     $dailyLogs = DailyAttendance::where('student_id', $student->id)
+    //         ->whereMonth('created_at', $month)
+    //         ->whereYear('created_at', $year)
+    //         ->orderBy('created_at', 'asc')
+    //         ->get();
+
+    //     // Statistik Harian
+    //     $dailySummary = [
+    //         'hadir'     => $dailyLogs->where('status', 'hadir')->count(),
+    //         'terlambat' => $dailyLogs->where('status', 'terlambat')->count(),
+    //         'izin'      => $dailyLogs->where('status', 'izin')->count(),
+    //         'sakit'     => $dailyLogs->where('status', 'sakit')->count(),
+    //         'alpa'      => $dailyLogs->where('status', 'alpa')->count(),
+    //     ];
+
+    //     // --- 2. DATA ABSENSI PEMBELAJARAN (Per Mapel) ---
+    //     // PERBAIKAN DI SINI: Join ke schedules dulu, baru ke subjects
+    //     $lessonSummary = Attendance::select(
+    //             'subjects.name as subject_name',
+    //             DB::raw('count(*) as total_meetings'),
+    //             DB::raw('sum(case when attendances.status = hadir" then 1 else 0 end) as total_present'),
+    //             DB::raw('sum(case when attendances.status = "terlambat" then 1 else 0 end) as total_late'),
+    //             DB::raw('sum(case when attendances.status = "sakit" then 1 else 0 end) as total_sick'),
+    //             DB::raw('sum(case when attendances.status = "izin" then 1 else 0 end) as total_permission'),
+    //             DB::raw('sum(case when attendances.status = "alpa" then 1 else 0 end) as total_alpha')
+    //         )
+    //         // Join 1: Attendance ke Schedule (untuk dapat subject_id)
+    //         ->join('schedules', 'attendances.schedule_id', '=', 'schedules.id') 
+    //         // Join 2: Schedule ke Subject (untuk dapat nama mapel)
+    //         ->join('subjects', 'schedules.subject_id', '=', 'subjects.id')      
+            
+    //         ->where('attendances.student_id', $student->id)
+    //         ->whereMonth('attendances.created_at', $month)
+    //         ->whereYear('attendances.created_at', $year)
+    //         ->groupBy('subjects.name') // Group berdasarkan nama mapel
+    //         ->get();
+
+    //     return [
+    //         'dailyLogs'     => $dailyLogs,
+    //         'dailySummary'  => $dailySummary,
+    //         'lessonSummary' => $lessonSummary,
+    //     ];
+    // }
+
     private function getStudentAttendanceData($student, $month, $year)
     {
         // --- 1. DATA ABSENSI HARIAN (Datang & Pulang) ---
@@ -108,25 +155,26 @@ class TranscriptController extends Controller
         ];
 
         // --- 2. DATA ABSENSI PEMBELAJARAN (Per Mapel) ---
-        // PERBAIKAN DI SINI: Join ke schedules dulu, baru ke subjects
+        // PERBAIKAN: Menggunakan tanda kutip satu (') untuk nilai string SQL
         $lessonSummary = Attendance::select(
                 'subjects.name as subject_name',
                 DB::raw('count(*) as total_meetings'),
-                DB::raw('sum(case when attendances.status = "hadir" then 1 else 0 end) as total_present'),
-                DB::raw('sum(case when attendances.status = "terlambat" then 1 else 0 end) as total_late'),
-                DB::raw('sum(case when attendances.status = "sakit" then 1 else 0 end) as total_sick'),
-                DB::raw('sum(case when attendances.status = "izin" then 1 else 0 end) as total_permission'),
-                DB::raw('sum(case when attendances.status = "alpa" then 1 else 0 end) as total_alpha')
+                // Perhatikan penggunaan tanda kutip di bawah ini:
+                DB::raw("sum(case when attendances.status = 'hadir' then 1 else 0 end) as total_present"),
+                DB::raw("sum(case when attendances.status = 'terlambat' then 1 else 0 end) as total_late"),
+                DB::raw("sum(case when attendances.status = 'sakit' then 1 else 0 end) as total_sick"),
+                DB::raw("sum(case when attendances.status = 'izin' then 1 else 0 end) as total_permission"),
+                DB::raw("sum(case when attendances.status = 'alpa' then 1 else 0 end) as total_alpha")
             )
-            // Join 1: Attendance ke Schedule (untuk dapat subject_id)
+            // Join 1: Attendance ke Schedule
             ->join('schedules', 'attendances.schedule_id', '=', 'schedules.id') 
-            // Join 2: Schedule ke Subject (untuk dapat nama mapel)
+            // Join 2: Schedule ke Subject
             ->join('subjects', 'schedules.subject_id', '=', 'subjects.id')      
             
             ->where('attendances.student_id', $student->id)
             ->whereMonth('attendances.created_at', $month)
             ->whereYear('attendances.created_at', $year)
-            ->groupBy('subjects.name') // Group berdasarkan nama mapel
+            ->groupBy('subjects.name')
             ->get();
 
         return [
