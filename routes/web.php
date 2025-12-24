@@ -320,10 +320,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transkrip/cetak-kelas', [TranscriptController::class, 'printByClass'])->name('reports.transcript.class');
 
         // Route::resource('teaching-assignments', TeachingAssignmentController::class);
-        Route::get('/teaching-assignments', [TeachingAssignmentController::class, 'index'])->name('teaching-assignments.index');
-        Route::get('/teaching-assignments/create', [TeachingAssignmentController::class, 'create'])->name('teaching-assignments.create');
-        Route::post('/teaching-assignments/store', [TeachingAssignmentController::class, 'store'])->name('teaching-assignments.store');
-        Route::delete('/teaching-assignments/destroy/{id}', [TeachingAssignmentController::class, 'destroy'])->name('teaching-assignments.destroy');
+        Route::prefix('/teaching-assignments')->name('teaching-assignments.')->group(function() {
+            Route::get('/', [TeachingAssignmentController::class, 'index'])->name('index');
+            Route::get('/edit/{id}', [TeachingAssignmentController::class, 'index'])->name('edit');
+            Route::get('/create', [TeachingAssignmentController::class, 'create'])->name('create');
+            Route::post('/store', [TeachingAssignmentController::class, 'store'])->name('store');
+            Route::put('/update/{id}', [TeachingAssignmentController::class, 'update'])->name('update');
+            Route::delete('destroy/{id}', [TeachingAssignmentController::class, 'destroy'])->name('destroy');
+        });
 
         Route::get('/reward/sertifikat', [CertificateController::class, 'index'])->name('certificates.index');
         Route::post('/reward/sertifikat/cetak', [CertificateController::class, 'generate'])->name('certificates.generate');

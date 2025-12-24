@@ -17,7 +17,13 @@ class TeachingAssignmentController extends Controller
         $assignments = TeachingAssignment::with(['teacher', 'subject', 'classroom'])
                         ->latest()
                         ->get();
-        return view('teaching_assignments.index', compact('assignments'));
+        // 2. TAMBAHAN WAJIB: Data untuk Dropdown di Modal Edit
+    // Pastikan Anda sudah meng-import Model Teacher, Subject, dan Classroom di atas controller
+        $allTeachers = Teacher::with('user')->get();
+        $allSubjects = Subject::all();
+        $allClassrooms = Classroom::all();
+        // 3. Kirim semua data ke view
+        return view('teaching_assignments.index', compact('assignments', 'allTeachers', 'allSubjects', 'allClassrooms'));
     }
 
     public function create()
@@ -59,6 +65,49 @@ class TeachingAssignmentController extends Controller
         ]);
 
         return redirect()->route('teaching-assignments.index')->with('success', 'Jadwal mengajar berhasil ditambahkan!');
+    }
+
+    public function update(Request $request, $id)
+    {
+        // 1. Validasi Input
+        $request->validate([
+            'teacher_id'   => 'required|exists:teachers,id',
+            'subject_id'   => 'required|exists:subjects,id',
+            'classroom_id' => 'required|exists:classrooms,id',
+        ]);
+
+        // 2. Cek Duplikat (Validasi Logika)
+        // Mencegah user mengubah data menjadi sama persis dengan data lain yang sudah ada
+        // Contoh: Guru A mengajar Math di Kelas X (sudah ada), lalu kita edit data lain menjadi sama persis.
+        $isDuplicate = TeachingAssignment::where('teacher_id', $request->teacher_id)
+            ->where('subject_id', $request->subject_id)
+            ->where('classroom_id', $request->classroom_id)
+            ->where('id', '!=', $id) // Penting: Kecualikan ID yang sedang diedit ini
+            ->exists();
+
+        if ($isDuplicate) {
+            return redirect()->back()->with('error', 'Gagal update! Kombinasi Guru, Mapel, dan Kelas tersebut sudah ada.');
+        }
+
+        try {
+            // 3. Proses Update
+            $assignment = TeachingAssignment::findOrFail($id);
+            
+            $assignment->update([
+                'teacher_id'   => $request->teacher_id,
+                'subject_id'   => $request->subject_id,
+                'classroom_id' => $request->classroom_id,
+                // Jika ada kolom tahun ajaran yang bisa diedit, tambahkan di sini
+                // 'academic_year' => $request->academic_year ?? $assignment->academic_year, 
+            ]);
+
+            // 4. Kembali dengan pesan sukses
+            return redirect()->back()->with('success', 'Mapping pembelajaran berhasil diperbarui!');
+
+        } catch (\Exception $e) {
+            // Handle jika ada error database lain
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
