@@ -10,7 +10,6 @@
                     <p class="text-muted small mb-0">Pantau dan kelola jadwal seluruh guru di sini.</p>
                 </div>
                 
-                <!-- Filter Guru -->
                 <form method="GET" class="d-flex gap-2">
                     <select name="teacher_id" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">-- Semua Guru --</option>
@@ -50,70 +49,79 @@
         </div>
     </div>
 
-    <!-- MODAL TAMBAH JADWAL (ADMIN) -->
     <div class="modal fade" id="adminScheduleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Tambah Jadwal (Admin Mode)</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="{{ route('schedule.store_admin') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        
-                        <!-- Input Hidden Hari -->
-                        <input type="hidden" name="day" id="modal_day">
-
-                        <!-- 1. Pilih Guru -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Guru</label>
-                            <select name="teacher_id" id="modal_teacher_id" class="form-select select2-modal" required>
-                                <option value="" disabled selected>-- Pilih Guru --</option>
-                                @foreach($teachers as $t)
-                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- 2. Pilih Kelas (Filter by JS) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Kelas</label>
-                            <select name="classroom_id" id="modal_classroom_id" class="form-select" required disabled>
-                                <option value="">-- Pilih Guru Dulu --</option>
-                            </select>
-                        </div>
-
-                        <!-- 3. Pilih Mapel (Filter by JS) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Mata Pelajaran</label>
-                            <select name="subject_id" id="modal_subject_id" class="form-select" required disabled>
-                                <option value="">-- Pilih Kelas Dulu --</option>
-                            </select>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Jam Mulai</label>
-                                <input type="time" name="start_time" id="modal_start_time" class="form-control" required>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Jam Selesai</label>
-                                <input type="time" name="end_time" id="modal_end_time" class="form-control" required>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
-                    </div>
-                </form>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Tambah Jadwal</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            <form id="scheduleForm" action="{{ route('schedule.store_admin') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    
+                    <input type="hidden" name="day" id="modal_day">
+
+                    <div id="error-alert" class="alert alert-danger d-none align-items-center mb-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="error-message"></span>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center mb-3">
+                        <i class="fas fa-clock fa-2x me-3"></i>
+                        <div>
+                            <div class="small text-uppercase fw-bold text-muted">Slot Waktu</div>
+                            <strong id="modal_slot_label" class="fs-5">Loading...</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Guru</label>
+                        <select name="teacher_id" id="modal_teacher_id" class="form-select select2-modal" required>
+                            <option value="" disabled selected>-- Pilih Guru --</option>
+                            @foreach($teachers as $t)
+                                <option value="{{ $t->id }}">{{ $t->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Kelas</label>
+                        <select name="classroom_id" id="modal_classroom_id" class="form-select" required disabled>
+                            <option value="">-- Pilih Guru Dulu --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mata Pelajaran</label>
+                        <select name="subject_id" id="modal_subject_id" class="form-select" required disabled>
+                            <option value="">-- Pilih Kelas Dulu --</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Jam Mulai</label>
+                            <input type="time" name="start_time" id="modal_start_time" class="form-control bg-light" readonly required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-bold">Jam Selesai</label>
+                            <input type="time" name="end_time" id="modal_end_time" class="form-control" required>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- DATA & SCRIPTS -->
+    
+
     @php
         $events = [];
         $dayMap = ['minggu'=>0, 'senin'=>1, 'selasa'=>2, 'rabu'=>3, 'kamis'=>4, 'jumat'=>5, 'sabtu'=>6];
@@ -132,13 +140,13 @@
                 'endTime' => \Carbon\Carbon::parse($s->end_time)->format('H:i'),
                 'daysOfWeek' => [$dayMap[$dayKey]],
                 'color' => $color,
-                'url' => route('schedule.show', $s->id), // Klik untuk hapus/lihat detail
+                'url' => route('schedule.show', $s->id),
             ];
         }
     @endphp
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-    <script>
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             // --- 1. FULLCALENDAR SETUP ---
             var calendarEl = document.getElementById('calendar');
@@ -146,10 +154,32 @@
                 initialView: 'timeGridWeek',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
                 locale: 'id',
-                slotMinTime: '06:00:00',
-                slotMaxTime: '23:00:00',
+                
+                // --- KONFIGURASI JAM PELAJARAN ---
+                slotMinTime: '07:00:00', // Mulai Jam 1
+                slotMaxTime: '18:00:00', // Selesai Jam 12 (15:15 + 45 menit = 16:00)
+                slotDuration: '00:45:00', // Durasi per slot 45 menit
+                slotLabelInterval: '00:45:00', // Label muncul tiap 45 menit
+                expandRows: true, // Agar baris meregang memenuhi tinggi
                 allDaySlot: false,
-                contentHeight: 'auto',
+                
+                // Custom Label (Jam 1, Jam 2, dst)
+                slotLabelContent: function(arg) {
+                    // Hitung Jam Ke-berapa berdasarkan waktu slot
+                    let date = arg.date;
+                    let totalMinutes = (date.getHours() * 60) + date.getMinutes();
+                    let startMinutes = (7 * 60); // Jam 07:00 dalam menit
+                    
+                    // Rumus: (Waktu Slot - Waktu Mulai) / 45 menit + 1
+                    let jamKe = Math.round((totalMinutes - startMinutes) / 45) + 1;
+                    
+                    // Format tampilan waktu (misal 07:00)
+                    let timeText = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+                    // Return HTML untuk label
+                    return { html: `<div class="text-center fw-bold">Jam ${jamKe}</div><div class="small text-muted">${timeText}</div>` };
+                },
+
                 events: @json($events),
                 
                 // Klik slot kosong -> Buka Modal
@@ -157,16 +187,19 @@
                     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     const date = info.date;
                     
-                    // Isi form otomatis
+                    // Isi form hari
                     document.getElementById('modal_day').value = days[date.getDay()];
                     
+                    // Isi form jam mulai (sesuai slot yang diklik)
                     const h = String(date.getHours()).padStart(2, '0');
                     const m = String(date.getMinutes()).padStart(2, '0');
                     document.getElementById('modal_start_time').value = `${h}:${m}`;
                     
-                    // Perkiraan selesai +1 jam
-                    let endH = date.getHours() + 1;
-                    document.getElementById('modal_end_time').value = `${String(endH).padStart(2,'0')}:${m}`;
+                    // Isi form jam selesai (Otomatis +45 menit)
+                    let endDate = new Date(date.getTime() + 45 * 60000); // tambah 45 menit
+                    const endH = String(endDate.getHours()).padStart(2, '0');
+                    const endM = String(endDate.getMinutes()).padStart(2, '0');
+                    document.getElementById('modal_end_time').value = `${endH}:${endM}`;
 
                     // Buka Modal
                     var myModal = new bootstrap.Modal(document.getElementById('adminScheduleModal'));
@@ -185,18 +218,15 @@
             calendar.render();
 
 
-            // --- 2. LOGIC FILTER DROPDOWN (ADMIN) ---
-            const allAssignments = @json($allAssignments); // Data mapping lengkap
+            // --- 2. LOGIC FILTER DROPDOWN (ADMIN) - TETAP SAMA ---
+            const allAssignments = @json($allAssignments); 
 
             const teacherSelect = document.getElementById('modal_teacher_id');
             const classroomSelect = document.getElementById('modal_classroom_id');
             const subjectSelect = document.getElementById('modal_subject_id');
 
-            // Saat Admin memilih Guru
             teacherSelect.addEventListener('change', function() {
                 const teacherId = this.value;
-                
-                // Reset Kelas & Mapel
                 classroomSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
                 subjectSelect.innerHTML = '<option value="">-- Pilih Mapel --</option>';
                 classroomSelect.disabled = true;
@@ -204,16 +234,12 @@
 
                 if (!teacherId) return;
 
-                // Cari Mapping milik guru ini
-                // Kita cari kelas-kelas yang unik dimana guru ini mengajar
                 const myAssignments = allAssignments.filter(a => a.teacher_id == teacherId);
-                
-                // Ekstrak Kelas Unik (Manual karena object JS)
                 const uniqueClasses = [];
                 const map = new Map();
                 for (const item of myAssignments) {
                     if(!map.has(item.classroom_id)){
-                        map.set(item.classroom_id, true);    // set any value to Map
+                        map.set(item.classroom_id, true);
                         uniqueClasses.push({ id: item.classroom_id, name: item.classroom.name });
                     }
                 }
@@ -231,7 +257,6 @@
                 }
             });
 
-            // Saat Admin memilih Kelas -> Tampilkan Mapel yg sesuai mapping
             classroomSelect.addEventListener('change', function() {
                 const teacherId = teacherSelect.value;
                 const classroomId = this.value;
@@ -255,11 +280,239 @@
             });
 
         });
-    </script>
+    </script> -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- 1. DATA DARI DATABASE ---
+        const existingSchedules = @json($schedules); 
+        const allAssignments = @json($allAssignments); 
+
+        // --- 2. DEFINISI JADWAL SEKOLAH ---
+        const scheduleMap = {
+            '07:00': { label: 'Jam 1',           duration: 45, type: 'lesson' },
+            '07:45': { label: 'Jam 2',           duration: 45, type: 'lesson' },
+            '08:30': { label: 'Jam 3',           duration: 45, type: 'lesson' },
+            '09:15': { label: 'Jam 4',           duration: 45, type: 'lesson' },
+            '10:00': { label: 'Istirahat I',     duration: 15, type: 'break' },  // <--- Tipe Break
+            '10:15': { label: 'Jam 5',           duration: 45, type: 'lesson' },
+            '11:00': { label: 'Jam 6',           duration: 45, type: 'lesson' },
+            '11:45': { label: 'Jam 7',           duration: 45, type: 'lesson' },
+            '12:30': { label: 'Ishoma',          duration: 45, type: 'break' },  // <--- Tipe Break
+            '13:15': { label: 'Jam 8',           duration: 45, type: 'lesson' },
+            '14:00': { label: 'Jam 9',           duration: 45, type: 'lesson' },
+            '14:45': { label: 'Jam 10',          duration: 45, type: 'lesson' },
+            '15:30': { label: 'Istirahat III',   duration: 15, type: 'break' },  // <--- Tipe Break
+            '15:45': { label: 'Jam 11',          duration: 45, type: 'lesson' },
+            '16:30': { label: 'Jam 12',          duration: 45, type: 'lesson' },
+            '17:15': { label: 'Jam 13',          duration: 45, type: 'lesson' }
+        };
+
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
+            locale: 'id',
+            slotMinTime: '07:00:00',
+            slotMaxTime: '18:15:00',
+            slotDuration: '00:15:00',
+            slotLabelInterval: '00:15:00',
+            expandRows: true,
+            allDaySlot: false,
+            
+            slotLabelContent: function(arg) {
+                let timeText = arg.date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace('.', ':');
+                if (scheduleMap[timeText]) {
+                    let info = scheduleMap[timeText];
+                    let colorClass = info.type === 'break' ? 'text-danger fw-bold' : 'text-primary fw-bold';
+                    let icon = info.type === 'break' ? '<i class="fas fa-coffee"></i>' : '';
+                    return { 
+                        html: `<div class="${colorClass}" style="font-size:10px; line-height:1.2;">${icon} ${info.label}</div>
+                               <div class="small text-muted" style="font-size:9px;">${timeText}</div>` 
+                    };
+                }
+                return { html: '' };
+            },
+
+            events: @json($events),
+            
+            // --- VALIDASI SAAT KLIK SLOT (DATE CLICK) ---
+            dateClick: function(info) {
+                const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                const date = info.date;
+                let h = String(date.getHours()).padStart(2, '0');
+                let m = String(date.getMinutes()).padStart(2, '0');
+                let timeKey = `${h}:${m}`;
+                
+                // 1. Cek apakah slot terdaftar di map
+                if (!scheduleMap[timeKey]) {
+                    alert('Mohon klik tepat pada jam mulai pelajaran (sesuai label di kiri).');
+                    return;
+                }
+
+                const slotInfo = scheduleMap[timeKey];
+
+                // 2. VALIDASI JAM ISTIRAHAT (BARU)
+                // Jika tipe slot adalah 'break', tampilkan alert dan jangan buka modal
+                if (slotInfo.type === 'break') {
+                    alert('Maaf, Anda tidak dapat menginput jadwal pada jam ' + slotInfo.label + '.');
+                    return; // Stop proses di sini
+                }
+                
+                // Jika lolos validasi, Lanjutkan buka modal...
+                
+                // RESET FORM & ERROR
+                document.getElementById('scheduleForm').reset();
+                document.getElementById('error-alert').classList.add('d-none');
+                document.getElementById('modal_classroom_id').disabled = true;
+                document.getElementById('modal_subject_id').disabled = true;
+
+                document.getElementById('modal_day').value = days[date.getDay()];
+                document.getElementById('modal_start_time').value = timeKey;
+                document.getElementById('modal_slot_label').innerText = `${slotInfo.label} (${slotInfo.duration} Menit)`;
+
+                let endDate = new Date(date.getTime() + slotInfo.duration * 60000);
+                const endH = String(endDate.getHours()).padStart(2, '0');
+                const endM = String(endDate.getMinutes()).padStart(2, '0');
+                document.getElementById('modal_end_time').value = `${endH}:${endM}`;
+
+                var myModal = new bootstrap.Modal(document.getElementById('adminScheduleModal'));
+                myModal.show();
+            },
+
+            eventClick: function(info) {
+                if (info.event.url) {
+                    info.jsEvent.preventDefault();
+                    if(confirm("Lihat detail jadwal ini?")) {
+                        window.location.href = info.event.url;
+                    }
+                }
+            }
+        });
+        calendar.render();
+
+
+        // --- 3. VALIDASI SAAT SUBMIT FORM (BENTROK GURU/KELAS) ---
+        const form = document.getElementById('scheduleForm');
+        form.addEventListener('submit', function(e) {
+            
+            const inputTeacher = document.getElementById('modal_teacher_id').value;
+            const inputClass = document.getElementById('modal_classroom_id').value;
+            const inputDay = document.getElementById('modal_day').value;
+            const inputStart = document.getElementById('modal_start_time').value;
+
+            if(!inputTeacher || !inputClass) return; 
+
+            // Cek Bentrok Kelas
+            const classBusy = existingSchedules.find(s => {
+                const dbStart = s.start_time.substring(0, 5);
+                return s.day.toLowerCase() === inputDay.toLowerCase() && 
+                       dbStart === inputStart &&
+                       s.classroom_id == inputClass;
+            });
+
+            // Cek Bentrok Guru
+            const teacherBusy = existingSchedules.find(s => {
+                const dbStart = s.start_time.substring(0, 5);
+                return s.day.toLowerCase() === inputDay.toLowerCase() && 
+                       dbStart === inputStart &&
+                       s.teacher_id == inputTeacher;
+            });
+
+            const errorBox = document.getElementById('error-alert');
+            const errorMsg = document.getElementById('error-message');
+
+            if (classBusy) {
+                e.preventDefault();
+                let teacherName = classBusy.teacher ? classBusy.teacher.name : 'Guru Lain';
+                errorMsg.innerHTML = `<strong>BENTROK KELAS:</strong> Kelas ini sudah diisi oleh <u>${teacherName}</u> pada jam tersebut.`;
+                errorBox.classList.remove('d-none');
+                return;
+            }
+
+            if (teacherBusy) {
+                e.preventDefault();
+                let className = teacherBusy.classroom ? teacherBusy.classroom.name : 'Kelas Lain';
+                errorMsg.innerHTML = `<strong>BENTROK GURU:</strong> Guru ini sedang mengajar di <u>${className}</u> pada jam tersebut.`;
+                errorBox.classList.remove('d-none');
+                return;
+            }
+        });
+
+        // Hide error on change
+        document.getElementById('modal_teacher_id').addEventListener('change', () => {
+            document.getElementById('error-alert').classList.add('d-none');
+        });
+        document.getElementById('modal_classroom_id').addEventListener('change', () => {
+            document.getElementById('error-alert').classList.add('d-none');
+        });
+
+
+        // --- 4. LOGIC DROPDOWN ---
+        const teacherSelect = document.getElementById('modal_teacher_id');
+        const classroomSelect = document.getElementById('modal_classroom_id');
+        const subjectSelect = document.getElementById('modal_subject_id');
+
+        teacherSelect.addEventListener('change', function() {
+            const teacherId = this.value;
+            classroomSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+            subjectSelect.innerHTML = '<option value="">-- Pilih Mapel --</option>';
+            classroomSelect.disabled = true;
+            subjectSelect.disabled = true;
+
+            if (!teacherId) return;
+
+            const myAssignments = allAssignments.filter(a => a.teacher_id == teacherId);
+            const uniqueClasses = [];
+            const map = new Map();
+            for (const item of myAssignments) {
+                if(!map.has(item.classroom_id)){
+                    map.set(item.classroom_id, true);
+                    uniqueClasses.push({ id: item.classroom_id, name: item.classroom.name });
+                }
+            }
+
+            if (uniqueClasses.length > 0) {
+                classroomSelect.disabled = false;
+                uniqueClasses.forEach(cls => {
+                    const opt = document.createElement('option');
+                    opt.value = cls.id;
+                    opt.textContent = cls.name;
+                    classroomSelect.appendChild(opt);
+                });
+            } else {
+                classroomSelect.innerHTML = '<option>Guru ini belum di-mapping!</option>';
+            }
+        });
+
+        classroomSelect.addEventListener('change', function() {
+            const teacherId = teacherSelect.value;
+            const classroomId = this.value;
+            subjectSelect.innerHTML = '<option value="">-- Pilih Mapel --</option>';
+            subjectSelect.disabled = true;
+
+            if(!classroomId) return;
+
+            const validMapels = allAssignments.filter(a => a.teacher_id == teacherId && a.classroom_id == classroomId);
+            if (validMapels.length > 0) {
+                subjectSelect.disabled = false;
+                validMapels.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.subject_id;
+                    opt.textContent = m.subject.name;
+                    subjectSelect.appendChild(opt);
+                });
+            }
+        });
+    });
+</script>
     
     <style>
         .fc-event-title { font-size: 0.8em; white-space: pre-wrap; }
-        .fc-toolbar-title { font-size: 1.2rem !important; }
+        /* Membesarkan sedikit area header jam agar muat tulisan "Jam 1" */
+        .fc-timegrid-slot-label-cushion { white-space: normal !important; width: 60px; }
+        .fc-timegrid-axis-cushion { max-width: 60px; }
     </style>
 
 </x-app-layout>
