@@ -234,7 +234,7 @@ Route::middleware(['auth'])->group(function () {
         // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
         Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
-        Route::get('/whatsapp/scan', [WhatsAppController::class, 'scan'])->name('whatsapp.scan');
+        // Route::get('/whatsapp/scan', [WhatsAppController::class, 'scan'])->name('whatsapp.scan');
 
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
@@ -386,6 +386,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/store', [WhatsappGatewayController::class, 'store'])->name('store');
             Route::get('/scan/{id}', [WhatsappGatewayController::class, 'scan'])->name('scan');
             Route::delete('/{id}', [WhatsappGatewayController::class, 'destroy'])->name('destroy');
+            Route::get('/send', [WhatsappGatewayController::class, 'send'])->name('send');
+            Route::post('/send', [WhatsappGatewayController::class, 'sendProcess'])->name('send_process');
         });
     });
 

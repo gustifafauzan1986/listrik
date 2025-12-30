@@ -10,7 +10,6 @@
                 <p class="text-muted small mb-0">Kelola banyak nomor WhatsApp untuk notifikasi sekolah.</p>
             </div>
             
-            <!-- Tombol Tambah Gateway (Otomatis generate session ID di controller) -->
             <form action="{{ route('whatsapp.store') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-success shadow-sm">
@@ -35,7 +34,7 @@
             </div>
         @endif
 
-        <!-- Alert Validation Errors (Untuk menangkap error form jika ada) -->
+        <!-- Alert Validation Errors (NEW - FIX) -->
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <div class="d-flex align-items-center mb-1">

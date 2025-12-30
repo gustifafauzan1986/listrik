@@ -75,4 +75,54 @@ class WhatsappGatewayController extends Controller
         $gateway = WhatsappGateway::findOrFail($id);
         return view('admin.whatsapp.scan', compact('gateway'));
     }
+
+    // Halaman Form Kirim Pesan
+    public function send()
+    {
+        $gateways = WhatsappGateway::all();
+        return view('admin.whatsapp.send', compact('gateways'));
+    }
+
+    // Proses Kirim Pesan
+    public function sendProcess(Request $request)
+    {
+        $request->validate([
+            'target' => 'required',
+            'message' => 'required',
+            'media_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048'
+        ]);
+
+        $targets = explode(',', $request->target);
+        $message = $request->message;
+        $sessionId = $request->session_id;
+
+        // Handle Media Upload if exists
+        $mediaUrl = null;
+        $type = 'text';
+        
+        if ($request->hasFile('media_file')) {
+            $file = $request->file('media_file');
+            $path = $file->store('whatsapp_media', 'public');
+            $mediaUrl = asset('storage/' . $path);
+            $type = in_array($file->extension(), ['pdf']) ? 'document' : 'image';
+        }
+
+        foreach ($targets as $number) {
+            $number = trim($number);
+            if(empty($number)) continue;
+
+            // Dispatch Job
+            \App\Jobs\SendWhatsappJob::dispatch(
+                $number, 
+                $message, 
+                $type, 
+                $mediaUrl, 
+                null, 
+                null, 
+                $sessionId
+            );
+        }
+
+        return back()->with('success', 'Pesan sedang diproses dalam antrian.');
+    }
 }
