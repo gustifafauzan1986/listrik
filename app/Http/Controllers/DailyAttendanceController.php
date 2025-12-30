@@ -136,44 +136,75 @@ class DailyAttendanceController extends Controller
     public function create()
     {
         $students = Student::with('classroom')->orderBy('name')->get();
-        return view('daily_attendance.create', compact('students'));
+
+        // --- FITUR BARU: CEK PERSENTASE KEHADIRAN GERBANG (BANTUAN GURU) ---
+        $today = Carbon::today()->format('Y-m-d');
+
+        //  Ambil Status Absensi Mapel Hari Ini
+        $existingAttendances = DailyAttendance::whereDate('created_at', Carbon::today())
+                                ->pluck('status', 'student_id')
+                                ->toArray();
+        
+        // Ambil ID siswa yang SUDAH absen gerbang hari ini
+        $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
+                            ->whereIn('student_id', $students->pluck('id'))
+                            ->whereNotNull('arrival_time')
+                            ->pluck('student_id')
+                            ->toArray();
+
+        $totalSiswa = $students->count();
+        $totalHadirGerbang = count($idsHadirGerbang);
+        
+        // Hitung Persentase
+        $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
+        
+        // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
+        $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
+        return view('daily_attendance.create', compact( 
+            'students', 
+            'gatePercentage',      
+            'studentsMissingGate',
+            'existingAttendances'
+        ));
     }
 
     /**
      * Proses Simpan Manual
      * Route: POST /daily-attendance/manual
      */
-    public function storeManual(Request $request)
-    {
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'date' => 'required|date',
-            'status' => 'required'
-        ]);
+    // public function storeManual(Request $request)
+    // {
+    //     // $request->validate([
+    //     //     'student_id' => 'required|exists:students,id',
+    //     //     'date' => 'required|date',
+    //     //     'status' => 'required'
+    //     // ]);
 
-        // Simpan atau Update data
-        DailyAttendance::updateOrCreate(
-            [
-                'student_id' => $request->student_id,
-                'date' => $request->date
-            ],
-            [
-                'arrival_time' => $request->arrival_time,
-                'departure_time' => $request->departure_time,
-                'status' => $request->status
-            ]
-        );
+    //     // Simpan atau Update data
+    //     DailyAttendance::updateOrCreate(
+    //         [
+    //             'student_id' => $request->student_id,
+    //             'date' => $request->date
+    //         ],
+    //         [
+    //             'arrival_time' => $request->arrival_time,
+    //             'departure_time' => $request->departure_time,
+    //             'status' => $request->status
+    //         ]
+    //     );
 
-        // Kirim notifikasi manual jika diperlukan (Uncomment jika ingin aktif)
-        /*
-        $student = Student::with('classroom')->find($request->student_id);
-        if ($student) {
-            $this->sendNotification($student, 'manual', $request->arrival_time ?? '-', $request->status);
-        }
-        */
+    //     // Kirim notifikasi manual jika diperlukan (Uncomment jika ingin aktif)
+    //     /*
+    //     $student = Student::with('classroom')->find($request->student_id);
+    //     if ($student) {
+    //         $this->sendNotification($student, 'manual', $request->arrival_time ?? '-', $request->status);
+    //     }
+    //     */
 
-        return redirect()->route('daily.index')->with('success', 'Data absensi harian berhasil disimpan secara manual.');
-    }
+    //     return redirect()->route('daily.index')->with('success', 'Data absensi harian berhasil disimpan secara manual.');
+    // }
+
+   
 
     /**
      * Helper Private: Kirim Pesan WA via Queue
@@ -473,6 +504,142 @@ class DailyAttendanceController extends Controller
     }
 
 
+     // SOLUSI: PERBAIKAN PADA CONTROLLER ANDA
+    // public function storeManual(Request $request)
+    // {
+    //     // 1. Ambil array 'attendances' yang berisi ['student_id' => 'status']
+    //     $attendancesData = $request->input('attendances');
+    //     $user = Auth::user();
+
+    //     if (empty($attendancesData)) {
+    //         // Handle jika tidak ada data yang dicentang
+    //         return back()->with('error', 'Tidak ada siswa yang diabsen.');
+    //     }
+
+    //     // 1. Cari Siswa
+    //     $student = Student::with('classroom')->where('nis', $request->nis)->first();
+    //     $date = Carbon::now()->format('Y-m-d');
+    //     $time = Carbon::now()->format('H:i:s');
+    //     $count = 0;
+
+    //     foreach ($attendancesData as $studentId => $status) {
+    //         // Cek apakah sudah ada data (untuk menghindari duplikat)
+    //         $exists = DailyAttendance::where('student_id', $studentId)
+    //                     ->where('date', $date)
+    //                     ->exists();
+
+    //         if (!$exists) {
+    //             DailyAttendance::create([
+    //                 'student_id'   => $studentId,
+    //                 'date'         => $date,
+    //                 'arrival_time' => $time, // Set jam sekarang sebagai jam datang
+    //                 'status'       => $request->status,
+    //                 // RECORDED BY: Nama Guru (Bantuan Manual)
+    //                 'recorded_by'  => $user->name . ' (Bantuan Manual)'
+    //             ]);
+    //             $count++;
+    //         }
+    //     }
+        
+    //     // // 2. Lakukan loop, gunakan $studentId sebagai key dan $status sebagai value
+    //     // foreach ($attendancesData as $studentId => $status) {
+    //     //     // PENTING: $studentId yang kita ambil dari key array adalah nilai non-null yang dicari
+            
+    //     //     // Asumsi data ini adalah data absensi mapel (bukan gerbang)
+    //     //     $recordsToInsert[] = [
+    //     //         'id' => \Illuminate\Support\Str::uuid(), // Jika Anda menggunakan UUID
+    //     //         'student_id' => $studentId, // <<< INI SOLUSINYA
+    //     //         'date' => $currentTimestamp->toDateString(),
+    //     //         'status' => $status,
+    //     //         'arrival_time' => null, // Mungkin null jika absensi mapel
+    //     //         'departure_time' => null, // Mungkin null
+    //     //         'created_at' => $currentTimestamp,
+    //     //         'updated_at' => $currentTimestamp,
+    //     //         // ... pastikan semua kolom NOT NULL lainnya (kecuali ID) juga terisi.
+    //     //     ];
+    //     // }
+        
+    //     // // 3. Lakukan Mass Insert (lebih efisien) atau loop dan save
+    //     // \Illuminate\Support\Facades\DB::table('daily_attendances')->insert($recordsToInsert);
+
+    //     return back()->with('success', 'Absensi berhasil disimpan!');
+    // }
+
+    public function storeManual(Request $request)
+    {
+        // 1. Validasi Data (PENTING, agar tidak terjadi error SQL lagi)
+        $request->validate([
+            'attendances' => 'required|array|min:1', 
+            'attendances.*' => 'required|string|in:hadir,terlambat,sakit,izin,alpa',
+            // Tambahkan validasi untuk schedule_id jika ini Absensi Mapel
+            // 'schedule_id' => 'required|uuid|exists:schedules,id', 
+        ], [
+            'attendances.required' => 'Minimal satu siswa harus dipilih status kehadirannya.',
+            'attendances.*.required' => 'Status kehadiran untuk setiap siswa wajib diisi.',
+            // 'schedule_id.required' => 'ID Jadwal harus disediakan untuk absensi mapel.'
+        ]);
+        
+        // 2. Persiapan Variabel
+        $attendancesData = $request->input('attendances');
+        $user = Auth::user();
+        $todayDate = Carbon::now()->toDateString();
+        $currentTimestamp = Carbon::now();
+        $scheduleId = $request->schedule_id; // Ambil schedule_id dari request
+
+        $insertedCount = 0;
+        $updatedCount = 0;
+        
+        // Asumsi: Semua absensi manual dicatat oleh user yang sedang login
+        $recordedBy = $user->name . ' (Manual)';
+
+        // 3. Loop dan Lakukan Update/Insert
+        foreach ($attendancesData as $studentId => $newStatus) {
+            
+            // --- KRITERIA PENCARIAN (MATCHING) ---
+            // Cari baris berdasarkan ID Siswa, Tanggal, dan Jadwal (jika ini absensi mapel)
+            $matchConditions = [
+                'student_id' => $studentId,
+                'date' => $todayDate,
+                // Kunci unik untuk membedakan absensi mapel satu dengan yang lain
+                // 'schedule_id' => $scheduleId, 
+            ];
+
+            // --- DATA YANG AKAN DI-UPDATE/INSERT ---
+            $updateData = [
+                'status' => $newStatus, 
+                'arrival_time' => $currentTimestamp->toTimeString(), // Asumsi set waktu datang saat absen manual
+                'recorded_by' => $recordedBy,
+            ];
+
+            // Cari data yang sudah ada
+            $attendance = DailyAttendance::where($matchConditions)->first();
+
+            if ($attendance) {
+                // DATA SUDAH ADA (UPDATE jika ada perubahan status)
+                if ($attendance->status !== $newStatus) {
+                    $attendance->update($updateData);
+                    $updatedCount++;
+                }
+                // Jika status sama, diabaikan (skip)
+            } else {
+                // DATA BELUM ADA (INSERT)
+                
+                // Gabungkan kriteria pencarian dan data update, tambahkan ID
+                $createData = array_merge($matchConditions, $updateData, [
+                    'id' => Str::uuid(), 
+                    // created_at dan updated_at akan otomatis diisi jika model menggunakan timestamps
+                ]);
+
+                DailyAttendance::create($createData);
+                $insertedCount++;
+            }
+        }
+        
+        // 4. Return Hasil
+        return redirect()->route('daily.create')->with('success', "Absensi Mapel berhasil disimpan! ($insertedCount Ditambahkan, $updatedCount Diperbarui).");
+    }
+
+
     
     /**
      * FITUR BARU: Simpan Absensi Gerbang Massal (Bantuan Guru)
@@ -486,6 +653,7 @@ class DailyAttendanceController extends Controller
         ]);
 
         $user = Auth::user();
+        $setting = AttendanceSetting::first();
 
         // 1. Cari Siswa
         $student = Student::with('classroom')->where('nis', $request->nis)->first();
@@ -515,6 +683,63 @@ class DailyAttendanceController extends Controller
         
 
         return redirect()->back()->with('success', "Berhasil menambahkan absensi gerbang manual untuk $count siswa.");
+    }
+
+    public function createManual($schedule_id)
+    {
+        $user = Auth::user();
+        $teacher = Teacher::where('user_id', $user->id)->first();
+
+        if ($user->jenis_user !== 'admin' && !$teacher) {
+            abort(403, 'Akses Ditolak');
+        }
+
+        // 1. Cari Jadwal
+        $query = Schedule::with(['classroom', 'subject'])->where('id', $schedule_id);
+        
+        if ($user->jenis_user !== 'admin') {
+            $query->where('teacher_id', $teacher->id);
+        }
+
+        $schedule = $query->firstOrFail();
+
+        // 2. Ambil Semua Siswa di Kelas Ini
+        $students = Student::where('classroom_id', $schedule->classroom_id)
+                    ->orderBy('name')
+                    ->get();
+
+        // 3. Ambil Status Absensi Mapel Hari Ini
+        $existingAttendances = Attendance::where('schedule_id', $schedule_id)
+                                ->whereDate('created_at', Carbon::today())
+                                ->pluck('status', 'student_id')
+                                ->toArray();
+
+        // --- FITUR BARU: CEK PERSENTASE KEHADIRAN GERBANG (BANTUAN GURU) ---
+        $today = Carbon::today()->format('Y-m-d');
+        
+        // Ambil ID siswa yang SUDAH absen gerbang hari ini
+        $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
+                            ->whereIn('student_id', $students->pluck('id'))
+                            ->whereNotNull('arrival_time')
+                            ->pluck('student_id')
+                            ->toArray();
+
+        $totalSiswa = $students->count();
+        $totalHadirGerbang = count($idsHadirGerbang);
+        
+        // Hitung Persentase
+        $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
+        
+        // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
+        $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
+
+        return view('attendance.manual', compact(
+            'schedule', 
+            'students', 
+            'existingAttendances',
+            'gatePercentage',      
+            'studentsMissingGate'
+        ));
     }
 
     

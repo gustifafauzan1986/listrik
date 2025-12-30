@@ -203,8 +203,8 @@ $status = $guruId->status;
 						<div class="menu-title">Presensi</div>
 					</a>
 					<ul>
-						<li> <a href="{{url('/absensi/laporan')}}"><i class='bx bx-border-all'></i>Datang & Pulang</a>
 						<li> <a href="{{url('/daily-attendance/monitor-kelas')}}"><i class='bx bx-barcode'></i>Realtime</a>
+						<li> <a href="{{url('/daily-attendance/manual')}}"><i class='bx bx-border-all'></i>Manual</a>
 						<li> <a href="{{url('/daily-attendance')}}"><i class='bx bx-barcode'></i>QR</a>
 						<li> <a href="{{route('daily.face.scan')}}"><i class='bx bx-face'></i>Face</a>
 						</li>

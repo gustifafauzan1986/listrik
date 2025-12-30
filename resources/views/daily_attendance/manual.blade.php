@@ -1,25 +1,25 @@
 @section('title')
-    Absensi Manual - 
+    Absensi Manual - {{ $schedule->classroom->name }}
 @endsection
 
 <x-app-layout>
     <div class="page-content">
         <div class="row justify-content-center">
-            <div class="col-md-12">
+            <div class="col-md-10">
                 
                 <!-- Header -->
                 <div class="mb-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h4 class="mb-1 fw-bold text-primary">Absensi Manual</h4>
                         <small class="text-muted fw-bold">
-                            <i class="fas fa-book-open me-1"></i> 
+                            <i class="fas fa-book-open me-1"></i> {{ $schedule->subject->name }} 
                             <span class="mx-2">|</span> 
-                            <i class="fas fa-door-open me-1"></i> 
+                            <i class="fas fa-door-open me-1"></i> {{ $schedule->classroom->name }}
                         </small>
                     </div>
-                    <!-- <a href="{{ route('daily.create') }}" class="btn btn-secondary">
+                    <a href="{{ route('schedule.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Kembali
-                    </a> -->
+                    </a>
                 </div>
 
                 <!-- 1. ALERT & FITUR BANTUAN ABSEN GERBANG -->
@@ -46,34 +46,11 @@
                 <!-- 2. FORM ABSENSI MAPEL -->
                 <div class="shadow card border-top-primary">
                     <div class="card-body">
-                        
-                        <form action="{{route('daily.storeManual')}}" method="POST">
+                        <form action="{{ route('attendance.storeManual', $schedule->id) }}" method="POST">
                             @csrf
 
-                            <div class="row mb-3">
-                                <!-- FITUR BARU: PENCARIAN SISWA -->
-                                <div class="col-md-6">
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
-                                        <input type="text" id="searchStudent" class="form-control" placeholder="Cari Nama Siswa atau NIS...">
-                                    </div>
-                                </div>
-
-                                <!-- TOMBOL QUICK CHECK -->
-                                <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                                    <span class="me-2 fw-bold small text-muted">Set Semua Ke:</span>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setAllStatus('hadir')">Hadir</button>
-                                        <button type="button" class="btn btn-sm btn-outline-warning text-dark" onclick="setAllStatus('terlambat')">Telat</button>
-                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="setAllStatus('sakit')">Sakit</button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setAllStatus('izin')">Izin</button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="setAllStatus('alpa')">Alpa</button>
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="table-responsive">
-                                <table class="table align-middle table-hover table-bordered" id="attendanceTable">
+                                <table class="table align-middle table-hover table-bordered">
                                     <thead class="table-light text-center">
                                         <tr>
                                             <th width="5%">No</th>
@@ -88,19 +65,20 @@
                                                 $dbStatus = $existingAttendances[$student->id] ?? null;
                                                 
                                                 $checked = '';
-                                                // Mapping status
+                                                // Mapping status dari database
                                                 if ($dbStatus == 'present' || $dbStatus == 'hadir') $checked = 'hadir';
                                                 elseif ($dbStatus == 'late' || $dbStatus == 'terlambat') $checked = 'terlambat';
                                                 elseif ($dbStatus == 'permission' || $dbStatus == 'izin') $checked = 'izin';
                                                 elseif ($dbStatus == 'sick' || $dbStatus == 'sakit') $checked = 'sakit';
                                                 elseif ($dbStatus == 'alpha' || $dbStatus == 'alpa') $checked = 'alpa';
 
+                                                // Cek apakah siswa ini ada di list Missing Gate?
                                                 $isMissingGate = isset($studentsMissingGate) ? $studentsMissingGate->contains('id', $student->id) : false;
                                             @endphp
-                                            <tr class="student-row {{ $isMissingGate ? 'table-danger' : '' }}">
+                                            <tr class="{{ $isMissingGate ? 'table-danger' : '' }}">
                                                 <td class="text-center">{{ $index + 1 }}</td>
-                                                <td class="text-center font-monospace student-nis">{{ $student->nis }}</td>
-                                                <td class="fw-bold student-name">
+                                                <td class="text-center font-monospace">{{ $student->nis }}</td>
+                                                <td class="fw-bold">
                                                     {{ $student->name }}
                                                     @if($isMissingGate)
                                                         <span class="badge bg-danger ms-2" title="Belum Scan Gerbang">Belum Masuk</span>
@@ -113,20 +91,19 @@
                                                         </div>
                                                     @else
                                                         <div class="btn-group w-100" role="group">
-                                                            <!-- Tambahkan class 'status-radio' untuk selector JS -->
-                                                            <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="h_{{ $student->id }}" value="hadir" {{ $checked == 'hadir' ? 'checked' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="h_{{ $student->id }}" value="hadir" {{ $checked == 'hadir' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-success btn-sm" for="h_{{ $student->id }}">Hadir</label>
 
-                                                            <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="t_{{ $student->id }}" value="terlambat" {{ $checked == 'terlambat' ? 'checked' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="t_{{ $student->id }}" value="terlambat" {{ $checked == 'terlambat' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-warning btn-sm text-dark" for="t_{{ $student->id }}">Telat</label>
 
-                                                            <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="s_{{ $student->id }}" value="sakit" {{ $checked == 'sakit' ? 'checked' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="s_{{ $student->id }}" value="sakit" {{ $checked == 'sakit' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-info btn-sm" for="s_{{ $student->id }}">Sakit</label>
 
-                                                            <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="i_{{ $student->id }}" value="izin" {{ $checked == 'izin' ? 'checked' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="i_{{ $student->id }}" value="izin" {{ $checked == 'izin' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-primary btn-sm" for="i_{{ $student->id }}">Izin</label>
 
-                                                            <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="a_{{ $student->id }}" value="alpa" {{ $checked == 'alpa' ? 'checked' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="a_{{ $student->id }}" value="alpa" {{ $checked == 'alpa' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-danger btn-sm" for="a_{{ $student->id }}">Alpa</label>
                                                         </div>
                                                     @endif
@@ -224,57 +201,5 @@
         });
     </script>
     @endif
-
-    <script>
-        // SCRIPT QUICK CHECK STATUS
-        function setAllStatus(value) {
-            let radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
-            radios.forEach(radio => {
-                // Hanya centang jika baris visible (tidak difilter) dan tidak disabled
-                if(!radio.disabled && radio.closest('tr').style.display !== 'none') {
-                    radio.checked = true;
-                }
-            });
-        }
-
-        // SCRIPT PENCARIAN SISWA (CLIENT SIDE)
-        document.getElementById('searchStudent').addEventListener('keyup', function() {
-            let filter = this.value.toLowerCase();
-            let rows = document.querySelectorAll('.student-row');
-
-            rows.forEach(row => {
-                let name = row.querySelector('.student-name').textContent.toLowerCase();
-                let nis = row.querySelector('.student-nis').textContent.toLowerCase();
-
-                if (name.includes(filter) || nis.includes(filter)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // Cek apakah ada session 'success' yang dikirim dari controller
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                showConfirmButton: false,
-                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
-            });
-        @endif
-
-        // Opsional: Cek jika ada error validasi
-        @if($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: 'Mohon periksa kembali inputan Anda.',
-            });
-        @endif
-    </script>
 
 </x-app-layout>

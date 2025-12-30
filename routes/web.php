@@ -129,9 +129,7 @@ Route::middleware(['auth'])->group(function () {
         // Route Khusus Dashboard Guru
         Route::get('/guru/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
 
-        // Route simpan absensi gerbang massal (Bantuan Guru)
-    Route::post('/daily-attendance/bulk', [DailyAttendanceController::class, 'storeBulk'])->name('daily.store_bulk');
-
+        
     });
     // =========================================================================
     // GROUP 1: AREA GURU & ADMIN (Operasional Harian)
@@ -174,6 +172,10 @@ Route::middleware(['auth'])->group(function () {
     // Scan Masuk & Pulang via Wajah
         Route::get('/daily-face-scan', [FaceController::class, 'dailyScan'])->name('daily.face.scan');
         Route::get('/face/all-descriptors', [FaceController::class, 'getAllDescriptors'])->name('face.descriptors.all');
+
+        // Route simpan absensi gerbang massal (Bantuan Guru)
+    Route::post('/daily-attendance/bulk', [DailyAttendanceController::class, 'storeBulk'])->name('daily.store_bulk');
+
     });
 
     // =========================================================================

@@ -49,6 +49,28 @@
                         <form action="{{ route('attendance.storeManual', $schedule->id) }}" method="POST">
                             @csrf
 
+                            <div class="row mb-3">
+                                <!-- FITUR BARU: PENCARIAN SISWA -->
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+                                        <input type="text" id="searchStudent" class="form-control" placeholder="Cari Nama Siswa atau NIS...">
+                                    </div>
+                                </div>
+
+                                <!-- TOMBOL QUICK CHECK -->
+                                <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                                    <span class="me-2 fw-bold small text-muted">Set Semua Ke:</span>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="setAllStatus('hadir')">Hadir</button>
+                                        <button type="button" class="btn btn-sm btn-outline-warning text-dark" onclick="setAllStatus('terlambat')">Telat</button>
+                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="setAllStatus('sakit')">Sakit</button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="setAllStatus('izin')">Izin</button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="setAllStatus('alpa')">Alpa</button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="table-responsive">
                                 <table class="table align-middle table-hover table-bordered">
                                     <thead class="table-light text-center">
@@ -78,10 +100,10 @@
                                                 // (Perlu isset check karena studentsMissingGate mungkin tidak dikirim jika gatePercentage >= 50)
                                                 $isMissingGate = isset($studentsMissingGate) ? $studentsMissingGate->contains('id', $student->id) : false;
                                             @endphp
-                                            <tr class="{{ $isMissingGate ? 'table-danger' : '' }}">
+                                            <tr class="student-row {{ $isMissingGate ? 'table-danger' : '' }}">
                                                 <td class="text-center">{{ $index + 1 }}</td>
-                                                <td class="text-center font-monospace">{{ $student->nis }}</td>
-                                                <td class="fw-bold">
+                                                <td class="text-center font-monospace student-nis">{{ $student->nis }}</td>
+                                                <td class="fw-bold student-name">
                                                     {{ $student->name }}
                                                     @if($isMissingGate)
                                                         <span class="badge bg-danger ms-2" title="Belum Scan Gerbang">Belum Masuk</span>
@@ -199,5 +221,58 @@
         });
     </script>
     @endif
+
+     <script>
+        // SCRIPT QUICK CHECK STATUS
+        function setAllStatus(value) {
+            let radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
+            radios.forEach(radio => {
+                // Hanya centang jika baris visible (tidak difilter) dan tidak disabled
+                if(!radio.disabled && radio.closest('tr').style.display !== 'none') {
+                    radio.checked = true;
+                }
+            });
+        }
+
+        // SCRIPT PENCARIAN SISWA (CLIENT SIDE)
+        document.getElementById('searchStudent').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('.student-row');
+
+            rows.forEach(row => {
+                let name = row.querySelector('.student-name').textContent.toLowerCase();
+                let nis = row.querySelector('.student-nis').textContent.toLowerCase();
+
+                if (name.includes(filter) || nis.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
+            });
+        @endif
+
+        // Opsional: Cek jika ada error validasi
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Mohon periksa kembali inputan Anda.',
+            });
+        @endif
+    </script>
 
 </x-app-layout>
