@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Classroom;
 use App\Models\Student;
+use App\Models\WhatsappLog; // Import Model Log
 use App\Jobs\SendWhatsappJob;
+use App\Models\WhatsappGateway;
 
 class WhatsAppController extends Controller
 {
@@ -47,75 +49,170 @@ class WhatsAppController extends Controller
      */
     public function broadcast()
     {
+        $gateways = WhatsappGateway::all();
         // Ambil data kelas untuk dropdown
         $classrooms = Classroom::orderBy('name')->get();
-        return view('whatsapp.broadcast', compact('classrooms'));
+         // Ambil Riwayat Pesan Terakhir (5 Data per halaman agar tidak penuh)
+        $logs = WhatsappLog::orderBy('created_at')->get();
+        return view('whatsapp.broadcast', compact('classrooms', 'logs', 'gateways'));
     }
 
     /**
      * [BARU] Proses Kirim Broadcast Massal
      * Route: POST /whatsapp/broadcast
      */
+    // public function sendBroadcast(Request $request)
+    // {
+    //     $request->validate([
+    //         'classroom_id' => 'required|exists:classrooms,id',
+    //         'message'      => 'required|string',
+    //         'attachment'   => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120', // Max 5MB
+    //     ]);
+
+    //     // 1. Ambil Siswa di Kelas Tersebut
+    //     $students = Student::where('classroom_id', $request->classroom_id)
+    //                        ->whereNotNull('phone')
+    //                        ->get();
+
+    //     if ($students->isEmpty()) {
+    //         return back()->with('error', 'Tidak ada siswa dengan nomor HP di kelas ini.');
+    //     }
+
+    //     // 2. Handle File Upload (Jika ada lampiran)
+    //     $mediaUrl = null;
+    //     $type = 'text';
+    //     $fileName = null;
+    //     $mimeType = null;
+
+    //     if ($request->hasFile('attachment')) {
+    //         $file = $request->file('attachment');
+    //         $fileName = $file->getClientOriginalName();
+    //         $mimeType = $file->getMimeType();
+
+    //         // Simpan di storage public agar bisa diakses Node.js via URL
+    //         // Pastikan Anda sudah menjalankan: php artisan storage:link
+    //         $path = $file->store('broadcasts', 'public');
+    //         $mediaUrl = asset('storage/' . $path);
+
+    //         // Tentukan tipe pesan (image atau document)
+    //         if (str_starts_with($mimeType, 'image/')) {
+    //             $type = 'image';
+    //         } else {
+    //             $type = 'document';
+    //         }
+    //     }
+
+    //     // 3. Dispatch Job untuk Setiap Siswa
+    //     $count = 0;
+    //     foreach ($students as $student) {
+    //         // Bersihkan nomor HP
+    //         if (empty($student->phone)) continue;
+
+    //         // Kirim ke Antrian (Queue)
+    //         SendWhatsappJob::dispatch(
+    //             $student->phone,
+    //             $request->message,
+    //             $type,
+    //             $mediaUrl,
+    //             $fileName,
+    //             $mimeType
+    //         );
+    //         $count++;
+    //     }
+
+    //     return back()->with('success', "Pesan sedang dikirim ke $count orang tua siswa di latar belakang.");
+    // }
+
+    /**
+     * Proses Kirim Pesan Broadcast
+     */
     public function sendBroadcast(Request $request)
     {
+        // 1. Validasi Input
         $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
             'message'      => 'required|string',
             'attachment'   => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120', // Max 5MB
         ]);
 
-        // 1. Ambil Siswa di Kelas Tersebut
-        $students = Student::where('classroom_id', $request->classroom_id)
-                           ->whereNotNull('phone')
-                           ->get();
+        // 2. Ambil Data Kelas & Siswa
+        $classroom = Classroom::findOrFail($request->classroom_id);
+        
+        // Ambil siswa yang memiliki nomor HP orang tua (parent_phone atau parent_phone_2)
+        $students = Student::where('classroom_id', $classroom->id)
+            ->where(function($q) {
+                $q->whereNotNull('phone');
+                // $q->whereNotNull('phone')->orWhereNotNull('phone_1');
+            })
+            ->get();
 
         if ($students->isEmpty()) {
-            return back()->with('error', 'Tidak ada siswa dengan nomor HP di kelas ini.');
+            return back()->with('error', "Tidak ada data nomor HP orang tua di kelas {$classroom->name}.");
         }
 
-        // 2. Handle File Upload (Jika ada lampiran)
+        // 3. Handle File Upload (Jika Ada)
         $mediaUrl = null;
-        $type = 'text';
         $fileName = null;
         $mimeType = null;
+        $messageType = 'text';
 
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
             $fileName = $file->getClientOriginalName();
             $mimeType = $file->getMimeType();
-
-            // Simpan di storage public agar bisa diakses Node.js via URL
-            // Pastikan Anda sudah menjalankan: php artisan storage:link
-            $path = $file->store('broadcasts', 'public');
+            
+            // Simpan ke storage publik agar bisa diakses oleh Node.js WA Service
+            $path = $file->storeAs('broadcast_files', time() . '_' . $fileName, 'public');
             $mediaUrl = asset('storage/' . $path);
-
-            // Tentukan tipe pesan (image atau document)
-            if (str_starts_with($mimeType, 'image/')) {
-                $type = 'image';
+            
+            // Tentukan tipe pesan
+            if (str_contains($mimeType, 'image')) {
+                $messageType = 'image';
             } else {
-                $type = 'document';
+                $messageType = 'document';
             }
         }
 
-        // 3. Dispatch Job untuk Setiap Siswa
-        $count = 0;
-        foreach ($students as $student) {
-            // Bersihkan nomor HP
-            if (empty($student->phone)) continue;
+        // 4. Proses Pengiriman (Looping)
+        $countSent = 0;
+        
+        // Ambil Gateway Aktif (Opsional: Random Load Balancing)
+        // Jika ingin spesifik, bisa tambahkan input select gateway di form
+        // Disini kita biarkan null agar Job memilih otomatis
+        $gatewaySessionId = null; 
 
-            // Kirim ke Antrian (Queue)
-            SendWhatsappJob::dispatch(
-                $student->phone,
-                $request->message,
-                $type,
-                $mediaUrl,
-                $fileName,
-                $mimeType
-            );
-            $count++;
+        foreach ($students as $student) {
+            // Kumpulkan nomor tujuan (Ortu 1 & Ortu 2)
+            $numbers = [];
+            if ($student->phone) $numbers[] = $student->phone;
+            // if ($student->phone_1) $numbers[] = $student->phone_1;
+            
+            // Hapus duplikat nomor dalam satu keluarga
+            $numbers = array_unique($numbers);
+
+            foreach ($numbers as $phone) {
+                // Personalization (Opsional): Tambahkan sapaan nama siswa
+                // $personalizedMsg = "Yth. Wali Murid {$student->name},\n\n" . $request->message;
+                
+                // Gunakan pesan asli saja agar bisa broadcast cepat (tanpa render string berulang)
+                $finalMessage = $request->message;
+
+                // Dispatch Job ke Antrian
+                SendWhatsappJob::dispatch(
+                    $phone, 
+                    $finalMessage, 
+                    $messageType, 
+                    $mediaUrl, 
+                    $fileName, 
+                    $mimeType,
+                    $gatewaySessionId
+                );
+                
+                $countSent++;
+            }
         }
 
-        return back()->with('success', "Pesan sedang dikirim ke $count orang tua siswa di latar belakang.");
+        return back()->with('success', "Broadcast sedang diproses! {$countSent} pesan telah dimasukkan ke antrian pengiriman.");
     }
 
     /**
@@ -186,5 +283,19 @@ class WhatsAppController extends Controller
     public function scan()
     {
         return view('admin.whatsapp_scan');
+    }
+
+    // Hapus Log Satuan (BARU)
+    public function deleteLog($id)
+    {
+        \App\Models\WhatsappLog::findOrFail($id)->delete();
+        return back()->with('success', 'Log pesan dihapus.');
+    }
+
+    // Bersihkan Semua Log (BARU)
+    public function clearLogs()
+    {
+        \App\Models\WhatsappLog::truncate();
+        return back()->with('success', 'Semua riwayat pesan dibersihkan.');
     }
 }

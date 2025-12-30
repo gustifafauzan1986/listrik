@@ -232,9 +232,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/face/register/{id}', [FaceController::class, 'store'])->name('face.store');
 
         // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
-        Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
+        // Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
         // Route::get('/whatsapp/scan', [WhatsAppController::class, 'scan'])->name('whatsapp.scan');
+        // ... di dalam group whatsapp ...
+        Route::delete('/logs/clear', [WhatsAppController::class, 'clearLogs'])->name('whatsapp.logs.clear');
+        Route::delete('/logs/{id}', [WhatsAppController::class, 'deleteLog'])->name('whatsapp.logs.delete');
 
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
@@ -282,7 +285,7 @@ Route::middleware(['auth'])->group(function () {
         // Route untuk mengeluarkan siswa dari kelas (Unassign)
         Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClass'])->name('students.remove_class');
         // --- 6. WHATSAPP GATEWAY (BROADCAST) ---
-        Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index'); // Manual 1 nomor
+        // Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index'); // Manual 1 nomor
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
 
         Route::get('/whatsapp/broadcast', [WhatsAppController::class, 'broadcast'])->name('whatsapp.broadcast'); // Broadcast Kelas

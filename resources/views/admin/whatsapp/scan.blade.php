@@ -9,7 +9,7 @@
                         <h5 class="mb-0 fw-bold text-success">
                             <i class="fab fa-whatsapp me-2"></i> {{ $gateway->name }}
                         </h5>
-                        <a href="{{ route('whatsapp.send') }}" class="btn btn-sm btn-secondary">
+                        <a href="{{ route('whatsapp.broadcast') }}" class="btn btn-sm btn-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Kembali
                         </a>
                     </div>
