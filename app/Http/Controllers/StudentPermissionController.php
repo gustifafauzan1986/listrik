@@ -102,9 +102,11 @@ class StudentPermissionController extends Controller
             'status' => 'out'
         ]);
 
+        $school = $this->getSchoolData();
+
         // 2. Generate PDF dari View (Gunakan view yang sama dengan print)
         // Pastikan view 'reports.permission_print' sudah ada dan rapi
-        $pdf = Pdf::loadView('report.permission_print', compact('permit'));
+        $pdf = Pdf::loadView('report.permission_print', compact('permit', 'school'));
 
         // 3. Simpan File PDF ke Storage
         // Nama file: IZIN-{NIS}-{TIMESTAMP}.pdf

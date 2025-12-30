@@ -44,6 +44,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PiketDashboardController;
 use App\Http\Controllers\SiswaDashboardController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\Pm2Controller;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -157,7 +158,7 @@ Route::middleware(['auth'])->group(function () {
         // Sesuai dengan method create() di controller
         Route::get('/daily-attendance/manual', [DailyAttendanceController::class, 'create'])->name('daily.create');
 
-        Route::get('/absensi/report', [DailyAttendanceController::class, 'report'])->name('daily_attendance.report');
+        //Route::get('/absensi/report', [DailyAttendanceController::class, 'report'])->name('daily_attendance.report');
         //Route::get('/absensi/laporan', [DailyAttendanceController::class, 'laporan'])->name('daily_attendance.report');
         Route::get('/report/absensi/student/{id}', [DailyReportController::class, 'printStudentAbsensi'])->name('report.absensi.student');
         Route::get('/absensi/report', [DailyReportController::class, 'reportDaily'])->name('daily_attendance.report');
@@ -360,12 +361,21 @@ Route::middleware(['auth'])->group(function () {
         // Menu Jadwal Semua Guru (Master Schedule)
         Route::get('/schedule/all', [ScheduleController::class, 'allSchedules'])->name('schedule.all');
         Route::post('/schedule/admin/store', [ScheduleController::class, 'storeAsAdmin'])->name('schedule.store_admin');
-
+        
         // --- PENGATURAN DATABASE (BACKUP & RESTORE) ---
         Route::get('/settings/database', [DatabaseController::class, 'index'])->name('database.index');
         Route::post('/settings/database/backup', [DatabaseController::class, 'backup'])->name('database.backup');
         Route::post('/settings/database/restore', [DatabaseController::class, 'restore'])->name('database.restore');
-
+        
+        Route::get('/pm2', [Pm2Controller::class, 'index'])->name('pm2.index');
+        Route::post('/pm2/start', [Pm2Controller::class, 'start'])->name('pm2.start');
+        Route::post('/pm2/stop', [Pm2Controller::class, 'stop'])->name('pm2.stop');
+        Route::post('/pm2/restart', [Pm2Controller::class, 'restart'])->name('pm2.restart');
+        Route::post('/pm2/delete', [Pm2Controller::class, 'delete'])->name('pm2.delete');
+        Route::post('/pm2/monitor', [Pm2Controller::class, 'monitor'])->name('pm2.monitor');
+        Route::post('/pm2/save', [Pm2Controller::class, 'save'])->name('pm2.save');
+        Route::post('/pm2//install-service', [Pm2Controller::class, 'installService'])->name('pm2.install_service');
+        Route::post('/pm2//uninstall-service', [Pm2Controller::class, 'uninstallService'])->name('pm2.uninstall_service');
     });
 
     Route::middleware(['role:siswa'])->group(function () {

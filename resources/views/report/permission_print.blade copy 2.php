@@ -40,7 +40,7 @@
             margin: 2px 0;
             font-size: 11pt;
         }
-        
+
         /* --- CONTENT --- */
         .title {
             text-align: center;
@@ -93,7 +93,7 @@
         .nip {
             font-size: 10pt;
         }
-        
+
         /* --- UTILS --- */
         .timestamp {
             position: fixed;
@@ -112,7 +112,7 @@
 <body onload="window.print()">
 
     <div class="no-print" style="position: fixed; top: 10px; right: 10px;">
-        <!-- <button onclick="window.close()" style="padding: 10px 20px; cursor: pointer;">Tutup</button> -->
+        <button onclick="window.close()" style="padding: 10px 20px; cursor: pointer;">Tutup</button>
     </div>
 
     <div class="container">
@@ -120,8 +120,7 @@
         <header>
             <!-- Ganti src dengan path logo sekolah Anda -->
             <img src="https://via.placeholder.com/80?text=LOGO" alt="Logo Sekolah" class="logo">
-            
-            <!-- Menggunakan Array Access karena Controller mengembalikan Array -->
+
             <h1>{{ $school['name'] }}</h1>
             <p>{{ $school['address'] }}</p>
             <p>Telp: {{ $school['phone'] }} | Email: {{ $school['email'] }}</p>
@@ -131,14 +130,7 @@
         <div class="title">SURAT IZIN MENINGGALKAN SEKOLAH</div>
 
         <div class="content">
-            <p>Yang bertanda tangan di bawah ini, 
-                @php
-                    $role = auth()->user()->jenis_user ?? 'Petugas';
-                    if ($role == 'piket') echo 'Petugas Piket';
-                    elseif ($role == 'guru') echo 'Guru Pengajar';
-                    else echo 'Petugas Sekolah';
-                @endphp
-            menerangkan bahwa siswa:</p>
+            <p>Yang bertanda tangan di bawah ini, Petugas Piket / Satpam menerangkan bahwa siswa:</p>
 
             <table class="data">
                 <tr>
@@ -186,20 +178,11 @@
 
             <div class="signature-box">
                 <p>
-                    {{ $school['sign_city'] ?? 'Jakarta' }}, 
+                    {{ isset($school['city']) ? $school['city'] : 'Kota Admin' }},
                     {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
-                    
-                    <!-- Jabatan Dinamis -->
-                    @if(auth()->user()->jenis_user == 'piket')
-                        Petugas Piket
-                    @elseif(auth()->user()->jenis_user == 'guru')
-                        Guru Pengajar
-                    @else
-                        Petugas Sekolah
-                    @endif
+                    Petugas Piket / Guru
                 </p>
-                <div class="signature-name">{{ auth()->user()->name ?? 'Administrator' }}</div>
-                <!-- NIP dummy atau ambil dari relasi teacher jika ada -->
+                <div class="signature-name">{{ auth()->user()->name ?? 'Petugas' }}</div>
                 <div class="nip">NIP. .......................</div>
             </div>
         </div>

@@ -178,6 +178,7 @@ $status = $guruId->status;
 					<ul>
 						<li> <a href="{{route('system.update.index')}}"><i class='bx bx-id-card'></i>Update</a></li>
 						<li> <a href="{{route('database.index')}}"><i class='bx bx-id-card'></i>Database</a></li>
+						<li> <a href="{{route('pm2.index')}}"><i class='bx bx-id-card'></i>server</a></li>
 						
 						
 					</ul>

@@ -29,98 +29,190 @@ class ReportController extends Controller
      * Route: POST /report/print
      */
 
+    // public function print(Request $request)
+    // {
+    //     $startDate = null;
+    //     $endDate = null;
+    //     $labelPeriode = "";
+
+    //     // LOGIKA PENENTUAN TANGGAL
+    //     switch ($request->periode) {
+    //         case 'harian':
+    //             $startDate = $request->tanggal;
+    //             $endDate = $request->tanggal;
+    //             $labelPeriode = "Harian (" . Carbon::parse($startDate)->translatedFormat('d F Y') . ")";
+    //             break;
+
+    //         case 'mingguan':
+    //             $request->validate([
+    //                 'start_date' => 'required|date',
+    //                 'end_date'   => 'required|date|after_or_equal:start_date',
+    //             ]);
+    //             $startDate = $request->start_date;
+    //             $endDate = $request->end_date;
+    //             $labelPeriode = "Mingguan (" . Carbon::parse($startDate)->format('d/m') . " - " . Carbon::parse($endDate)->format('d/m/Y') . ")";
+    //             break;
+
+    //         case 'bulanan':
+    //             $month = $request->bulan;
+    //             $year = $request->tahun_bulan;
+
+    //             $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d');
+    //             $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
+    //             $labelPeriode = "Bulan " . Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
+    //             break;
+
+    //         case 'semester':
+    //             $year = $request->tahun_semester;
+    //             if ($request->semester == 'ganjil') {
+    //                 // Ganjil: Juli Tahun Ini - Desember Tahun Ini
+    //                 $startDate = $year . '-07-01';
+    //                 $endDate   = $year . '-12-31';
+    //                 $labelPeriode = "Semester Ganjil T.A $year/" . ($year+1);
+    //             } else {
+    //                 // Genap: Januari Tahun Depan - Juni Tahun Depan
+    //                 $startDate = ($year + 1) . '-01-01';
+    //                 $endDate   = ($year + 1) . '-06-30';
+    //                 $labelPeriode = "Semester Genap T.A $year/" . ($year+1);
+    //             }
+    //             break;
+    //     }
+
+
+    //     // 2. AMBIL DATA SEKOLAH (KOP SURAT)
+    //     $school = $this->getSchoolData();
+
+    //      // 3. QUERY DATA ABSENSI (DENGAN FILTER KELAS)
+    //     $query = Attendance::with(['student', 'schedule'])
+    //                     ->whereBetween('date', [$startDate, $endDate])
+    //                     ->orderBy('date', 'asc')
+    //                     ->orderBy('check_in_time', 'asc');
+
+    //     $labelTambahan = null;
+
+    //     // --- TAMBAHAN: Filter Per Kelas ---
+    //     if ($request->filled('classroom_id')) {
+    //         // Filter hanya siswa yang berada di kelas yang dipilih
+    //         $query->whereHas('student', function($q) use ($request) {
+    //             $q->where('classroom_id', $request->classroom_id);
+    //         });
+
+    //         // Ambil nama kelas untuk judul PDF
+    //         $kelas = Classroom::find($request->classroom_id);
+    //         if ($kelas) {
+    //             $labelTambahan = "Kelas: " . $kelas->name;
+    //         }
+    //     }
+    //     // ----------------------------------
+
+    //     $attendances = $query->get();
+
+    //     // GENERATE PDF
+    //     $pdf = Pdf::loadView('report.pdf_view_admin', compact(
+    //         'attendances',
+    //         'labelPeriode',
+    //         'startDate',
+    //         'endDate',
+    //         'school'));
+    //     $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
+
+    //     return $pdf->stream('Laporan-Absensi.pdf');
+
+
+    // }
+
     public function print(Request $request)
     {
+        // 1. VALIDASI INPUT (PENTING)
+        // $request->validate([
+        //     'periode'      => 'required|in:harian,mingguan,bulanan,semester',
+        //     'classroom_id' => 'nullable|exists:classrooms,id',
+        //     // Validasi bersyarat
+        //     'tanggal'        => 'required_if:periode,harian',
+        //     'start_date'     => 'required_if:periode,mingguan|date',
+        //     'end_date'       => 'required_if:periode,mingguan|date|after_or_equal:start_date',
+        //     'bulan'          => 'required_if:periode,bulanan',
+        //     'tahun_bulan'    => 'required_if:periode,bulanan',
+        //     'semester'       => 'required_if:periode,semester',
+        //     'tahun_semester' => 'required_if:periode,semester',
+        // ]);
+
         $startDate = null;
         $endDate = null;
         $labelPeriode = "";
 
-        // LOGIKA PENENTUAN TANGGAL
+        // LOGIKA TANGGAL (Sama seperti sebelumnya, tapi lebih aman karena sudah divalidasi)
         switch ($request->periode) {
             case 'harian':
                 $startDate = $request->tanggal;
                 $endDate = $request->tanggal;
                 $labelPeriode = "Harian (" . Carbon::parse($startDate)->translatedFormat('d F Y') . ")";
                 break;
-
             case 'mingguan':
-                $request->validate([
-                    'start_date' => 'required|date',
-                    'end_date'   => 'required|date|after_or_equal:start_date',
-                ]);
                 $startDate = $request->start_date;
                 $endDate = $request->end_date;
                 $labelPeriode = "Mingguan (" . Carbon::parse($startDate)->format('d/m') . " - " . Carbon::parse($endDate)->format('d/m/Y') . ")";
                 break;
-
             case 'bulanan':
-                $month = $request->bulan;
-                $year = $request->tahun_bulan;
-
-                $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d');
-                $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
-
-                $labelPeriode = "Bulan " . Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
+                $startDate = Carbon::createFromDate($request->tahun_bulan, $request->bulan, 1)->startOfMonth()->format('Y-m-d');
+                $endDate = Carbon::createFromDate($request->tahun_bulan, $request->bulan, 1)->endOfMonth()->format('Y-m-d');
+                $labelPeriode = "Bulan " . Carbon::createFromDate($request->tahun_bulan, $request->bulan, 1)->translatedFormat('F Y');
                 break;
-
             case 'semester':
-                $year = $request->tahun_semester;
                 if ($request->semester == 'ganjil') {
-                    // Ganjil: Juli Tahun Ini - Desember Tahun Ini
-                    $startDate = $year . '-07-01';
-                    $endDate   = $year . '-12-31';
-                    $labelPeriode = "Semester Ganjil T.A $year/" . ($year+1);
+                    $startDate = $request->tahun_semester . '-07-01';
+                    $endDate   = $request->tahun_semester . '-12-31';
+                    $labelPeriode = "Semester Ganjil T.A " . $request->tahun_semester . "/" . ($request->tahun_semester + 1);
                 } else {
-                    // Genap: Januari Tahun Depan - Juni Tahun Depan
-                    $startDate = ($year + 1) . '-01-01';
-                    $endDate   = ($year + 1) . '-06-30';
-                    $labelPeriode = "Semester Genap T.A $year/" . ($year+1);
+                    $startDate = ($request->tahun_semester + 1) . '-01-01';
+                    $endDate   = ($request->tahun_semester + 1) . '-06-30';
+                    $labelPeriode = "Semester Genap T.A " . $request->tahun_semester . "/" . ($request->tahun_semester + 1);
                 }
                 break;
         }
 
-
-        // 2. AMBIL DATA SEKOLAH (KOP SURAT)
         $school = $this->getSchoolData();
 
-         // 3. QUERY DATA ABSENSI (DENGAN FILTER KELAS)
-        $query = Attendance::with(['student', 'schedule'])
-                        ->whereBetween('date', [$startDate, $endDate])
-                        ->orderBy('date', 'asc')
-                        ->orderBy('check_in_time', 'asc');
+        $query = Attendance::with(['student', 'schedule.subject', 'classroom']) // Eager load diperbaiki
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'asc')
+            ->orderBy('check_in_time', 'asc');
 
         $labelTambahan = null;
 
-        // --- TAMBAHAN: Filter Per Kelas ---
         if ($request->filled('classroom_id')) {
-            // Filter hanya siswa yang berada di kelas yang dipilih
-            $query->whereHas('student', function($q) use ($request) {
+            $query->whereHas('student', function ($q) use ($request) {
                 $q->where('classroom_id', $request->classroom_id);
             });
-
-            // Ambil nama kelas untuk judul PDF
             $kelas = Classroom::find($request->classroom_id);
             if ($kelas) {
                 $labelTambahan = "Kelas: " . $kelas->name;
             }
         }
-        // ----------------------------------
 
         $attendances = $query->get();
 
-        // GENERATE PDF
-        $pdf = Pdf::loadView('report.pdf_view', compact(
-            'attendances',
-            'labelPeriode',
-            'startDate',
-            'endDate',
-            'school'));
+        // ==========================================
+        //  TAMBAHKAN VALIDASI INI
+        // ==========================================
+        if ($attendances->isEmpty()) {
+            return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
+        }
+        // ==========================================
+
+        // LOGIKA TANDA TANGAN UNTUK LAPORAN UMUM
+        // Jika admin mencetak laporan umum, biasanya TTD Kepala Sekolah ($isTeacher = false)
+        $isTeacher = false; 
+
+        $pdf = Pdf::loadView('report.pdf_view_admin', compact(
+            'attendances', 'labelPeriode', 'labelTambahan', 'startDate', 'endDate', 'school', 'isTeacher'
+        ));
+        
         $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
-
         return $pdf->stream('Laporan-Absensi.pdf');
-
-
     }
+    
 
     /**
      * METHOD BARU: Cetak Laporan Spesifik Jadwal/Mapel
@@ -193,6 +285,15 @@ class ReportController extends Controller
                         ->orderBy('date', 'desc')
                         ->orderBy('check_in_time', 'desc')
                         ->get();
+
+        
+        // ==========================================
+        //  TAMBAHKAN VALIDASI INI
+        // ==========================================
+        if ($attendances->isEmpty()) {
+            return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
+        }
+        // ==========================================
 
         // 3. Calculate Statistics
         $summary = [

@@ -148,6 +148,9 @@ class DailyReportController extends Controller
                         ->orderBy('date', 'asc')
                         ->orderBy('arrival_time', 'asc');
 
+        
+
+
         $labelTambahan = null;
         // --- TAMBAHAN: Filter Per Kelas ---
         if ($request->filled('classroom_id')) {
@@ -165,6 +168,14 @@ class DailyReportController extends Controller
         // ----------------------------------
 
         $attendances = $query->get();
+
+                // // ==========================================
+        //  TAMBAHKAN VALIDASI INI
+        // ==========================================
+        if ($attendances->isEmpty()) {
+            return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
+        }
+        // ==========================================
 
         // GENERATE PDF
         $pdf = Pdf::loadView('daily_attendance.reports.pdf_view', compact(

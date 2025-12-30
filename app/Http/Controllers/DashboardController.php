@@ -29,7 +29,7 @@ class DashboardController extends Controller
         } elseif ($request->user()->jenis_user === 'piket') {
             $url = 'piket/dashboard';
         } elseif ($request->user()->jenis_user === 'siswa') {
-            $url = '/dashboard';
+            $url = 'siswa/dashboard';
         }
 
         return redirect($url);
