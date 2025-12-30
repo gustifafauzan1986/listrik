@@ -9,7 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\WhatsappLog;
+use App\Models\WhatsappLog; // Pastikan Model Log diimport
 
 class SendWhatsappJob implements ShouldQueue
 {
@@ -21,15 +21,16 @@ class SendWhatsappJob implements ShouldQueue
     protected $mediaUrl;
     protected $fileName;
     protected $mimeType;
-    protected $sessionId; // Tambahan untuk Multi Gateway
 
+    /**
+     * Jumlah percobaan ulang jika gagal (misal bot mati sebentar)
+     */
     public $tries = 3;
 
     /**
      * Create a new job instance.
-     * @param string $sessionId (Opsional) ID Gateway spesifik (misal: 'gateway_1'). Jika null, sistem pilih acak.
      */
-    public function __construct($target, $message, $type = 'text', $mediaUrl = null, $fileName = null, $mimeType = null, $sessionId = null)
+    public function __construct($target, $message, $type = 'text', $mediaUrl = null, $fileName = null, $mimeType = null)
     {
         $this->target = $target;
         $this->message = $message;
@@ -37,7 +38,6 @@ class SendWhatsappJob implements ShouldQueue
         $this->mediaUrl = $mediaUrl;
         $this->fileName = $fileName;
         $this->mimeType = $mimeType;
-        $this->sessionId = $sessionId;
     }
 
     /**
@@ -53,53 +53,50 @@ class SendWhatsappJob implements ShouldQueue
                 'type' => $this->type,
             ];
 
-            // Tambahkan data media jika ada
+            // Tambahkan data media jika tipe bukan text
             if ($this->type !== 'text' && $this->mediaUrl) {
                 $payload['media_url'] = $this->mediaUrl;
                 $payload['file_name'] = $this->fileName;
                 $payload['mime_type'] = $this->mimeType;
             }
 
-            // Tambahkan Session ID jika ingin kirim lewat gateway tertentu
-            // Jika null, Node.js akan menggunakan Load Balancing (Round Robin/Random)
-            if ($this->sessionId) {
-                $payload['session_id'] = $this->sessionId;
-            }
-
-            // Kirim Request ke Service Node.js
+            // Kirim Request ke Service Node.js (Baileys)
+            // Timeout 15 detik untuk memberi waktu download file jika ada media
             $response = Http::timeout(15)->post('http://localhost:3000/send-message', $payload);
 
-            $responseData = $response->json();
-            $status = $response->successful() && ($responseData['status'] ?? false) ? 'success' : 'failed';
+            // LOGIKA PENCATATAN LOG KE DATABASE
+            $status = $response->successful() ? 'success' : 'failed';
             $apiResponse = $response->body();
-            
-            // Simpan info sender (nomor pengirim) jika dikembalikan oleh Node.js
-            $sender = $responseData['sender'] ?? null;
-            $logNote = $sender ? "[Via: $sender] " : "";
 
-            if ($status === 'failed') {
+            // Cek Respon
+            if ($response->failed()) {
                 Log::error("Gagal kirim WA ke {$this->target}: " . $apiResponse);
             } else {
-                Log::info("WA Terkirim ke: {$this->target} " . $logNote);
+                Log::info("WA Terkirim ke: " . $this->target . " | Tipe: " . $this->type);
             }
 
-            // Simpan ke Log Database
+            // Simpan ke Tabel WhatsappLog
             WhatsappLog::create([
                 'recipient_number' => $this->target,
-                'message'          => $this->message,
+                'message'          => $this->message, // Bisa dipotong Str::limit() jika terlalu panjang
                 'status'           => $status,
-                'api_response'     => $logNote . $apiResponse,
+                'api_response'     => $apiResponse,
             ]);
 
         } catch (\Exception $e) {
+            // Tangkap error koneksi (misal Node.js mati)
             Log::error("Queue WA Error ({$this->target}): " . $e->getMessage());
 
+            // Simpan Log Error Sistem
             WhatsappLog::create([
                 'recipient_number' => $this->target,
                 'message'          => $this->message,
-                'status'           => 'error',
+                'status'           => 'error', // Status khusus error sistem
                 'api_response'     => "Exception: " . $e->getMessage(),
             ]);
+
+            // Opsional: throw $e; jika ingin Job ini masuk ke tabel failed_jobs untuk di-retry nanti
+            // throw $e; 
         }
     }
 }

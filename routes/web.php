@@ -45,6 +45,7 @@ use App\Http\Controllers\PiketDashboardController;
 use App\Http\Controllers\SiswaDashboardController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\Pm2Controller;
+use App\Http\Controllers\WhatsappGatewayController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -233,6 +234,7 @@ Route::middleware(['auth'])->group(function () {
         // --- 4. WHATSAPP GATEWAY (MANUAL BROADCAST) ---
         Route::get('/whatsapp/test', [WhatsAppController::class, 'index'])->name('whatsapp.index');
         Route::post('/whatsapp/send', [WhatsAppController::class, 'store'])->name('whatsapp.store');
+        Route::get('/whatsapp/scan', [WhatsAppController::class, 'scan'])->name('whatsapp.scan');
 
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
@@ -378,6 +380,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pm2/save', [Pm2Controller::class, 'save'])->name('pm2.save');
         Route::post('/pm2//install-service', [Pm2Controller::class, 'installService'])->name('pm2.install_service');
         Route::post('/pm2//uninstall-service', [Pm2Controller::class, 'uninstallService'])->name('pm2.uninstall_service');
+
+        Route::prefix('whatsapp')->name('whatsapp.')->group(function() {
+            Route::get('/', [WhatsappGatewayController::class, 'index'])->name('index');
+            Route::post('/store', [WhatsappGatewayController::class, 'store'])->name('store');
+            Route::get('/scan/{id}', [WhatsappGatewayController::class, 'scan'])->name('scan');
+            Route::delete('/{id}', [WhatsappGatewayController::class, 'destroy'])->name('destroy');
+        });
     });
 
     Route::middleware(['role:siswa'])->group(function () {

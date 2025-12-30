@@ -182,4 +182,9 @@ class WhatsAppController extends Controller
             return ['status' => 'error', 'message' => 'Koneksi ke Bot Node.js Gagal (Port 3000). Pastikan service "node index.js" berjalan. Error: ' . $e->getMessage()];
         }
     }
+
+    public function scan()
+    {
+        return view('admin.whatsapp_scan');
+    }
 }
