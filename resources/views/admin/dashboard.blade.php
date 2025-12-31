@@ -159,6 +159,9 @@
         </div>
         <hr/>
 
+        <!-- BARIS 3: GRAFIK -->
+        
+
         <div class="row row-cols-1 row-cols-md-1 row-cols-xl-5 mb-4">
             <div class="col">
                 <div class="card radius-10 bg-success bg-gradient">
@@ -229,6 +232,48 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-1 row-cols-xl-1 row-cols-xxl-2">
+                <div class="row">
+                   <div class="col-12 col-lg-12">
+                      <!-- <div class="card radius-10 border-start border-0 border-4 border-info"> -->
+                        <div class="card radius-10">
+                            <div class="card-header border-bottom-0 bg-transparent">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Tren Kehadiran ({{ ucfirst($filter) }})</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container-1">
+                                    <canvas id="chartTrend"></canvas>
+                                </div>
+                            </div>
+                        </div>
+				   </div>
+				</div><!--end row-->	
+                
+                <div class="row">
+                   <div class="col-12 col-lg-12">
+                      <!-- <div class="card radius-10 border-start border-0 border-4 border-info"> -->
+                        <div class="card radius-10">
+                            <div class="card-header border-bottom-0 bg-transparent">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Tren Kehadiran ({{ ucfirst($filter) }})</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container-1">
+                                    <canvas id="chartTrend"></canvas>
+                                </div>
+                            </div>
+                        </div>
+				   </div>
+				</div><!--end row-->	
+            
         </div>
 
         <!-- BARIS 3: GRAFIK -->
@@ -346,6 +391,8 @@
             </div>
             
         </div>
+
+        
         
 
         
