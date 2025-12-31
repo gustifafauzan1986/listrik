@@ -4,7 +4,7 @@
     <div class="page-content">
 
         <!-- HEADER FILTER -->
-        <!-- <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <h6 class="mb-0 text-uppercase">Ringkasan Data</h6>
             <form method="GET" class="d-flex gap-2">
                 <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
@@ -16,12 +16,12 @@
                 </select>
             </form>
         </div>
-        <hr/> -->
+        <hr/>
 
         <!-- BARIS 1: DATA PENGGUNA UTAMA -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-4">
             <div class="col">
-                <div class="card radius-10 border-start border-0 border-4 border-info">
+                <div class="card radius-10 border-start border-0 border-4 border-info h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
@@ -36,13 +36,13 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card radius-10 border-start border-0 border-4 border-info">
+                <div class="card radius-10 border-start border-0 border-4 border-danger h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
                                 <p class="mb-0 text-secondary">Total Guru</p>
                                 <h4 class="my-1 text-danger">{{ $countAllTeacher ?? 0 }}</h4>
-                                <!-- <p class="mb-0 font-13">Admin: {{ $countAdmin }} | Piket: {{ $countPiket }} | Guru: {{ $countGuru }}</p> -->
+                                <small class="text-muted">Admin: {{ $countAdmin }} | Piket: {{ $countPiket }} | Guru: {{ $countGuru }}</small>
                             </div>
                             <div class="widgets-icons-2 rounded-circle bg-gradient-burning text-white ms-auto">
                                 <i class='bx bx-chalkboard'></i>
@@ -52,7 +52,7 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card radius-10 border-start border-0 border-4 border-info">
+                <div class="card radius-10 border-start border-0 border-4 border-warning h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
@@ -67,13 +67,13 @@
                 </div>
             </div>
             <div class="col">
-               <div class="card radius-10 border-start border-0 border-4 border-info">
+                <div class="card radius-10 border-start border-0 border-4 border-success h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
                                 <p class="mb-0 text-secondary">Absensi Gerbang</p>
                                 <h4 class="my-1 text-success">{{ $countPresensi ?? 0 }}</h4>
-                                <!-- <small class="text-muted">Masuk: {{ $countPresensiMasuk }} | Plg: {{ $countPresensiPulang }}</small> -->
+                                <small class="text-muted">Masuk: {{ $countPresensiMasuk }} | Plg: {{ $countPresensiPulang }}</small>
                             </div>
                             <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto">
                                 <i class='bx bx-scan'></i>
@@ -85,11 +85,11 @@
         </div>
 
         <!-- BARIS 2: DATA AKADEMIK -->
-        <!-- <h6 class="mb-0 text-uppercase">Statistik Akademik</h6>
-        <hr/> -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-2 row-cols-xxl-4">
+        <h6 class="mb-0 text-uppercase">Statistik Akademik</h6>
+        <hr/>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-4">
             <div class="col">
-                <div class="card radius-10 bg-gradient-cosmic">
+                <div class="card radius-10 bg-primary bg-gradient h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
@@ -102,13 +102,13 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card radius-10 bg-gradient-ibiza">
+                <div class="card radius-10 bg-danger bg-gradient h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
                                 <p class="mb-0 text-white">Total Kelas</p>
                                 <h4 class="my-1 text-white">{{ $countKelasTotal ?? 0 }}</h4>
-                                <!-- <small class="text-white">Isi: {{ $countKelasIsi }} | Kosong: {{ $countKelasKosong }}</small> -->
+                                <small class="text-white">Isi: {{ $countKelasIsi }} | Kosong: {{ $countKelasKosong }}</small>
                             </div>
                             <div class="text-white ms-auto font-35"><i class='bx bx-door-open'></i></div>
                         </div>
@@ -116,7 +116,7 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card radius-10 bg-gradient-ohhappiness">
+                <div class="card radius-10 bg-warning bg-gradient h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
@@ -129,100 +129,13 @@
                 </div>
             </div>
             <div class="col">
-               <div class="card radius-10 bg-gradient-kyoto">
+                <div class="card radius-10 bg-success bg-gradient h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div>
                                 <p class="mb-0 text-white">Jadwal Mapel</p>
                                 <h4 class="my-1 text-white">{{ $countJadwal ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- HEADER FILTER -->
-        <div class="d-flex justify-content-between align-items-center mb-4 ">
-            <h6 class="mb-0 text-uppercase">STATISTIK DATA</h6>
-            <form method="GET" class="d-flex gap-2">
-                <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <option value="harian" {{ $filter == 'harian' ? 'selected' : '' }}>Harian (7 Hari)</option>
-                    <option value="mingguan" {{ $filter == 'mingguan' ? 'selected' : '' }}>Mingguan</option>
-                    <option value="bulanan" {{ $filter == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
-                    <option value="semester" {{ $filter == 'semester' ? 'selected' : '' }}>Semester</option>
-                    <option value="tahunan" {{ $filter == 'tahunan' ? 'selected' : '' }}>Tahunan</option>
-                </select>
-            </form>
-        </div>
-        <hr/>
-
-        <div class="row row-cols-1 row-cols-md-1 row-cols-xl-5 mb-4">
-            <div class="col">
-                <div class="card radius-10 bg-success bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Hadir</p>
-                                <h4 class="my-1 text-white">{{ $countMapel ?? 0 }}</h4>
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-book'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10 bg-primary bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Terlambat</p>
-                                <h4 class="my-1 text-white">{{ $countKelasTotal ?? 0 }}</h4>
-                                <!-- <small class="text-white">Isi: {{ $countKelasIsi }} | Kosong: {{ $countKelasKosong }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-door-open'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10 bg-warning bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-dark">Sakit</p>
-                                <h4 class="my-1 text-dark">{{ $countJurusan ?? 0 }}</h4>
-                            </div>
-                            <div class="text-dark ms-auto font-35"><i class='bx bxs-graduation'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-               <div class="card radius-10 bg-secondary bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Izin</p>
-                                <h4 class="my-1 text-white">{{ $countJadwal ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col">
-               <div class="card radius-10 bg-danger bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Alpa</p>
-                                <h4 class="my-1 text-white">{{ $countJadwal ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
+                                <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small>
                             </div>
                             <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
                         </div>
@@ -232,30 +145,10 @@
         </div>
 
         <!-- BARIS 3: GRAFIK -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-4">
+        <div class="row">
             <!-- Grafik Batang -->
             <div class="col-12 col-lg-8">
-                <!-- <div class="card radius-10 border-start border-0 border-4 border-info"> -->
-                <div class="card radius-10">
-                    <div class="card-header border-bottom-0 bg-transparent">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <h6 class="mb-0">Tren Kehadiran ({{ ucfirst($filter) }})</h6>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container-1">
-                            <canvas id="chartTrend"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Grafik Batang -->
-            <div class="col-12 col-lg-8">
-                
-                <div class="card radius-10">
+                <div class="card radius-10 h-100">
                     <div class="card-header border-bottom-0 bg-transparent">
                         <div class="d-flex align-items-center">
                             <div>
@@ -273,46 +166,11 @@
             
             <!-- Grafik Lingkaran -->
             <div class="col-12 col-lg-4">
-                <div class="card radius-10">
+                <div class="card radius-10 h-100">
                     <div class="card-header border-bottom-0 bg-transparent">
                         <div class="d-flex align-items-center">
                             <div>
-                                <h6 class="mb-0">Kehadiran Gerbang ({{ ucfirst($filter) }})</h6>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container-2">
-                            <canvas id="chartPie"></canvas>
-                        </div>
-                        <ul class="list-group list-group-flush mt-3">
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Hadir <span class="badge bg-success rounded-pill">{{ $pieData[0] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Terlambat <span class="badge bg-warning text-dark rounded-pill">{{ $pieData[1] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Sakit <span class="badge bg-info rounded-pill">{{ $pieData[2] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Izin <span class="badge bg-primary rounded-pill">{{ $pieData[3] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Alpha <span class="badge bg-danger rounded-pill">{{ $pieData[4] }}</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>   
-            </div>
-
-            <!-- Grafik Lingkaran -->
-            <div class="col-12 col-lg-4">
-                <div class="card radius-10">
-                    <div class="card-header border-bottom-0 bg-transparent">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <h6 class="mb-0">Kehadiran PBM ({{ ucfirst($filter) }})</h6>
+                                <h6 class="mb-0">Persentase Status ({{ ucfirst($filter) }})</h6>
                             </div>
                         </div>
                     </div>
@@ -339,18 +197,8 @@
                         </ul>
                     </div>
                 </div>
-
-                
-
-                
             </div>
-            
         </div>
-        
-
-        
-
-        
 
     </div>
 

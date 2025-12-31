@@ -13,7 +13,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Tambahkan baris ini
+        if (file_exists(app_path('Helpers/SchoolHelper.php'))) {
+            require_once app_path('Helpers/SchoolHelper.php');
+        }
     }
 
     /**

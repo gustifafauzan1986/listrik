@@ -41,7 +41,7 @@
     <!-- KOP SURAT -->
     <div class="header">
         <h2>Laporan Transkrip Kehadiran Siswa</h2>
-        <p>SMK NEGERI TEKNOLOGI</p>
+        <p>{{ $school['name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</p>
         <p>Periode: {{ $dateObj->translatedFormat('F Y') }}</p>
     </div>
 
