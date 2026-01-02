@@ -48,7 +48,7 @@
                 @if(isset($school['logo_left']) && $school['logo_left'])
                     <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
                 @else
-                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
                 @endif
             </td>
 
@@ -65,7 +65,7 @@
                 @if(isset($school['logo_right']) && $school['logo_right'])
                     <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
                 @else
-                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
                 @endif
             </td>
         </tr>

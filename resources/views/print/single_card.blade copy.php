@@ -2,7 +2,16 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Cetak Kartu Siswa - {{ $student->name }}</title>
+    <title>Cetak Kartu Siswa - {{ $student->name }} | {{ \App\Models\Setting::value('app_name', 'GATECH') }} {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @php
+        $favicon = \App\Models\Setting::value('app_favicon');
+    @endphp
+    @if($favicon)
+        <link rel="icon" href="{{ asset('storage/'.$favicon) }}" type="image/x-icon"/>
+    @else
+        <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png') }}" type="image/x-icon"/>
+    @endif
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 

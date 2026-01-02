@@ -1,7 +1,3 @@
-@php
-$id = Auth::user()->id;
-@endphp
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,7 +8,9 @@ $id = Auth::user()->id;
         @page {
             margin-top: {{ $school['margin_top'] ?? '2cm' }};
             margin-right: {{ $school['margin_right'] ?? '2cm' }};
-            margin-bottom: {{ $school['margin_bottom'] ?? '2cm' }};
+            /* PENTING: Set margin-bottom lebih besar dari 1.5cm agar ada ruang untuk footer. */
+            /* Kita set menjadi 3cm untuk margin yang aman. */
+            margin-bottom: 3cm; 
             margin-left: {{ $school['margin_left'] ?? '2cm' }};
         }
         body { font-family: sans-serif; font-size: 12px; }
@@ -46,6 +44,24 @@ $id = Auth::user()->id;
             margin-top: 40px;
             page-break-inside: avoid; /* Jangan potong tanda tangan ke halaman baru sendirian */
         }
+
+        /* CSS FOOTER PERMANEN */
+        .footer-print {
+            position: fixed;
+            /* PENTING: Pindahkan posisi footer ke atas (misalnya, 50px dari tepi bawah fisik halaman) */
+            /* -50px dari tepi bawah fisik halaman (margin 0). */
+            /* Ini akan menempatkannya di area margin-bottom 3cm yang kita set. */
+            bottom: -50px; 
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            padding-top: 5px;
+            /* Kita gunakan border-top: 1px solid #ccc; seperti yang Anda inginkan, */
+            /* tetapi pastikan elemen ini berada di area margin. */
+            border-top: 1px solid #ccc;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -53,25 +69,24 @@ $id = Auth::user()->id;
     <!-- KOP SURAT DINAMIS -->
     <table class="header-table">
         <tr>
-            <!-- LOGO KIRI -->
             <td width="15%" class="text-center">
                 @if(isset($school['logo_left']) && $school['logo_left'])
                     <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
+                @else
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
                 @endif
             </td>
-
-            <!-- TEKS TENGAH (IDENTITAS SEKOLAH) -->
             <td width="70%" class="school-info">
                 <h1>{{ $school['name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</h1>
-                <p>{{ $school['address'] ?? 'Alamat sekolah belum diatur di menu pengaturan.' }}</p>
+                <p>{{ $school['address'] ?? 'Alamat sekolah belum diatur.' }}</p>
                 <p>Telp: {{ $school['phone'] ?? '-' }} | Email: {{ $school['email'] ?? '-' }}</p>
                 <p>Website: {{ $school['web'] ?? '-' }}</p>
             </td>
-
-            <!-- LOGO KANAN -->
             <td width="15%" class="text-center">
                 @if(isset($school['logo_right']) && $school['logo_right'])
                     <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
+                @else
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
                 @endif
             </td>
         </tr>
@@ -182,6 +197,34 @@ $id = Auth::user()->id;
             </tr>
         </table>
     </div>
+    <!-- FOOTER TAMBAHAN -->
+       
+    <div class="footer-print">
+        <small>
+            {{-- Catatan: Panggilan Model di view membebani, tapi akan saya biarkan jika Anda membutuhkannya. --}}
+            <strong>{{ \App\Models\Setting::value('app_name', 'GATECH') }}</strong> 
+            &bull; 
+            {{ \App\Models\Setting::value('school_name', 'GATECH') }} 
+            &bull; 
+            Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }}
+        </small>
+    </div>
+
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
+            $size = 9;
+            $font = $fontMetrics->getFont("Helvetica");
+            $width = $fontMetrics->get_text_width($text, $font, $size);
+            
+            // Hitung posisi X untuk menengahkan teks
+            $x = ($pdf->get_width() - $width) / 2;
+            // Hitung posisi Y (sekitar 30px dari bawah)
+            $y = $pdf->get_height() - 30;
+            
+            
+        }
+    </script>
 
 </body>
 </html>

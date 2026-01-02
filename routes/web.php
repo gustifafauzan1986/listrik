@@ -139,8 +139,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin|guru|piket'])->group(function () {
 
         Route::get('/piket/dashboard', [PiketDashboardController::class, 'dashboard'])->name('piket.dashboard');
-        Route::get('/report', [ReportController::class, 'index'])->name('report.index');
-        Route::post('/report/print', [ReportController::class, 'print'])->name('report.print');
+        Route::get('/laporan-pembelajaran', [ReportController::class, 'index'])->name('report.index');
+        Route::post('/pembelajaran/print', [ReportController::class, 'print'])->name('report.print');
         // [BARU] Route Cetak Laporan Per Jadwal (Direct Link)
         Route::get('/report/schedule/{id}', [ReportController::class, 'printSchedule'])->name('report.schedule');
         Route::resource('subjects', SubjectController::class);
@@ -160,7 +160,7 @@ Route::middleware(['auth'])->group(function () {
         //Route::get('/absensi/report', [DailyAttendanceController::class, 'report'])->name('daily_attendance.report');
         //Route::get('/absensi/laporan', [DailyAttendanceController::class, 'laporan'])->name('daily_attendance.report');
         Route::get('/report/absensi/student/{id}', [DailyReportController::class, 'printStudentAbsensi'])->name('report.absensi.student');
-        Route::get('/absensi/report', [DailyReportController::class, 'reportDaily'])->name('daily_attendance.report');
+        Route::get('laporan-gerbang', [DailyReportController::class, 'reportDaily'])->name('daily_attendance.report');
         Route::post('/report/absensi/print', [DailyReportController::class, 'printAbsensi'])->name('report.print.absensi');
 
         // 2. Route Menyimpan Data Manual (POST)

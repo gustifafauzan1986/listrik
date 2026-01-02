@@ -58,12 +58,20 @@ new #[Layout('layouts.guest')] class extends Component
 						<div class="mb-0 card">
 							<div class="card-body">
 								<div class="p-4">
+									@php
+									$appLogo = \App\Models\Setting::value('app_logo');
+									$appName = \App\Models\Setting::value('app_name', 'E-Absensi');
+									@endphp
 									<div class="mb-3 text-center">
-										<img src="{{ asset('backend/assets/images/logo-titl.png')}}" width="60" alt="" />
+									@if($appLogo && file_exists(storage_path('app/public/'.$appLogo)))
+										<img src="{{ asset('storage/'.$appLogo) }}" width="60" alt="" />
+									@else
+										<img src="{{ asset('upload/no_image.jpg')}}" width="60" alt="" />
+									@endif
 									</div>
 									<div class="mb-4 text-center">
 										<h5 class="">Halaman Login</h5>
-										<p class="mb-0">Sistem Presensi Listrik BKT</p>
+										<p class="mb-0">{{ $appName ?? 'GATECH' }} {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</p>
 									</div>
 									<div class="form-body">
                                         <form class="row g-3" wire:submit="login">

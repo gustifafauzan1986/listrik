@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\Jobs\SendWhatsappJob; // Queue Job untuk WA
 use App\Models\AttendanceSetting; // Jangan lupa import model ini
 use Illuminate\Support\Facades\DB; // Tambahkan import DB
+use Illuminate\Support\Facades\Auth;
 
 class DailyReportController extends Controller
 {
@@ -89,11 +90,112 @@ class DailyReportController extends Controller
         return view('daily_attendance.reports.report', compact('attendances', 'students', 'summary', 'classrooms'));
     }
 
+    // public function printAbsensi(Request $request)
+    // {
+    //     $startDate = null;
+    //     $endDate = null;
+    //     $labelPeriode = "";
+
+    //     // LOGIKA PENENTUAN TANGGAL
+    //     switch ($request->periode) {
+    //         case 'harian':
+    //             $startDate = $request->tanggal;
+    //             $endDate = $request->tanggal;
+    //             $labelPeriode = "Harian (" . Carbon::parse($startDate)->translatedFormat('d F Y') . ")";
+    //             break;
+
+    //         case 'mingguan':
+    //             $request->validate([
+    //                 'start_date' => 'required|date',
+    //                 'end_date'   => 'required|date|after_or_equal:start_date',
+    //             ]);
+    //             $startDate = $request->start_date;
+    //             $endDate = $request->end_date;
+    //             $labelPeriode = "Mingguan (" . Carbon::parse($startDate)->format('d/m') . " - " . Carbon::parse($endDate)->format('d/m/Y') . ")";
+    //             break;
+
+    //         case 'bulanan':
+    //             $month = $request->bulan;
+    //             $year = $request->tahun_bulan;
+
+    //             $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d');
+    //             $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
+    //             $labelPeriode = "Bulan " . Carbon::createFromDate($year, $month, 1)->translatedFormat('F Y');
+    //             break;
+
+    //         case 'semester':
+    //             $year = $request->tahun_semester;
+    //             if ($request->semester == 'ganjil') {
+    //                 // Ganjil: Juli Tahun Ini - Desember Tahun Ini
+    //                 $startDate = $year . '-07-01';
+    //                 $endDate   = $year . '-12-31';
+    //                 $labelPeriode = "Semester Ganjil T.A $year/" . ($year+1);
+    //             } else {
+    //                 // Genap: Januari Tahun Depan - Juni Tahun Depan
+    //                 $startDate = ($year + 1) . '-01-01';
+    //                 $endDate   = ($year + 1) . '-06-30';
+    //                 $labelPeriode = "Semester Genap T.A $year/" . ($year+1);
+    //             }
+    //             break;
+    //     }
+
+
+    //     // 2. AMBIL DATA SEKOLAH (KOP SURAT)
+    //     $school = $this->getSchoolData();
+
+    //      // 3. QUERY DATA ABSENSI (DENGAN FILTER KELAS)
+    //     $query = DailyAttendance::with(['student'])
+    //                     ->orderBy('date', 'asc')
+    //                     ->orderBy('arrival_time', 'asc');
+
+        
+
+
+    //     $labelTambahan = null;
+    //     // --- TAMBAHAN: Filter Per Kelas ---
+    //     if ($request->filled('classroom_id')) {
+    //         // Filter hanya siswa yang berada di kelas yang dipilih
+    //         $query->whereHas('student', function($q) use ($request) {
+    //             $q->where('classroom_id', $request->classroom_id);
+    //         });
+
+    //         // Ambil nama kelas untuk judul PDF
+    //         $kelas = Classroom::find($request->classroom_id);
+    //         if ($kelas) {
+    //             $labelTambahan = "Kelas: " . $kelas->name;
+    //         }
+    //     }
+    //     // ----------------------------------
+
+    //     $attendances = $query->get();
+
+    //             // // ==========================================
+    //     //  TAMBAHKAN VALIDASI INI
+    //     // ==========================================
+    //     if ($attendances->isEmpty()) {
+    //         return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
+    //     }
+    //     // ==========================================
+
+    //     // GENERATE PDF
+    //     $pdf = Pdf::loadView('daily_attendance.reports.pdf_view', compact(
+    //         'attendances',
+    //         'labelPeriode',
+    //         'startDate',
+    //         'endDate',
+    //         'school'));
+    //     $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
+
+    //     return $pdf->stream('Laporan-Kehadiran.pdf');
+    // }
+
     public function printAbsensi(Request $request)
     {
         $startDate = null;
         $endDate = null;
         $labelPeriode = "";
+        $id = Auth::user()->id;
 
         // LOGIKA PENENTUAN TANGGAL
         switch ($request->periode) {
@@ -141,14 +243,20 @@ class DailyReportController extends Controller
 
 
         // 2. AMBIL DATA SEKOLAH (KOP SURAT)
-        $school = $this->getSchoolData();
+       
 
-         // 3. QUERY DATA ABSENSI (DENGAN FILTER KELAS)
+        // 3. QUERY DATA ABSENSI (DENGAN FILTER KELAS DAN TANGGAL)
         $query = DailyAttendance::with(['student'])
-                        ->orderBy('date', 'asc')
-                        ->orderBy('arrival_time', 'asc');
+            ->orderBy('date', 'asc')
+            ->orderBy('arrival_time', 'asc');
 
-        
+        // ===========================================
+        // !!! INI BAGIAN YANG DITAMBAHKAN !!!
+        // ===========================================
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        }
+        // ===========================================
 
 
         $labelTambahan = null;
@@ -166,24 +274,26 @@ class DailyReportController extends Controller
             }
         }
         // ----------------------------------
-
         $attendances = $query->get();
+        
 
-                // // ==========================================
-        //  TAMBAHKAN VALIDASI INI
+        // ==========================================
+        // TAMBAHKAN VALIDASI INI
         // ==========================================
         if ($attendances->isEmpty()) {
             return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
         }
         // ==========================================
-
+        $school = get_school_data();
         // GENERATE PDF
         $pdf = Pdf::loadView('daily_attendance.reports.pdf_view', compact(
             'attendances',
             'labelPeriode',
             'startDate',
             'endDate',
+            'id',
             'school'));
+        $pdf->setOptions(['isPhpEnabled' => true]);
         $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
 
         return $pdf->stream('Laporan-Kehadiran.pdf');
@@ -216,7 +326,7 @@ class DailyReportController extends Controller
         $endDate = $attendances->first()->date ?? date('Y-m-d');
 
         // 5. Get School Settings
-        $school = $this->getSchoolData();
+        $school = get_school_data();
 
         // 6. Generate PDF using specific view
         $pdf = Pdf::loadView('daily_attendance.reports.student_history', compact(

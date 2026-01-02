@@ -26,7 +26,7 @@ $status = $guruId->status;
             </div>
 
         <div>
-            <h4 class="logo-text">{{ $appName }}</h4> </div>
+            <h4 class="logo-text">{{ $appName ?? 'GATECH' }}</h4> </div>
 
         <div class="toggle-icon ms-auto">
             <i class='bx bx-arrow-back'></i>
@@ -135,7 +135,7 @@ $status = $guruId->status;
 		</a>
 		<ul>
 			<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
-			<li> <a href="{{url('/absensi/report')}}"><i class='bx bx-border-all'></i>Kehadiran</a>
+			<li> <a href="{{route('daily_attendance.report')}}"><i class='bx bx-border-all'></i>Gerbang</a>
 			<li> <a href="{{url('/transkrip')}}"><i class='bx bx-border-all'></i>Transkip</a>
 			<li> <a href="{{route('recap.index')}}"><i class='bx bx-id-card'></i>Rekap</a>
 		</li>
