@@ -3,7 +3,24 @@
 <head>
     <title>Rekap Absensi</title>
     <style>
+        /* Mengatur Margin Halaman secara Dinamis dari Database */
+        @page {
+            margin-top: {{ $school['margin_top'] ?? '2cm' }};
+            margin-right: {{ $school['margin_right'] ?? '2cm' }};
+            margin-bottom: {{ $school['margin_bottom'] ?? '2cm' }};
+            margin-left: {{ $school['margin_left'] ?? '2cm' }};
+        }
         body { font-family: sans-serif; font-size: 12px; }
+
+        /* Layout Kop Surat menggunakan Tabel agar rapi di PDF */
+        .header-table { width: 100%; border-bottom: 3px double #333; margin-bottom: 20px; padding-bottom: 10px; }
+        .header-table td { vertical-align: middle; }
+
+        /* Logo harus menggunakan public_path agar terbaca oleh DOMPDF */
+        .logo-img { width: 80px; height: auto; }
+        .school-info { text-align: center; }
+        .school-info h1 { margin: 0; font-size: 20px; text-transform: uppercase; font-weight: bold; }
+        .school-info p { margin: 2px 0; font-size: 11px; }
         .header { text-align: center; margin-bottom: 20px; }
         .header h2 { margin: 0; }
         .header p { margin: 2px; color: #555; }
@@ -23,11 +40,40 @@
     </style>
 </head>
 <body>
+    <!-- KOP SURAT DINAMIS -->
+    <table class="header-table">
+        <tr>
+            <!-- LOGO KIRI -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_left']) && $school['logo_left'])
+                    <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
+                @else
+                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
+                @endif
+            </td>
+
+            <!-- TEKS TENGAH (IDENTITAS SEKOLAH) -->
+            <td width="70%" class="school-info">
+                <h1>{{ $school['name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</h1>
+                <p>{{ $school['address'] ?? 'Alamat sekolah belum diatur di menu pengaturan.' }}</p>
+                <p>Telp: {{ $school['phone'] ?? '-' }} | Email: {{ $school['email'] ?? '-' }}</p>
+                <p>Website: {{ $school['web'] ?? '-' }}</p>
+            </td>
+
+            <!-- LOGO KANAN -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_right']) && $school['logo_right'])
+                    <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
+                @else
+                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
+                @endif
+            </td>
+        </tr>
+    </table>
+
 
     <div class="header">
         <h2>LAPORAN REKAPITULASI ABSENSI</h2>
-        <p>SMK TELADAN BANGSA</p>
-        <p>Jl. Pendidikan No. 123, Kota Data</p>
     </div>
 
     <table class="info-table">
@@ -46,7 +92,7 @@
             <td>{{ optional($student->classroom)->name ?? 'Belum ada kelas' }}</td>
             <td><strong>Periode</strong></td>
             <td>:</td>
-            <td>{{ $period }}</td>
+            <td>{{ $periodAwal }} s/d {{ $periodAkhir }}</td>
         </tr>
     </table>
 

@@ -57,6 +57,8 @@ $id = Auth::user()->id;
             <td width="15%" class="text-center">
                 @if(isset($school['logo_left']) && $school['logo_left'])
                     <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
+                @else
+                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
                 @endif
             </td>
 
@@ -72,6 +74,8 @@ $id = Auth::user()->id;
             <td width="15%" class="text-center">
                 @if(isset($school['logo_right']) && $school['logo_right'])
                     <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
+                @else
+                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
                 @endif
             </td>
         </tr>

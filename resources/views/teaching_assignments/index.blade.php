@@ -1,15 +1,30 @@
 @section('title', 'Laporan Pembelajaran')
 <x-app-layout>
     <div class="page-content">
+    <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Maping</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item"><a href="{{url('/admin/dashboard')}}"><i class="bx bx-user"></i></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Jadwal Mengajar (Mapping)</li>
+                </ol>
+            </nav>
+        </div>
+       
+    </div>
+    <!--end breadcrumb-->
         <div class="container py-4">
 
             <div class="row mb-4 align-items-center">
-                <div class="col-md-5">
+                <!-- <div class="col-md-5">
                     <h1 class="mb-0 text-gray-800 h3">Jadwal Mengajar (Mapping)</h1>
                     <p class="text-muted small mb-0">Kartu kendali beban mengajar guru.</p>
-                </div>
+                </div> -->
                 
-                <div class="col-md-4 my-2 my-md-0">
+                <div class="col-md-8 my-2 my-md-0">
                     <div class="input-group shadow-sm">
                         <span class="input-group-text bg-white border-end-0">
                             <i class="fas fa-search text-muted"></i>
@@ -18,7 +33,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 text-md-end">
+                <div class="col-md-4 text-md-end">
                     <a href="{{ route('teaching-assignments.create') }}" class="shadow-sm btn btn-primary w-100 w-md-auto">
                         <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Baru
                     </a>

@@ -241,7 +241,7 @@ Route::middleware(['auth'])->group(function () {
 
         // --- 2. PENGATURAN SEKOLAH (SETTINGS) ---
         // Route ini diperlukan oleh form di settings/index.blade.php
-        Route::prefix('admin/settings')->name('settings.')->group(function() {
+        Route::prefix('settings')->name('settings.')->group(function() {
             Route::get('/', [SettingController::class, 'index'])->name('index');
             Route::put('/update', [SettingController::class, 'update'])->name('update');
             // Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
@@ -273,7 +273,23 @@ Route::middleware(['auth'])->group(function () {
         // Route::resource('teachers', TeacherController::class);
         // Route::resource('teachers', TeacherController::class)->except(['create', 'store', 'show']);
         Route::resource('classrooms', ClassroomController::class);
-        Route::resource('majors', MajorController::class);
+        // Route::prefix('maping/rombel')->name('classrooms.')->group(function() {
+        //     Route::get('/', [ClassroomController::class, 'index'])->name('index');
+        //     Route::get('/create', [ClassroomController::class, 'create'])->name('create');
+        //     Route::post('/store', [ClassroomController::class, 'store'])->name('store');
+        //     Route::get('/edit/{id}', [ClassroomController::class, 'edit'])->name('edit');
+        //     Route::put('/update/{id}', [ClassroomController::class, 'update'])->name('update');
+        //     Route::delete('/destroy/{id}', [ClassroomController::class, 'destroy'])->name('destroy');
+        // });
+        // Route::resource('majors', MajorController::class);
+        Route::prefix('setting/jurusan')->name('majors.')->group(function() {
+            Route::get('/', [MajorController::class, 'index'])->name('index');
+            Route::get('/create', [MajorController::class, 'create'])->name('create');
+            Route::post('/store', [MajorController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [MajorController::class, 'edit'])->name('edit');
+            Route::put('/update/{id}', [MajorController::class, 'update'])->name('update');
+            Route::delete('/destroy/{id}', [MajorController::class, 'destroy'])->name('destroy');
+        });
 
         Route::patch('/students/{id}/remove-class', [StudentController::class, 'removeClassroom'])->name('students.remove_class');
 

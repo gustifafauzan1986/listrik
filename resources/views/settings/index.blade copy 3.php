@@ -3,21 +3,6 @@
 @endsection
 <x-app-layout>
     <div class="page-content">
-        <!--breadcrumb-->
-    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div class="breadcrumb-title pe-3">Setting</div>
-        <div class="ps-3">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 p-0">
-                    <li class="breadcrumb-item"><a href="{{url('/admin/dashboard')}}"><i class="bx bx-home-alt"></i></a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Setting Aplikasi</li>
-                </ol>
-            </nav>
-        </div>
-       
-    </div>
-    <!--end breadcrumb-->
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <div class="border-0 shadow card">
@@ -70,30 +55,59 @@
                                         <!-- Logo Kiri -->
                                         <div class="text-center col-md-6 border-end">
                                             <label class="form-label fw-bold">Logo Kiri (Kop Surat)</label>
-                                            <div class="mb-2 d-flex justify-content-center">
+                                            
+                                            <!-- Container Preview -->
+                                            <div class="mb-2 d-flex justify-content-center" id="preview_left">
                                                 @if(isset($settings['logo_left']) && $settings['logo_left'])
-                                                    <img src="{{ asset('storage/'.$settings['logo_left']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
+                                                    <div style="position: relative; display: inline-block;">
+                                                        <img src="{{ asset('storage/'.$settings['logo_left']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
+                                                        <!-- Tombol Hapus -->
+                                                        <button type="button" class="btn btn-danger btn-sm position-absolute" 
+                                                                style="top: -10px; right: -10px; border-radius: 50%; padding: 0.25rem 0.5rem;"
+                                                                onclick="deleteLogo('left')" title="Hapus Logo">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
                                                 @else
                                                     <div class="p-3 border rounded text-muted" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
                                                         <i class="fas fa-image fa-2x text-secondary"></i>
                                                     </div>
                                                 @endif
                                             </div>
-                                            <input type="file" name="logo_left" class="form-control form-control-sm accept-image">
+                                            
+                                            <!-- Hidden Input untuk flag hapus -->
+                                            <input type="hidden" name="delete_logo_left" id="delete_logo_left" value="0">
+                                            
+                                            <input type="file" name="logo_left" id="input_logo_left" class="form-control form-control-sm accept-image">
                                         </div>
+                                        
                                         <!-- Logo Kanan -->
                                         <div class="text-center col-md-6">
                                             <label class="form-label fw-bold">Logo Kanan (Kop Surat)</label>
-                                            <div class="mb-2 d-flex justify-content-center">
+                                            
+                                            <!-- Container Preview -->
+                                            <div class="mb-2 d-flex justify-content-center" id="preview_right">
                                                 @if(isset($settings['logo_right']) && $settings['logo_right'])
-                                                    <img src="{{ asset('storage/'.$settings['logo_right']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
+                                                    <div style="position: relative; display: inline-block;">
+                                                        <img src="{{ asset('storage/'.$settings['logo_right']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
+                                                        <!-- Tombol Hapus -->
+                                                        <button type="button" class="btn btn-danger btn-sm position-absolute" 
+                                                                style="top: -10px; right: -10px; border-radius: 50%; padding: 0.25rem 0.5rem;"
+                                                                onclick="deleteLogo('right')" title="Hapus Logo">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
                                                 @else
                                                     <div class="p-3 border rounded text-muted" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
                                                         <i class="fas fa-image fa-2x text-secondary"></i>
                                                     </div>
                                                 @endif
                                             </div>
-                                            <input type="file" name="logo_right" class="form-control form-control-sm accept-image">
+
+                                            <!-- Hidden Input untuk flag hapus -->
+                                            <input type="hidden" name="delete_logo_right" id="delete_logo_right" value="0">
+
+                                            <input type="file" name="logo_right" id="input_logo_right" class="form-control form-control-sm accept-image">
                                         </div>
                                     </div>
 
@@ -239,7 +253,7 @@
                                 </div>
 
                                  <!-- TAB 4: Info Aplikasi -->
-                                <div class="tab-pane fade show active" id="absensi">
+                                <div class="tab-pane fade" id="absensi">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Info Aplikasi</label>
                                         <input type="text" name="inf_app" class="form-control" value="{{ $settings['inf_app'] ?? 'Sistem Absensi Sekolah.' }}">
@@ -282,5 +296,27 @@
                 text: 'Mohon periksa kembali inputan Anda.',
             });
         @endif
+
+        // JS untuk hapus logo
+        function deleteLogo(side) {
+            // side = 'left' atau 'right'
+            
+            // Konfirmasi sederhana (opsional)
+            // if(!confirm('Hapus logo ini?')) return;
+
+            // 1. Ubah tampilan jadi placeholder
+            let container = document.getElementById('preview_' + side);
+            container.innerHTML = `
+                <div class="p-3 border rounded text-muted" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                    <i class="fas fa-image fa-2x text-secondary"></i>
+                </div>
+            `;
+
+            // 2. Set input hidden jadi 1
+            document.getElementById('delete_logo_' + side).value = '1';
+
+            // 3. Reset input file
+            document.getElementById('input_logo_' + side).value = '';
+        }
     </script>
 </x-app-layout>

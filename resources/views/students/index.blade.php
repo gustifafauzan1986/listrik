@@ -3,9 +3,23 @@
 <x-app-layout>
     <div class="page-content">
         <div class="col-md-12">
+            <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Maping</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item"><a href="{{url('/admin/dashboard')}}"><i class="fas fa-users me-2"></i></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Data Murid & Registrasi Wajah</li>
+                </ol>
+            </nav>
+        </div>
+       
+    </div>
 
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-users me-2"></i> Data Murid & Registrasi Wajah</h5>
+                <!-- <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-users me-2"></i> Data Murid & Registrasi Wajah</h5> -->
                 
                 <div>
                     <a href="{{ route('students.import') }}" class="btn btn-success me-2">

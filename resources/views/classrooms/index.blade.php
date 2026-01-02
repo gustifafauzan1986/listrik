@@ -4,12 +4,26 @@
 
 <x-app-layout>
     <div class="page-content">
-        <div class="mb-4 d-flex justify-content-between align-items-center">
+        <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Maping</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item"><a href="{{url('/admin/dashboard')}}"><i class="bx bx-home-alt"></i></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Rombongan Belajar</li>
+                </ol>
+            </nav>
+        </div>
+       
+    </div>
+        <!-- <div class="mb-4 d-flex justify-content-between align-items-center">
             <h3 class="fw-bold text-primary"><i class="fas fa-school me-2"></i> Master Data Kelas</h3>
             <a href="{{ route('classrooms.create') }}" class="shadow-sm btn btn-primary">
                 <i class="bx bx-plus me-1"></i> Tambah Kelas
             </a>
-        </div>
+        </div> -->
 
         {{-- LOGIC: Ambil Data Guru & Filter Wali Kelas untuk Modal --}}
         @php

@@ -3160,6 +3160,8 @@ class WhatsappWebhookController extends Controller
         try {
             $startDate = Carbon::now()->startOfMonth();
             $endDate = Carbon::now();
+
+           
             
             // Ambil data
             $attendances = DailyAttendance::where('student_id', $student->id)
@@ -3175,7 +3177,10 @@ class WhatsappWebhookController extends Controller
             $pdf = Pdf::loadView('pdf.recap', [
                 'student' => $student,
                 'attendances' => $attendances,
-                'period' => $startDate->translatedFormat('F Y')
+                'periodAwal' => $startDate->translatedFormat('d F Y'),
+                'periodAkhir' => $endDate->translatedFormat('d F Y'),
+                'school' => get_school_data()
+
             ]);
             $pdf->setPaper('a4', 'portrait');
 
@@ -3264,10 +3269,10 @@ class WhatsappWebhookController extends Controller
                     $listJadwal .= "• {$mapel} ({$jamMulai}-{$jamSelesai})\n  👨‍🏫 {$guru}\n";
                 }
             } else {
-                $listJadwal = "_Tidak ada jadwal pelajaran_";
+                $listJadwal = "_Tidak ada jadwal pelajaran_\n";
             }
         } catch (\Throwable $e) {
-            $listJadwal = "_Data jadwal belum tersedia_";
+            $listJadwal = "_Data jadwal belum tersedia_\n";
         }
 
         // --- 3. KEHADIRAN PEMBELAJARAN (MAPEL) ---
@@ -3296,7 +3301,7 @@ class WhatsappWebhookController extends Controller
         // --- SUSUN PESAN FINAL ---
         $message = "📊 *LAPORAN HARIAN SISWA*\n" .
                    "Nama: *{$student->name}*\n" .
-                   "Hari: {$namaHari}, " . $today->format('d-m-Y') . "\n\n" .
+                   "Hari: {$namaHari}, " . $today->translatedformat('d F Y') . "\n\n" .
                    "🏫 *KEHADIRAN GERBANG*\n" .
                    "Status: *{$statusGerbang}*\n\n" .
                    "📅 *JADWAL HARI INI*\n" .
