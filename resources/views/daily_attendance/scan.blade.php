@@ -149,7 +149,7 @@
                             title: res.message,
                             text: res.student,
                             icon: res.status === 'success' ? 'success' : 'error',
-                            timer: 2000,
+                            timer: 3000,
                             showConfirmButton: false
                         }).then(() => safeResume());
                     },

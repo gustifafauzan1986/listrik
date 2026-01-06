@@ -68,7 +68,7 @@ $id = Auth::user()->id;
                 @if(isset($school['logo_left']) && $school['logo_left'])
                     <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
                 @else
-                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
                 @endif
             </td>
 
@@ -85,7 +85,7 @@ $id = Auth::user()->id;
                 @if(isset($school['logo_right']) && $school['logo_right'])
                     <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
                 @else
-                    <img src="{{ {{ asset('upload/no_image.jpg')}} }}" class="logo-img">
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
                 @endif
             </td>
         </tr>
@@ -161,7 +161,7 @@ $id = Auth::user()->id;
             <tr>
                 <td width="60%"></td> <!-- Spacer Kosong di Kiri -->
                 <td width="40%" class="text-center">
-                    <p>{{ $school['sign_city'] ?? 'Jakarta' }}, {{ date('d F Y') }}</p>
+                    <p>{{ $school['sign_city'] ?? 'Jakarta' }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
                     @if($id == true)
                     <p>Guru Mata Pelajaran,</p>
                     <br><br><br>

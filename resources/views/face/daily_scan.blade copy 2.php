@@ -43,68 +43,25 @@
             background-color: #ffc107;
             color: black;
         }
-
-        /* Responsive Video Container */
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 640px; /* Max width for desktop */
-            margin: 0 auto;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #000;
-            aspect-ratio: 4/3; /* Maintain aspect ratio */
-        }
-
-        #video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        /* Mobile specific adjustments */
-        @media (max-width: 576px) {
-            .btn-group {
-                width: 100% !important;
-                display: flex;
-            }
-            .btn-group .btn {
-                flex: 1;
-                font-size: 0.9rem;
-                padding: 0.5rem;
-            }
-            .card-header span {
-                font-size: 0.9rem;
-            }
-        }
     </style>
 </head>
 
 <body>
     <div class="page-content">
         <div class="row justify-content-center">
-            <div class="col-12 col-md-10 col-lg-8">
+            <div class="col-md-10">
                 <div class="shadow card">
 
                     <div class="text-white card-header bg-success d-flex justify-content-between align-items-center">
-                        <span class="d-flex align-items-center"><i class="fas fa-smile-beam me-2"></i> Absensi Wajah</span>
+                        <span><i class="fas fa-smile-beam me-2"></i> Absensi Wajah</span>
                         <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light text-success fw-bold">Dashboard</a>
                     </div>
                     <div class="text-center card-body bg-light">
 
                         <!-- FITUR BARU: PILIHAN MODE ABSENSI -->
-                        <div class="mb-2">
-                            <h5 class="mb-2 h6 d-md-block d-none">Pilih Mode Absensi:</h5>
-                            <div class="btn-group w-50 w-md-50 w-sm-100" role="group" aria-label="Mode Absensi">
+                        <div class="mb-4">
+                            <h5 class="mb-2">Pilih Mode Absensi:</h5>
+                            <div class="btn-group w-50" role="group" aria-label="Mode Absensi">
                                 <input type="radio" class="btn-check" name="mode_absen" id="mode_harian" value="harian" checked>
                                 <label class="btn btn-outline-primary fw-bold" for="mode_harian">
                                     <i class="fas fa-clock me-1"></i> Datang / Pulang
@@ -116,27 +73,16 @@
                                 </label>
                             </div>
                         </div>
-
-                        <!-- FITUR BARU: PILIHAN KAMERA -->
-                        <div class="mb-3 d-flex justify-content-center">
-                            <div class="input-group w-auto">
-                                <label class="input-group-text bg-white" for="cameraSelect"><i class="fas fa-camera"></i></label>
-                                <select class="form-select form-select-sm" id="cameraSelect" style="max-width: 250px;">
-                                    <option value="" selected>Mencari kamera...</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <hr>
 
                         <div id="status-loading" class="alert alert-warning">
                             <span class="spinner-border spinner-border-sm me-2"></span> Memuat Data Wajah Seluruh Siswa...
                         </div>
 
-                        <div class="shadow-lg video-container">
+                        <div class="rounded shadow-lg position-relative d-inline-block">
                             <!-- Video Webcam -->
-                            <video id="video" autoplay muted playsinline></video>
-                            <canvas id="overlay"></canvas>
+                            <video id="video" width="640" height="480" autoplay muted style="border-radius: 10px; background: #000; object-fit: cover;"></video>
+                            <canvas id="overlay" class="top-0 position-absolute start-0"></canvas>
                         </div>
 
                         <div class="mt-3">
@@ -156,12 +102,10 @@
 <script>
     const video = document.getElementById('video');
     const statusMsg = document.getElementById('status-loading');
-    const cameraSelect = document.getElementById('cameraSelect'); // Element Select Kamera
 
     let labeledFaceDescriptors = [];
     let faceMatcher = null;
     let isProcessing = false; // Cegah spam request
-    let currentStream = null; // Variable untuk menyimpan stream kamera saat ini
 
      // 1. Load Models & Data Siswa
     Promise.all([
@@ -198,115 +142,29 @@
         startVideo();
     }
 
-    // Fungsi Mendapatkan Daftar Kamera
-    async function getCameras() {
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            
-            cameraSelect.innerHTML = '<option value="" disabled>Pilih Kamera</option>';
-            
-            if (videoDevices.length === 0) {
-                const opt = document.createElement('option');
-                opt.text = "Tidak ada kamera ditemukan";
-                cameraSelect.add(opt);
-                return;
-            }
-
-            videoDevices.forEach((device, index) => {
-                const option = document.createElement('option');
-                option.value = device.deviceId;
-                option.text = device.label || `Kamera ${index + 1}`;
-                cameraSelect.add(option);
-            });
-
-            // Set select value ke kamera yang sedang aktif jika ada
-            if (currentStream) {
-                const track = currentStream.getVideoTracks()[0];
-                const settings = track.getSettings();
-                if (settings.deviceId) {
-                    cameraSelect.value = settings.deviceId;
-                }
-            }
-        } catch (err) {
-            console.error("Error enumerating devices:", err);
-        }
-    }
-
-    // Fungsi Start Video dengan opsi Device ID
-    function startVideo(deviceId = null) {
-        // Stop stream sebelumnya jika ada
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-        }
-
-        // Tambahkan playsinline agar di iOS video tidak fullscreen otomatis
-        video.setAttribute('playsinline', ''); 
-        video.setAttribute('autoplay', '');
-        video.setAttribute('muted', '');
-
-        // Config constraints
-        const constraints = {
-            video: deviceId ? { deviceId: { exact: deviceId } } : {}
-        };
-
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(stream => {
-                currentStream = stream;
-                video.srcObject = stream;
-                
-                // Ambil daftar kamera setelah izin diberikan (agar label terbaca)
-                // Cek jika option masih default/sedikit, reload list
-                if (cameraSelect.options.length <= 1) {
-                    getCameras();
-                }
-            })
+    function startVideo() {
+        navigator.mediaDevices.getUserMedia({ video: {} })
+            .then(stream => video.srcObject = stream)
             .catch(err => {
                 statusMsg.className = 'alert alert-danger';
                 statusMsg.innerText = "Kamera tidak terdeteksi / Izin ditolak.";
             });
     }
 
-    // Event Listener saat user mengganti kamera
-    cameraSelect.addEventListener('change', function() {
-        if (this.value) {
-            startVideo(this.value);
-        }
-    });
-
     video.addEventListener('play', () => {
         const canvas = document.getElementById('overlay');
-        
-        // Fungsi untuk menyesuaikan ukuran canvas saat window diresize
-        function adjustCanvasSize() {
-            const displaySize = { width: video.clientWidth, height: video.clientHeight };
-            faceapi.matchDimensions(canvas, displaySize);
-            return displaySize;
-        }
-
-        let displaySize = adjustCanvasSize();
-
-        // Update canvas size saat window resize
-        window.addEventListener('resize', () => {
-            displaySize = adjustCanvasSize();
-        });
+        const displaySize = { width: video.width, height: video.height };
+        faceapi.matchDimensions(canvas, displaySize);
 
         setInterval(async () => {
             // Jika sedang memproses data absensi, pause deteksi visual
             if(isProcessing || !faceMatcher) return;
 
-            // Pastikan ukuran canvas selalu sinkron sebelum detect
-            const currentDisplaySize = { width: video.clientWidth, height: video.clientHeight };
-            // Optional: cek if size changed drastically to avoid flicker, but matchDimensions usually safe
-            if (canvas.width !== currentDisplaySize.width || canvas.height !== currentDisplaySize.height) {
-                 faceapi.matchDimensions(canvas, currentDisplaySize);
-            }
-
             const detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options())
                 .withFaceLandmarks()
                 .withFaceDescriptors();
 
-            const resizedDetections = faceapi.resizeResults(detections, currentDisplaySize);
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
             canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
             const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor));

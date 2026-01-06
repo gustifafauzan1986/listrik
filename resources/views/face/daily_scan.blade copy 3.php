@@ -102,7 +102,7 @@
                     <div class="text-center card-body bg-light">
 
                         <!-- FITUR BARU: PILIHAN MODE ABSENSI -->
-                        <div class="mb-2">
+                        <div class="mb-4">
                             <h5 class="mb-2 h6 d-md-block d-none">Pilih Mode Absensi:</h5>
                             <div class="btn-group w-50 w-md-50 w-sm-100" role="group" aria-label="Mode Absensi">
                                 <input type="radio" class="btn-check" name="mode_absen" id="mode_harian" value="harian" checked>
@@ -116,17 +116,6 @@
                                 </label>
                             </div>
                         </div>
-
-                        <!-- FITUR BARU: PILIHAN KAMERA -->
-                        <div class="mb-3 d-flex justify-content-center">
-                            <div class="input-group w-auto">
-                                <label class="input-group-text bg-white" for="cameraSelect"><i class="fas fa-camera"></i></label>
-                                <select class="form-select form-select-sm" id="cameraSelect" style="max-width: 250px;">
-                                    <option value="" selected>Mencari kamera...</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <hr>
 
                         <div id="status-loading" class="alert alert-warning">
@@ -156,12 +145,10 @@
 <script>
     const video = document.getElementById('video');
     const statusMsg = document.getElementById('status-loading');
-    const cameraSelect = document.getElementById('cameraSelect'); // Element Select Kamera
 
     let labeledFaceDescriptors = [];
     let faceMatcher = null;
     let isProcessing = false; // Cegah spam request
-    let currentStream = null; // Variable untuk menyimpan stream kamera saat ini
 
      // 1. Load Models & Data Siswa
     Promise.all([
@@ -198,81 +185,21 @@
         startVideo();
     }
 
-    // Fungsi Mendapatkan Daftar Kamera
-    async function getCameras() {
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            
-            cameraSelect.innerHTML = '<option value="" disabled>Pilih Kamera</option>';
-            
-            if (videoDevices.length === 0) {
-                const opt = document.createElement('option');
-                opt.text = "Tidak ada kamera ditemukan";
-                cameraSelect.add(opt);
-                return;
-            }
-
-            videoDevices.forEach((device, index) => {
-                const option = document.createElement('option');
-                option.value = device.deviceId;
-                option.text = device.label || `Kamera ${index + 1}`;
-                cameraSelect.add(option);
-            });
-
-            // Set select value ke kamera yang sedang aktif jika ada
-            if (currentStream) {
-                const track = currentStream.getVideoTracks()[0];
-                const settings = track.getSettings();
-                if (settings.deviceId) {
-                    cameraSelect.value = settings.deviceId;
-                }
-            }
-        } catch (err) {
-            console.error("Error enumerating devices:", err);
-        }
-    }
-
-    // Fungsi Start Video dengan opsi Device ID
-    function startVideo(deviceId = null) {
-        // Stop stream sebelumnya jika ada
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-        }
-
+    function startVideo() {
         // Tambahkan playsinline agar di iOS video tidak fullscreen otomatis
         video.setAttribute('playsinline', ''); 
         video.setAttribute('autoplay', '');
         video.setAttribute('muted', '');
 
-        // Config constraints
-        const constraints = {
-            video: deviceId ? { deviceId: { exact: deviceId } } : {}
-        };
-
-        navigator.mediaDevices.getUserMedia(constraints)
+        navigator.mediaDevices.getUserMedia({ video: {} })
             .then(stream => {
-                currentStream = stream;
                 video.srcObject = stream;
-                
-                // Ambil daftar kamera setelah izin diberikan (agar label terbaca)
-                // Cek jika option masih default/sedikit, reload list
-                if (cameraSelect.options.length <= 1) {
-                    getCameras();
-                }
             })
             .catch(err => {
                 statusMsg.className = 'alert alert-danger';
                 statusMsg.innerText = "Kamera tidak terdeteksi / Izin ditolak.";
             });
     }
-
-    // Event Listener saat user mengganti kamera
-    cameraSelect.addEventListener('change', function() {
-        if (this.value) {
-            startVideo(this.value);
-        }
-    });
 
     video.addEventListener('play', () => {
         const canvas = document.getElementById('overlay');

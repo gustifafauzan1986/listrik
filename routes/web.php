@@ -161,7 +161,7 @@ Route::middleware(['auth'])->group(function () {
         //Route::get('/absensi/laporan', [DailyAttendanceController::class, 'laporan'])->name('daily_attendance.report');
         Route::get('/report/absensi/student/{id}', [DailyReportController::class, 'printStudentAbsensi'])->name('report.absensi.student');
         Route::get('laporan-gerbang', [DailyReportController::class, 'reportDaily'])->name('daily_attendance.report');
-        Route::post('/report/absensi/print', [DailyReportController::class, 'printAbsensi'])->name('report.print.absensi');
+        Route::post('/report-absensi-print', [DailyReportController::class, 'printAbsensi'])->name('report.print.absensi');
 
         // 2. Route Menyimpan Data Manual (POST)
         // Sesuai dengan method storeManual() di controller

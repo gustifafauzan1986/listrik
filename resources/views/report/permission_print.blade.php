@@ -2,8 +2,37 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Izin - {{ $permit->student->name }}</title>
+    <title>Surat Izin - {{ $permit->student->name }} | {{ \App\Models\Setting::value('app_name', 'GATECH') }} {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @php
+        $favicon = \App\Models\Setting::value('app_favicon');
+    @endphp
+    @if($favicon)
+        <link rel="icon" href="{{ asset('storage/'.$favicon) }}" type="image/x-icon"/>
+    @else
+        <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png') }}" type="image/x-icon"/>
+    @endif
     <style>
+        
+        /* Mengatur Margin Halaman secara Dinamis dari Database */
+        @page {
+            margin-top: {{ $school['margin_top'] ?? '2cm' }};
+            margin-right: {{ $school['margin_right'] ?? '2cm' }};
+            margin-bottom: {{ $school['margin_bottom'] ?? '2cm' }};
+            margin-left: {{ $school['margin_left'] ?? '2cm' }};
+        }
+
+        /* Layout Kop Surat menggunakan Tabel agar rapi di PDF */
+        .header-table { width: 100%; border-bottom: 3px double #333; margin-bottom: 20px; padding-bottom: 10px; }
+        .header-table td { vertical-align: middle; }
+
+        /* Logo harus menggunakan public_path agar terbaca oleh DOMPDF */
+        .logo-img { width: 80px; height: auto; }
+
+        .school-info { text-align: center; }
+        .school-info h1 { margin: 0; font-size: 20px; text-transform: uppercase; font-weight: bold; }
+        .school-info p { margin: 2px 0; font-size: 11px; }
+
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
@@ -117,15 +146,36 @@
 
     <div class="container">
         <!-- HEADER / KOP SURAT -->
-        <header>
-            <!-- Ganti src dengan path logo sekolah Anda -->
-            <img src="https://via.placeholder.com/80?text=LOGO" alt="Logo Sekolah" class="logo">
-            
-            <!-- Menggunakan Array Access karena Controller mengembalikan Array -->
-            <h1>{{ $school['name'] }}</h1>
-            <p>{{ $school['address'] }}</p>
-            <p>Telp: {{ $school['phone'] }} | Email: {{ $school['email'] }}</p>
-        </header>
+        <!-- KOP SURAT DINAMIS -->
+    <table class="header-table">
+        <tr>
+            <!-- LOGO KIRI -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_left']) && $school['logo_left'])
+                    <img src="{{ asset('storage/'.$school['logo_left']) }}" class="logo-img">
+                @else
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
+                @endif
+            </td>
+
+            <!-- TEKS TENGAH (IDENTITAS SEKOLAH) -->
+            <td width="70%" class="school-info">
+                <h1>{{ $school['name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</h1>
+                <p>{{ $school['address'] ?? 'Alamat sekolah belum diatur di menu pengaturan.' }}</p>
+                <p>Telp: {{ $school['phone'] ?? '-' }} | Email: {{ $school['email'] ?? '-' }}</p>
+                <p>Website: {{ $school['web'] ?? '-' }}</p>
+            </td>
+
+            <!-- LOGO KANAN -->
+            <td width="15%" class="text-center">
+                @if(isset($school['logo_right']) && $school['logo_right'])
+                    <img src="{{ asset('storage/'.$school['logo_right']) }}" class="logo-img">
+                @else
+                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
+                @endif
+            </td>
+        </tr>
+    </table>
 
         <!-- ISI SURAT -->
         <div class="title">SURAT IZIN MENINGGALKAN SEKOLAH</div>
@@ -190,9 +240,9 @@
                     {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
                     
                     <!-- Jabatan Dinamis -->
-                    @if(auth()->user()->jenis_user == 'piket')
+                    @if(Auth()->user()->jenis_user == 'piket')
                         Petugas Piket
-                    @elseif(auth()->user()->jenis_user == 'guru')
+                    @elseif(Auth()->user()->jenis_user == 'guru')
                         Guru Pengajar
                     @else
                         Petugas Sekolah

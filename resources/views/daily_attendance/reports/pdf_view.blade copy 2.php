@@ -3,22 +3,22 @@
 <head>
     <title>Laporan Kehadiran | {{ \App\Models\Setting::value('app_name', 'GATECH') }} {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    {{-- Favicon untuk PDF --}}
     @php
-        $favicon = \App\Models\Setting::value('app_favicon');
+        $faviconDB = \App\Models\Setting::value('app_favicon');
+        $faviconPath = $faviconDB ? public_path('storage/'.$faviconDB) : public_path('backend/assets/images/favicon-32x32.png');
     @endphp
-    @if($favicon)
-        <link rel="icon" href="{{ asset('storage/'.$favicon) }}" type="image/x-icon"/>
-    @else
-        <link rel="icon" href="{{ asset('backend/assets/images/favicon-32x32.png') }}" type="image/x-icon"/>
+    @if(file_exists($faviconPath))
+        <link rel="icon" href="{{ $faviconPath }}" type="image/x-icon"/>
     @endif
-    <style>
 
+    <style>
         /* Mengatur Margin Halaman secara Dinamis dari Database */
         @page {
             margin-top: {{ $school['margin_top'] ?? '2cm' }};
             margin-right: {{ $school['margin_right'] ?? '2cm' }};
-            /* PENTING: Set margin-bottom lebih besar dari 1.5cm agar ada ruang untuk footer. */
-            /* Kita set menjadi 3cm untuk margin yang aman. */
+            /* Margin bottom untuk ruang footer */
             margin-bottom: 3cm; 
             margin-left: {{ $school['margin_left'] ?? '2cm' }};
         }
@@ -26,22 +26,22 @@
 
         /* Layout Kop Surat menggunakan Tabel agar rapi di PDF */
         .header-table { width: 100%; border-bottom: 3px double #333; margin-bottom: 20px; padding-bottom: 10px; }
-        .header-table td { vertical-align: middle; }
+        .header-table td { vertical-align: top; }
 
         /* Logo harus menggunakan public_path agar terbaca oleh DOMPDF */
-        .logo-img { width: 80px; height: auto; }
+        .logo-img { width: 80px; height: auto; object-fit: contain; }
 
-        .school-info { text-align: center; }
-        .school-info h1 { margin: 0; font-size: 20px; text-transform: uppercase; font-weight: bold; }
+        .school-info { text-align: center; padding: 0 10px; }
+        .school-info h1 { margin: 0; font-size: 18px; text-transform: uppercase; font-weight: bold; }
         .school-info p { margin: 2px 0; font-size: 11px; }
 
         /* Tabel Data */
         table.data { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table.data th, table.data td { border: 1px solid #333; padding: 6px; text-align: left; }
+        table.data th, table.data td { border: 1px solid #333; padding: 5px; text-align: left; }
         table.data th { background-color: #eee; text-align: center; font-weight: bold; }
 
         .text-center { text-align: center; }
-        .badge { padding: 2px 5px; border-radius: 3px; color: white; font-size: 10px; text-transform: uppercase; }
+        .badge { padding: 2px 5px; border-radius: 3px; color: white; font-size: 10px; text-transform: uppercase; display: inline-block; min-width: 50px; text-align: center; }
         .bg-hadir { background-color: green; }
         .bg-terlambat { background-color: orange; color: black; }
         .bg-izin { background-color: blue; }
@@ -57,17 +57,12 @@
         /* CSS FOOTER PERMANEN */
         .footer-print {
             position: fixed;
-            /* PENTING: Pindahkan posisi footer ke atas (misalnya, 50px dari tepi bawah fisik halaman) */
-            /* -50px dari tepi bawah fisik halaman (margin 0). */
-            /* Ini akan menempatkannya di area margin-bottom 3cm yang kita set. */
             bottom: -50px; 
             left: 0;
             right: 0;
             text-align: center;
             font-size: 10px;
             padding-top: 5px;
-            /* Kita gunakan border-top: 1px solid #ccc; seperti yang Anda inginkan, */
-            /* tetapi pastikan elemen ini berada di area margin. */
             border-top: 1px solid #ccc;
             width: 100%;
         }
@@ -75,47 +70,59 @@
 </head>
 <body>
 
-   <!-- KOP SURAT DINAMIS -->
+    <!-- KOP SURAT DINAMIS -->
     <table class="header-table">
         <tr>
             <!-- LOGO KIRI -->
             <td width="15%" class="text-center">
-                @if(isset($school['logo_left']) && $school['logo_left'])
-                    <img src="{{ public_path('storage/'.$school['logo_left']) }}" class="logo-img">
+                @php
+                    $logoLeft = $school['logo_left'] ?? null;
+                    $pathLeft = $logoLeft ? public_path('storage/'.$logoLeft) : null;
+                @endphp
+                
+                @if($pathLeft && file_exists($pathLeft))
+                    <img src="{{ $pathLeft }}" class="logo-img">
                 @else
-                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
+                    <!-- Placeholder kosong atau default -->
                 @endif
             </td>
 
             <!-- TEKS TENGAH (IDENTITAS SEKOLAH) -->
             <td width="70%" class="school-info">
-                <h1>{{ $school['name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</h1>
-                <p>{{ $school['address'] ?? 'Alamat sekolah belum diatur di menu pengaturan.' }}</p>
-                <p>Telp: {{ $school['phone'] ?? '-' }} | Email: {{ $school['email'] ?? '-' }}</p>
-                <p>Website: {{ $school['web'] ?? '-' }}</p>
+                <h1>{{ $school['school_name'] ?? 'NAMA SEKOLAH BELUM DISET' }}</h1>
+                <p>{{ $school['school_address'] ?? 'Alamat sekolah belum diatur di menu pengaturan.' }}</p>
+                <p>
+                    @if(isset($school['school_phone'])) Telp: {{ $school['school_phone'] }} @endif
+                    @if(isset($school['school_phone']) && isset($school['school_email'])) | @endif
+                    @if(isset($school['school_email'])) Email: {{ $school['school_email'] }} @endif
+                </p>
+                <p>{{ $school['school_web'] ?? '' }}</p>
             </td>
 
             <!-- LOGO KANAN -->
             <td width="15%" class="text-center">
-                @if(isset($school['logo_right']) && $school['logo_right'])
-                    <img src="{{ public_path('storage/'.$school['logo_right']) }}" class="logo-img">
-                @else
-                    <img src="{{ asset('upload/no_image.jpg')}}" class="logo-img">
+                @php
+                    $logoRight = $school['logo_right'] ?? null;
+                    $pathRight = $logoRight ? public_path('storage/'.$logoRight) : null;
+                @endphp
+
+                @if($pathRight && file_exists($pathRight))
+                    <img src="{{ $pathRight }}" class="logo-img">
                 @endif
             </td>
         </tr>
     </table>
 
     <!-- JUDUL LAPORAN -->
-    <h3 class="text-center" style="text-transform: uppercase;">LAPORAN DATANG & PULANG SISWA</h3>
+    <h3 class="text-center" style="text-transform: uppercase; margin-bottom: 5px;">LAPORAN DATANG & PULANG SISWA</h3>
 
-    <h4 class="text-center" style="margin-top: 0; font-weight: normal;">
+    <h4 class="text-center" style="margin-top: 0; font-weight: normal; font-size: 12px;">
         {{ $labelPeriode ?? 'Periode Laporan' }}
     </h4>
 
     <!-- SUB-JUDUL (Misal: Filter per Kelas/Siswa) -->
     @if(isset($labelTambahan))
-        <h5 class="text-center" style="margin-top: 5px; font-weight: bold; text-decoration: underline;">
+        <h5 class="text-center" style="margin-top: 5px; font-weight: bold; text-decoration: underline; font-size: 12px;">
             {{ $labelTambahan }}
         </h5>
     @endif
@@ -147,22 +154,22 @@
                 <!-- Mengambil nama kelas via relasi -->
                 <td>{{ $row->student->classroom->name ?? '-' }}</td>
 
-
                 <td class="text-center">
                     @php
                         $statusClass = 'bg-alpa';
-                        if($row->status == 'hadir') $statusClass = 'bg-hadir';
-                        elseif($row->status == 'terlambat') $statusClass = 'bg-terlambat';
-                        elseif($row->status == 'izin') $statusClass = 'bg-izin';
-                        elseif($row->status == 'sakit') $statusClass = 'bg-sakit';
+                        $statusText = ucfirst($row->status);
+                        if($row->status == 'hadir') { $statusClass = 'bg-hadir'; }
+                        elseif($row->status == 'terlambat') { $statusClass = 'bg-terlambat'; }
+                        elseif($row->status == 'izin') { $statusClass = 'bg-izin'; }
+                        elseif($row->status == 'sakit') { $statusClass = 'bg-sakit'; }
                     @endphp
-                    <span class="badge {{ $statusClass }}">{{ ucfirst($row->status) }}</span>
+                    <span class="badge {{ $statusClass }}">{{ $statusText }}</span>
                 </td>
             </tr>
             @empty
             <tr>
                 <td colspan="8" class="text-center" style="padding: 20px;">
-                    Tidak ada data absensi yang ditemukan pada periode ini.
+                    <i>Tidak ada data absensi yang ditemukan pada periode ini.</i>
                 </td>
             </tr>
             @endforelse
@@ -175,47 +182,46 @@
             <tr>
                 <td width="60%"></td> <!-- Spacer Kosong di Kiri -->
                 <td width="40%" class="text-center">
-                    <p>{{ $school['sign_city'] ?? 'Jakarta' }}, {{ date('d F Y') }}</p>
-                    @if($id == 'guru')
-                    <p>Guru Mata Pelajaran,</p>
-                    <br><br><br>
-                     <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">
-                        {{ Auth::user()->name ?? '.........................' }}
-                    </p>
-                    <p>NIP. {{ Auth::user()->teacher->nip ?? '-' }}</p>
+                    <p>{{ $school['signature_city'] ?? 'Jakarta' }}, {{ date('d F Y') }}</p>
+                    
+                    @if(isset($id) && $id == 'guru')
+                        <p>Guru Mata Pelajaran,</p>
+                        <br><br><br>
+                        <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">
+                            {{ Auth::user()->name ?? '.........................' }}
+                        </p>
+                        <p>NIP. {{ Auth::user()->teacher->nip ?? '-' }}</p>
 
                     @else
-                    <p>{{ $school['sign_title'] ?? 'Admin' }},</p>
+                        <p>{{ $school['signature_title'] ?? 'Kepala Sekolah' }},</p>
 
-                    <br><br><br>
-                    <!-- <p style="text-decoration: underline; font-weight: bold;">
-                        {{ $school['sign_name'] ?? '.........................' }}
-                    </p>
-                    <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p> -->
+                        <!-- LOGIC GAMBAR TANDA TANGAN -->
+                        @php
+                            $signImage = $school['signature_image'] ?? null;
+                            $pathSign = $signImage ? public_path('storage/'.$signImage) : null;
+                        @endphp
 
-                    <!-- LOGIC GAMBAR TANDA TANGAN -->
-                    @if(isset($school['sign_image']) && $school['sign_image'])
-                        <div style="height: 70px; display: flex; align-items: center; justify-content: center;">
-                            <img src="{{ public_path('storage/'.$school['sign_image']) }}" style="height: 70px; max-width: 100%;">
-                        </div>
-                    @else
-                        <br> <!-- Spasi untuk TTD Basah -->
-                    @endif
+                        @if($pathSign && file_exists($pathSign))
+                            <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
+                                <img src="{{ $pathSign }}" style="height: 70px; max-width: 100%; object-fit: contain;">
+                            </div>
+                        @else
+                            <br><br><br> <!-- Spasi untuk TTD Basah -->
+                        @endif
 
-                    <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">
-                        {{ $school['sign_name'] ?? '.........................' }}
-                    </p>
-                    <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p>
+                        <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">
+                            {{ $school['signature_name'] ?? '.........................' }}
+                        </p>
+                        <p>NIP. {{ $school['signature_nip'] ?? '-' }}</p>
                     @endif
                 </td>
             </tr>
         </table>
     </div>
+
     <!-- FOOTER TAMBAHAN -->
-       
     <div class="footer-print">
         <small>
-            {{-- Catatan: Panggilan Model di view membebani, tapi akan saya biarkan jika Anda membutuhkannya. --}}
             <strong>{{ \App\Models\Setting::value('app_name', 'GATECH') }}</strong> 
             &bull; 
             {{ \App\Models\Setting::value('school_name', 'GATECH') }} 
@@ -236,7 +242,7 @@
             // Hitung posisi Y (sekitar 30px dari bawah)
             $y = $pdf->get_height() - 30;
             
-            
+            $pdf->page_text($x, $y, $text, $font, $size);
         }
     </script>
 

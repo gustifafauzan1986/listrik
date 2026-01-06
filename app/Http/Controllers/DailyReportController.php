@@ -195,7 +195,8 @@ class DailyReportController extends Controller
         $startDate = null;
         $endDate = null;
         $labelPeriode = "";
-        $id = Auth::user()->id;
+        $id = Auth::user()->jenis_user;
+        $school = $this->getSchoolData();
 
         // LOGIKA PENENTUAN TANGGAL
         switch ($request->periode) {
@@ -284,7 +285,8 @@ class DailyReportController extends Controller
             return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
         }
         // ==========================================
-        $school = get_school_data();
+         
+        // $school = get_school_data();
         // GENERATE PDF
         $pdf = Pdf::loadView('daily_attendance.reports.pdf_view', compact(
             'attendances',
@@ -370,6 +372,7 @@ class DailyReportController extends Controller
             'sign_title' => Setting::value('signature_title', 'Kepala Sekolah'),
             'sign_name'  => Setting::value('signature_name', 'Administrator'),
             'sign_nip'   => Setting::value('signature_nip', '-'),
+            'sign_image'  => Setting::value('signature_image', '-'),
         ];
     }
 }
