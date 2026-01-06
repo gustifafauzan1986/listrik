@@ -144,11 +144,21 @@
         <small>dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }}</small>
     </div>
     
-    <script type="text/php">
+<script type="text/php">
         if (isset($pdf)) {
-            $text = "Hal {PAGE_NUM} dari {PAGE_COUNT}";
-            $font = $fontMetrics->getFont("Helvetica");
-            $pdf->page_text($pdf->get_width()/2 - 20, $pdf->get_height() - 30, $text, $font, 9);
+            $text = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
+            $size = 9;
+            $font = $fontMetrics->getFont("Helvetica", "italic");
+            $width = $fontMetrics->get_text_width($text, $font, $size);
+            $color = array(0.5, 0.5, 0.5); // Warna Abu-abu
+            
+            // Hitung posisi X agar mepet kanan (Lebar Halaman - Lebar Teks - Margin Kanan 30pt)
+            $x = $pdf->get_width() - $width - 30;
+            
+            // Hitung posisi Y (sekitar 30px dari bawah)
+            $y = $pdf->get_height() - 30;
+            
+            $pdf->page_text($x, $y, $text, $font, $size, $color);
         }
     </script>
 </body>
