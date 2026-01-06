@@ -126,7 +126,7 @@
                         <!-- TANDA TANGAN (Sudah Base64 dari Controller) -->
                         @if(!empty($school['sign_image']))
                             <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
-                                <img src="{{ $school['sign_image'] }}" style="height: 100px; max-width: 100%; object-fit: contain;">
+                                <img src="{{ $school['sign_image'] }}" style="height: 120px; max-width: 100%; object-fit: contain;">
                             </div>
                         @else
                             <br><br><br>
