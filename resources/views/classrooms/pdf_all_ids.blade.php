@@ -21,30 +21,30 @@
         }
 
         .card-container {
-    width: 8cm;
-    height: 4cm;
-    
+    width: 8.5cm;
+    height: 3.4cm;
+
     /* Layout */
     display: inline-block;
     vertical-align: top;
     position: relative;
-    
+
     /* --- GAYA GARIS MENARIK --- */
     /* Garis pinggir tipis abu-abu */
-    border: 1px solid #e0e0e0; 
-    
+    border: 1px solid #e0e0e0;
+
     /* Garis Atas Tebal (Warna Utama/Biru) */
-    border-top: 6px solid #1a73e8; 
-    
+    border-top: 6px solid #1a73e8;
+
     /* Garis Bawah Sedang (Hitam/Gelap) */
-    border-bottom: 3px solid #333; 
-    
+    border-bottom: 3px solid #333;
+
     /* Sudut sedikit melengkung */
-    border-radius: 8px; 
-    
+    border-radius: 8px;
+
     /* Agar garis tebal tidak mengubah ukuran total 9cm */
-    box-sizing: border-box; 
-    
+    box-sizing: border-box;
+
     /* Spasi */
     margin-right: 0.2cm;
     margin-bottom: 0.5cm;

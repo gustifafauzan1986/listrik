@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\DailyAttendance;
+use App\Models\Attendance;
+use App\Models\Schedule;
+use App\Models\Teacher;
 use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Classroom;
@@ -13,6 +16,7 @@ use App\Jobs\SendWhatsappJob; // Queue Job untuk WA
 use App\Models\AttendanceSetting; // Jangan lupa import model ini
 use Illuminate\Support\Facades\DB; // Tambahkan import DB
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class DailyAttendanceController extends Controller
 {
@@ -144,7 +148,7 @@ class DailyAttendanceController extends Controller
         $existingAttendances = DailyAttendance::whereDate('created_at', Carbon::today())
                                 ->pluck('status', 'student_id')
                                 ->toArray();
-        
+
         // Ambil ID siswa yang SUDAH absen gerbang hari ini
         $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
                             ->whereIn('student_id', $students->pluck('id'))
@@ -154,15 +158,15 @@ class DailyAttendanceController extends Controller
 
         $totalSiswa = $students->count();
         $totalHadirGerbang = count($idsHadirGerbang);
-        
+
         // Hitung Persentase
         $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
-        
+
         // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
         $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
-        return view('daily_attendance.create', compact( 
-            'students', 
-            'gatePercentage',      
+        return view('daily_attendance.create', compact(
+            'students',
+            'gatePercentage',
             'studentsMissingGate',
             'existingAttendances'
         ));
@@ -204,7 +208,7 @@ class DailyAttendanceController extends Controller
     //     return redirect()->route('daily.index')->with('success', 'Data absensi harian berhasil disimpan secara manual.');
     // }
 
-   
+
 
     /**
      * Helper Private: Kirim Pesan WA via Queue
@@ -428,7 +432,7 @@ class DailyAttendanceController extends Controller
     /**
      * Menampilkan laporan absensi dengan filter lengkap.
      */
-    
+
 
     public function laporan(Request $request)
     {
@@ -540,11 +544,11 @@ class DailyAttendanceController extends Controller
     //             $count++;
     //         }
     //     }
-        
+
     //     // // 2. Lakukan loop, gunakan $studentId sebagai key dan $status sebagai value
     //     // foreach ($attendancesData as $studentId => $status) {
     //     //     // PENTING: $studentId yang kita ambil dari key array adalah nilai non-null yang dicari
-            
+
     //     //     // Asumsi data ini adalah data absensi mapel (bukan gerbang)
     //     //     $recordsToInsert[] = [
     //     //         'id' => \Illuminate\Support\Str::uuid(), // Jika Anda menggunakan UUID
@@ -558,7 +562,7 @@ class DailyAttendanceController extends Controller
     //     //         // ... pastikan semua kolom NOT NULL lainnya (kecuali ID) juga terisi.
     //     //     ];
     //     // }
-        
+
     //     // // 3. Lakukan Mass Insert (lebih efisien) atau loop dan save
     //     // \Illuminate\Support\Facades\DB::table('daily_attendances')->insert($recordsToInsert);
 
@@ -569,16 +573,16 @@ class DailyAttendanceController extends Controller
     {
         // 1. Validasi Data (PENTING, agar tidak terjadi error SQL lagi)
         $request->validate([
-            'attendances' => 'required|array|min:1', 
+            'attendances' => 'required|array|min:1',
             'attendances.*' => 'required|string|in:hadir,terlambat,sakit,izin,alpa',
             // Tambahkan validasi untuk schedule_id jika ini Absensi Mapel
-            // 'schedule_id' => 'required|uuid|exists:schedules,id', 
+            // 'schedule_id' => 'required|uuid|exists:schedules,id',
         ], [
             'attendances.required' => 'Minimal satu siswa harus dipilih status kehadirannya.',
             'attendances.*.required' => 'Status kehadiran untuk setiap siswa wajib diisi.',
             // 'schedule_id.required' => 'ID Jadwal harus disediakan untuk absensi mapel.'
         ]);
-        
+
         // 2. Persiapan Variabel
         $attendancesData = $request->input('attendances');
         $user = Auth::user();
@@ -588,25 +592,25 @@ class DailyAttendanceController extends Controller
 
         $insertedCount = 0;
         $updatedCount = 0;
-        
+
         // Asumsi: Semua absensi manual dicatat oleh user yang sedang login
         $recordedBy = $user->name . ' (Manual)';
 
         // 3. Loop dan Lakukan Update/Insert
         foreach ($attendancesData as $studentId => $newStatus) {
-            
+
             // --- KRITERIA PENCARIAN (MATCHING) ---
             // Cari baris berdasarkan ID Siswa, Tanggal, dan Jadwal (jika ini absensi mapel)
             $matchConditions = [
                 'student_id' => $studentId,
                 'date' => $todayDate,
                 // Kunci unik untuk membedakan absensi mapel satu dengan yang lain
-                // 'schedule_id' => $scheduleId, 
+                // 'schedule_id' => $scheduleId,
             ];
 
             // --- DATA YANG AKAN DI-UPDATE/INSERT ---
             $updateData = [
-                'status' => $newStatus, 
+                'status' => $newStatus,
                 'arrival_time' => $currentTimestamp->toTimeString(), // Asumsi set waktu datang saat absen manual
                 'recorded_by' => $recordedBy,
             ];
@@ -623,10 +627,10 @@ class DailyAttendanceController extends Controller
                 // Jika status sama, diabaikan (skip)
             } else {
                 // DATA BELUM ADA (INSERT)
-                
+
                 // Gabungkan kriteria pencarian dan data update, tambahkan ID
                 $createData = array_merge($matchConditions, $updateData, [
-                    'id' => Str::uuid(), 
+                    'id' => Str::uuid(),
                     // created_at dan updated_at akan otomatis diisi jika model menggunakan timestamps
                 ]);
 
@@ -634,13 +638,13 @@ class DailyAttendanceController extends Controller
                 $insertedCount++;
             }
         }
-        
+
         // 4. Return Hasil
         return redirect()->route('daily.create')->with('success', "Absensi Mapel berhasil disimpan! ($insertedCount Ditambahkan, $updatedCount Diperbarui).");
     }
 
 
-    
+
     /**
      * FITUR BARU: Simpan Absensi Gerbang Massal (Bantuan Guru)
      * Digunakan jika scanner rusak atau antrian panjang, guru bisa mem-bypass.
@@ -680,7 +684,7 @@ class DailyAttendanceController extends Controller
             }
         }
 
-        
+
 
         return redirect()->back()->with('success', "Berhasil menambahkan absensi gerbang manual untuk $count siswa.");
     }
@@ -696,7 +700,7 @@ class DailyAttendanceController extends Controller
 
         // 1. Cari Jadwal
         $query = Schedule::with(['classroom', 'subject'])->where('id', $schedule_id);
-        
+
         if ($user->jenis_user !== 'admin') {
             $query->where('teacher_id', $teacher->id);
         }
@@ -716,7 +720,7 @@ class DailyAttendanceController extends Controller
 
         // --- FITUR BARU: CEK PERSENTASE KEHADIRAN GERBANG (BANTUAN GURU) ---
         $today = Carbon::today()->format('Y-m-d');
-        
+
         // Ambil ID siswa yang SUDAH absen gerbang hari ini
         $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
                             ->whereIn('student_id', $students->pluck('id'))
@@ -726,23 +730,23 @@ class DailyAttendanceController extends Controller
 
         $totalSiswa = $students->count();
         $totalHadirGerbang = count($idsHadirGerbang);
-        
+
         // Hitung Persentase
         $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
-        
+
         // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
         $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
 
         return view('attendance.manual', compact(
-            'schedule', 
-            'students', 
+            'schedule',
+            'students',
             'existingAttendances',
-            'gatePercentage',      
+            'gatePercentage',
             'studentsMissingGate'
         ));
     }
 
-    
+
 
 
 }
