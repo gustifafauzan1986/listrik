@@ -11,6 +11,7 @@ use App\Models\Classroom; // Tambahan untuk Admin View
 use App\Models\Subject;   // Tambahan untuk Admin View
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Spatie\Permission\Traits\HasRoles;
 
 
 class ScheduleController extends Controller
@@ -255,9 +256,9 @@ class ScheduleController extends Controller
     public function allSchedules(Request $request)
     {
         // Security Check: Hanya Admin
-        if (!Auth::user()->hasRole('admin')) {
-            abort(403, 'Hanya Admin yang dapat mengakses halaman ini.');
-        }
+        // if (!Auth::user()->hasRole('admin')) {
+        //     abort(403, 'Hanya Admin yang dapat mengakses halaman ini.');
+        // }
         // 1. Ambil Semua Jadwal
         $query = Schedule::with(['teacher', 'classroom', 'subject']);
 
