@@ -18,7 +18,7 @@
                         </small>
                     </div>
                     <div>
-                        <!-- TOMBOL ISI JURNAL -->
+                        <!-- TOMBOL ISI JURNAL (BARU) -->
                         <button type="button" class="btn btn-warning me-2 fw-bold text-dark" onclick="openJournalModal()">
                             <i class="fas fa-book-reader me-1"></i> Isi Jurnal
                         </button>
@@ -91,17 +91,7 @@
                                     <tbody>
                                         @forelse($students as $index => $student)
                                             @php
-                                                // Ambil data status dan recorded_by dari array existingAttendances
-                                                $attendanceData = $existingAttendances[$student->id] ?? null;
-
-                                                // Handling format data (Array vs String)
-                                                if (is_array($attendanceData)) {
-                                                    $dbStatus = $attendanceData['status'] ?? null;
-                                                    $recordedBy = $attendanceData['recorded_by'] ?? null;
-                                                } else {
-                                                    $dbStatus = $attendanceData; // Fallback jika controller mengirim string saja
-                                                    $recordedBy = null;
-                                                }
+                                                $dbStatus = $existingAttendances[$student->id] ?? null;
 
                                                 $checked = '';
                                                 if ($dbStatus == 'present' || $dbStatus == 'hadir') $checked = 'hadir';
@@ -111,29 +101,14 @@
                                                 elseif ($dbStatus == 'alpha' || $dbStatus == 'alpa') $checked = 'alpa';
 
                                                 $isMissingGate = isset($studentsMissingGate) ? $studentsMissingGate->contains('id', $student->id) : false;
-
-                                                // --- FITUR LOCK JIKA AUTO SCAN ---
-                                                // Kunci jika recorded_by adalah face_scan atau barcode_scan
-                                                $isAutoScan = ($recordedBy == 'face_scan' || $recordedBy == 'barcode_scan');
-                                                // Disabled jika belum absen gerbang OR sudah absen otomatis
-                                                $isDisabled = $isMissingGate || $isAutoScan;
                                             @endphp
-                                            <tr class="student-row {{ $isMissingGate ? 'table-danger' : ($isAutoScan ? 'table-success' : '') }}">
+                                            <tr class="student-row {{ $isMissingGate ? 'table-danger' : '' }}">
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td class="text-center font-monospace student-nis">{{ $student->nis }}</td>
                                                 <td class="fw-bold student-name">
                                                     {{ $student->name }}
-
                                                     @if($isMissingGate)
-                                                        <span class="badge bg-danger ms-2" title="Belum Scan Gerbang"><i class="fas fa-times-circle"></i> Belum Masuk</span>
-                                                    @endif
-
-                                                    @if($isAutoScan)
-                                                        @if($recordedBy == 'face_scan')
-                                                            <span class="badge bg-success ms-2"><i class="fas fa-smile"></i> Auto (Wajah)</span>
-                                                        @else
-                                                            <span class="badge bg-primary ms-2"><i class="fas fa-qrcode"></i> Auto (Barcode)</span>
-                                                        @endif
+                                                        <span class="badge bg-danger ms-2" title="Belum Scan Gerbang">Belum Masuk</span>
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
@@ -143,32 +118,21 @@
                                                         </div>
                                                     @else
                                                         <div class="btn-group w-100" role="group">
-
-                                                            <!-- Jika Locked (Auto Scan), tambahkan hidden input agar value tetap terkirim -->
-                                                            @if($isAutoScan)
-                                                                <input type="hidden" name="attendances[{{ $student->id }}]" value="{{ $checked }}">
-                                                            @endif
-
-                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="h_{{ $student->id }}" value="hadir" {{ $checked == 'hadir' ? 'checked' : '' }} {{ $isDisabled ? 'disabled' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="h_{{ $student->id }}" value="hadir" {{ $checked == 'hadir' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-success btn-sm" for="h_{{ $student->id }}">Hadir</label>
 
-                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="t_{{ $student->id }}" value="terlambat" {{ $checked == 'terlambat' ? 'checked' : '' }} {{ $isDisabled ? 'disabled' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="t_{{ $student->id }}" value="terlambat" {{ $checked == 'terlambat' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-warning btn-sm text-dark" for="t_{{ $student->id }}">Telat</label>
 
-                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="s_{{ $student->id }}" value="sakit" {{ $checked == 'sakit' ? 'checked' : '' }} {{ $isDisabled ? 'disabled' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="s_{{ $student->id }}" value="sakit" {{ $checked == 'sakit' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-info btn-sm" for="s_{{ $student->id }}">Sakit</label>
 
-                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="i_{{ $student->id }}" value="izin" {{ $checked == 'izin' ? 'checked' : '' }} {{ $isDisabled ? 'disabled' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="i_{{ $student->id }}" value="izin" {{ $checked == 'izin' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-primary btn-sm" for="i_{{ $student->id }}">Izin</label>
 
-                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="a_{{ $student->id }}" value="alpa" {{ $checked == 'alpa' ? 'checked' : '' }} {{ $isDisabled ? 'disabled' : '' }}>
+                                                            <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="a_{{ $student->id }}" value="alpa" {{ $checked == 'alpa' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-danger btn-sm" for="a_{{ $student->id }}">Alpa</label>
                                                         </div>
-                                                        @if($isAutoScan)
-                                                            <div class="mt-1 text-muted" style="font-size: 0.75rem;">
-                                                                <i class="fas fa-lock"></i> Terkunci oleh sistem
-                                                            </div>
-                                                        @endif
                                                     @endif
                                                 </td>
                                             </tr>
@@ -251,7 +215,7 @@
     </div>
     @endif
 
-    <!-- 4. MODAL JURNAL PEMBELAJARAN -->
+    <!-- 4. MODAL JURNAL PEMBELAJARAN (BARU) -->
     <div class="modal fade" id="journalModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -306,7 +270,6 @@
         function setAllStatus(value) {
             let radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
             radios.forEach(radio => {
-                // Hanya check jika radio tidak disabled dan barisnya terlihat
                 if(!radio.disabled && radio.closest('tr').style.display !== 'none') {
                     radio.checked = true;
                 }
@@ -330,7 +293,7 @@
             });
         });
 
-        // --- SCRIPT JURNAL PEMBELAJARAN ---
+        // --- SCRIPT JURNAL PEMBELAJARAN (BARU) ---
         function openJournalModal() {
             // Reset form sebelum dibuka
             $('#journalForm')[0].reset();
@@ -384,12 +347,7 @@
                     }
                 },
                 error: function(xhr) {
-                    // Coba ambil pesan error dari response JSON jika ada
-                    let msg = 'Terjadi kesalahan saat menyimpan jurnal.';
-                    if(xhr.responseJSON && xhr.responseJSON.message) {
-                        msg = xhr.responseJSON.message;
-                    }
-                    Swal.fire('Error', msg, 'error');
+                    Swal.fire('Error', 'Terjadi kesalahan saat menyimpan jurnal.', 'error');
                 }
             });
         }
