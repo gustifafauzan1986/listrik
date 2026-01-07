@@ -6,32 +6,25 @@
     <div class="page-content">
         <div class="row justify-content-center">
             <div class="col-md-12">
-
+                
                 <!-- Header -->
                 <div class="mb-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h4 class="mb-1 fw-bold text-primary">Absensi Manual</h4>
                         <small class="text-muted fw-bold">
-                            <i class="fas fa-book-open me-1"></i> {{ $schedule->subject->name }}
-                            <span class="mx-2">|</span>
+                            <i class="fas fa-book-open me-1"></i> {{ $schedule->subject->name }} 
+                            <span class="mx-2">|</span> 
                             <i class="fas fa-door-open me-1"></i> {{ $schedule->classroom->name }}
                         </small>
                     </div>
-                    <div>
-                        <!-- TOMBOL ISI JURNAL (BARU) -->
-                        <button type="button" class="btn btn-warning me-2 fw-bold text-dark" onclick="openJournalModal()">
-                            <i class="fas fa-book-reader me-1"></i> Isi Jurnal
-                        </button>
-
-                        <a href="{{ route('schedule.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i> Kembali
-                        </a>
-                    </div>
+                    <a href="{{ route('schedule.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali
+                    </a>
                 </div>
 
-                <!-- 1. ALERT & FITUR BANTUAN ABSEN GERBANG -->
+                <!-- 1. ALERT & FITUR BANTUAN ABSEN GERBANG (FITUR BARU) -->
                 @if(isset($gatePercentage) && $gatePercentage < 50)
-                    <div class="shadow-sm alert alert-danger border-left-danger d-flex align-items-center justify-content-between">
+                    <div class="alert alert-danger shadow-sm border-left-danger d-flex align-items-center justify-content-between">
                         <div>
                             <h5 class="alert-heading fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> PERHATIAN!</h5>
                             <p class="mb-0 small">
@@ -39,13 +32,13 @@
                                 <br>Siswa yang belum scan gerbang <strong>tidak dapat</strong> diabsen di mapel ini.
                             </p>
                         </div>
-                        <button type="button" class="shadow-sm btn btn-light text-danger fw-bold" data-bs-toggle="modal" data-bs-target="#bulkGateModal">
+                        <button type="button" class="btn btn-light text-danger fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkGateModal">
                             <i class="fas fa-magic me-1"></i> Bantuan: Absen Gerbang Otomatis
                         </button>
                     </div>
                 @elseif(isset($gatePercentage))
-                    <div class="mb-4 alert alert-info small">
-                        <i class="fas fa-check-circle me-1"></i>
+                    <div class="alert alert-info small mb-4">
+                        <i class="fas fa-check-circle me-1"></i> 
                         <strong>Status Gerbang Aman:</strong> {{ round($gatePercentage) }}% siswa sudah scan masuk.
                     </div>
                 @endif
@@ -56,8 +49,8 @@
                         <form action="{{ route('attendance.storeManual', $schedule->id) }}" method="POST">
                             @csrf
 
-                            <div class="mb-3 row">
-                                <!-- PENCARIAN SISWA -->
+                            <div class="row mb-3">
+                                <!-- FITUR BARU: PENCARIAN SISWA -->
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
@@ -66,7 +59,7 @@
                                 </div>
 
                                 <!-- TOMBOL QUICK CHECK -->
-                                <div class="mt-2 col-md-6 text-md-end mt-md-0">
+                                <div class="col-md-6 text-md-end mt-2 mt-md-0">
                                     <span class="me-2 fw-bold small text-muted">Set Semua Ke:</span>
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-sm btn-outline-success" onclick="setAllStatus('hadir')">Hadir</button>
@@ -80,7 +73,7 @@
 
                             <div class="table-responsive">
                                 <table class="table align-middle table-hover table-bordered">
-                                    <thead class="text-center table-light">
+                                    <thead class="table-light text-center">
                                         <tr>
                                             <th width="5%">No</th>
                                             <th width="15%">NIS</th>
@@ -92,14 +85,19 @@
                                         @forelse($students as $index => $student)
                                             @php
                                                 $dbStatus = $existingAttendances[$student->id] ?? null;
-
+                                                
                                                 $checked = '';
+                                                // Database might store 'present', 'late', etc. (English)
+                                                // or 'hadir', 'terlambat', etc. (Indonesian) depending on your DB
+                                                // Adjust these checks based on what is actually in your DB
                                                 if ($dbStatus == 'present' || $dbStatus == 'hadir') $checked = 'hadir';
                                                 elseif ($dbStatus == 'late' || $dbStatus == 'terlambat') $checked = 'terlambat';
                                                 elseif ($dbStatus == 'permission' || $dbStatus == 'izin') $checked = 'izin';
                                                 elseif ($dbStatus == 'sick' || $dbStatus == 'sakit') $checked = 'sakit';
                                                 elseif ($dbStatus == 'alpha' || $dbStatus == 'alpa') $checked = 'alpa';
 
+                                                // Cek apakah siswa ini ada di list Missing Gate?
+                                                // (Perlu isset check karena studentsMissingGate mungkin tidak dikirim jika gatePercentage >= 50)
                                                 $isMissingGate = isset($studentsMissingGate) ? $studentsMissingGate->contains('id', $student->id) : false;
                                             @endphp
                                             <tr class="student-row {{ $isMissingGate ? 'table-danger' : '' }}">
@@ -118,6 +116,7 @@
                                                         </div>
                                                     @else
                                                         <div class="btn-group w-100" role="group">
+                                                            <!-- Radio Buttons -->
                                                             <input type="radio" class="btn-check" name="attendances[{{ $student->id }}]" id="h_{{ $student->id }}" value="hadir" {{ $checked == 'hadir' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-success btn-sm" for="h_{{ $student->id }}">Hadir</label>
 
@@ -143,8 +142,8 @@
                                 </table>
                             </div>
 
-                            <div class="gap-2 mt-4 d-grid">
-                                <button type="submit" class="shadow-sm btn btn-primary btn-lg">
+                            <div class="mt-4 d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg shadow-sm">
                                     <i class="fas fa-save me-2"></i> Simpan Data Absensi Mapel
                                 </button>
                             </div>
@@ -156,24 +155,24 @@
         </div>
     </div>
 
-    <!-- 3. MODAL BANTUAN ABSENSI GERBANG -->
+    <!-- 3. MODAL BANTUAN ABSENSI GERBANG (POPUP) -->
     @if(isset($studentsMissingGate) && $studentsMissingGate->count() > 0)
     <div class="modal fade" id="bulkGateModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="text-white modal-header bg-danger">
+                <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title fw-bold"><i class="fas fa-magic me-2"></i> Bantuan Absensi Gerbang</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('daily.store_bulk') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="border alert alert-light">
-                            <p class="mb-0 small">Fitur ini digunakan jika terjadi kendala pada scanner gerbang (misal mati listrik/rusak). Guru dapat mengabsenkan massal sebagai <strong>"Hadir"</strong> di gerbang.</p>
+                        <div class="alert alert-light border">
+                            <p class="mb-0 small">Fitur ini digunakan jika terjadi kendala pada scanner gerbang (misal mati listrik/rusak) sehingga banyak siswa belum tercatat masuk. Guru dapat mengabsenkan mereka secara massal sebagai <strong>"Hadir"</strong> di gerbang.</p>
                         </div>
-
-                        <p class="mb-2 fw-bold">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
-
+                        
+                        <p class="fw-bold mb-2">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
+                        
                         <div class="table-responsive" style="max-height: 300px; overflow-y:auto;">
                             <table class="table table-sm table-bordered">
                                 <thead class="table-light">
@@ -199,7 +198,7 @@
 
                         <div class="mt-3">
                             <label class="fw-bold small">Set Status Gerbang Sebagai:</label>
-                            <select name="status" class="w-auto form-select d-inline-block ms-2">
+                            <select name="status" class="form-select w-auto d-inline-block ms-2">
                                 <option value="hadir" selected>Hadir (Tepat Waktu)</option>
                                 <option value="terlambat">Terlambat</option>
                             </select>
@@ -213,48 +212,9 @@
             </div>
         </div>
     </div>
-    @endif
 
-    <!-- 4. MODAL JURNAL PEMBELAJARAN (BARU) -->
-    <div class="modal fade" id="journalModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-book-reader me-2"></i> Jurnal Pembelajaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="journalForm">
-                        @csrf
-                        <!-- ID Jadwal (Hidden) -->
-                        <input type="hidden" name="schedule_id" value="{{ $schedule->id }}">
-
-                        <div class="mb-3">
-                            <label for="j_topic" class="form-label fw-bold">Materi / Topik Pembelajaran</label>
-                            <input type="text" class="form-control" id="j_topic" name="topic" placeholder="Contoh: Instalasi Listrik Dasar" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="j_activity" class="form-label fw-bold">Aktivitas Pembelajaran</label>
-                            <textarea class="form-control" id="j_activity" name="activity" rows="3" placeholder="Contoh: Praktikum, Diskusi Kelompok..."></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="j_notes" class="form-label fw-bold">Catatan Tambahan (Opsional)</label>
-                            <textarea class="form-control" id="j_notes" name="notes" rows="2" placeholder="Catatan khusus tentang siswa atau kendala..."></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-primary" onclick="saveJournal()">Simpan Jurnal</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @if(isset($studentsMissingGate) && $studentsMissingGate->count() > 0)
     <script>
+        // Script Check All di Modal
         document.getElementById('checkAll')?.addEventListener('change', function() {
             let checkboxes = document.querySelectorAll('.student-check');
             checkboxes.forEach(cb => cb.checked = this.checked);
@@ -262,21 +222,19 @@
     </script>
     @endif
 
-     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
      <script>
         // SCRIPT QUICK CHECK STATUS
         function setAllStatus(value) {
             let radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
             radios.forEach(radio => {
+                // Hanya centang jika baris visible (tidak difilter) dan tidak disabled
                 if(!radio.disabled && radio.closest('tr').style.display !== 'none') {
                     radio.checked = true;
                 }
             });
         }
 
-        // SCRIPT PENCARIAN SISWA
+        // SCRIPT PENCARIAN SISWA (CLIENT SIDE)
         document.getElementById('searchStudent').addEventListener('keyup', function() {
             let filter = this.value.toLowerCase();
             let rows = document.querySelectorAll('.student-row');
@@ -292,78 +250,22 @@
                 }
             });
         });
+    </script>
 
-        // --- SCRIPT JURNAL PEMBELAJARAN (BARU) ---
-        function openJournalModal() {
-            // Reset form sebelum dibuka
-            $('#journalForm')[0].reset();
-
-            // Load data jurnal yang sudah ada via AJAX
-            $.ajax({
-                url: "{{ route('journal.show', $schedule->id) }}",
-                type: "GET",
-                success: function(res) {
-                    if (res.status === 'success' && res.data) {
-                        $('#j_topic').val(res.data.topic);
-                        $('#j_activity').val(res.data.activity);
-                        $('#j_notes').val(res.data.notes);
-                    }
-                    // Tampilkan Modal
-                    var myModal = new bootstrap.Modal(document.getElementById('journalModal'));
-                    myModal.show();
-                },
-                error: function() {
-                    // Jika error (misal belum ada data), tetap buka modal kosong
-                    var myModal = new bootstrap.Modal(document.getElementById('journalModal'));
-                    myModal.show();
-                }
-            });
-        }
-
-        function saveJournal() {
-            let formData = new FormData(document.getElementById('journalForm'));
-
-            $.ajax({
-                url: "{{ route('journal.store') }}",
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(res) {
-                    if (res.status === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: res.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                        // Tutup modal
-                        var modalEl = document.getElementById('journalModal');
-                        var modal = bootstrap.Modal.getInstance(modalEl);
-                        modal.hide();
-                    } else {
-                        Swal.fire('Gagal', res.message, 'error');
-                    }
-                },
-                error: function(xhr) {
-                    Swal.fire('Error', 'Terjadi kesalahan saat menyimpan jurnal.', 'error');
-                }
-            });
-        }
-
-        // Alert Session Success
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
                 text: "{{ session('success') }}",
                 showConfirmButton: false,
-                timer: 2000
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
             });
         @endif
 
-        // Alert Validation Error
+        // Opsional: Cek jika ada error validasi
         @if($errors->any())
             Swal.fire({
                 icon: 'error',

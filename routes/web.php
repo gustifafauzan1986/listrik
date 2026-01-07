@@ -36,6 +36,7 @@ use App\Http\Controllers\TranscriptController;
 use App\Http\Controllers\TeachingAssignmentController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ScannerDeviceController;
+use App\Http\Controllers\TeachingJournalController;
 
 use App\Http\Controllers\StudentPermissionController;
 use App\Http\Controllers\RecapController;
@@ -103,7 +104,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/scan-face/{schedule_id}', [FaceController::class, 'scan'])->name('scan.face');
         // Route::resource('schedule', ScheduleController::class);
         Route::prefix('guru/schedule')->name('schedule.')->group(function() {
-            Route::get('/', [ScheduleController::class, 'index'])->name('index'); 
+            Route::get('/', [ScheduleController::class, 'index'])->name('index');
             Route::get('/create', [ScheduleController::class, 'create'])->name('create');
             Route::post('/store', [ScheduleController::class, 'store'])->name('store');
             Route::get('/show/{id}', [ScheduleController::class, 'show'])->name('show');
@@ -130,7 +131,7 @@ Route::middleware(['auth'])->group(function () {
         // Route Khusus Dashboard Guru
         Route::get('/guru/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
 
-        
+
     });
     // =========================================================================
     // GROUP 1: AREA GURU & ADMIN (Operasional Harian)
@@ -175,7 +176,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/face/all-descriptors', [FaceController::class, 'getAllDescriptors'])->name('face.descriptors.all');
 
         // Route simpan absensi gerbang massal (Bantuan Guru)
-    Route::post('/daily-attendance/bulk', [DailyAttendanceController::class, 'storeBulk'])->name('daily.store_bulk');
+        Route::post('/daily-attendance/bulk', [DailyAttendanceController::class, 'storeBulk'])->name('daily.store_bulk');
+
+                // Routes Jurnal Pembelajaran
+        Route::post('/journal/store', [TeachingJournalController::class, 'store'])->name('journal.store');
+        Route::get('/journal/show/{schedule_id}', [TeachingJournalController::class, 'show'])->name('journal.show');
 
     });
 
@@ -374,7 +379,7 @@ Route::middleware(['auth'])->group(function () {
         // --- REKAPITULASI MENYELURUH (MASTER RECAP) ---
         // Pastikan RecapController sudah dibuat
         Route::prefix('rekapitulasi')->name('recap.')->group(function() {
-            Route::get('/', [RecapController::class, 'index'])->name('index'); 
+            Route::get('/', [RecapController::class, 'index'])->name('index');
             Route::get('/daily', [RecapController::class, 'dailyLog'])->name('daily');
             Route::get('/learning', [RecapController::class, 'learningLog'])->name('learning');
             Route::get('/students', [RecapController::class, 'studentsList'])->name('students');
@@ -384,12 +389,12 @@ Route::middleware(['auth'])->group(function () {
         // Menu Jadwal Semua Guru (Master Schedule)
         Route::get('/schedule/all', [ScheduleController::class, 'allSchedules'])->name('schedule.all');
         Route::post('/schedule/admin/store', [ScheduleController::class, 'storeAsAdmin'])->name('schedule.store_admin');
-        
+
         // --- PENGATURAN DATABASE (BACKUP & RESTORE) ---
         Route::get('/settings/database', [DatabaseController::class, 'index'])->name('database.index');
         Route::post('/settings/database/backup', [DatabaseController::class, 'backup'])->name('database.backup');
         Route::post('/settings/database/restore', [DatabaseController::class, 'restore'])->name('database.restore');
-        
+
         Route::get('/pm2', [Pm2Controller::class, 'index'])->name('pm2.index');
         Route::post('/pm2/start', [Pm2Controller::class, 'start'])->name('pm2.start');
         Route::post('/pm2/stop', [Pm2Controller::class, 'stop'])->name('pm2.stop');
@@ -408,6 +413,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/send', [WhatsappGatewayController::class, 'send'])->name('send');
             Route::post('/send', [WhatsappGatewayController::class, 'sendProcess'])->name('send_process');
         });
+
+
     });
 
     Route::middleware(['role:siswa'])->group(function () {
