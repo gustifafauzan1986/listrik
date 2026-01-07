@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Schedule;
 use App\Models\Attendance;
-use App\Models\Teacher; 
+use App\Models\Teacher;
 use App\Models\TeachingAssignment; // Model Mapping
 use App\Models\Classroom; // Tambahan untuk Admin View
 use App\Models\Subject;   // Tambahan untuk Admin View
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+
 
 class ScheduleController extends Controller
 {
@@ -28,7 +29,7 @@ class ScheduleController extends Controller
     public function index()
     {
         $teacher = $this->getTeacher();
-        
+
         if (!$teacher) {
             return redirect()->back()->with('error', 'Akun Anda tidak terdaftar sebagai Guru.');
         }
@@ -149,7 +150,7 @@ class ScheduleController extends Controller
     public function edit($id)
     {
         $teacher = $this->getTeacher();
-        
+
         // Pastikan jadwal milik guru yang login
         $schedule = Schedule::where('id', $id)
                     ->where('teacher_id', $teacher->id)
@@ -235,11 +236,11 @@ class ScheduleController extends Controller
     public function destroy($id)
     {
         $teacher = $this->getTeacher();
-        
+
         $schedule = Schedule::where('id', $id)
                     ->where('teacher_id', $teacher->id)
                     ->firstOrFail();
-        
+
         $schedule->delete();
 
         return redirect()->route('schedule.index')->with('success', 'Jadwal Berhasil Dihapus!');
@@ -259,7 +260,7 @@ class ScheduleController extends Controller
         }
         // 1. Ambil Semua Jadwal
         $query = Schedule::with(['teacher', 'classroom', 'subject']);
-        
+
         // Filter by Teacher (Optional)
         if ($request->filled('teacher_id')) {
             $query->where('teacher_id', $request->teacher_id);
@@ -271,7 +272,7 @@ class ScheduleController extends Controller
         // Kita butuh semua guru, dan mapping mereka untuk validasi dropdown via JS
         $teachers = Teacher::orderBy('name')->get();
         // Ambil SEMUA mapping untuk keperluan filter JS di view admin
-        $allAssignments = TeachingAssignment::with(['classroom', 'subject'])->get(); 
+        $allAssignments = TeachingAssignment::with(['classroom', 'subject'])->get();
 
         return view('schedule.all', compact('schedules', 'teachers', 'allAssignments'));
     }
@@ -308,7 +309,7 @@ class ScheduleController extends Controller
     //         ->where('start_time', '<', $request->end_time)
     //         ->where('end_time', '>', $request->start_time)
     //         ->exists();
-            
+
     //     // 2. Cek Bentrok Jadwal KELAS
     //     $classConflict = Schedule::where('classroom_id', $request->classroom_id)
     //         ->where('day', $request->day)
@@ -326,13 +327,13 @@ class ScheduleController extends Controller
             ->where('day', $request->day)
             ->where('start_time', '<', $request->end_time)
             ->where('end_time', '>', $request->start_time);
-        
+
         if ($ignoreId) {
             $queryTeacher->where('id', '!=', $ignoreId);
         }
-        
+
         $teacherConflict = $queryTeacher->exists();
-            
+
         // 2. Cek Bentrok Jadwal KELAS
         $queryClass = Schedule::where('classroom_id', $request->classroom_id)
             ->where('day', $request->day)
