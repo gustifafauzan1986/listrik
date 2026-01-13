@@ -3,13 +3,14 @@
 <head>
     <title>Surat Tugas - {{ $teacher->user->name }}</title>
     <style>
+
         @page {
-            /* Margin disesuaikan dengan contoh PDF */
-            margin-top: 2cm;
-            margin-right: 2cm;
-            margin-bottom: 2cm;
-            margin-left: 2.5cm;
+            margin-top: {{ $school['margin_top'] ?? '2.5cm' }};
+            margin-right: {{ $school['margin_right'] ?? '2.5cm' }};
+            margin-bottom: {{ $school['margin_bottom'] ?? '2.5cm' }};
+            margin-left: {{ $school['margin_left'] ?? '2.5cm' }};
         }
+
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
@@ -207,7 +208,8 @@
     <!-- TANDA TANGAN -->
     <div class="footer-section">
         <div class="ttd-box">
-            <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+            {{-- <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p> --}}
+            <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, 02 Januari 2026</p>
             <p>{{ $school['sign_title'] ?? 'Kepala,' }}</p>
 
             @if(isset($school['sign_image']) && $school['sign_image'])
@@ -215,7 +217,7 @@
                     <img src="{{ $school['sign_image'] }}" style="height: 60px; max-width: 100%;">
                 </div>
             @else
-                <br><br><br>
+                <br><br>
             @endif
 
             <p style="text-decoration: underline; font-weight: bold;">{{ $school['sign_name'] }}</p>
