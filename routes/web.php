@@ -415,6 +415,10 @@ Route::middleware(['auth'])->group(function () {
         });
 
 
+        // Cetak Surat Tugas Guru
+        Route::get('/report/surat-tugas/{teacher_id}', [ReportController::class, 'printSuratTugas'])->name('report.surat_tugas');
+
+
     });
 
     Route::middleware(['role:siswa'])->group(function () {

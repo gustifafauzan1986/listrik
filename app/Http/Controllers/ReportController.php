@@ -9,6 +9,7 @@ use App\Models\Classroom; // <--- Import Model Classroom
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use App\Models\Student;
+use App\Models\Teacher;
 // ... Jangan lupa import Model Setting di paling atas
 use App\Models\Setting;
 use App\Models\TeachingJournal; // Import Model Jurnal
@@ -435,6 +436,82 @@ class ReportController extends Controller
         $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
 
         return $pdf->stream('Laporan-Siswa-' . $student->name . '.pdf');
+    }
+
+     public function printSuratTugas($teacher_id)
+    {
+        // 1. Ambil Data Guru & Jadwal
+        $teacher = Teacher::with(['user', 'schedules.classroom', 'schedules.subject'])
+                    ->findOrFail($teacher_id);
+
+        // 2. Ambil Data Sekolah (Kop Surat & TTD)
+        $school = $this->getSchoolData();
+
+        // 3. Tentukan Semester & Tahun Ajaran
+        $bulan = date('n');
+        $tahun = date('Y');
+        if ($bulan >= 7) {
+            $semester = "Ganjil";
+            $tahunAjaran = $tahun . "/" . ($tahun + 1);
+        } else {
+            $semester = "Genap";
+            $tahunAjaran = ($tahun - 1) . "/" . $tahun;
+        }
+
+        // 4. Kelompokkan Jadwal (Agar rapi di tabel)
+        // Group by Hari -> Kelas -> Mapel
+        $schedules = $teacher->schedules->sortBy(function($schedule) {
+            // Urutkan hari (Senin=1, dst)
+            $days = ['Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4, 'Friday' => 5, 'Saturday' => 6, 'Sunday' => 7];
+            return $days[$schedule->day] ?? 8;
+        });
+
+        // Hitung Total Jam
+        $totalJam = 0;
+        foreach($schedules as $s) {
+            // Logika hitung JP: (End Time - Start Time) / 45 menit
+            try {
+                if ($s->start_time && $s->end_time) {
+                    $start = Carbon::parse($s->start_time);
+                    $end = Carbon::parse($s->end_time);
+                    $diffInMinutes = $end->diffInMinutes($start);
+                    $jp = round($diffInMinutes / 45); // Asumsi 1 JP = 45 menit
+                    $s->calculated_jp = $jp > 0 ? $jp : 1;
+                } else {
+                    $s->calculated_jp = 0;
+                }
+            } catch (\Exception $e) {
+                $s->calculated_jp = 0;
+            }
+            $totalJam += $s->calculated_jp;
+        }
+
+        // Nomor Surat (Bisa disesuaikan formatnya)
+        $nomorSurat = "800/..../SMK-G/" . date('m') . "/" . date('Y');
+
+        // Generate PDF
+        $pdf = Pdf::loadView('pdf.surat_tugas', compact(
+            'teacher',
+            'school',
+            'schedules',
+            'semester',
+            'tahunAjaran',
+            'totalJam',
+            'nomorSurat'
+        ));
+
+        // Setting kertas
+        $paperSize = $school['paper_size'] ?? 'a4';
+        $pdf->setPaper($paperSize, 'portrait');
+
+        // Options untuk image/asset
+        $pdf->setOptions([
+            'isRemoteEnabled' => true,
+            'isPhpEnabled' => true,
+            'chroot' => public_path(),
+        ]);
+
+        return $pdf->stream('Surat_Tugas_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $teacher->user->name) . '.pdf');
     }
 
     /**

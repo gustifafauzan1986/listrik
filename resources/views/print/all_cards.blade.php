@@ -236,7 +236,7 @@
                         </div>
 
                         @include('print.card_signature')
-                        
+
 
                     </div>
                 </div>

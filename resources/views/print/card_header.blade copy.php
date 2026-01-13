@@ -1,9 +1,5 @@
                         <div class="card-header">
-                            @if(isset($settings['logo_left']) && $settings['logo_left'])
-                                <img src="{{asset('storage/'.$settings['logo_left'])}}" class="header-logo" alt="Logo 1">
-                            @else
-                                <img src="{{ asset('upload/no_image.jpg')}}" class="header-logo" alt="Logo 1">
-                            @endif
+                            <img src="{{asset('storage/'.$settings['logo_left'])}}" class="header-logo" alt="Logo 1">
                             {{-- <img src="{{ asset('images/logo_kiri.png') }}" class="header-logo" alt="Logo 1" onerror="this.src='https://placehold.co/100x100/png?text=Logo1'"> --}}
 
                             <div class="school-header-text">
