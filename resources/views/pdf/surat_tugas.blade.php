@@ -87,7 +87,7 @@
 
     <!-- PEMBUKA -->
     <div class="content">
-        Guna kelancaran Kegiatan Pembelajaran pada Semester {{ $semester }} Tahun Pelajaran {{ $tahunAjaran }}, maka Kepala {{ $school['name'] }} menugaskan saudara:
+        Guna kelancaran Kegiatan Pembelajaran pada Semester {{ $semester }} Tahun Pelajaran {{ $tahunAjaran }}, maka Kepala {{ $school['school_name'] }} menugaskan saudara:
     </div>
 
     <!-- BIODATA GURU -->

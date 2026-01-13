@@ -438,7 +438,84 @@ class ReportController extends Controller
         return $pdf->stream('Laporan-Siswa-' . $student->name . '.pdf');
     }
 
-     public function printSuratTugas($teacher_id)
+    //  public function printSuratTugas($teacher_id)
+    // {
+    //     // 1. Ambil Data Guru & Jadwal
+    //     $teacher = Teacher::with(['user', 'schedules.classroom', 'schedules.subject'])
+    //                 ->findOrFail($teacher_id);
+
+    //     // 2. Ambil Data Sekolah (Kop Surat & TTD)
+    //     $school = $this->getSchoolData();
+
+    //     // 3. Tentukan Semester & Tahun Ajaran
+    //     $bulan = date('n');
+    //     $tahun = date('Y');
+    //     if ($bulan >= 7) {
+    //         $semester = "Ganjil";
+    //         $tahunAjaran = $tahun . "/" . ($tahun + 1);
+    //     } else {
+    //         $semester = "Genap";
+    //         $tahunAjaran = ($tahun - 1) . "/" . $tahun;
+    //     }
+
+    //     // 4. Kelompokkan Jadwal (Agar rapi di tabel)
+    //     // Group by Hari -> Kelas -> Mapel
+    //     $schedules = $teacher->schedules->sortBy(function($schedule) {
+    //         // Urutkan hari (Senin=1, dst)
+    //         $days = ['Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4, 'Friday' => 5, 'Saturday' => 6, 'Sunday' => 7];
+    //         return $days[$schedule->day] ?? 8;
+    //     });
+
+    //     // Hitung Total Jam
+    //     $totalJam = 0;
+    //     foreach($schedules as $s) {
+    //         // Logika hitung JP: (End Time - Start Time) / 45 menit
+    //         try {
+    //             if ($s->start_time && $s->end_time) {
+    //                 $start = Carbon::parse($s->start_time);
+    //                 $end = Carbon::parse($s->end_time);
+    //                 $diffInMinutes = $end->diffInMinutes($start);
+    //                 $jp = round($diffInMinutes / 45); // Asumsi 1 JP = 45 menit
+    //                 $s->calculated_jp = $jp > 0 ? $jp : 1;
+    //             } else {
+    //                 $s->calculated_jp = 0;
+    //             }
+    //         } catch (\Exception $e) {
+    //             $s->calculated_jp = 0;
+    //         }
+    //         $totalJam += $s->calculated_jp;
+    //     }
+
+    //     // Nomor Surat (Bisa disesuaikan formatnya)
+    //     $nomorSurat = "800/..../SMK-G/" . date('m') . "/" . date('Y');
+
+    //     // Generate PDF
+    //     $pdf = Pdf::loadView('pdf.surat_tugas', compact(
+    //         'teacher',
+    //         'school',
+    //         'schedules',
+    //         'semester',
+    //         'tahunAjaran',
+    //         'totalJam',
+    //         'nomorSurat'
+    //     ));
+
+    //     // Setting kertas
+
+    //     $paperSize = $school['paper_size'] ?? 'a4';
+    //     $pdf->setPaper($paperSize, 'portrait');
+
+    //     // Options untuk image/asset
+    //     $pdf->setOptions([
+    //         'isRemoteEnabled' => true,
+    //         'isPhpEnabled' => true,
+    //         'chroot' => public_path(),
+    //     ]);
+
+    //     return $pdf->stream('Surat_Tugas_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $teacher->user->name) . '.pdf');
+    // }
+
+    public function printSuratTugas($teacher_id)
     {
         // 1. Ambil Data Guru & Jadwal
         $teacher = Teacher::with(['user', 'schedules.classroom', 'schedules.subject'])
@@ -469,7 +546,6 @@ class ReportController extends Controller
         // Hitung Total Jam
         $totalJam = 0;
         foreach($schedules as $s) {
-            // Logika hitung JP: (End Time - Start Time) / 45 menit
             try {
                 if ($s->start_time && $s->end_time) {
                     $start = Carbon::parse($s->start_time);
@@ -520,33 +596,82 @@ class ReportController extends Controller
     /**
      * Helper Private: Ambil Data Sekolah dari Settings
      */
+    // private function getSchoolData()
+    // {
+    //     return [
+    //         // Identitas Sekolah
+    //         'name'       => Setting::value('school_name', 'SMK DEFAULT'),
+    //         'address'    => Setting::value('school_address', 'Alamat Sekolah'),
+    //         'phone'      => Setting::value('school_phone', '-'),
+    //         'web'        => Setting::value('school_web', '-'),
+    //         'email'      => Setting::value('school_email', '-'),
+    //         'logo_left'  => Setting::value('logo_left'),
+    //         'logo_right' => Setting::value('logo_right'),
+
+    //         // Pengaturan Kertas
+    //         'paper_size'        => Setting::value('paper_size', 'a4'),
+    //         'paper_orientation' => Setting::value('paper_orientation', 'portrait'),
+
+    //         // Pengaturan Margin (Tambahkan satuan cm/mm untuk CSS)
+    //         'margin_top'    => Setting::value('margin_top', '2.5') . 'cm',
+    //         'margin_right'  => Setting::value('margin_right', '2.5') . 'cm',
+    //         'margin_bottom' => Setting::value('margin_bottom', '2.5') . 'cm',
+    //         'margin_left'   => Setting::value('margin_left', '2.5') . 'cm',
+
+    //         // Tanda Tangan
+    //         'sign_city'  => Setting::value('signature_city', 'Jakarta'),
+    //         'sign_title' => Setting::value('signature_title', 'Kepala Sekolah'),
+    //         'sign_name'  => Setting::value('signature_name', 'Administrator'),
+    //         'sign_nip'   => Setting::value('signature_nip', '-'),
+    //     ];
+    // }
+
     private function getSchoolData()
     {
-        return [
-            // Identitas Sekolah
-            'name'       => Setting::value('school_name', 'SMK DEFAULT'),
-            'address'    => Setting::value('school_address', 'Alamat Sekolah'),
-            'phone'      => Setting::value('school_phone', '-'),
-            'web'        => Setting::value('school_web', '-'),
-            'email'      => Setting::value('school_email', '-'),
-            'logo_left'  => Setting::value('logo_left'),
-            'logo_right' => Setting::value('logo_right'),
+        // Helper untuk membersihkan path (jika DB menyimpan 'storage/settings/logo.png', kita ubah jadi 'settings/logo.png')
+        // Ini agar public_path('storage/' . $val) tidak menjadi 'public/storage/storage/...'
+        $cleanPath = function($val) {
+            if (!$val) return null;
+            return str_replace('storage/', '', $val);
+        };
 
-            // Pengaturan Kertas
+        // Helper untuk convert image ke base64
+        $imageToBase64 = function($path) use ($cleanPath) {
+            $cleaned = $cleanPath($path);
+            if (!$cleaned || $cleaned == '-') return null;
+
+            $fullPath = storage_path('app/public/' . $cleaned);
+            if (!file_exists($fullPath)) {
+                $fullPath = public_path('storage/' . $cleaned);
+            }
+
+            if (file_exists($fullPath)) {
+                $type = pathinfo($fullPath, PATHINFO_EXTENSION);
+                $data = file_get_contents($fullPath);
+                return 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
+            return null;
+        };
+
+        return [
+            'school_name'    => Setting::value('school_name', 'SMK DEFAULT'),
+            'school_address' => Setting::value('school_address', 'Alamat Sekolah'),
+            'school_phone'   => Setting::value('school_phone', '-'),
+            'school_web'     => Setting::value('school_web', '-'),
+            'school_email'   => Setting::value('school_email', '-'),
+            'logo_left'      => $imageToBase64(Setting::value('logo_left')),
+            'logo_right'     => $imageToBase64(Setting::value('logo_right')),
             'paper_size'        => Setting::value('paper_size', 'a4'),
             'paper_orientation' => Setting::value('paper_orientation', 'portrait'),
-
-            // Pengaturan Margin (Tambahkan satuan cm/mm untuk CSS)
             'margin_top'    => Setting::value('margin_top', '2.5') . 'cm',
             'margin_right'  => Setting::value('margin_right', '2.5') . 'cm',
             'margin_bottom' => Setting::value('margin_bottom', '2.5') . 'cm',
             'margin_left'   => Setting::value('margin_left', '2.5') . 'cm',
-
-            // Tanda Tangan
             'sign_city'  => Setting::value('signature_city', 'Jakarta'),
             'sign_title' => Setting::value('signature_title', 'Kepala Sekolah'),
             'sign_name'  => Setting::value('signature_name', 'Administrator'),
             'sign_nip'   => Setting::value('signature_nip', '-'),
+            'sign_image' => $imageToBase64(Setting::value('signature_image')),
         ];
     }
 }
