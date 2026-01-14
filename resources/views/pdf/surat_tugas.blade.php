@@ -138,7 +138,8 @@
                 <td>{{ $sched->calculated_jp ?? 0 }}</td>
 
                 <!-- Menggunakan merged_room dari controller -->
-                <td>{{ $sched->merged_room ?? '-' }}</td>
+                {{-- <td>{{ $sched->merged_room ?? '-' }}</td> --}}
+                <td>{{ !empty($sched->merged_room) ? $sched->merged_room : ($sched->getAttribute('room') ?? '-') }}</td>
 
                 <td>{{ $sched->subject->code ?? 'PBM' }}</td>
             </tr>
