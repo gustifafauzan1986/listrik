@@ -1406,7 +1406,144 @@ class ReportController extends Controller
     //     return $pdf->stream('Surat_Tugas_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $teacher->user->name) . '.pdf');
     // }
 
-     public function printSuratTugas($teacher_id)
+    // public function printSuratTugas($teacher_id)
+    // {
+    //     // 1. Ambil Data Guru
+    //     $teacher = Teacher::with(['user'])->findOrFail($teacher_id);
+
+    //     // 2. Ambil Data Sekolah
+    //     $school = $this->getSchoolData();
+
+    //     // 3. Tentukan Semester
+    //     $bulan = date('n');
+    //     $tahun = date('Y');
+    //     if ($bulan >= 7) {
+    //         $semester = "Ganjil";
+    //         $tahunAjaran = $tahun . "/" . ($tahun + 1);
+    //     } else {
+    //         $semester = "Genap";
+    //         $tahunAjaran = ($tahun - 1) . "/" . $tahun;
+    //     }
+
+    //     // 4. Ambil Jadwal ...
+    //     $rawSchedules = Schedule::with(['classroom', 'subject']) // Pastikan relasi 'room' diload jika ada
+    //                             ->where('teacher_id', $teacher_id)
+    //                             ->get();
+
+    //     // 5. GROUPING JADWAL (UPDATE DI SINI)
+    //     // Gabungkan jika Hari, Kelas, dan Mapel sama
+    //     $groupedSchedules = $rawSchedules->groupBy(function($item) {
+    //         return strtolower(trim($item->day)) . '-' . $item->classroom_id . '-' . $item->subject_id;
+    //     });
+
+    //     $finalSchedules = collect();
+    //     $totalJam = 0;
+
+    //     foreach ($groupedSchedules as $group) {
+    //         $schedule = $group->first();
+
+    //         $minStart = null;
+    //         $maxEnd = null;
+    //         $totalMinutesGlobal = 0;
+
+    //         // --- A. LOGIKA HITUNG JAM PER RUANGAN ---
+    //         $roomDetails = [];
+
+    //         // Group item berdasarkan nama ruangan
+    //         $itemsByRoom = $group->groupBy(function($item) {
+    //             // Ambil nama ruangan (dari relasi atau string langsung)
+    //             return $item->room->name ?? $item->room ?? 'Tanpa Ruangan';
+    //         });
+
+    //         foreach ($itemsByRoom as $roomName => $roomItems) {
+    //             $roomMinutes = 0;
+
+    //             foreach ($roomItems as $rItem) {
+    //                 if ($rItem->start_time && $rItem->end_time) {
+    //                     $s = \Carbon\Carbon::parse($rItem->start_time);
+    //                     $e = \Carbon\Carbon::parse($rItem->end_time);
+    //                     $roomMinutes += $e->diffInMinutes($s);
+    //                 }
+    //             }
+
+    //             // Konversi Menit Ruangan ke JP
+    //             if ($roomMinutes > 0) {
+    //                 $rJp = round($roomMinutes / 45);
+    //                 $rJp = $rJp > 0 ? $rJp : 1;
+    //             } else {
+    //                 $rJp = $roomItems->count(); // Fallback jika jam null
+    //             }
+
+    //             // Format: "Bengkel (4 JP)"
+    //             $roomDetails[] = $roomName . ' (' . $rJp . ' JP)';
+    //         }
+
+    //         // dd($roomMinutes);
+
+    //         // Gabungkan string ruangan: "R.Teori (2 JP), Bengkel (4 JP)"
+    //         $schedule->merged_room = implode(', ', $roomDetails);
+
+
+    //         // --- B. LOGIKA TOTAL JAM & WAKTU (GLOBAL) ---
+    //         foreach ($group as $item) {
+    //             if ($item->start_time && $item->end_time) {
+    //                 $start = \Carbon\Carbon::parse($item->start_time);
+    //                 $end = \Carbon\Carbon::parse($item->end_time);
+
+    //                 if (is_null($minStart) || $start->lt($minStart)) $minStart = $start;
+    //                 if (is_null($maxEnd) || $end->gt($maxEnd)) $maxEnd = $end;
+
+    //                 $totalMinutesGlobal += $end->diffInMinutes($start);
+    //             }
+    //         }
+
+    //         // Hitung JP Global untuk kolom "Jumlah Jam"
+    //         if ($totalMinutesGlobal > 0) {
+    //             $jp = round($totalMinutesGlobal / 45);
+    //             $schedule->calculated_jp = $jp > 0 ? $jp : 1;
+    //         } else {
+    //             $schedule->calculated_jp = $group->count();
+    //         }
+
+    //         // Set jam tampilan (Mulai - Selesai)
+    //         if ($minStart && $maxEnd) {
+    //             $schedule->start_time = $minStart->format('H:i');
+    //             $schedule->end_time = $maxEnd->format('H:i');
+    //         }
+
+    //         $totalJam += $schedule->calculated_jp;
+    //         $finalSchedules->push($schedule);
+    //     }
+
+    //     // ... (Bagian 6 sorting dan return PDF tetap sama) ...
+    //     // 6. Urutkan berdasarkan Hari
+    //     $schedules = $finalSchedules->sortBy(function($schedule) {
+    //         $dayMap = [
+    //             'monday' => 1, 'senin' => 1,
+    //             'tuesday' => 2, 'selasa' => 2,
+    //             'wednesday' => 3, 'rabu' => 3,
+    //             'thursday' => 4, 'kamis' => 4,
+    //             'friday' => 5, 'jumat' => 5,
+    //             'saturday' => 6, 'sabtu' => 6,
+    //             'sunday' => 7, 'minggu' => 7
+    //         ];
+    //         $dayIndex = $dayMap[strtolower(trim($schedule->day))] ?? 8;
+    //         return sprintf('%02d-%s', $dayIndex, $schedule->start_time);
+    //     });
+
+    //     $nomorSurat = "800.1.11.1/002/SMKN1 BKT/I/" . date('Y');
+
+    //     $pdf = Pdf::loadView('pdf.surat_tugas', compact(
+    //         'teacher', 'school', 'schedules', 'semester', 'tahunAjaran', 'totalJam', 'nomorSurat'
+    //     ));
+
+    //     $pdf->setPaper($school['paper_size'] ?? 'a4', 'portrait');
+    //     $pdf->setOptions(['isRemoteEnabled' => true, 'isPhpEnabled' => true, 'chroot' => public_path()]);
+
+    //     return $pdf->stream('Surat_Tugas_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $teacher->user->name) . '.pdf');
+    // }
+
+    public function printSuratTugas($teacher_id)
     {
         // 1. Ambil Data Guru
         $teacher = Teacher::with(['user'])->findOrFail($teacher_id);
@@ -1426,13 +1563,10 @@ class ReportController extends Controller
         }
 
         // 4. Ambil Jadwal Mengajar
-        // Eager load 'room' jika Anda sudah membuat relasi ke model Room
-        // Jika belum, 'room' string biasa akan tetap terambil
-        $rawSchedules = Schedule::with(['classroom', 'subject'])
+        // Eager load 'room' dan 'classroom' serta 'subject'
+        $rawSchedules = Schedule::with(['classroom', 'subject', 'room'])
                             ->where('teacher_id', $teacher_id)
                             ->get();
-
-        // Jika Anda sudah menambahkan relasi room(), tambahkan di with() di atas: with(['classroom', 'subject', 'room'])
 
         // 5. GROUPING JADWAL
         // Gabungkan jika Hari, Kelas, dan Mapel sama
@@ -1453,8 +1587,8 @@ class ReportController extends Controller
             // --- FITUR NAMA RUANGAN ---
             // Gabungkan nama ruangan unik dalam grup ini
             $rooms = $group->map(function($item) {
-                // Cek relasi room->name dulu (jika pakai tabel master)
-                // Jika tidak ada, cek kolom string 'room' biasa
+                // Prioritas 1: Relasi ke tabel rooms (item->room->name)
+                // Prioritas 2: Kolom string manual (item->room)
                 return $item->room->name ?? $item->room ?? null;
             })
             ->filter(function($value) { return !empty($value); })
@@ -1462,6 +1596,7 @@ class ReportController extends Controller
             ->implode(', ');
 
             $schedule->merged_room = $rooms ?: '-';
+
 
             // --- HITUNG DURASI & JAM ---
             foreach ($group as $item) {
@@ -1492,6 +1627,8 @@ class ReportController extends Controller
             }
 
             $totalJam += $schedule->calculated_jp;
+
+            // dd($totalJam);
             $finalSchedules->push($schedule);
         }
 
@@ -1510,7 +1647,12 @@ class ReportController extends Controller
             return sprintf('%02d-%s', $dayIndex, $schedule->start_time);
         });
 
-        $nomorSurat = "800.1.11.1/002/SMKN1 BKT/I/" . date('Y');
+        // Generate Nomor Surat (Dengan Bulan Romawi)
+        $bulanRomawi = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+        $currMonth = date('n');
+        $romawi = $bulanRomawi[$currMonth] ?? 'I';
+
+        $nomorSurat = "800.1.11.1/002/SMKN1 BKT/" . $romawi . "/" . date('Y');
 
         $pdf = Pdf::loadView('pdf.surat_tugas', compact(
             'teacher', 'school', 'schedules', 'semester', 'tahunAjaran', 'totalJam', 'nomorSurat'
@@ -1521,7 +1663,6 @@ class ReportController extends Controller
 
         return $pdf->stream('Surat_Tugas_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $teacher->user->name) . '.pdf');
     }
-
     /**
      * Private Helper: Get School Data from Settings
      */

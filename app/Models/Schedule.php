@@ -8,7 +8,17 @@ use App\Traits\HasUuid; // <--- 1. Import Trait
 class Schedule extends Model
 {
     use HasUuid; // <--- 2. Pasang Trait
-    protected $guarded = [];
+    // protected $guarded = [];
+     protected $fillable = [
+        'teacher_id',
+        'classroom_id',
+        'subject_id',
+        'room_id', // Pastikan ini ditambahkan
+        'day',
+        'start_time',
+        'end_time',
+        // 'room' // Kolom string lama bisa dihapus atau dibiarkan sebagai fallback
+    ];
 
     /**
      * Relasi: Jadwal ini milik Guru siapa?

@@ -4,10 +4,10 @@
     <title>Surat Tugas - {{ $teacher->user->name }}</title>
     <style>
         @page {
-            margin-top: {{ $school['margin_top'] ?? '2.5cm' }};
-            margin-right: {{ $school['margin_right'] ?? '2.5cm' }};
-            margin-bottom: {{ $school['margin_bottom'] ?? '2.5cm' }};
-            margin-left: {{ $school['margin_left'] ?? '2.5cm' }};
+            margin-top: 2cm;
+            margin-right: 2cm;
+            margin-bottom: 2cm;
+            margin-left: 2.5cm;
         }
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -15,7 +15,7 @@
             line-height: 1.15;
         }
         .header-table { width: 100%; border-bottom: 3px double #000; margin-bottom: 20px; padding-bottom: 10px; }
-        .logo-img { width: 90px; height: auto; object-fit: contain; }
+        .logo-img { width: 90px; height: auto; }
         .school-info { text-align: center; }
         .school-info h2 { margin: 0; font-size: 14pt; font-weight: normal; }
         .school-info h1 { margin: 0; font-size: 16pt; font-weight: bold; }
