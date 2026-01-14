@@ -37,6 +37,7 @@ use App\Http\Controllers\TeachingAssignmentController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ScannerDeviceController;
 use App\Http\Controllers\TeachingJournalController;
+use App\Http\Controllers\RoomController;
 
 use App\Http\Controllers\StudentPermissionController;
 use App\Http\Controllers\RecapController;
@@ -414,7 +415,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/send', [WhatsappGatewayController::class, 'sendProcess'])->name('send_process');
         });
 
-
+        Route::resource('rooms', RoomController::class);
         // Cetak Surat Tugas Guru
         Route::get('/report/surat-tugas/{teacher_id}', [ReportController::class, 'printSuratTugas'])->name('report.surat_tugas');
 

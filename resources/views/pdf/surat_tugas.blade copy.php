@@ -4,10 +4,10 @@
     <title>Surat Tugas - {{ $teacher->user->name }}</title>
     <style>
         @page {
-            margin-top: 2cm;
-            margin-right: 2cm;
-            margin-bottom: 2cm;
-            margin-left: 2.5cm;
+            margin-top: {{ $school['margin_top'] ?? '2.5cm' }};
+            margin-right: {{ $school['margin_right'] ?? '2.5cm' }};
+            margin-bottom: {{ $school['margin_bottom'] ?? '2.5cm' }};
+            margin-left: {{ $school['margin_left'] ?? '2.5cm' }};
         }
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -48,8 +48,8 @@
                 @endif
             </td>
             <td width="70%" class="school-info">
-                <h2>PEMERINTAH PROVINSI SUMATERA BARAT</h2>
-                <h2>DINAS PENDIDIKAN</h2>
+                <h2>PEMERINTAH {{strToUpper($school['provinsi_name']) ?? 'PROVINSI SUMATERA BARAT' }}</h2>
+                {{-- <h2>DINAS PENDIDIKAN</h2> --}}
                 <h1>{{ $school['school_name'] ?? 'SMK NEGERI 1 BUKITTINGGI' }}</h1>
                 <p>{{ $school['school_address'] ?? 'Alamat Sekolah' }}</p>
                 <p>Telp./Fax (0752) 32330 | Email: {{ $school['school_email'] ?? 'smkn1.bukittinggi@gmail.com' }}</p>
@@ -125,8 +125,8 @@
                 $hariIndo = ['Monday'=>'Senin', 'Tuesday'=>'Selasa', 'Wednesday'=>'Rabu', 'Thursday'=>'Kamis', 'Friday'=>'Jumat', 'Saturday'=>'Sabtu', 'Sunday'=>'Minggu'];
                 $hari = $hariIndo[trim($sched->day)] ?? $sched->day;
 
-                // Gunakan format jam yang sudah disiapkan Controller (07:00 dan 09:15)
-                // Hapus detik jika ada
+                // Mengambil jam yang sudah diset di Controller (Grouping)
+                // Jika formatnya H:i:s, ambil 5 karakter pertama (H:i)
                 $jamMulai = substr($sched->start_time, 0, 5);
                 $jamSelesai = substr($sched->end_time, 0, 5);
             @endphp
@@ -136,10 +136,7 @@
                 <td>{{ $sched->classroom->name ?? '-' }}</td>
                 <td>{{ $jamMulai }} - {{ $jamSelesai }}</td>
                 <td>{{ $sched->calculated_jp ?? 0 }}</td>
-
-                <!-- Menggunakan merged_room dari controller -->
-                <td>{{ $sched->merged_room ?? '-' }}</td>
-
+                <td>{{ $sched->room->code ?? '-' }}</td>
                 <td>{{ $sched->subject->code ?? 'PBM' }}</td>
             </tr>
             @empty
@@ -168,7 +165,7 @@
         </tbody>
     </table>
 
-    <!-- INTRUKSI BAWAH -->
+    <!-- INTRUKSI -->
     <div class="content">
         Diharapkan Kepada saudara untuk menyiapkan :
         <div class="list-container">
@@ -184,8 +181,7 @@
     <!-- TANDA TANGAN -->
     <div class="footer-section">
         <div class="ttd-box">
-            <!-- TANGGAL OTOMATIS SESUAI HARI INI ATAU BULAN SURAT -->
-            <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{ date('d F Y') }}</p>
+            <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
             <p>{{ $school['sign_title'] ?? 'Kepala,' }}</p>
 
             @if(!empty($school['sign_image']))

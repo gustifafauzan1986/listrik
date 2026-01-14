@@ -43,5 +43,11 @@ class Schedule extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    // Relasi ke Ruangan
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
+
 
 }

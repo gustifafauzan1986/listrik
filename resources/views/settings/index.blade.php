@@ -4,18 +4,18 @@
 <x-app-layout>
     <div class="page-content">
         <!--breadcrumb-->
-    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="mb-3 page-breadcrumb d-none d-sm-flex align-items-center">
         <div class="breadcrumb-title pe-3">Setting</div>
         <div class="ps-3">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 p-0">
+                <ol class="p-0 mb-0 breadcrumb">
                     <li class="breadcrumb-item"><a href="{{url('/admin/dashboard')}}"><i class="bx bx-home-alt"></i></a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">Setting Aplikasi</li>
                 </ol>
             </nav>
         </div>
-       
+
     </div>
     <!--end breadcrumb-->
         <div class="row justify-content-center">
@@ -105,6 +105,12 @@
                                         <label class="form-label fw-bold">Alamat Lengkap</label>
                                         <textarea name="school_address" class="form-control" rows="2">{{ $settings['school_address'] ?? '' }}</textarea>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Provinsi</label>
+                                        <input type="text" name="provinsi_name" class="form-control" value="{{ $settings['provinsi_name'] ?? '' }}" required>
+                                    </div>
+
                                     <div class="row">
                                         <div class="mb-3 col-md-6">
                                             <label class="form-label fw-bold">No. Telepon</label>
@@ -119,6 +125,7 @@
                                         <label class="form-label fw-bold">Website</label>
                                         <input type="text" name="school_web" class="form-control" value="{{ $settings['school_web'] ?? '' }}">
                                     </div>
+
                                 </div>
 
                                 <!-- TAB 2: TAMPILAN APLIKASI (Favicon & Sidebar) -->
@@ -245,7 +252,7 @@
                                         <input type="text" name="inf_app" class="form-control" value="{{ $settings['inf_app'] ?? 'Sistem Absensi Sekolah.' }}">
                                     </div>
                                 </div>
-                                
+
 
                             </div>
 
