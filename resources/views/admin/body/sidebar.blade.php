@@ -74,6 +74,7 @@ $status = $guruId->status;
                         <li> <a href="{{route('settings.attendance')}}"><i class='bx bx-barcode-reader'></i>Presensi</a></li>
                         <li> <a href="{{route('majors.index')}}"><i class='bx bx-minus-front'></i>Jurusan</a></li>
                         <li> <a href="{{route('subjects.index')}}"><i class='bx bx-minus-front'></i>Mapel</a></li>
+						<li> <a href="{{route('rooms.index')}}"><i class='bx bx-radio-circle'></i>Bengkel</a>
 						<li> <a href="{{route('permissions.index')}}"><i class='bx bx-radio-circle'></i>Permission</a>
 						</li>
                         <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
@@ -109,12 +110,12 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{route('print.index')}}"><i class='bx bx-id-card'></i>Kartu</a></li>
-						
-						
+
+
 					</ul>
 				</li>
-				
-				
+
+
 				{{-- <li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-grid-alt"></i>
@@ -126,7 +127,7 @@ $status = $guruId->status;
 				</li>
 			</ul>
 		</li> --}}
-		
+
 		<li>
 			<a class="has-arrow" href="javascript:;">
 				<div class="parent-icon"> <i class="bx bxs-report"></i>
@@ -180,12 +181,12 @@ $status = $guruId->status;
 						<li> <a href="{{route('database.index')}}"><i class='bx bx-id-card'></i>Database</a></li>
 						<li> <a href="{{route('pm2.index')}}"><i class='bx bx-id-card'></i>server</a></li>
 						<li> <a href="{{route('whatsapp.index')}}"><i class='bx bx-id-card'></i>WA</a></li>
-						
-						
-						
+
+
+
 					</ul>
 				</li>
-<!-- 
+<!--
 				<li>
 					<a href="{{route('system.update.index')}}">
 						<div class="parent-icon"><i class='bx bxl-microsoft'></i>
