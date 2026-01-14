@@ -1,5 +1,3 @@
-@section('title', 'Buat Jadwal Baru')
-
 <x-app-layout>
     <div class="page-content">
         <div class="row justify-content-center">
@@ -42,28 +40,14 @@
                                 </select>
                             </div>
 
-                            <!-- 3. Pilih Ruangan / Bengkel (FITUR BARU) -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Ruang / Labor / Bengkel</label>
-                                <select name="room_id" class="form-select">
-                                    <option value="" selected>-- Tidak Ada Ruangan Khusus --</option>
-                                    @foreach($rooms as $r)
-                                        <option value="{{ $r->id }}" {{ old('room_id') == $r->id ? 'selected' : '' }}>
-                                            {{ $r->name }} ({{ $r->code }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">*Opsional: Pilih jika pelajaran dilakukan di laboratorium atau bengkel.</small>
-                            </div>
-
-                            <!-- 4. Pilih Hari (Otomatis Terisi dari Kalender) -->
+                            <!-- 3. Pilih Hari (Otomatis Terisi dari Kalender) -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Hari</label>
                                 <select name="day" class="form-select" required>
                                     @php
                                         $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
                                         // Ambil 'day' dari URL (request), jika tidak ada gunakan Hari Ini
-                                        $selectedDay = request('day', \Carbon\Carbon::now()->translatedFormat('l'));
+                                        $selectedDay = request('day', \Carbon\Carbon::now()->translatedFormat('l')); 
                                     @endphp
                                     @foreach($days as $day)
                                         <option value="{{ $day }}" {{ $day == $selectedDay ? 'selected' : '' }}>{{ $day }}</option>
@@ -71,18 +55,19 @@
                                 </select>
                             </div>
 
-                            <!-- 5. Jam (Otomatis Terisi dari Kalender) -->
+                            <!-- 4. Jam (Otomatis Terisi dari Kalender) -->
                             <div class="row">
                                 <div class="mb-3 col-md-6">
                                     <label class="form-label fw-bold">Jam Mulai</label>
-                                    <input type="time" name="start_time" class="form-control"
+                                    <!-- Ambil 'start_time' dari URL -->
+                                    <input type="time" name="start_time" class="form-control" 
                                            value="{{ request('start_time', date('H:i')) }}" required>
                                 </div>
                                 <div class="mb-3 col-md-6">
                                     <label class="form-label fw-bold">Jam Selesai</label>
                                     <!-- Jam Selesai otomatis +1 Jam dari Start Time -->
-                                    <input type="time" name="end_time" class="form-control"
-                                           value="{{ request('start_time') ? date('H:i', strtotime(request('start_time') . ' +1 hour')) : date('H:i', strtotime('+1 hour')) }}"
+                                    <input type="time" name="end_time" class="form-control" 
+                                           value="{{ request('start_time') ? date('H:i', strtotime(request('start_time') . ' +1 hour')) : date('H:i', strtotime('+1 hour')) }}" 
                                            required>
                                 </div>
                             </div>

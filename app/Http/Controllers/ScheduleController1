@@ -9,7 +9,7 @@ use App\Models\Teacher;
 use App\Models\TeachingAssignment; // Model Mapping
 use App\Models\Classroom; // Tambahan untuk Admin View
 use App\Models\Subject;   // Tambahan untuk Admin View
-use App\Models\Room;      // Tambahkan Import Model Room
+use App\Models\Room;   // Tambahan untuk Admin View
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Spatie\Permission\Traits\HasRoles;
@@ -36,8 +36,8 @@ class ScheduleController extends Controller
             return redirect()->back()->with('error', 'Akun Anda tidak terdaftar sebagai Guru.');
         }
 
-        // Ambil jadwal guru (tambahkan 'room' di eager loading)
-        $schedules = Schedule::with(['classroom', 'subject', 'room'])
+        // Ambil jadwal guru
+        $schedules = Schedule::with(['classroom', 'subject'])
             // Hitung jumlah siswa yang sudah diabsen pada jadwal ini (HARI INI)
             ->withCount(['attendances' => function ($query) {
                 $query->whereDate('created_at', Carbon::today());
@@ -74,10 +74,7 @@ class ScheduleController extends Controller
         // 2. Ambil daftar Kelas Unik dari mapping tersebut
         $classrooms = $assignments->pluck('classroom')->unique('id')->sortBy('name');
 
-        // 3. Ambil daftar Ruangan (Semua Ruangan)
-        $rooms = Room::orderBy('name')->get();
-
-        return view('schedule.create', compact('classrooms', 'assignments', 'rooms'));
+        return view('schedule.create', compact('classrooms', 'assignments'));
     }
 
     /**
@@ -88,7 +85,6 @@ class ScheduleController extends Controller
         $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
             'subject_id'   => 'required|exists:subjects,id',
-            'room_id'      => 'nullable|exists:rooms,id', // Validasi Room (Optional/Nullable)
             'day'          => 'required',
             'start_time'   => 'required',
             'end_time'     => 'required|after:start_time',
@@ -108,22 +104,39 @@ class ScheduleController extends Controller
                 ->withInput();
         }
 
-        // 2. Cek Bentrok Jadwal GURU
-        if ($this->checkConflict($teacher->id, $request)) {
-             return back()->withErrors(['start_time' => 'Jadwal bentrok! Anda sudah mengajar di kelas lain pada jam tersebut.'])->withInput();
+        // 2. Cek Bentrok Jadwal GURU (Guru tidak bisa ada di 2 tempat sekaligus)
+        // Logika overlap: (StartA < EndB) and (EndA > StartB)
+        $teacherConflict = Schedule::where('teacher_id', $teacher->id)
+            ->where('day', $request->day)
+            ->where('start_time', '<', $request->end_time)
+            ->where('end_time', '>', $request->start_time)
+            ->first();
+
+        if ($teacherConflict) {
+            return back()
+                ->withErrors(['start_time' => 'Jadwal bentrok! Anda sudah mengajar di kelas ' . $teacherConflict->classroom->name . ' pada jam tersebut (' . $teacherConflict->start_time . ' - ' . $teacherConflict->end_time . ').'])
+                ->withInput();
         }
 
-        // 3. Cek Bentrok Jadwal KELAS
-        // (Logic ada di dalam checkConflict bagian bawah, tapi dipanggil terpisah jika ingin pesan spesifik)
-        // Disini saya gabung di checkConflict agar lebih ringkas, atau bisa dipisah jika ingin pesan error beda.
-        // checkConflict di bawah sudah mengcover keduanya.
+        // 3. Cek Bentrok Jadwal KELAS (Kelas tidak bisa dipakai 2 pelajaran sekaligus)
+        $classroomConflict = Schedule::where('classroom_id', $request->classroom_id)
+            ->where('day', $request->day)
+            ->where('start_time', '<', $request->end_time)
+            ->where('end_time', '>', $request->start_time)
+            ->first();
+
+        if ($classroomConflict) {
+            // Kita bisa ambil nama guru yang mengajar jika perlu (load relation teacher)
+            return back()
+                ->withErrors(['classroom_id' => 'Jadwal bentrok! Kelas ini sedang digunakan untuk pelajaran lain pada jam tersebut.'])
+                ->withInput();
+        }
 
         // Jika lolos semua validasi, Simpan
         Schedule::create([
             'teacher_id'   => $teacher->id,
             'classroom_id' => $request->classroom_id,
             'subject_id'   => $request->subject_id,
-            'room_id'      => $request->room_id, // Simpan Room ID
             'day'          => $request->day,
             'start_time'   => $request->start_time,
             'end_time'     => $request->end_time,
@@ -145,13 +158,12 @@ class ScheduleController extends Controller
                     ->where('teacher_id', $teacher->id)
                     ->firstOrFail();
 
-        // Ambil data mapping untuk dropdown
+        // Ambil data mapping untuk dropdown (Sama seperti create)
         $assignments = TeachingAssignment::with(['classroom', 'subject'])
                         ->where('teacher_id', $teacher->id)
                         ->get();
 
         $classrooms = $assignments->pluck('classroom')->unique('id')->sortBy('name');
-
         // Ambil data ruangan
         $rooms = Room::orderBy('name')->get();
 
@@ -166,7 +178,6 @@ class ScheduleController extends Controller
         $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
             'subject_id'   => 'required|exists:subjects,id',
-            'room_id'      => 'nullable|exists:rooms,id', // Validasi Room
             'day'          => 'required',
             'start_time'   => 'required',
             'end_time'     => 'required|after:start_time',
@@ -193,7 +204,6 @@ class ScheduleController extends Controller
         $schedule->update([
             'classroom_id' => $request->classroom_id,
             'subject_id'   => $request->subject_id,
-            'room_id'      => $request->room_id, // Update Room ID
             'day'          => $request->day,
             'start_time'   => $request->start_time,
             'end_time'     => $request->end_time,
@@ -209,7 +219,7 @@ class ScheduleController extends Controller
     {
         $teacher = $this->getTeacher();
 
-        $schedule = Schedule::with(['classroom', 'subject', 'room'])
+        $schedule = Schedule::with(['classroom', 'subject'])
                     ->where('id', $id)
                     ->where('teacher_id', $teacher->id)
                     ->firstOrFail();
@@ -248,8 +258,12 @@ class ScheduleController extends Controller
      */
     public function allSchedules(Request $request)
     {
+        // Security Check: Hanya Admin
+        // if (!Auth::user()->hasRole('admin')) {
+        //     abort(403, 'Hanya Admin yang dapat mengakses halaman ini.');
+        // }
         // 1. Ambil Semua Jadwal
-        $query = Schedule::with(['teacher', 'classroom', 'subject', 'room']); // Load room juga
+        $query = Schedule::with(['teacher', 'classroom', 'subject']);
 
         // Filter by Teacher (Optional)
         if ($request->filled('teacher_id')) {
@@ -259,11 +273,12 @@ class ScheduleController extends Controller
         $schedules = $query->get();
 
         // 2. Data untuk Modal Tambah Jadwal (Admin Mode)
+        // Kita butuh semua guru, dan mapping mereka untuk validasi dropdown via JS
         $teachers = Teacher::orderBy('name')->get();
+        // Ambil SEMUA mapping untuk keperluan filter JS di view admin
         $allAssignments = TeachingAssignment::with(['classroom', 'subject'])->get();
-        $rooms = Room::orderBy('name')->get(); // Data ruangan untuk admin
 
-        return view('schedule.all', compact('schedules', 'teachers', 'allAssignments', 'rooms'));
+        return view('schedule.all', compact('schedules', 'teachers', 'allAssignments'));
     }
 
     /**
@@ -275,7 +290,6 @@ class ScheduleController extends Controller
             'teacher_id'   => 'required|exists:teachers,id',
             'classroom_id' => 'required|exists:classrooms,id',
             'subject_id'   => 'required|exists:subjects,id',
-            'room_id'      => 'nullable|exists:rooms,id', // Validasi Room
             'day'          => 'required',
             'start_time'   => 'required',
             'end_time'     => 'required|after:start_time',
@@ -290,6 +304,25 @@ class ScheduleController extends Controller
 
         return redirect()->back()->with('success', 'Jadwal berhasil ditambahkan oleh Admin!');
     }
+
+    // Helper Cek Bentrok
+    // private function checkConflict($teacherId, $request) {
+    //     // 1. Cek Bentrok Jadwal GURU
+    //     $teacherConflict = Schedule::where('teacher_id', $teacherId)
+    //         ->where('day', $request->day)
+    //         ->where('start_time', '<', $request->end_time)
+    //         ->where('end_time', '>', $request->start_time)
+    //         ->exists();
+
+    //     // 2. Cek Bentrok Jadwal KELAS
+    //     $classConflict = Schedule::where('classroom_id', $request->classroom_id)
+    //         ->where('day', $request->day)
+    //         ->where('start_time', '<', $request->end_time)
+    //         ->where('end_time', '>', $request->start_time)
+    //         ->exists();
+
+    //     return $teacherConflict || $classConflict;
+    // }
 
      // Helper Cek Bentrok (Updated dengan ignore ID)
     private function checkConflict($teacherId, $request, $ignoreId = null) {
@@ -317,24 +350,7 @@ class ScheduleController extends Controller
 
         $classConflict = $queryClass->exists();
 
-        // 3. (Opsional) Cek Bentrok RUANGAN jika room_id diisi
-        // Jika ruangan tidak boleh dipakai 2 kelas sekaligus
-        $roomConflict = false;
-        if ($request->filled('room_id')) {
-             $queryRoom = Schedule::where('room_id', $request->room_id)
-                ->where('day', $request->day)
-                ->where('start_time', '<', $request->end_time)
-                ->where('end_time', '>', $request->start_time);
-
-             if ($ignoreId) {
-                $queryRoom->where('id', '!=', $ignoreId);
-             }
-
-             $roomConflict = $queryRoom->exists();
-        }
-
-
-        return $teacherConflict || $classConflict || $roomConflict;
+        return $teacherConflict || $classConflict;
     }
 
 }

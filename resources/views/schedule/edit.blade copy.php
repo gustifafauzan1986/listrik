@@ -45,7 +45,7 @@
                                         <!-- Opsi awal diisi sesuai data yang tersimpan -->
                                         @if($schedule->subject)
                                             <option value="{{ $schedule->subject_id }}" selected>
-                                                {{ $schedule->subject->name }}
+                                                {{ $schedule->subject->name }} 
                                                 {{ $schedule->subject->code ? '('.$schedule->subject->code.')' : '' }}
                                             </option>
                                         @else
@@ -57,21 +57,7 @@
                                     </small>
                                 </div>
 
-                                <!-- 3. Pilih Ruangan / Bengkel (FITUR BARU) -->
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Ruang / Labor / Bengkel</label>
-                                    <select name="room_id" class="form-select">
-                                        <option value="" selected>-- Tidak Ada Ruangan Khusus --</option>
-                                        @foreach($rooms as $r)
-                                            <option value="{{ $r->id }}" {{ $schedule->room_id == $r->id ? 'selected' : '' }}>
-                                                {{ $r->name }} ({{ $r->code }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <small class="text-muted">*Opsional: Pilih jika pelajaran dilakukan di laboratorium atau bengkel.</small>
-                                </div>
-
-                                <!-- 4. Pilih Hari -->
+                                <!-- 3. Pilih Hari -->
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Hari</label>
                                     <select name="day" class="form-select" required>
@@ -84,16 +70,16 @@
                                     </select>
                                 </div>
 
-                                <!-- 5. Jam -->
+                                <!-- 4. Jam -->
                                 <div class="row">
                                     <div class="mb-3 col-md-6">
                                         <label class="form-label fw-bold">Jam Mulai</label>
-                                        <input type="time" name="start_time" class="form-control"
+                                        <input type="time" name="start_time" class="form-control" 
                                                value="{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}" required>
                                     </div>
                                     <div class="mb-3 col-md-6">
                                         <label class="form-label fw-bold">Jam Selesai</label>
-                                        <input type="time" name="end_time" class="form-control"
+                                        <input type="time" name="end_time" class="form-control" 
                                                value="{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}" required>
                                     </div>
                                 </div>
@@ -115,20 +101,18 @@
         </div>
     </div>
 
-    <!-- SCRIPT FILTER MAPEL -->
+    <!-- SCRIPT FILTER MAPEL (Sama seperti create, tapi handle init state) -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const assignments = @json($assignments);
             const classroomSelect = document.getElementById('classroom_select');
             const subjectSelect = document.getElementById('subject_select');
-
+            
             // Simpan Subject ID awal agar bisa di-select kembali saat init
             const initialSubjectId = "{{ $schedule->subject_id }}";
 
             // Fungsi render dropdown subject
             function populateSubjects(classId, selectedSubId = null) {
-                // Reset subject select, TAPI simpan opsi yang sedang terpilih jika masih valid
-                // Cara paling aman: kosongkan dulu
                 subjectSelect.innerHTML = '<option value="" disabled selected>-- Pilih Mapel --</option>';
                 subjectSelect.disabled = true;
 
@@ -141,12 +125,12 @@
                             const option = document.createElement('option');
                             option.value = item.subject.id;
                             option.textContent = item.subject.name + (item.subject.code ? ` (${item.subject.code})` : '');
-
+                            
                             // Auto select jika ID cocok
                             if (selectedSubId && item.subject.id == selectedSubId) {
                                 option.selected = true;
                             }
-
+                            
                             subjectSelect.appendChild(option);
                         });
                     } else {
