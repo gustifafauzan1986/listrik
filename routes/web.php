@@ -418,6 +418,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('rooms', RoomController::class);
         // Cetak Surat Tugas Guru
         Route::get('/report/surat-tugas/{teacher_id}', [ReportController::class, 'printSuratTugas'])->name('report.surat_tugas');
+        // Cetak Surat Tugas SEMUA Guru
+        Route::get('/report/surat-tugas-all', [ReportController::class, 'printAllSuratTugas'])->name('report.surat_tugas_all');
 
 
     });
