@@ -20,7 +20,9 @@ class Teacher extends Model
         'date_of_birth',
         'address',
         'education_level',
-        'major_id'
+        'major_id',
+        'golongan',
+        'pangkat'
     ];
 
     /**

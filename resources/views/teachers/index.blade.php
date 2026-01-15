@@ -16,7 +16,7 @@
                 </ol>
             </nav>
         </div>
-       
+
     </div>
     <!--end breadcrumb-->
 
@@ -163,6 +163,14 @@
                                                                         <div class="mb-3">
                                                                             <label class="form-label">No. HP</label>
                                                                             <input type="text" name="phone" class="form-control" value="{{ $teacher->phone }}">
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Pangkat</label>
+                                                                            <input type="text" name="pangkat" class="form-control" value="{{ $teacher->pangkat }}">
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Golongan</label>
+                                                                            <input type="text" name="golongan" class="form-control" value="{{ $teacher->golongan }}">
                                                                         </div>
 
                                                                         <!-- Jika ada kolom jurusan (major_id) di table teachers -->

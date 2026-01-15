@@ -58,7 +58,7 @@ class TeacherController extends Controller
     public function update(Request $request, $id)
     {
         $teacher = Teacher::findOrFail($id);
-        
+
         $request->validate([
             'name'   => 'required|string|max:255',
             'nip'    => 'nullable|string|max:50|unique:teachers,nip,' . $id,
@@ -78,6 +78,8 @@ class TeacherController extends Controller
             'gender'  => $request->gender,
             'address' => $request->address,
             'major_id' => $request->major_id,
+            'pangkat' => $request->pangkat,
+            'golongan' => $request->golongan,
         ]);
 
         return redirect()->route('teachers.index')->with('success', 'Data guru berhasil diperbarui.');
@@ -89,9 +91,9 @@ class TeacherController extends Controller
     public function destroy($id)
     {
         $teacher = Teacher::findOrFail($id);
-        
+
         // Hapus usernya, otomatis teacher terhapus karena cascade delete
-        $teacher->user->delete(); 
+        $teacher->user->delete();
 
         return redirect()->route('teachers.index')->with('success', 'Data guru dan akun login berhasil dihapus.');
     }

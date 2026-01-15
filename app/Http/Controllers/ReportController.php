@@ -2304,6 +2304,9 @@ class ReportController extends Controller
             'sign_name'  => Setting::value('signature_name', 'Administrator'),
             'sign_nip'   => Setting::value('signature_nip', '-'),
             'sign_image' => $imageToBase64(Setting::value('signature_image')),
+            'nip_surat'   => Setting::value('nip_surat', '-'),
+            'ttd_surat'   => Setting::value('ttd_surat', '-'),
+            'nomor_surat'   => Setting::value('nomor_surat', '-'),
         ];
     }
 }

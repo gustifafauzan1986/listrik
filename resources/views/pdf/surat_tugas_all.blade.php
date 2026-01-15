@@ -85,7 +85,7 @@
             <!-- JUDUL -->
             <div class="title-surat">
                 <h3>SURAT TUGAS</h3>
-                <p>Nomor: {{ $nomorSurat }}</p>
+                <p>Nomor: {{ $school['nomor_surat'] }}</p>
             </div>
 
             <!-- PEMBUKA -->
@@ -208,8 +208,8 @@
                         <br><br><br>
                     @endif
 
-                    <p style="text-decoration: underline; font-weight: bold;">{{ $school['sign_name'] }}</p>
-                    <p>NIP. {{ $school['sign_nip'] }}</p>
+                    <p style="text-decoration: underline; font-weight: bold;">{{ $school['ttd_surat'] }}</p>
+                    <p>NIP. {{ $school['nip_surat'] }}</p>
                 </div>
                 <div style="clear: both;"></div>
             </div>

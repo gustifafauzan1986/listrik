@@ -56,6 +56,12 @@
                                 </li>
 
                                  <li class="nav-item">
+                                    <button class="nav-link fw-bold" id="surat-tab" data-bs-toggle="tab" data-bs-target="#surat" type="button">
+                                        <i class="fas fa-file-pdf me-2"></i> Surat Tugas
+                                    </button>
+                                </li>
+
+                                <li class="nav-item">
                                     <button class="nav-link fw-bold" id="absensi-tab" data-bs-toggle="tab" data-bs-target="#absensi" type="button">
                                         <i class="fas fa-file-pdf me-2"></i> Info Absensi
                                     </button>
@@ -245,15 +251,30 @@
                                     </div>
                                 </div>
 
-                                 <!-- TAB 4: Info Aplikasi -->
-                                <div class="tab-pane fade show active" id="absensi">
+                                <!-- TAB 4: Surat Tugas -->
+                                <div class="tab-pane fade" id="surat">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Nomor Surat</label>
+                                        <input type="text" name="nomor_surat" class="form-control" value="{{ $settings['nomor_surat'] ?? '800.1.11.1/002/SMKN1 BKT/I/2026.' }}">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Penanda Tangan</label>
+                                        <input type="text" name="ttd_surat" class="form-control" value="{{ $settings['ttd_surat'] ?? 'Gustifa Fauzan' }}">
+                                    </div>
+
+                                     <div class="mb-3">
+                                        <label class="form-label fw-bold">NIP Penanda Tangan</label>
+                                        <input type="text" name="nip_surat" class="form-control" value="{{ $settings['nip_surat'] ?? '19860802023211016' }}">
+                                    </div>
+                                </div>
+                                <!-- TAB 5: Info Aplikasi -->
+                                <div class="tab-pane fade" id="absensi">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Info Aplikasi</label>
                                         <input type="text" name="inf_app" class="form-control" value="{{ $settings['inf_app'] ?? 'Sistem Absensi Sekolah.' }}">
                                     </div>
                                 </div>
-
-
                             </div>
 
                             <div class="mt-4 d-grid">
