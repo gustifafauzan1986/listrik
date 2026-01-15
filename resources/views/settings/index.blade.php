@@ -253,15 +253,32 @@
 
                                 <!-- TAB 4: Surat Tugas -->
                                 <div class="tab-pane fade" id="surat">
-                                    <div class="mb-3">
+                                    <div class="mb-3 col-md-6">
                                         <label class="form-label fw-bold">Nomor Surat</label>
                                         <input type="text" name="nomor_surat" class="form-control" value="{{ $settings['nomor_surat'] ?? '800.1.11.1/002/SMKN1 BKT/I/2026.' }}">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Pejabat</label>
+                                        <input type="text" name="pejabat" class="form-control" value="{{ $settings['pejabat'] ?? 'Kepala Sekolah' }}">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Lokasi</label>
+                                        <input type="text" name="lokasi" class="form-control" value="{{ $settings['lokasi'] ?? 'Pasaman Barat' }}">
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Penanda Tangan</label>
                                         <input type="text" name="ttd_surat" class="form-control" value="{{ $settings['ttd_surat'] ?? 'Gustifa Fauzan' }}">
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Tanggal</label>
+                                        <input type="date" name="tanggal_surat" class="form-control" value="{{ $settings['ttd_surat'] ?? 'Gustifa Fauzan' }}">
+                                    </div>
+
+
 
                                      <div class="mb-3">
                                         <label class="form-label fw-bold">NIP Penanda Tangan</label>

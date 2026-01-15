@@ -42,6 +42,9 @@
         .list-container { margin-left: 15px; }
         .footer-section { margin-top: 30px; width: 100%; }
         .ttd-box { float: right; width: 300px; text-align: left; }
+        .nip{
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
@@ -197,8 +200,8 @@
             <!-- TANDA TANGAN -->
             <div class="footer-section">
                 <div class="ttd-box">
-                    <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{ date('d F Y') }}</p>
-                    <p>{{ $school['sign_title'] ?? 'Kepala,' }}</p>
+                    <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{\Carbon\Carbon::parse($school['tanggal_surat'])->translatedFormat('j F Y')  ?? date('d F Y') }}</p>
+                    <p>{{ $school['pejabat'] ?? 'Kepala,' }}</p>
 
                     @if(!empty($school['sign_image']))
                         <div style="height: 60px; margin: 5px 0;">
@@ -209,7 +212,10 @@
                     @endif
 
                     <p style="text-decoration: underline; font-weight: bold;">{{ $school['ttd_surat'] }}</p>
-                    <p>NIP. {{ $school['nip_surat'] }}</p>
+                    <div class="nip">
+                         <p>NIP. {{ $school['nip_surat'] }}</p>
+                    </div>
+
                 </div>
                 <div style="clear: both;"></div>
             </div>

@@ -2307,6 +2307,8 @@ class ReportController extends Controller
             'nip_surat'   => Setting::value('nip_surat', '-'),
             'ttd_surat'   => Setting::value('ttd_surat', '-'),
             'nomor_surat'   => Setting::value('nomor_surat', '-'),
+            'pejabat'   => Setting::value('pejabat', '-'),
+            'tanggal_surat'   => Setting::value('tanggal_surat', '-'),
         ];
     }
 }
