@@ -172,6 +172,10 @@
                                                                             <label class="form-label">Golongan</label>
                                                                             <input type="text" name="golongan" class="form-control" value="{{ $teacher->golongan }}">
                                                                         </div>
+                                                                         <div class="mb-3">
+                                                                            <label class="form-label">Tugas Tamabahan</label>
+                                                                            <input type="text" name="tugas_tambahan" class="form-control" value="{{ $teacher->tugas_tambahan }}">
+                                                                        </div>
 
                                                                         <!-- Jika ada kolom jurusan (major_id) di table teachers -->
                                                                         @if(\Schema::hasColumn('teachers', 'major_id'))

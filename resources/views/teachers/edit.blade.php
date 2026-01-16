@@ -64,6 +64,11 @@
                                 <textarea name="address" class="form-control" rows="2">{{ old('address', $teacher->address) }}</textarea>
                             </div>
 
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Alamat</label>
+                                <textarea name="address" class="form-control" rows="2">{{ old('tugas_tambahan', $teacher->tugas_tambahan) }}</textarea>
+                            </div>
+
                             <hr>
 
                             <div class="d-flex justify-content-between">

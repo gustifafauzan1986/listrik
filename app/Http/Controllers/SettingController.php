@@ -56,7 +56,9 @@ class SettingController extends Controller
             'logo_right',     // Logo Kop Surat Kanan (Lama)
             'app_favicon',    // Favicon Browser (Baru)
             'app_logo',       // Logo Sidebar/Navbar (Baru)
-            'signature_image' // Scan Tanda Tangan (Baru)
+            'signature_image', // Scan Tanda Tangan (Baru)
+            'ttd_pejabat',
+            'stempel'
         ];
 
        // 2. Handle Upload Logo (Kiri & Kanan) - Kode lama tetap
@@ -87,7 +89,7 @@ class SettingController extends Controller
                 Setting::updateOrCreate(['key' => $key], ['value' => $path]);
             }
         }
-        $data = $request->except(['_token', '_method', 'logo_left', 'logo_right', 'app_favicon', 'app_logo', 'signature_image']);
+        $data = $request->except(['_token', '_method', 'logo_left', 'logo_right', 'app_favicon', 'app_logo', 'signature_image', 'ttd_pejabat', 'stempel']);
 
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(

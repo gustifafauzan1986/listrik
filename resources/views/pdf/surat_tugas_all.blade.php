@@ -40,11 +40,38 @@
         .schedule-table th { background-color: #f0f0f0; font-weight: bold; }
         .col-left { text-align: left !important; padding-left: 5px; }
         .list-container { margin-left: 15px; }
-        .footer-section { margin-top: 30px; width: 100%; }
+        .footer-section { margin-top: 20px; width: 100%; }
         .ttd-box { float: right; width: 300px; text-align: left; }
         .nip{
             margin-top: 0;
         }
+        /* Container untuk membungkus TTD dan Stempel agar bisa tumpuk */
+        .signature-wrapper {
+            position: relative;
+            height: 90px; /* Sesuaikan tinggi area tanda tangan */
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        /* Gambar Tanda Tangan */
+        .img-sign {
+            position: absolute;
+            z-index: 10; /* TTD di atas stempel */
+            height: 120px;
+            left: 20px; /* Geser sedikit ke kanan */
+            top: 0;
+        }
+
+        /* Gambar Stempel */
+        .img-stamp {
+            position: absolute;
+            z-index: 5; /* Stempel di bawah TTD */
+            height: 125px; /* Sedikit lebih besar dari TTD */
+            left: -30px; /* Geser ke kiri agar kena bagian kiri TTD */
+            top: -5px;
+            opacity: 0.8; /* Transparansi agar terlihat natural */
+        }
+        /* --------------------------------------------- */
     </style>
 </head>
 <body>
@@ -70,12 +97,11 @@
                         @endif
                     </td>
                     <td width="70%" class="school-info">
-                        <h2>PEMERINTAH PROVINSI SUMATERA BARAT</h2>
+                        <h2>PEMERINTAH {{ strtoUpper($school['provinsi_name']) ?? 'PROVINSI SUMATERA BARA' }}</h2>
                         <h2>DINAS PENDIDIKAN</h2>
                         <h1>{{ $school['school_name'] ?? 'SMK NEGERI 1 BUKITTINGGI' }}</h1>
                         <p>{{ $school['school_address'] ?? 'Alamat Sekolah' }}</p>
-                        <p>Telp./Fax (0752) 32330 | Email: {{ $school['school_email'] ?? 'smkn1.bukittinggi@gmail.com' }}</p>
-                        <p>Website: {{ $school['school_web'] ?? 'www.smkn1bukittinggi.sch.id' }}</p>
+                        <p>Email: {{ $school['school_email'] ?? 'smkn1.bukittinggi@gmail.com' }} | Website: {{ $school['school_web'] ?? 'www.smkn1bukittinggi.sch.id' }}
                     </td>
                     <td width="15%" style="text-align: center; vertical-align: middle;">
                         @if(!empty($school['logo_right']))
@@ -188,34 +214,38 @@
             <div class="content">
                 Diharapkan Kepada saudara untuk menyiapkan :
                 <div class="list-container">
-                    1. Administrasi Pembelajaran yang meliputi ;
+                    1. Administrasi Pembelajaran yang meliputi:
                     <div style="margin-left: 15px; font-style: italic;">
-                        (Capaian Pembelajaran, Tujuan Pembelajaran, Alur Tujuan Pembelajaran, KKTP, Program Tahunan, Program Semester, Modul Ajar, Materi Ajar, Asesment Diagnostig, Formatif, Sumatif, LKPD/Jobshet)
+                        (Kalender Pendidikan, Rincian Minggu Efektif, Program Tahunan, Program Semester, Capaian Pembelajaran, Pemetaan Elemen Fase, Analisis CP - TP - ATP, ITP / KKTP, Pemetaan Asesmen, RPP/MA, Media Ajar, Materi Ajar, Jadwal Kontak Kelas, Agenda Mengajar, Absensi Siswa, Asesmen, Daftar Nilai, Program Remedial dan Program Pengayaan)
                     </div>
                     2. Administrasi pembelajaran dibuat bersama KKG per-mata pelajaran
                 </div>
-                <p style="margin-top: 10px;">Demikian surat tugas ini di buat untuk dilaksanakan sesuai dengan ketentuan dan penuh rasa tanggung jawab.</p>
+                <p style="margin-top: 10px; margin-bottom: 1px;">Demikian surat tugas ini di buat untuk dilaksanakan sesuai dengan ketentuan dan penuh rasa tanggung jawab.</p>
             </div>
 
             <!-- TANDA TANGAN -->
             <div class="footer-section">
                 <div class="ttd-box">
-                    <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{\Carbon\Carbon::parse($school['tanggal_surat'])->translatedFormat('j F Y')  ?? date('d F Y') }}</p>
-                    <p>{{ $school['pejabat'] ?? 'Kepala,' }}</p>
+                    <p style="margin-bottom: 1px; margin-bottom: 1px;">{{ $school['lokasi'] ?? 'Bukittinggi' }}, {{\Carbon\Carbon::parse($school['tanggal_surat'])->translatedFormat('j F Y') ?? date('d F Y') }}</p>
+                    
+                    <p style="margin-top: 1px;">{{ $school['sign_title'] ?? 'Kepala,' }}</p>
 
-                    @if(!empty($school['sign_image']))
-                        <div style="height: 60px; margin: 5px 0;">
-                            <img src="{{ $school['sign_image'] }}" style="height: 60px; max-width: 100%;">
-                        </div>
-                    @else
-                        <br><br><br>
-                    @endif
-
-                    <p style="text-decoration: underline; font-weight: bold;">{{ $school['ttd_surat'] }}</p>
-                    <div class="nip">
-                         <p>NIP. {{ $school['nip_surat'] }}</p>
+                    <div class="signature-wrapper">
+                        
+                        @if(!empty($school['stempel'])) 
+                            <img src="{{ $school['stempel'] }}" class="img-stamp">
+                        @endif
+                        
+                        @if(!empty($school['ttd_pejabat']))
+                            <img src="{{ $school['ttd_pejabat'] }}" class="img-sign">
+                        @else
+                            <div style="height: 80px;"></div> 
+                        @endif
+                        
                     </div>
 
+                    <p style="text-decoration: underline; font-weight: bold; position: relative; z-index: 11; margin-bottom: 1px; margin-top: 1px;">{{ $school['ttd_surat'] }}</p>
+                    <p style="margin-top: 1px;">NIP. {{ $school['nip_surat'] }}</p>
                 </div>
                 <div style="clear: both;"></div>
             </div>

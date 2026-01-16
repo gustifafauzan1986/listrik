@@ -80,6 +80,7 @@ class TeacherController extends Controller
             'major_id' => $request->major_id,
             'pangkat' => $request->pangkat,
             'golongan' => $request->golongan,
+            'tugas_tambahan' => $request->tugas_tambahan,
         ]);
 
         return redirect()->route('teachers.index')->with('success', 'Data guru berhasil diperbarui.');

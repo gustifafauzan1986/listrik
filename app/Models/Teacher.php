@@ -22,7 +22,8 @@ class Teacher extends Model
         'education_level',
         'major_id',
         'golongan',
-        'pangkat'
+        'pangkat',
+        'tugas_tambahan'
     ];
 
     /**

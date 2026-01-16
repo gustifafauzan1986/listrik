@@ -269,13 +269,13 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-bold">Penanda Tangan</label>
+                                        <label class="form-label fw-bold">Nama Pejabat</label>
                                         <input type="text" name="ttd_surat" class="form-control" value="{{ $settings['ttd_surat'] ?? 'Gustifa Fauzan' }}">
                                     </div>
 
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Tanggal</label>
-                                        <input type="date" name="tanggal_surat" class="form-control" value="{{ $settings['ttd_surat'] ?? 'Gustifa Fauzan' }}">
+                                        <input type="date" name="tanggal_surat" class="form-control" value="{{ $settings['tanggal_surat'] ?? '01-01-2026' }}">
                                     </div>
 
 
@@ -284,6 +284,38 @@
                                         <label class="form-label fw-bold">NIP Penanda Tangan</label>
                                         <input type="text" name="nip_surat" class="form-control" value="{{ $settings['nip_surat'] ?? '19860802023211016' }}">
                                     </div>
+
+                                    <!-- INPUT TANDA TANGAN PEJABAT -->
+                                        <div class="mb-3 col-12">
+                                            <label class="form-label fw-bold">Scan Tanda Tangan (Opsional)</label>
+                                            <div class="d-flex align-items-center">
+                                                @if(isset($settings['ttd_pejabat']) && $settings['ttd_pejabat'])
+                                                    <div class="p-1 border rounded me-3">
+                                                        <img src="{{ asset('storage/'.$settings['ttd_pejabat']) }}" style="height: 60px;">
+                                                    </div>
+                                                @endif
+                                                <div class="flex-grow-1">
+                                                    <input type="file" name="ttd_pejabat" class="form-control form-control-sm accept-image">
+                                                    <div class="form-text">Upload gambar tanda tangan (PNG transparan) jika ingin muncul otomatis di PDF.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- INPUT STEMPEL -->
+                                        <div class="mb-3 col-12">
+                                            <label class="form-label fw-bold">Scan Stempel (Opsional)</label>
+                                            <div class="d-flex align-items-center">
+                                                @if(isset($settings['stempel']) && $settings['stempel'])
+                                                    <div class="p-1 border rounded me-3">
+                                                        <img src="{{ asset('storage/'.$settings['stempel']) }}" style="height: 60px;">
+                                                    </div>
+                                                @endif
+                                                <div class="flex-grow-1">
+                                                    <input type="file" name="stempel" class="form-control form-control-sm accept-image">
+                                                    <div class="form-text">Upload Stempel (PNG transparan) jika ingin muncul otomatis di PDF.</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                 </div>
                                 <!-- TAB 5: Info Aplikasi -->
                                 <div class="tab-pane fade" id="absensi">

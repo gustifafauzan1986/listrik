@@ -33,42 +33,13 @@
         .schedule-table th { background-color: #f0f0f0; font-weight: bold; }
         .col-left { text-align: left !important; padding-left: 5px; }
         .list-container { margin-left: 15px; }
-        
-        /* --- STYLE BARU UNTUK FOOTER TTD & STEMPEL --- */
         .footer-section { margin-top: 30px; width: 100%; }
-        .ttd-box { float: right; width: 320px; text-align: left; position: relative; }
-        
-        /* Container untuk membungkus TTD dan Stempel agar bisa tumpuk */
-        .signature-wrapper {
-            position: relative;
-            height: 90px; /* Sesuaikan tinggi area tanda tangan */
-            width: 100%;
-            margin: 5px 0;
-        }
-        
-        /* Gambar Tanda Tangan */
-        .img-sign {
-            position: absolute;
-            z-index: 10; /* TTD di atas stempel */
-            height: 80px;
-            left: 20px; /* Geser sedikit ke kanan */
-            top: 0;
-        }
-
-        /* Gambar Stempel */
-        .img-stamp {
-            position: absolute;
-            z-index: 5; /* Stempel di bawah TTD */
-            height: 85px; /* Sedikit lebih besar dari TTD */
-            left: -30px; /* Geser ke kiri agar kena bagian kiri TTD */
-            top: -5px;
-            opacity: 0.8; /* Transparansi agar terlihat natural */
-        }
-        /* --------------------------------------------- */
+        .ttd-box { float: right; width: 300px; text-align: left; }
     </style>
 </head>
 <body>
 
+    <!-- KOP SURAT (Base64 Images) -->
     <table class="header-table">
         <tr>
             <td width="15%" style="text-align: center; vertical-align: middle;">
@@ -92,15 +63,18 @@
         </tr>
     </table>
 
+    <!-- JUDUL -->
     <div class="title-surat">
         <h3>SURAT TUGAS</h3>
         <p>Nomor: {{ $nomorSurat }}</p>
     </div>
 
+    <!-- PEMBUKA -->
     <div class="content">
         Guna kelancaran Kegiatan Pembelajaran pada Semester {{ $semester }} Tahun Pelajaran {{ $tahunAjaran }}, maka Kepala {{ $school['school_name'] }} menugaskan saudara:
     </div>
 
+    <!-- BIODATA GURU -->
     <table class="bio-table">
         <tr>
             <td class="bio-label">Nama</td><td class="bio-sep">:</td>
@@ -131,6 +105,7 @@
         Dengan ketentuan :
     </div>
 
+    <!-- TABEL JADWAL -->
     <table class="schedule-table">
         <thead>
             <tr>
@@ -144,29 +119,35 @@
             </tr>
         </thead>
         <tbody>
-            @php $no = 1; $totalJam = 0; @endphp
+            @php $no = 1; @endphp
             @forelse($schedules as $sched)
             @php
                 $hariIndo = ['Monday'=>'Senin', 'Tuesday'=>'Selasa', 'Wednesday'=>'Rabu', 'Thursday'=>'Kamis', 'Friday'=>'Jumat', 'Saturday'=>'Sabtu', 'Sunday'=>'Minggu'];
                 $hari = $hariIndo[trim($sched->day)] ?? $sched->day;
+
+                // Gunakan format jam yang sudah disiapkan Controller (07:00 dan 09:15)
+                // Hapus detik jika ada
                 $jamMulai = substr($sched->start_time, 0, 5);
                 $jamSelesai = substr($sched->end_time, 0, 5);
-                $jp = $sched->calculated_jp ?? 0;
-                $totalJam += $jp;
             @endphp
             <tr>
                 <td>{{ $no++ }}</td>
                 <td>{{ $hari }}</td>
                 <td>{{ $sched->classroom->name ?? '-' }}</td>
                 <td>{{ $jamMulai }} - {{ $jamSelesai }}</td>
-                <td>{{ $jp }}</td>
+                <td>{{ $sched->calculated_jp ?? 0 }}</td>
+
+                <!-- Menggunakan merged_room dari controller -->
+                {{-- <td>{{ $sched->merged_room ?? '-' }}</td> --}}
                 <td>{{ !empty($sched->merged_room) ? $sched->merged_room : ($sched->getAttribute('room') ?? '-') }}</td>
+
                 <td>{{ $sched->subject->code ?? 'PBM' }}</td>
             </tr>
             @empty
             <tr><td colspan="7">Belum ada jadwal mengajar.</td></tr>
             @endforelse
 
+            <!-- TUGAS TAMBAHAN -->
             @if(!empty($teacher->tugas_tambahan))
             <tr>
                 <td></td><td></td><td colspan="2" class="col-left" style="font-weight: bold;">TUGAS TAMBAHAN SEBAGAI</td>
@@ -179,6 +160,7 @@
             @php $totalJam += 12; @endphp
             @endif
 
+            <!-- TOTAL -->
             <tr>
                 <td colspan="4" style="text-align: right; font-weight: bold; padding-right: 10px;">Jumlah</td>
                 <td style="font-weight: bold;">{{ $totalJam }}</td>
@@ -187,6 +169,7 @@
         </tbody>
     </table>
 
+    <!-- INTRUKSI BAWAH -->
     <div class="content">
         Diharapkan Kepada saudara untuk menyiapkan :
         <div class="list-container">
@@ -199,26 +182,22 @@
         <p style="margin-top: 10px;">Demikian surat tugas ini di buat untuk dilaksanakan sesuai dengan ketentuan dan penuh rasa tanggung jawab.</p>
     </div>
 
+    <!-- TANDA TANGAN -->
     <div class="footer-section">
         <div class="ttd-box">
+            <!-- TANGGAL OTOMATIS SESUAI HARI INI ATAU BULAN SURAT -->
             <p>{{ $school['sign_city'] ?? 'Bukittinggi' }}, {{ date('d F Y') }}</p>
             <p>{{ $school['sign_title'] ?? 'Kepala,' }}</p>
 
-            <div class="signature-wrapper">
-                
-                @if(!empty($school['stempel'])) 
-                    <img src="{{ $school['stempel'] }}" class="img-stamp">
-                @endif
-                
-                @if(!empty($school['ttd_pejabat']))
-                    <img src="{{ $school['ttd_pejabat'] }}" class="img-sign">
-                @else
-                    <div style="height: 80px;"></div> 
-                @endif
-                
-            </div>
+            @if(!empty($school['sign_image']))
+                <div style="height: 60px; margin: 5px 0;">
+                    <img src="{{ $school['sign_image'] }}" style="height: 60px; max-width: 100%;">
+                </div>
+            @else
+                <br><br><br>
+            @endif
 
-            <p style="text-decoration: underline; font-weight: bold; position: relative; z-index: 11;">{{ $school['sign_name'] }}</p>
+            <p style="text-decoration: underline; font-weight: bold;">{{ $school['sign_name'] }}</p>
             <p>NIP. {{ $school['sign_nip'] }}</p>
         </div>
         <div style="clear: both;"></div>

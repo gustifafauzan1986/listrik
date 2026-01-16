@@ -110,7 +110,7 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{route('print.index')}}"><i class='bx bx-id-card'></i>Kartu</a></li>
-						<li> <a href="{{route('report.surat_tugas_all')}}"><i class='bx bx-id-card'></i>Surat Tugas</a></li>
+						<li> <a href="{{route('report.surat_tugas_all')}}" target="_blank"><i class='bx bx-id-card'></i>Surat Tugas</a></li>
 
 
 					</ul>
