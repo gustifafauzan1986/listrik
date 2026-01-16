@@ -30,7 +30,7 @@
         .title-surat { text-align: center; margin-bottom: 20px; }
         .title-surat h3 { margin: 0; text-decoration: underline; font-size: 14pt; text-transform: uppercase; }
         .title-surat p { margin: 0; font-size: 12pt; }
-        .content { text-align: justify; margin-bottom: 15px; }
+        .content { text-align: justify; margin-bottom: 3px; }
         .bio-table { width: 100%; margin-bottom: 15px; }
         .bio-table td { vertical-align: top; padding: 2px 0; }
         .bio-label { width: 160px; }
@@ -40,8 +40,8 @@
         .schedule-table th { background-color: #f0f0f0; font-weight: bold; }
         .col-left { text-align: left !important; padding-left: 5px; }
         .list-container { margin-left: 15px; }
-        .footer-section { margin-top: 20px; width: 100%; }
-        .ttd-box { float: right; width: 300px; text-align: left; }
+        .footer-section { margin-top: 2px; width: 100%; }
+        .ttd-box { float: right; width: 300px; text-align: left; margin-top: 2px;}
         .nip{
             margin-top: 0;
         }
