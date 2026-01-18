@@ -92,8 +92,8 @@
             <table class="header-table">
                 <tr>
                     <td width="15%" style="text-align: center; vertical-align: middle;">
-                        @if(!empty($school['logo_left']))
-                            <img src="{{ $school['logo_left'] }}" class="logo-img">
+                        @if(!empty($school['logo_left_st']))
+                            <img src="{{ $school['logo_left_st'] }}" class="logo-img">
                         @endif
                     </td>
                     <td width="70%" class="school-info">
@@ -104,8 +104,8 @@
                         <p>Email: {{ $school['school_email'] ?? 'smkn1.bukittinggi@gmail.com' }} | Website: {{ $school['school_web'] ?? 'www.smkn1bukittinggi.sch.id' }}
                     </td>
                     <td width="15%" style="text-align: center; vertical-align: middle;">
-                        @if(!empty($school['logo_right']))
-                            <img src="{{ $school['logo_right'] }}" class="logo-img">
+                        @if(!empty($school['logo_right_st']))
+                            <img src="{{ $school['logo_right_st'] }}" class="logo-img">
                         @endif
                     </td>
                 </tr>
@@ -189,7 +189,7 @@
                     @endforelse
 
                     <!-- TUGAS TAMBAHAN -->
-                    @if(!empty($teacher->tugas_tambahan))
+                    @if(!empty($teacher->tugas_tambahan) and $teacher->tugas_tambahan === 'Ka. Proka Teknik Ketenagalistrikan' and 'Kepala Bengkel TITL' and 'Kepala Bengkel TPTUP' )
                     <tr>
                         <td></td><td></td><td colspan="2" class="col-left" style="font-weight: bold;">TUGAS TAMBAHAN SEBAGAI</td>
                         <td></td><td></td><td></td>
@@ -199,6 +199,16 @@
                         <td>12</td><td></td><td></td>
                     </tr>
                     @php $totalJam += 12; @endphp
+                    @else
+                    <tr>
+                        <td></td><td></td><td colspan="2" class="col-left" style="font-weight: bold;">TUGAS TAMBAHAN SEBAGAI</td>
+                        <td></td><td></td><td></td>
+                    </tr>
+                    <tr>
+                        <td>{{ $no++ }}</td><td></td><td colspan="2" class="col-left">{{ $teacher->tugas_tambahan }}</td>
+                        <td>2</td><td></td><td></td>
+                    </tr>
+                    @php $totalJam += 2; @endphp
                     @endif
 
                     <!-- TOTAL -->

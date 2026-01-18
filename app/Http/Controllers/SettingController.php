@@ -53,7 +53,9 @@ class SettingController extends Controller
         // 2. Daftar File yang akan diproses
         $filesToUpload = [
             'logo_left',      // Logo Kop Surat Kiri (Lama)
+            'logo_left_st',      // Logo Kop Surat Kiri (Lama)
             'logo_right',     // Logo Kop Surat Kanan (Lama)
+            'logo_right_st',     // Logo Kop Surat Kanan (Lama)
             'app_favicon',    // Favicon Browser (Baru)
             'app_logo',       // Logo Sidebar/Navbar (Baru)
             'signature_image', // Scan Tanda Tangan (Baru)
@@ -89,7 +91,7 @@ class SettingController extends Controller
                 Setting::updateOrCreate(['key' => $key], ['value' => $path]);
             }
         }
-        $data = $request->except(['_token', '_method', 'logo_left', 'logo_right', 'app_favicon', 'app_logo', 'signature_image', 'ttd_pejabat', 'stempel']);
+        $data = $request->except(['_token', '_method', 'logo_left', 'logo_left_st', 'logo_right', 'logo_right_st', 'app_favicon', 'app_logo', 'signature_image', 'ttd_pejabat', 'stempel']);
 
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(

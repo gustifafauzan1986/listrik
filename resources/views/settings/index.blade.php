@@ -316,6 +316,38 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="pb-4 mb-4 row border-bottom">
+                                        <!-- Logo Kiri -->
+                                        <div class="text-center col-md-6 border-end">
+                                            <label class="form-label fw-bold">Logo Kiri (Kop Surat)</label>
+                                            <div class="mb-2 d-flex justify-content-center">
+                                                @if(isset($settings['logo_left_st']) && $settings['logo_left_st'])
+                                                    <img src="{{ asset('storage/'.$settings['logo_left_st']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
+                                                @else
+                                                    <div class="p-3 border rounded text-muted" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                                        <i class="fas fa-image fa-2x text-secondary"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <input type="file" name="logo_left_st" class="form-control form-control-sm accept-image">
+                                        </div>
+                                        <!-- Logo Kanan -->
+                                        <div class="text-center col-md-6">
+                                            <label class="form-label fw-bold">Logo Kanan (Kop Surat)</label>
+                                            <div class="mb-2 d-flex justify-content-center">
+                                                @if(isset($settings['logo_right_st']) && $settings['logo_right_st'])
+                                                    <img src="{{ asset('storage/'.$settings['logo_right_st']) }}" style="height: 80px; border: 1px solid #ddd; padding: 5px;">
+                                                @else
+                                                    <div class="p-3 border rounded text-muted" style="height: 80px; width: 80px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                                        <i class="fas fa-image fa-2x text-secondary"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <input type="file" name="logo_right_st" class="form-control form-control-sm accept-image">
+                                        </div>
+                                    </div>
+
                                 </div>
                                 <!-- TAB 5: Info Aplikasi -->
                                 <div class="tab-pane fade" id="absensi">
