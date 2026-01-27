@@ -14,7 +14,8 @@ class TeachingJournal extends Model
         'topic',
         'activity',
         'notes',
-        'photo_evidence'
+        'photo_evidence',
+        'date'
     ];
 
     public function schedule()

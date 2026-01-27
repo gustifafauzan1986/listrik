@@ -180,6 +180,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/daily-attendance/bulk', [DailyAttendanceController::class, 'storeBulk'])->name('daily.store_bulk');
 
                 // Routes Jurnal Pembelajaran
+        Route::get('/journal', [TeachingJournalController::class, 'index'])->name('journal.index');
         Route::post('/journal/store', [TeachingJournalController::class, 'store'])->name('journal.store');
         Route::get('/journal/show/{schedule_id}', [TeachingJournalController::class, 'show'])->name('journal.show');
 
