@@ -426,6 +426,109 @@ class ReportController extends Controller
     //     return $pdf->stream('Laporan-Absensi-Jurnal.pdf');
     // }
 
+    // {
+    //     $startDate = null;
+    //     $endDate = null;
+    //     $labelPeriode = "";
+
+    //     // 1. TENTUKAN PERIODE
+    //     switch ($request->periode) {
+    //         case 'harian':
+    //             $startDate = $request->tanggal;
+    //             $endDate = $request->tanggal;
+    //             $labelPeriode = "Harian (" . Carbon::parse($startDate)->translatedFormat('d F Y') . ")";
+    //             break;
+    //         case 'mingguan':
+    //             $startDate = $request->start_date;
+    //             $endDate = $request->end_date;
+    //             $labelPeriode = "Mingguan (" . Carbon::parse($startDate)->format('d/m') . " - " . Carbon::parse($endDate)->format('d/m/Y') . ")";
+    //             break;
+    //         case 'bulanan':
+    //             $startDate = Carbon::createFromDate($request->tahun_bulan, $request->bulan, 1)->startOfMonth()->format('Y-m-d');
+    //             $endDate = Carbon::createFromDate($request->tahun_bulan, $request->bulan, 1)->endOfMonth()->format('Y-m-d');
+    //             $labelPeriode = "Bulan " . Carbon::createFromDate($request->tahun_bulan, $request->bulan, 1)->translatedFormat('F Y');
+    //             break;
+    //         case 'semester':
+    //             if ($request->semester == 'ganjil') {
+    //                 $startDate = $request->tahun_semester . '-07-01';
+    //                 $endDate   = $request->tahun_semester . '-12-31';
+    //                 $labelPeriode = "Semester Ganjil T.A " . $request->tahun_semester . "/" . ($request->tahun_semester + 1);
+    //             } else {
+    //                 $startDate = ($request->tahun_semester + 1) . '-01-01';
+    //                 $endDate   = ($request->tahun_semester + 1) . '-06-30';
+    //                 $labelPeriode = "Semester Genap T.A " . $request->tahun_semester . "/" . ($request->tahun_semester + 1);
+    //             }
+    //             break;
+    //     }
+
+    //     $school = $this->getSchoolData();
+
+    //     // 2. QUERY ABSENSI
+    //     $query = Attendance::with(['student', 'schedule.subject', 'classroom'])
+    //         ->whereBetween('date', [$startDate, $endDate])
+    //         ->orderBy('date', 'asc')
+    //         ->orderBy('check_in_time', 'asc');
+
+    //     $labelTambahan = null;
+    //     if ($request->filled('classroom_id')) {
+    //         $query->whereHas('student', function ($q) use ($request) {
+    //             $q->where('classroom_id', $request->classroom_id);
+    //         });
+    //         $kelas = Classroom::find($request->classroom_id);
+    //         if ($kelas) $labelTambahan = "Kelas: " . $kelas->name;
+    //     }
+
+    //     $attendances = $query->get();
+
+    //     if ($attendances->isEmpty()) {
+    //         return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
+    //     }
+
+    //     // 3. QUERY JURNAL PEMBELAJARAN (FIXED)
+    //     // Ambil semua jurnal yang sesuai dengan jadwal dan rentang tanggal yang dipilih
+    //     $journals = collect(); // Default collection kosong
+        
+    //     if ($attendances->isNotEmpty()) {
+    //         // Ambil daftar ID Jadwal dari data absensi yang ditemukan
+    //         $scheduleIds = $attendances->pluck('schedule_id')->unique()->filter();
+            
+    //         if ($scheduleIds->isNotEmpty()) {
+    //             // Ambil jurnal berdasarkan jadwal dan RENTANG TANGGAL yang sesuai
+    //             // Menggunakan whereBetween pada kolom 'date' jurnal agar sesuai periode laporan
+    //             $journals = TeachingJournal::with(['schedule.subject', 'schedule.classroom'])
+    //                         ->whereIn('schedule_id', $scheduleIds)
+    //                         ->whereBetween('date', [$startDate, $endDate]) // Filter by DATE range
+    //                         ->orderBy('date', 'asc')
+    //                         ->get();
+    //         }
+    //     }
+
+    //     // Ambil satu jurnal untuk view harian (opsional, untuk kompatibilitas jika view lama pakai $journal)
+    //     $journal = $journals->first();
+
+    //     // 4. CEK USER LOGIN (GURU / ADMIN)
+    //     $user = Auth::user();
+    //     $isTeacher = false;
+        
+    //     if ($user->teacher) {
+    //         $isTeacher = true;
+    //     }
+
+    //     // 5. LOAD VIEW PDF
+    //     $pdf = Pdf::loadView('report.pdf_view_admin', compact(
+    //         'attendances', 
+    //         'journals', // Kirim collection jurnal (untuk loop semua jurnal dalam periode)
+    //         'journal',  // Kirim single jurnal (untuk view harian/lama)
+    //         'labelPeriode', 'labelTambahan', 
+    //         'startDate', 'endDate', 'school', 'isTeacher', 'user'
+    //     ));
+        
+    //     $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
+    //     $pdf->setOptions(['isRemoteEnabled' => true, 'isPhpEnabled' => true, 'chroot' => public_path()]);
+        
+    //     return $pdf->stream('Laporan-Absensi-Jurnal.pdf');
+    // }
+
         {
         $startDate = null;
         $endDate = null;
@@ -484,26 +587,22 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'Data absensi tidak ditemukan pada periode/filter yang dipilih.');
         }
 
-        // 3. QUERY JURNAL PEMBELAJARAN (FIXED)
-        // Ambil semua jurnal yang sesuai dengan jadwal dan rentang tanggal yang dipilih
-        $journals = collect(); // Default collection kosong
-        
-        if ($attendances->isNotEmpty()) {
-            // Ambil daftar ID Jadwal dari data absensi yang ditemukan
-            $scheduleIds = $attendances->pluck('schedule_id')->unique()->filter();
-            
-            if ($scheduleIds->isNotEmpty()) {
-                // Ambil jurnal berdasarkan jadwal dan RENTANG TANGGAL yang sesuai
-                // Menggunakan whereBetween pada kolom 'date' jurnal agar sesuai periode laporan
-                $journals = TeachingJournal::with(['schedule.subject', 'schedule.classroom'])
-                            ->whereIn('schedule_id', $scheduleIds)
-                            ->whereBetween('date', [$startDate, $endDate]) // Filter by DATE range
-                            ->orderBy('date', 'asc')
-                            ->get();
-            }
+        // 3. QUERY JURNAL PEMBELAJARAN (PERBAIKAN)
+        // Mengambil semua jurnal dalam rentang tanggal & filter kelas yang sama
+        $journalQuery = TeachingJournal::with(['schedule.subject', 'schedule.classroom'])
+                        ->whereBetween('date', [$startDate, $endDate])
+                        ->orderBy('date', 'asc');
+
+        // Terapkan filter kelas yang sama ke Jurnal (via relasi schedule->classroom)
+        if ($request->filled('classroom_id')) {
+            $journalQuery->whereHas('schedule', function($q) use ($request) {
+                $q->where('classroom_id', $request->classroom_id);
+            });
         }
 
-        // Ambil satu jurnal untuk view harian (opsional, untuk kompatibilitas jika view lama pakai $journal)
+        $journals = $journalQuery->get();
+        
+        // Ambil satu jurnal untuk view harian (opsional, untuk kompatibilitas jika view lama pakai variable $journal)
         $journal = $journals->first();
 
         // 4. CEK USER LOGIN (GURU / ADMIN)
@@ -517,8 +616,8 @@ class ReportController extends Controller
         // 5. LOAD VIEW PDF
         $pdf = Pdf::loadView('report.pdf_view_admin', compact(
             'attendances', 
-            'journals', // Kirim collection jurnal (untuk loop semua jurnal dalam periode)
-            'journal',  // Kirim single jurnal (untuk view harian/lama)
+            'journals', // Kirim list jurnal lengkap
+            'journal',  // Kirim single jurnal (fallback)
             'labelPeriode', 'labelTambahan', 
             'startDate', 'endDate', 'school', 'isTeacher', 'user'
         ));
