@@ -389,7 +389,7 @@ class ReportController extends Controller
 
     //     if ($attendances->isNotEmpty()) {
     //         $scheduleIds = $attendances->pluck('schedule_id')->unique()->filter();
-            
+
     //         if ($scheduleIds->isNotEmpty()) {
     //             // Ambil jurnal berdasarkan jadwal dan TANGGAL yang sesuai
     //             $journals = TeachingJournal::with(['schedule.subject', 'schedule.classroom'])
@@ -406,23 +406,23 @@ class ReportController extends Controller
     //     // 4. CEK USER LOGIN (GURU / ADMIN)
     //     $user = Auth::user();
     //     $isTeacher = false;
-        
+
     //     if ($user->teacher) {
     //         $isTeacher = true;
     //     }
 
     //     // 5. LOAD VIEW PDF
     //     $pdf = Pdf::loadView('report.pdf_view_admin', compact(
-    //         'attendances', 
+    //         'attendances',
     //         'journals', // Kirim collection jurnal (untuk loop)
     //         'journal',  // Kirim single jurnal (untuk view lama)
-    //         'labelPeriode', 'labelTambahan', 
+    //         'labelPeriode', 'labelTambahan',
     //         'startDate', 'endDate', 'school', 'isTeacher', 'user'
     //     ));
-        
+
     //     $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
     //     $pdf->setOptions(['isRemoteEnabled' => true, 'isPhpEnabled' => true, 'chroot' => public_path()]);
-        
+
     //     return $pdf->stream('Laporan-Absensi-Jurnal.pdf');
     // }
 
@@ -487,11 +487,11 @@ class ReportController extends Controller
     //     // 3. QUERY JURNAL PEMBELAJARAN (FIXED)
     //     // Ambil semua jurnal yang sesuai dengan jadwal dan rentang tanggal yang dipilih
     //     $journals = collect(); // Default collection kosong
-        
+
     //     if ($attendances->isNotEmpty()) {
     //         // Ambil daftar ID Jadwal dari data absensi yang ditemukan
     //         $scheduleIds = $attendances->pluck('schedule_id')->unique()->filter();
-            
+
     //         if ($scheduleIds->isNotEmpty()) {
     //             // Ambil jurnal berdasarkan jadwal dan RENTANG TANGGAL yang sesuai
     //             // Menggunakan whereBetween pada kolom 'date' jurnal agar sesuai periode laporan
@@ -509,23 +509,23 @@ class ReportController extends Controller
     //     // 4. CEK USER LOGIN (GURU / ADMIN)
     //     $user = Auth::user();
     //     $isTeacher = false;
-        
+
     //     if ($user->teacher) {
     //         $isTeacher = true;
     //     }
 
     //     // 5. LOAD VIEW PDF
     //     $pdf = Pdf::loadView('report.pdf_view_admin', compact(
-    //         'attendances', 
+    //         'attendances',
     //         'journals', // Kirim collection jurnal (untuk loop semua jurnal dalam periode)
     //         'journal',  // Kirim single jurnal (untuk view harian/lama)
-    //         'labelPeriode', 'labelTambahan', 
+    //         'labelPeriode', 'labelTambahan',
     //         'startDate', 'endDate', 'school', 'isTeacher', 'user'
     //     ));
-        
+
     //     $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
     //     $pdf->setOptions(['isRemoteEnabled' => true, 'isPhpEnabled' => true, 'chroot' => public_path()]);
-        
+
     //     return $pdf->stream('Laporan-Absensi-Jurnal.pdf');
     // }
 
@@ -601,30 +601,30 @@ class ReportController extends Controller
         }
 
         $journals = $journalQuery->get();
-        
+
         // Ambil satu jurnal untuk view harian (opsional, untuk kompatibilitas jika view lama pakai variable $journal)
         $journal = $journals->first();
 
         // 4. CEK USER LOGIN (GURU / ADMIN)
         $user = Auth::user();
         $isTeacher = false;
-        
+
         if ($user->teacher) {
             $isTeacher = true;
         }
 
         // 5. LOAD VIEW PDF
         $pdf = Pdf::loadView('report.pdf_view_admin', compact(
-            'attendances', 
+            'attendances',
             'journals', // Kirim list jurnal lengkap
             'journal',  // Kirim single jurnal (fallback)
-            'labelPeriode', 'labelTambahan', 
+            'labelPeriode', 'labelTambahan',
             'startDate', 'endDate', 'school', 'isTeacher', 'user'
         ));
-        
+
         $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
         $pdf->setOptions(['isRemoteEnabled' => true, 'isPhpEnabled' => true, 'chroot' => public_path()]);
-        
+
         return $pdf->stream('Laporan-Absensi-Jurnal.pdf');
     }
 
@@ -634,55 +634,126 @@ class ReportController extends Controller
      * Diakses dari tombol PDF di halaman Jadwal Mengajar
      */
     public function printSchedule($id)
-    {
-        // 1. Ambil Data Jadwal
-        $schedule = Schedule::with('classroom')->findOrFail($id);
+    // {
+    //     // 1. Ambil Data Jadwal
+    //     $schedule = Schedule::with('classroom')->findOrFail($id);
 
-        // 2. Ambil Data Absensi Jadwal Tersebut
-        // Kita ambil data semester ini (opsional) atau semua history
-        $attendances = Attendance::with(['student', 'schedule'])
+    //     // 2. Ambil Data Absensi Jadwal Tersebut
+    //     // Kita ambil data semester ini (opsional) atau semua history
+    //     $attendances = Attendance::with(['student', 'schedule'])
+    //                     ->where('schedule_id', $id)
+    //                     ->orderBy('date', 'desc') // Tanggal terbaru di atas
+    //                     ->orderBy('check_in_time', 'desc')
+    //                     ->get();
+
+    //     // 3. Siapkan Variabel untuk Header PDF
+    //     // Karena view PDF kita butuh variable startDate/endDate, kita ambil dari data pertama & terakhir
+    //     if ($attendances->count() > 0) {
+    //         $startDate = $attendances->last()->date; // Tanggal terlama
+    //         $endDate = $attendances->first()->date;  // Tanggal terbaru
+    //     } else {
+    //         $startDate = date('Y-m-d');
+    //         $endDate = date('Y-m-d');
+    //     }
+
+    //     $labelPeriode = "Rekapitulasi Mata Pelajaran";
+    //     $labelTambahan = "Mapel: " . $schedule->subject->name . " - Kelas: " . ($schedule->classroom->name ?? '-');
+
+
+    //     $school = $this->getSchoolData();
+    //     // 4. Generate PDF
+    //     // Kita reuse (gunakan kembali) view 'report.pdf_view' yang sudah dibuat sebelumnya
+    //     $pdf = Pdf::loadView('report.pdf_view', compact(
+    //         'school',
+    //         'attendances',
+    //         'labelPeriode',
+    //         'labelTambahan',
+    //         'startDate',
+    //         'endDate'
+    //     ));
+
+    //     // 2. LEWATKAN data $school ke view
+    //     // Menggunakan compact() adalah cara yang ringkas
+
+    //     // Jika Anda menggunakan Dompdf (barryvdh/laravel-dompdf):
+    //     //$pdf = PDF::loadView('report.pdf_view', $data);
+
+    //     $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
+
+    //     return $pdf->stream('Laporan-' . $schedule->subject_name . '.pdf');
+
+
+    // }
+
+    {
+        // 1. Ambil Data Jadwal & Relasi
+        $schedule = Schedule::with(['classroom', 'subject', 'teacher.user'])->findOrFail($id);
+
+        // 2. Ambil Data Absensi pada Jadwal Tersebut
+        $attendances = Attendance::with(['student'])
                         ->where('schedule_id', $id)
-                        ->orderBy('date', 'desc') // Tanggal terbaru di atas
-                        ->orderBy('check_in_time', 'desc')
+                        ->orderBy('date', 'asc') // Urutkan tanggal secara kronologis (bukan desc)
+                        ->orderBy('check_in_time', 'asc')
                         ->get();
 
-        // 3. Siapkan Variabel untuk Header PDF
-        // Karena view PDF kita butuh variable startDate/endDate, kita ambil dari data pertama & terakhir
-        if ($attendances->count() > 0) {
-            $startDate = $attendances->last()->date; // Tanggal terlama
-            $endDate = $attendances->first()->date;  // Tanggal terbaru
+        // 3. Ambil Data Jurnal pada Jadwal Tersebut
+        $journals = TeachingJournal::where('schedule_id', $id)
+                        ->orderBy('date', 'asc')
+                        ->get();
+
+        // 4. Tentukan Rentang Tanggal (Min & Max) untuk Header
+        // Gabungkan tanggal dari absensi dan jurnal untuk akurasi
+        $dates = $attendances->pluck('date')
+                    ->merge($journals->pluck('date'))
+                    ->filter()
+                    ->unique()
+                    ->sort();
+
+        if ($dates->count() > 0) {
+            $startDate = $dates->first(); // Tanggal terlama (awal)
+            $endDate = $dates->last();    // Tanggal terbaru (akhir)
         } else {
-            $startDate = date('Y-m-d');
-            $endDate = date('Y-m-d');
+            $startDate = Carbon::today()->format('Y-m-d');
+            $endDate = Carbon::today()->format('Y-m-d');
         }
 
+        // 5. Siapkan Label Header
         $labelPeriode = "Rekapitulasi Mata Pelajaran";
-        $labelTambahan = "Mapel: " . $schedule->subject->name . " - Kelas: " . ($schedule->classroom->name ?? '-');
+        $teacherName = $schedule->teacher->user->name ?? 'Guru';
 
+        $labelTambahan = "Mapel: " . $schedule->subject->name .
+                         " | Kelas: " . $schedule->classroom->name .
+                         " | Guru: " . $teacherName;
 
+        // 6. Data Sekolah & Tanda Tangan
         $school = $this->getSchoolData();
-        // 4. Generate PDF
-        // Kita reuse (gunakan kembali) view 'report.pdf_view' yang sudah dibuat sebelumnya
+        $user = Auth::user();
+
+        // Logika Tanda Tangan:
+        // Jika yang login adalah guru ybs, tampilkan nama dia. Jika admin, default (Kepsek/Admin).
+        $isTeacher = false;
+        if ($user->teacher && $user->teacher->id == $schedule->teacher_id) {
+            $isTeacher = true;
+        }
+
+        // 7. Generate PDF
+        // Menggunakan view 'report.pdf_view_admin' yang sudah support tabel jurnal
         $pdf = Pdf::loadView('report.pdf_view', compact(
-            'school',
             'attendances',
+            'journals',      // Mengirim data jurnal ke view
             'labelPeriode',
             'labelTambahan',
             'startDate',
-            'endDate'
+            'endDate',
+            'school',
+            'isTeacher',
+            'user'
         ));
 
-        // 2. LEWATKAN data $school ke view
-        // Menggunakan compact() adalah cara yang ringkas
+        $pdf->setPaper($school['paper_size'] ?? 'a4', $school['paper_orientation'] ?? 'portrait');
+        $pdf->setOptions(['isRemoteEnabled' => true, 'isPhpEnabled' => true, 'chroot' => public_path()]);
 
-        // Jika Anda menggunakan Dompdf (barryvdh/laravel-dompdf):
-        //$pdf = PDF::loadView('report.pdf_view', $data);
-
-        $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
-
-        return $pdf->stream('Laporan-' . $schedule->subject_name . '.pdf');
-
-
+        return $pdf->stream('Laporan-Mapel-' . preg_replace('/[^A-Za-z0-9\-]/', '_', $schedule->subject->name) . '.pdf');
     }
 
     /**
@@ -2546,7 +2617,7 @@ class ReportController extends Controller
 
     //         $minStart = null;
     //         $maxEnd = null;
-            
+
     //         // --- FITUR NAMA RUANGAN ---
     //         $rooms = $group->map(function($item) {
     //             return $item->room->code ?? $item->room ?? null;
@@ -2554,7 +2625,7 @@ class ReportController extends Controller
     //         ->filter(function($value) { return !empty($value); })
     //         ->unique()
     //         ->implode(', ');
-            
+
     //         $schedule->merged_room = $rooms ?: '-';
 
     //         // --- CARI DURASI TOTAL (Start Paling Awal - End Paling Akhir) ---
@@ -2595,7 +2666,7 @@ class ReportController extends Controller
 
     //             // 4. Bagi 45 menit (Asumsi 1 JP = 45 menit)
     //             // Menggunakan round agar pembulatan presisi (contoh: 44 menit dianggap 1 JP)
-    //             $jp = round($netMinutes / 45); 
+    //             $jp = round($netMinutes / 45);
     //             $schedule->calculated_jp = $jp > 0 ? $jp : 1;
 
     //             // Update jam tampilan
@@ -2603,7 +2674,7 @@ class ReportController extends Controller
     //             $schedule->end_time = $maxEnd->format('H:i');
     //         } else {
     //             // Fallback jika tidak ada waktu
-    //             $schedule->calculated_jp = $group->count(); 
+    //             $schedule->calculated_jp = $group->count();
     //         }
 
     //         $totalJam += $schedule->calculated_jp;
@@ -2663,7 +2734,7 @@ class ReportController extends Controller
     //         ['start' => '15:30:00', 'end' => '15:45:00'], // Istirahat Sore (15m)
     //     ];
 
-        
+
 
     //     foreach ($groupedSchedules as $group) {
     //         $schedule = $group->first();
@@ -2699,7 +2770,7 @@ class ReportController extends Controller
     //             }
     //         }
 
-            
+
 
     //         // OPSI 1: Hitung JP dari total durasi (45 menit = 1 JP)
     //         // Contoh: 285 menit / 45 = 6.33 -> round jadi 6
@@ -2761,7 +2832,7 @@ class ReportController extends Controller
      * HELPER: MEMPROSES DATA JADWAL (GROUPING & HITUNG JAM)
      * Menggunakan input Collection Schedules secara eksplisit (Bukan relasi)
      */
-    
+
 
     /**
      * CETAK SURAT TUGAS SEMUA GURU (Batch)
