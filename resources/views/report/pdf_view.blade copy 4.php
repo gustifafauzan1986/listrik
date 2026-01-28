@@ -81,7 +81,7 @@
     </table>
 
     <!-- JUDUL LAPORAN -->
-    <h3 class="text-center" style="text-transform: uppercase; margin-bottom: 5px;">LAPORAN ABSENSI & JURNAL PEMBELAJARAN</h3>
+    <h3 class="text-center" style="text-transform: uppercase; margin-bottom: 5px;">LAPORAN ABSENSI SISWA</h3>
     <h4 class="text-center" style="margin-top: 0; font-weight: normal;">{{ $labelPeriode ?? 'Periode Laporan' }}</h4>
 
     @if(isset($labelTambahan))
