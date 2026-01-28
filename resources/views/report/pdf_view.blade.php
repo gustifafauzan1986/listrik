@@ -49,6 +49,11 @@
         /* TANDA TANGAN */
         .footer-section { margin-top: 30px; width: 100%; page-break-inside: avoid; }
         .ttd-box { float: right; width: 250px; text-align: center; }
+
+        /* UTILITAS PAGE BREAK */
+        .page-break {
+            page-break-after: always;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +178,8 @@
 
         <!-- B. TABEL JURNAL (Jika Ada) -->
         @if(isset($journals) && $journals->count() > 0)
+        <!-- Page Break agar Jurnal mulai di halaman baru (Opsional) -->
+        <div class="page-break"></div>
         <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #000; margin-top: 20px;">B. JURNAL PEMBELAJARAN</div>
         <table class="data">
             <thead>
@@ -209,15 +216,15 @@
     <!-- TANDA TANGAN (COMMON) -->
     <div class="footer-section">
         <div class="ttd-box">
-            <p>{{ $school['sign_city'] ?? 'Kota' }}, {{ date('d F Y') }}</p>
+            <p>{{ $school['sign_city'] ?? 'Kota' }}, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
 
             @if($isTeacher)
                 <p>Guru Mata Pelajaran,</p>
                 <br><br><br>
-                <p style="text-decoration: underline; font-weight: bold;">
+                <p style="text-decoration: underline; font-weight: bold; margin-bottom: 1px;">
                     {{ $teacher->user->name ?? $user->name }}
                 </p>
-                <p>NIP. {{ $user->teacher->nip ?? '-' }}</p>
+                <p style="margin-top: 1px;">NIP. {{ $user->teacher->nip ?? '-' }}</p>
             @else
                 <p>{{ $school['sign_title'] ?? 'Kepala Sekolah' }},</p>
 
@@ -229,8 +236,8 @@
                     <br><br><br>
                 @endif
 
-                <p style="text-decoration: underline; font-weight: bold;">{{ $school['sign_name'] }}</p>
-                <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p>
+                <p style="text-decoration: underline; font-weight: bold; margin-bottom: 1px;">{{ $school['sign_name'] }}</p>
+                <p style="margin-top: 1px;">NIP. {{ $school['sign_nip'] ?? '-' }}</p>
             @endif
         </div>
         <div style="clear: both;"></div>

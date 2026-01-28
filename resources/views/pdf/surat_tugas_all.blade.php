@@ -52,12 +52,12 @@
             width: 100%;
             margin: 5px 0;
         }
-        
+
         /* Gambar Tanda Tangan */
         .img-sign {
             position: absolute;
             z-index: 10; /* TTD di atas stempel */
-            height: 120px;
+            height: 130px;
             left: 20px; /* Geser sedikit ke kanan */
             top: 0;
         }
@@ -66,8 +66,8 @@
         .img-stamp {
             position: absolute;
             z-index: 5; /* Stempel di bawah TTD */
-            height: 125px; /* Sedikit lebih besar dari TTD */
-            left: -30px; /* Geser ke kiri agar kena bagian kiri TTD */
+            height: 145px; /* Sedikit lebih besar dari TTD */
+            left: -60px; /* Geser ke kiri agar kena bagian kiri TTD */
             top: -5px;
             opacity: 0.8; /* Transparansi agar terlihat natural */
         }
@@ -189,7 +189,27 @@
                     @endforelse
 
                     <!-- TUGAS TAMBAHAN -->
-                    @if(!empty($teacher->tugas_tambahan) and $teacher->tugas_tambahan === 'Ka. Proka Teknik Ketenagalistrikan' and 'Kepala Bengkel TITL' and 'Kepala Bengkel TPTUP' )
+                    @if(!empty($teacher->tugas_tambahan) and $teacher->tugas_tambahan === 'Ka. Proka Teknik Ketenagalistrikan')
+                    <tr>
+                        <td></td><td></td><td colspan="2" class="col-left" style="font-weight: bold;">TUGAS TAMBAHAN SEBAGAI</td>
+                        <td></td><td></td><td></td>
+                    </tr>
+                    <tr>
+                        <td>{{ $no++ }}</td><td></td><td colspan="2" class="col-left">{{ $teacher->tugas_tambahan }}</td>
+                        <td>12</td><td></td><td></td>
+                    </tr>
+                    @php $totalJam += 12; @endphp
+                    @elseif(!empty($teacher->tugas_tambahan) and $teacher->tugas_tambahan === 'Kepala Bengkel TITL')
+                    <tr>
+                        <td></td><td></td><td colspan="2" class="col-left" style="font-weight: bold;">TUGAS TAMBAHAN SEBAGAI</td>
+                        <td></td><td></td><td></td>
+                    </tr>
+                    <tr>
+                        <td>{{ $no++ }}</td><td></td><td colspan="2" class="col-left">{{ $teacher->tugas_tambahan }}</td>
+                        <td>12</td><td></td><td></td>
+                    </tr>
+                    @php $totalJam += 12; @endphp
+                    @elseif(!empty($teacher->tugas_tambahan) and $teacher->tugas_tambahan === 'Kepala Bengkel TPTUP')
                     <tr>
                         <td></td><td></td><td colspan="2" class="col-left" style="font-weight: bold;">TUGAS TAMBAHAN SEBAGAI</td>
                         <td></td><td></td><td></td>
@@ -237,21 +257,21 @@
             <div class="footer-section">
                 <div class="ttd-box">
                     <p style="margin-bottom: 1px; margin-bottom: 1px;">{{ $school['lokasi'] ?? 'Bukittinggi' }}, {{\Carbon\Carbon::parse($school['tanggal_surat'])->translatedFormat('j F Y') ?? date('d F Y') }}</p>
-                    
+
                     <p style="margin-top: 1px;">{{ $school['sign_title'] ?? 'Kepala,' }}</p>
 
                     <div class="signature-wrapper">
-                        
-                        @if(!empty($school['stempel'])) 
+
+                        @if(!empty($school['stempel']))
                             <img src="{{ $school['stempel'] }}" class="img-stamp">
                         @endif
-                        
+
                         @if(!empty($school['ttd_pejabat']))
                             <img src="{{ $school['ttd_pejabat'] }}" class="img-sign">
                         @else
-                            <div style="height: 80px;"></div> 
+                            <div style="height: 80px;"></div>
                         @endif
-                        
+
                     </div>
 
                     <p style="text-decoration: underline; font-weight: bold; position: relative; z-index: 11; margin-bottom: 1px; margin-top: 1px;">{{ $school['ttd_surat'] }}</p>

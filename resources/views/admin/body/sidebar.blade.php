@@ -53,7 +53,7 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{route('schedule.index')}}"><i class='bx bx-radio-circle'></i>PBM</a></li>
-						<li> <a href="{{route('journal.index')}}"><i class='bx bx-radio-circle'></i>journal</a></li>
+						<li> <a href="{{route('journal.index')}}"><i class='bx bx-radio-circle'></i>Jurnal</a></li>
 
 					</ul>
 				</li>

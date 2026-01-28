@@ -148,7 +148,7 @@
                                                     </div>
                                                 @else
                                                     {{-- Pastikan route report.schedule menerima parameter ID jadwal --}}
-                                                    <a href="{{ route('report.schedule', $schedule->id) }}" class="text-white btn btn-sm btn-success" title="Lihat Laporan">
+                                                    <a href="{{ route('report.schedule', $schedule->id) }}" target="_blank" class="text-white btn btn-sm btn-success" title="Lihat Laporan">
                                                         <i class="fas fa-file-alt me-1"></i> Laporan
                                                     </a>
                                                 @endif

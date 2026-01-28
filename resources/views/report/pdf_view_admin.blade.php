@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Laporan Absensi | {{ \App\Models\Setting::value('app_name', 'GATECH') }} {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     @php
         $favicon = \App\Models\Setting::value('app_favicon');
     @endphp
@@ -22,7 +22,7 @@
             margin-left: {{ $school['margin_left'] ?? '2.5cm' }};
         }
         body { font-family: sans-serif; font-size: 11px; }
-        
+
         /* Kop Surat */
         .header-table { width: 100%; border-bottom: 3px double #000; margin-bottom: 20px; padding-bottom: 10px; }
         .header-table td { vertical-align: middle; }
@@ -32,14 +32,14 @@
         .school-info p { margin: 0; font-size: 9pt; }
 
         h3, h4, h5 { margin: 5px 0; text-align: center; text-transform: uppercase; }
-        
+
         /* Tabel Data */
         table.data { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
         table.data th, table.data td { border: 1px solid #000; padding: 4px; text-align: left; vertical-align: top; }
         table.data th { background-color: #f0f0f0; text-align: center; font-weight: bold; }
-        
+
         .text-center { text-align: center; }
-        
+
         /* Badge Status */
         .badge { padding: 2px 5px; border-radius: 3px; color: white; font-size: 9px; font-weight: bold; text-transform: uppercase; display: inline-block; min-width: 50px; text-align: center; }
         .bg-hadir { background-color: green; }
@@ -55,7 +55,7 @@
         /* Tanda Tangan */
         .footer-section { margin-top: 30px; width: 100%; page-break-inside: avoid; }
         .ttd-box { float: right; width: 250px; text-align: center; }
-        
+
         /* Footer Print */
         .footer-print { position: fixed; bottom: -30px; left: 0; right: 0; text-align: center; font-size: 9px; color: #555; border-top: 1px solid #ccc; padding-top: 5px; }
     </style>
@@ -172,8 +172,8 @@
     <!-- TANDA TANGAN -->
     <div class="footer-section">
         <div class="ttd-box">
-            <p>{{ $school['sign_city'] ?? 'Kota' }}, {{ date('d F Y') }}</p>
-            
+            <p>{{ $school['sign_city'] ?? 'Kota' }}, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
+
             @if($isTeacher && isset($user->teacher))
                 <p>Guru Mata Pelajaran,</p>
                 <br><br><br>
@@ -183,7 +183,7 @@
                 <p>NIP. {{ $user->teacher->nip ?? '-' }}</p>
             @else
                 <p>{{ $school['sign_title'] ?? 'Kepala Sekolah' }},</p>
-                
+
                 @if(!empty($school['sign_image']))
                     <div style="height: 60px; margin: 5px auto; display: flex; justify-content: center;">
                         <img src="{{ $school['sign_image'] }}" style="height: 60px; max-width: 100%;">
