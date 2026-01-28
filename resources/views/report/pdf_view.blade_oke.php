@@ -51,14 +51,12 @@
         .ttd-box { float: right; width: 250px; text-align: center; }
 
         /* UTILITAS PAGE BREAK */
-        .page-break {
-            page-break-after: always;
-        }
+        .page-break { page-break-after: always; }
     </style>
 </head>
 <body>
 
-    <!-- KOP SURAT (SAMA UNTUK SEMUA) -->
+    <!-- KOP SURAT -->
     <table class="header-table">
         <tr>
             <td width="15%" class="text-center">
@@ -84,10 +82,9 @@
     </table>
 
     <!-- LOGIKA TAMPILAN BERDASARKAN MODE -->
-
     @if(isset($mode) && $mode == 'teacher_recap')
-        {{-- === MODE 1: REKAP JURNAL GURU (HANYA HARI AKTIF) === --}}
 
+        {{-- MODE 1: REKAP JURNAL HARIAN GURU (CUMA HARI AKTIF) --}}
         <h3>LAPORAN KEGIATAN PEMBELAJARAN & ABSENSI</h3>
         <h4>{{ $labelPeriode }}</h4>
         <h5 style="margin-bottom: 20px;">GURU: {{ $teacher->user->name ?? $user->name }} (NIP: {{ $teacher->nip ?? '-' }})</h5>
@@ -97,8 +94,8 @@
                 <tr>
                     <th width="5%">No</th>
                     <th width="12%">Hari / Tanggal</th>
-                    <th width="15%">Kelas / Mapel</th>
-                    <th width="30%">Materi & Aktivitas</th>
+                    <th width="20%">Kelas / Mapel</th>
+                    <th width="25%">Materi & Aktivitas</th>
                     <th width="15%">Statistik Kehadiran</th>
                     <th>Siswa Tidak Hadir</th>
                 </tr>
@@ -123,11 +120,11 @@
                     </td>
                     <td>
                         @php $summ = $j->attendance_summary; @endphp
-                        <table style="width: 100%; font-size: 9px; border: none;">
-                            <tr><td>Hadir</td><td>: {{ $summ->hadir ?? 0 }}</td></tr>
-                            <tr><td>Sakit</td><td>: {{ $summ->sakit ?? 0 }}</td></tr>
-                            <tr><td>Izin</td><td>: {{ $summ->izin ?? 0 }}</td></tr>
-                            <tr><td>Alpa</td><td>: {{ $summ->alpa ?? 0 }}</td></tr>
+                        <table style="width: 100%; font-size: 9px; border: none; margin: 0;">
+                            <tr><td style="border:none; padding:0;">Hadir</td><td style="border:none; padding:0;">: {{ $summ->hadir ?? 0 }}</td></tr>
+                            <tr><td style="border:none; padding:0;">Sakit</td><td style="border:none; padding:0;">: {{ $summ->sakit ?? 0 }}</td></tr>
+                            <tr><td style="border:none; padding:0;">Izin</td><td style="border:none; padding:0;">: {{ $summ->izin ?? 0 }}</td></tr>
+                            <tr><td style="border:none; padding:0;">Alpa</td><td style="border:none; padding:0;">: {{ $summ->alpa ?? 0 }}</td></tr>
                         </table>
                     </td>
                     <td>
@@ -139,8 +136,8 @@
         </table>
 
     @else
-        {{-- === MODE 2: LAPORAN ABSENSI STANDAR (LIST SISWA) === --}}
 
+        {{-- MODE 2: LAPORAN ABSENSI STANDAR (LIST SISWA) --}}
         <h3>LAPORAN ABSENSI & JURNAL PEMBELAJARAN</h3>
         <h4>{{ $labelPeriode }}</h4>
         @if(isset($labelTambahan)) <h5>{{ $labelTambahan }}</h5> @endif
@@ -178,8 +175,9 @@
 
         <!-- B. TABEL JURNAL (Jika Ada) -->
         @if(isset($journals) && $journals->count() > 0)
-        <!-- Page Break agar Jurnal mulai di halaman baru (Opsional) -->
-        <div class="page-break"></div>
+
+        <div class="page-break"></div> <!-- Pindah halaman untuk jurnal -->
+
         <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #000; margin-top: 20px;">B. JURNAL PEMBELAJARAN</div>
         <table class="data">
             <thead>
@@ -195,16 +193,10 @@
                 @foreach($journals as $idx => $j)
                 <tr>
                     <td class="text-center">{{ $idx + 1 }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($j->date)->translatedFormat('d/m/Y') }}</td>
-                    <td>
-                        {{ $j->schedule->subject->name ?? '-' }}
-                        <br><small>({{ $j->schedule->classroom->name ?? '-' }})</small>
-                    </td>
+                    <td class="text-center">{{ \Carbon\Carbon::parse($j->date)->translatedFormat('d/m/y') }}</td>
+                    <td>{{ $j->schedule->subject->name ?? '-' }} ({{ $j->schedule->classroom->name ?? '-' }})</td>
                     <td>{{ $j->topic }}</td>
-                    <td>
-                        <strong>Aktivitas:</strong> {{ $j->activity }}<br>
-                        @if($j->notes) <em>Catatan: {{ $j->notes }}</em> @endif
-                    </td>
+                    <td>{{ $j->activity }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -216,15 +208,15 @@
     <!-- TANDA TANGAN (COMMON) -->
     <div class="footer-section">
         <div class="ttd-box">
-            <p>{{ $school['sign_city'] ?? 'Kota' }}, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
+            <p>{{ $school['sign_city'] ?? 'Kota' }}, {{ date('d F Y') }}</p>
 
-            @if($isTeacher)
+            @if($isTeacher && isset($teacher))
                 <p>Guru Mata Pelajaran,</p>
                 <br><br><br>
-                <p style="text-decoration: underline; font-weight: bold; margin-bottom: 1px;">
+                <p style="text-decoration: underline; font-weight: bold;">
                     {{ $teacher->user->name ?? $user->name }}
                 </p>
-                <p style="margin-top: 1px;">NIP. {{ $user->teacher->nip ?? '-' }}</p>
+                <p>NIP. {{ $teacher->nip ?? '-' }}</p>
             @else
                 <p>{{ $school['sign_title'] ?? 'Kepala Sekolah' }},</p>
 
@@ -236,15 +228,15 @@
                     <br><br><br>
                 @endif
 
-                <p style="text-decoration: underline; font-weight: bold; margin-bottom: 1px;">{{ $school['sign_name'] }}</p>
-                <p style="margin-top: 1px;">NIP. {{ $school['sign_nip'] ?? '-' }}</p>
+                <p style="text-decoration: underline; font-weight: bold;">{{ $school['sign_name'] }}</p>
+                <p>NIP. {{ $school['sign_nip'] ?? '-' }}</p>
             @endif
         </div>
         <div style="clear: both;"></div>
     </div>
 
     <!-- Page Number -->
-    {{-- <script type="text/php">
+    <script type="text/php">
         if (isset($pdf)) {
             $text = "Hal {PAGE_NUM} dari {PAGE_COUNT}";
             $size = 9;
@@ -253,54 +245,6 @@
             $x = $pdf->get_width() - $width - 30;
             $y = $pdf->get_height() - 30;
             $pdf->page_text($x, $y, $text, $font, $size);
-        }
-    </script> --}}
-
-        <script type="text/php">
-        if (isset($pdf)) {
-            // ===========================================
-            // KONFIGURASI
-            // ===========================================
-            $font = $fontMetrics->getFont("Helvetica", "italic");
-            $size = 8;
-            $textColor = array(0.3, 0.3, 0.3); // Abu gelap (Teks)
-            $lineColor = array(0.8, 0.8, 0.8); // Abu pudar (Garis)
-
-            // Posisi Y dasar (35 point dari bawah)
-            $y = $pdf->get_height() - 35;
-
-            // ===========================================
-            // 1. GAMBAR GARIS (MENGGUNAKAN KOTAK TIPIS)
-            // ===========================================
-            // Trik: Gunakan filled_rectangle agar lebih kompatibel daripada line()
-            // Rumus: filled_rectangle(x, y, lebar, tinggi, warna)
-
-            $lineY = $y - 10;           // Posisi Y garis
-            $lineX = 30;                // Mulai dari kiri
-            $lineW = $pdf->get_width() - 60; // Lebar kertas dikurangi margin kiri-kanan (30+30)
-            $lineH = 1;                 // Ketebalan garis (1 point)
-
-            $pdf->filled_rectangle($lineX, $lineY, $lineW, $lineH, $lineColor);
-
-            // ===========================================
-            // 2. TEXT FOOTER
-            // ===========================================
-
-            // KIRI: Nama Aplikasi
-            $appName = "{{ \App\Models\Setting::value('app_name', 'GATECH') }} - Generated by System";
-            $pdf->page_text(30, $y, $appName, $font, $size, $textColor);
-
-            // KANAN: Halaman & Tanggal
-            $date = "{{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }}";
-            $textRight = "Dicetak: " . $date . " | Hal {PAGE_NUM} dari {PAGE_COUNT}";
-
-            // Hitung posisi X agar rata kanan
-            $width = $fontMetrics->get_text_width($textRight, $font, $size);
-
-            // Margin kanan 15 (sesuai request sebelumnya)
-            $xRight = $pdf->get_width() - $width - 15;
-
-            $pdf->page_text($xRight, $y, $textRight, $font, $size, $textColor);
         }
     </script>
 
