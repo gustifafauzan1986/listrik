@@ -48,6 +48,8 @@ use App\Http\Controllers\SiswaDashboardController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\Pm2Controller;
 use App\Http\Controllers\WhatsappGatewayController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\InventoryLoanController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -422,6 +424,11 @@ Route::middleware(['auth'])->group(function () {
         // Cetak Surat Tugas SEMUA Guru
         Route::get('/report/surat-tugas-all', [ReportController::class, 'printAllSuratTugas'])->name('report.surat_tugas_all');
 
+        Route::resource('inventory', InventoryController::class);
+        Route::post('/inventory-loan', [InventoryLoanController::class, 'store'])->name('inventory-loan.store');
+        // [PENTING] Tambahkan route ini untuk mengatasi error 404
+    Route::get('/inventory-loan/active', [InventoryLoanController::class, 'activeLoans'])->name('inventory-loan.active');
+        Route::put('/inventory-loan/{id}/return', [InventoryLoanController::class, 'returnItem'])->name('inventory-loan.return');
 
     });
 
