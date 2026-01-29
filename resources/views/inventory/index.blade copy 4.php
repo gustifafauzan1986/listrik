@@ -364,7 +364,7 @@
             myModal.show();
         }
 
-        // --- FUNGSI LOAD DATA PEMINJAMAN VIA AJAX ---
+        // --- FUNGSI LOAD DATA PEMINJAMAN VIA AJAX (UPDATED) ---
         function showLoansModal() {
             var myModal = new bootstrap.Modal(document.getElementById('loansModal'));
             myModal.show();
@@ -394,7 +394,7 @@
 
                         // LOGIKA TOMBOL CETAK BUKTI
                         let printTitle = 'Cetak Bukti Peminjaman';
-                        let printBtnClass = 'btn-secondary';
+                        let printBtnClass = 'btn-secondary'; // Default abu-abu
 
                         if (loan.status === 'kembali') {
                             printTitle = 'Cetak Bukti Pengembalian';
@@ -410,7 +410,7 @@
 
                         if (loan.status === 'dipinjam') {
                             statusBadge = '<span class="badge bg-warning text-dark">Dipinjam</span>';
-                            // Tombol Kembali
+                            // Tombol Kembali hanya muncul jika masih dipinjam
                             actionButtons = `
                                 ${printBtn}
                                 <button class="text-white btn btn-sm btn-success" onclick="returnItem('${loan.id}', '${loan.borrower_name}')" title="Kembalikan">
@@ -453,33 +453,26 @@
                 });
         }
 
-        // --- FIX: FUNGSI PENGEMBALIAN BARANG DENGAN TEXTAREA ---
         function returnItem(id, borrowerName) {
             Swal.fire({
-                title: 'Konfirmasi Pengembalian',
-                html: `Barang dipinjam oleh: <b>${borrowerName}</b><br><br>Masukkan catatan kondisi barang (Opsional):`,
+                title: 'Pengembalian Barang',
+                text: `Apakah ${borrowerName} sudah mengembalikan barang?`,
                 icon: 'question',
-                input: 'textarea', // Gunakan textarea agar bisa input banyak baris
-                inputPlaceholder: 'Contoh: Barang kondisi baik / Ada lecet...',
-                inputAttributes: {
-                    'aria-label': 'Catatan kondisi barang'
-                },
+                input: 'text',
+                inputPlaceholder: 'Catatan kondisi barang (Opsional)',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
-                confirmButtonText: 'Terima Barang',
+                confirmButtonText: 'Ya, Sudah Kembali',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     const notes = result.value;
 
-                    // Loading state
-                    Swal.fire({title: 'Memproses...', didOpen: () => Swal.showLoading()});
-
                     fetch(`/inventory-loan/${id}/return`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json', // PENTING agar dikenali sebagai AJAX
+                            'Accept': 'application/json', // PENTING: Agar controller tahu ini request AJAX
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({ notes: notes })
@@ -489,11 +482,11 @@
                         try {
                             data = await response.json();
                         } catch (e) {
-                            data = { message: 'Terjadi kesalahan pada respon server.' };
+                            data = { message: 'Terjadi kesalahan parsing respon server.' };
                         }
 
                         if (response.ok) {
-                            Swal.fire('Berhasil!', data.message || 'Barang telah dikembalikan.', 'success');
+                            Swal.fire('Berhasil!', data.message || 'Status berhasil diperbarui.', 'success');
                             loadLoans(); // Reload tabel modal
                         } else {
                             Swal.fire('Gagal!', data.message || 'Terjadi kesalahan sistem.', 'error');
@@ -506,7 +499,7 @@
             });
         }
 
-        // Reset modal saat ditutup (agar kembali ke mode tambah)
+        // Reset modal saat ditutup
         document.getElementById('addInventoryModal').addEventListener('hidden.bs.modal', function () {
             document.getElementById('inventoryForm').reset();
             document.getElementById('inventoryForm').action = "{{ route('inventory.store') }}";

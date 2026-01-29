@@ -427,8 +427,10 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('inventory', InventoryController::class);
         Route::post('/inventory-loan', [InventoryLoanController::class, 'store'])->name('inventory-loan.store');
         // [PENTING] Tambahkan route ini untuk mengatasi error 404
-    Route::get('/inventory-loan/active', [InventoryLoanController::class, 'activeLoans'])->name('inventory-loan.active');
+        Route::get('/inventory-loan/active', [InventoryLoanController::class, 'activeLoans'])->name('inventory-loan.active');
         Route::put('/inventory-loan/{id}/return', [InventoryLoanController::class, 'returnItem'])->name('inventory-loan.return');
+        // Tambahkan ini:
+        Route::get('/inventory-loan/{id}/print', [InventoryLoanController::class, 'printProof'])->name('inventory-loan.print');
 
     });
 

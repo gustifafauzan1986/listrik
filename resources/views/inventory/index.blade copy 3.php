@@ -14,7 +14,7 @@
                             </h5>
 
                             <div class="gap-2 d-flex">
-                                <!-- TOMBOL DATA PEMINJAMAN -->
+                                <!-- TOMBOL DATA PEMINJAMAN (BARU) -->
                                 <button class="text-white btn btn-info" onclick="showLoansModal()">
                                     <i class="fas fa-list-alt me-1"></i> Data Peminjaman
                                 </button>
@@ -290,12 +290,12 @@
         </div>
     </div>
 
-    <!-- MODAL DAFTAR PEMINJAMAN AKTIF & RIWAYAT -->
+    <!-- MODAL DAFTAR PEMINJAMAN AKTIF (FITUR BARU) -->
     <div class="modal fade" id="loansModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="text-white modal-header bg-success">
-                    <h5 class="modal-title"><i class="fas fa-list-alt me-2"></i> Riwayat Peminjaman Barang</h5>
+                    <h5 class="modal-title"><i class="fas fa-list-alt me-2"></i> Peminjaman Aktif</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="p-0 modal-body">
@@ -311,7 +311,7 @@
                                     <th>Barang</th>
                                     <th class="text-center">Jml</th>
                                     <th>Tgl Pinjam</th>
-                                    <th>Status / Catatan</th>
+                                    <th>Catatan</th>
                                     <th class="text-center pe-3">Aksi</th>
                                 </tr>
                             </thead>
@@ -332,13 +332,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function editInventory(item) {
-            // Ubah Title & Action URL
             document.getElementById('modalTitle').innerText = 'Edit Inventaris';
             document.getElementById('inventoryForm').action = `/inventory/${item.id}`;
             document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
             document.getElementById('btnSubmit').innerText = 'Update';
 
-            // Isi Form
             document.getElementById('name').value = item.name;
             document.getElementById('code').value = item.code;
             document.getElementById('brand').value = item.brand;
@@ -350,7 +348,6 @@
             document.getElementById('purchase_date').value = item.purchase_date;
             document.getElementById('description').value = item.description;
 
-            // Buka Modal
             var myModal = new bootstrap.Modal(document.getElementById('addInventoryModal'));
             myModal.show();
         }
@@ -378,68 +375,29 @@
             tableBody.innerHTML = '';
             loading.style.display = 'block';
 
+            // Menggunakan route /inventory-loan/active yang perlu Anda buat di web.php
+            // Route::get('/inventory-loan/active', [InventoryLoanController::class, 'activeLoans']);
             fetch('/inventory-loan/active')
                 .then(response => response.json())
                 .then(data => {
                     loading.style.display = 'none';
                     if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-muted">Belum ada riwayat peminjaman.</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-muted">Tidak ada peminjaman aktif saat ini.</td></tr>';
                         return;
                     }
 
                     data.forEach(loan => {
-                        // Tentukan Status dan Tombol Aksi
-                        let statusBadge = '';
-                        let actionButtons = '';
-
-                        // LOGIKA TOMBOL CETAK BUKTI
-                        let printTitle = 'Cetak Bukti Peminjaman';
-                        let printBtnClass = 'btn-secondary';
-
-                        if (loan.status === 'kembali') {
-                            printTitle = 'Cetak Bukti Pengembalian';
-                            printBtnClass = 'btn-primary'; // Warna biru jika sudah kembali
-                        }
-
-                        // Link Cetak Bukti
-                        const printBtn = `
-                            <a href="/inventory-loan/${loan.id}/print" target="_blank" class="text-white btn btn-sm ${printBtnClass} me-1" title="${printTitle}">
-                                <i class="fas fa-print"></i>
-                            </a>
-                        `;
-
-                        if (loan.status === 'dipinjam') {
-                            statusBadge = '<span class="badge bg-warning text-dark">Dipinjam</span>';
-                            // Tombol Kembali
-                            actionButtons = `
-                                ${printBtn}
-                                <button class="text-white btn btn-sm btn-success" onclick="returnItem('${loan.id}', '${loan.borrower_name}')" title="Kembalikan">
-                                    <i class="fas fa-undo"></i>
-                                </button>
-                            `;
-                        } else {
-                            statusBadge = '<span class="badge bg-success">Kembali</span>';
-                            actionButtons = printBtn;
-                        }
-
                         const row = `
                             <tr>
-                                <td class="ps-3 fw-bold">
-                                    ${loan.borrower_name}<br>
-                                    ${statusBadge}
-                                </td>
+                                <td class="ps-3 fw-bold">${loan.borrower_name}</td>
                                 <td>${loan.inventory ? loan.inventory.name : 'Item dihapus'}</td>
-                                <td class="text-center fw-bold">${loan.quantity}</td>
-                                <td>
-                                    <small class="d-block text-muted">Pinjam:</small>
-                                    ${new Date(loan.loan_date).toLocaleString('id-ID')}
-                                    ${loan.return_date ? '<small class="d-block text-success">Kembali: ' + new Date(loan.return_date).toLocaleString('id-ID') + '</small>' : ''}
-                                </td>
+                                <td class="mt-2 text-center badge bg-warning text-dark">${loan.quantity}</td>
+                                <td>${new Date(loan.loan_date).toLocaleString('id-ID')}</td>
                                 <td><small class="text-muted">${loan.notes || '-'}</small></td>
                                 <td class="text-center pe-3">
-                                    <div class="btn-group">
-                                        ${actionButtons}
-                                    </div>
+                                    <button class="text-white btn btn-sm btn-success" onclick="returnItem('${loan.id}', '${loan.borrower_name}')">
+                                        <i class="fas fa-undo me-1"></i> Kembali
+                                    </button>
                                 </td>
                             </tr>
                         `;
@@ -453,50 +411,36 @@
                 });
         }
 
-        // --- FIX: FUNGSI PENGEMBALIAN BARANG DENGAN TEXTAREA ---
         function returnItem(id, borrowerName) {
             Swal.fire({
-                title: 'Konfirmasi Pengembalian',
-                html: `Barang dipinjam oleh: <b>${borrowerName}</b><br><br>Masukkan catatan kondisi barang (Opsional):`,
+                title: 'Pengembalian Barang',
+                text: `Apakah ${borrowerName} sudah mengembalikan barang?`,
                 icon: 'question',
-                input: 'textarea', // Gunakan textarea agar bisa input banyak baris
-                inputPlaceholder: 'Contoh: Barang kondisi baik / Ada lecet...',
-                inputAttributes: {
-                    'aria-label': 'Catatan kondisi barang'
-                },
+                input: 'text',
+                inputPlaceholder: 'Catatan kondisi barang (Opsional)',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
-                confirmButtonText: 'Terima Barang',
+                confirmButtonText: 'Ya, Sudah Kembali',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     const notes = result.value;
 
-                    // Loading state
-                    Swal.fire({title: 'Memproses...', didOpen: () => Swal.showLoading()});
-
+                    // Kirim Request Pengembalian
                     fetch(`/inventory-loan/${id}/return`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json', // PENTING agar dikenali sebagai AJAX
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({ notes: notes })
                     })
-                    .then(async response => {
-                        let data;
-                        try {
-                            data = await response.json();
-                        } catch (e) {
-                            data = { message: 'Terjadi kesalahan pada respon server.' };
-                        }
-
+                    .then(response => {
                         if (response.ok) {
-                            Swal.fire('Berhasil!', data.message || 'Barang telah dikembalikan.', 'success');
+                            Swal.fire('Berhasil!', 'Status berhasil diperbarui.', 'success');
                             loadLoans(); // Reload tabel modal
                         } else {
-                            Swal.fire('Gagal!', data.message || 'Terjadi kesalahan sistem.', 'error');
+                            Swal.fire('Gagal!', 'Terjadi kesalahan sistem.', 'error');
                         }
                     })
                     .catch(error => {
@@ -506,7 +450,6 @@
             });
         }
 
-        // Reset modal saat ditutup (agar kembali ke mode tambah)
         document.getElementById('addInventoryModal').addEventListener('hidden.bs.modal', function () {
             document.getElementById('inventoryForm').reset();
             document.getElementById('inventoryForm').action = "{{ route('inventory.store') }}";

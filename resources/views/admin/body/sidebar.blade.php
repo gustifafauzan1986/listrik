@@ -78,6 +78,7 @@ $status = $guruId->status;
 						<li> <a href="{{route('permissions.index')}}"><i class='bx bx-radio-circle'></i>Permission</a>
 						</li>
                         <li> <a href="{{route('roles.index')}}"><i class='bx bx-radio-circle'></i>Role</a>
+                        <li> <a href="{{route('inventory.index')}}"><i class='bx bx-radio-circle'></i>Inventaris</a>
 					</li>
 
 					</ul>
