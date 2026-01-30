@@ -349,6 +349,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/print-cards/all', [CardController::class, 'printAll'])->name('print.all');
         Route::get('/print-card/{id}', [CardController::class, 'printSingle'])->name('print.single');
 
+        Route::get('/cards', [CardController::class, 'card'])->name('cards.card');
+        Route::post('/cards/print', [CardController::class, 'print'])->name('cards.print');
+
         Route::get('/transkrip', [TranscriptController::class, 'index'])->name('reports.transcript.index');
         Route::get('/transkrip/cetak', [TranscriptController::class, 'show'])->name('reports.transcript.show');
         Route::get('/transkrip/cetak-kelas', [TranscriptController::class, 'printByClass'])->name('reports.transcript.class');
