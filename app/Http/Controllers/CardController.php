@@ -203,41 +203,39 @@ class CardController extends Controller
      /**
      * Proses Cetak Kartu (PDF)
      */
+   /**
+     * Proses Cetak Kartu (PDF)
+     */
     public function print(Request $request)
     {
         $request->validate([
             'type' => 'required|in:student,teacher',
-            'title_1' => 'required|string|max:50', // Baris 1: KARTU PESERTA
-            'title_2' => 'required|string|max:50', // Baris 2: UJIAN SEMESTER GANJIL
+            'title_1' => 'required|string|max:50',
+            'title_2' => 'required|string|max:50',
         ]);
 
         $users = collect();
         $type = $request->type;
 
-        // 1. Ambil Data Berdasarkan Tipe
+        // 1. Ambil Data
         if ($type == 'student') {
             $query = Student::with('classroom')->orderBy('name');
-
             if ($request->filled('classroom_id')) {
                 $query->where('classroom_id', $request->classroom_id);
             }
-
             $users = $query->get();
         } else {
-            // Data Guru
             $users = Teacher::with('user')->get()->sortBy(function($t) {
                 return $t->user->name;
             });
         }
 
         if ($users->isEmpty()) {
-            return redirect()->back()->with('error', 'Data tidak ditemukan untuk kriteria tersebut.');
+            return redirect()->back()->with('error', 'Data tidak ditemukan.');
         }
 
-        // 2. Data Sekolah & Kop Surat
         $school = $this->getSchoolData();
 
-        // 3. Info Kartu
         $cardInfo = [
             'title_1' => strtoupper($request->title_1),
             'title_2' => strtoupper($request->title_2),
@@ -245,15 +243,14 @@ class CardController extends Controller
             'type'    => $type
         ];
 
-        // 4. CHUNKING (PEMECAHAN HALAMAN MANUAL)
-        // Agar tidak terpotong, kita batasi 1 halaman A4 berisi maksimal 8 kartu (2 kolom x 4 baris)
-        // Sisanya dipaksa ke halaman berikutnya.
-        $chunks = $users->chunk(8);
+        // 4. CHUNKING (PAGINASI MANUAL)
+        // Kita set 10 kartu per halaman (2 kolom x 5 baris)
+        $chunks = $users->chunk(10);
 
         // 5. Generate PDF
         $pdf = Pdf::loadView('pdf.cards', compact('chunks', 'school', 'cardInfo'));
 
-        // Set kertas A4 Portrait
+        // Set kertas A4 Portrait (Tegak) agar muat 2 kolom
         $pdf->setPaper('a4', 'portrait');
         $pdf->setOptions(['isRemoteEnabled' => true, 'isPhpEnabled' => true, 'chroot' => public_path()]);
 
