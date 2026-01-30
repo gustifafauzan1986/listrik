@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Inventory;
 use App\Models\Room;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -83,5 +84,43 @@ class InventoryController extends Controller
         $inventory->delete();
 
         return redirect()->back()->with('success', 'Barang dihapus dari inventaris.');
+    }
+
+    /**
+     * FITUR BARU: CETAK BARCODE / QR CODE
+     * Menangani error "Call to undefined method"
+     */
+    // public function printBarcode($id)
+    // {
+    //     $inventory = Inventory::with('room')->findOrFail($id);
+
+        // Ambil nama sekolah dari setting, default ke 'SMK TEKNIK' jika tidak ada
+        // Pastikan model Setting sudah ada dan method value() tersedia (biasanya scope atau static helper)
+        // Jika error di Setting::value, ganti dengan Setting::where('key', 'school_name')->value('value')
+    //     $schoolName = Setting::value('school_name', 'SMK TEKNIK');
+
+    //     return view('inventory.barcode', compact('inventory', 'schoolName'));
+    // }
+
+    /**
+     * FITUR BARU: CETAK BARCODE / QR CODE
+     * Menggunakan jumlah stok sebagai default jumlah cetak
+     */
+    public function printBarcode(Request $request, $id)
+    {
+        $inventory = Inventory::with('room')->findOrFail($id);
+
+        $schoolName = Setting::value('school_name', 'SMK TEKNIK');
+
+        // Ambil jumlah cetak dari parameter 'qty' di URL,
+        // Jika tidak ada, default ke jumlah stok barang saat ini ($inventory->quantity)
+        // Jika stok 0, default cetak 1 label master
+        $defaultQty = $inventory->quantity > 0 ? $inventory->quantity : 1;
+        $printQty = $request->input('qty', $defaultQty);
+
+        // Batasi maksimal cetak sekaligus (misal 50) untuk mencegah browser hang
+        $printQty = min($printQty, 50);
+
+        return view('inventory.barcode', compact('inventory', 'schoolName', 'printQty'));
     }
 }

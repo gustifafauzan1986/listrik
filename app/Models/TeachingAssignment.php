@@ -24,4 +24,9 @@ class TeachingAssignment extends Model
     {
         return $this->belongsTo(Classroom::class);
     }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
 }

@@ -125,10 +125,15 @@
                                                         <i class="fas fa-hand-holding"></i>
                                                     </button>
 
+
                                                     <button class="btn btn-sm btn-warning" title="Edit" onclick="editInventory({{ json_encode($item) }})">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
 
+                                                    <form action="{{ route('inventory.barcode', $item->id) }}" method="GET" class="d-inline">
+                                                        @csrf
+                                                        <button class="btn btn-sm btn-primary" title="qrcode"><i class="fas fa-qrcode"></i></button>
+                                                    </form>
                                                     <form action="{{ route('inventory.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus barang ini?')">
                                                         @csrf
                                                         @method('DELETE')

@@ -431,6 +431,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/inventory-loan/{id}/return', [InventoryLoanController::class, 'returnItem'])->name('inventory-loan.return');
         // Tambahkan ini:
         Route::get('/inventory-loan/{id}/print', [InventoryLoanController::class, 'printProof'])->name('inventory-loan.print');
+        // Route Cetak Barcode
+        Route::get('/inventory/{id}/barcode', [InventoryController::class, 'printBarcode'])->name('inventory.barcode');
 
     });
 
