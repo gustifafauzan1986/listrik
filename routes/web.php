@@ -50,6 +50,7 @@ use App\Http\Controllers\Pm2Controller;
 use App\Http\Controllers\WhatsappGatewayController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryLoanController;
+use App\Http\Controllers\LoanController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -185,6 +186,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/journal', [TeachingJournalController::class, 'index'])->name('journal.index');
         Route::post('/journal/store', [TeachingJournalController::class, 'store'])->name('journal.store');
         Route::get('/journal/show/{schedule_id}', [TeachingJournalController::class, 'show'])->name('journal.show');
+
+        // Fitur Peminjaman Guru
+        Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
+        Route::get('/loans/scan', [LoanController::class, 'scan'])->name('loans.scan');
+        Route::post('/loans/store', [LoanController::class, 'store'])->name('loans.store');
+        Route::post('/loans/return/{id}', [LoanController::class, 'returnItem'])->name('loans.return');
 
     });
 

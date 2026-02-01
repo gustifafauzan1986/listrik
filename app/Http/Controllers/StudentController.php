@@ -95,6 +95,21 @@ class StudentController extends Controller
         return back()->with('success', "Siswa {$student->name} berhasil dikeluarkan dari kelas.");
     }
 
+    public function removeClass($id)
+    {
+        try {
+            $student = Student::findOrFail($id);
+            $namaKelas = $student->classroom->name ?? '-';
+
+            // Set classroom_id menjadi null (tanpa menghapus siswa dari database)
+            $student->update(['classroom_id' => null]);
+
+            return redirect()->back()->with('success', "Siswa {$student->name} berhasil dikeluarkan dari kelas {$namaKelas}.");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
     public function export()
     {
         return Excel::download(new StudentExport, 'Data-Siswa.xlsx');
