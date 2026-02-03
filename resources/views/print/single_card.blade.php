@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Cetak Kartu Siswa - {{ $student->name }} | {{ \App\Models\Setting::value('app_name', 'GATECH') }} {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
+    <title>Cetak Kartu Siswa - {{ $students->name }} | {{ \App\Models\Setting::value('app_name', 'GATECH') }} {{ \App\Models\Setting::value('school_name', 'Sekolah') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @php
         $favicon = \App\Models\Setting::value('app_favicon');

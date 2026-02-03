@@ -27,4 +27,9 @@ class PrayerAttendance extends Model
     {
         return $this->belongsTo(Student::class);
     }
+
+    // Relasi ke Absensi Sholat
+    public function prayer_attendance() {
+        return $this->hasMany(PrayerAttendance::class);
+    }
 }

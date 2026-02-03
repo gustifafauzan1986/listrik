@@ -195,7 +195,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/store', [LoanController::class, 'store'])->name('loans.store');
         Route::post('/loans/return/{id}', [LoanController::class, 'returnItem'])->name('loans.return');
 
-        
+
 
     });
 
@@ -448,7 +448,7 @@ Route::middleware(['auth'])->group(function () {
         // Route Cetak Barcode
         Route::get('/inventory/{id}/barcode', [InventoryController::class, 'printBarcode'])->name('inventory.barcode');
 
-        Route::get('/monitoring-sholat', [PrayerMonitoringController::class, 'index'])->name('prayer.monitoring');
+        Route::get('/monitoring-sholat', [PrayerMonitoringController::class, 'index'])->name('admin.prayer.monitoring');
 
     });
 

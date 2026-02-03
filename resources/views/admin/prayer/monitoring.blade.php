@@ -1,86 +1,113 @@
-@section('title', 'Riwayat Peminjaman')
+@section('title', 'Cetak Kartu Kegiatan')
 
 <x-app-layout>
-    <div class="page-content">
-        <div class="row justify-content-center">
-            <div class="container mx-auto p-4 lg:p-8">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Monitoring Absensi Sholat</h1>
-                <p class="text-gray-500 text-sm">Pantau kedisiplinan dan lokasi ibadah siswa.</p>
-            </div>
-            
-            <!-- Filter Tanggal -->
-            <form action="{{ route('admin.prayer.monitoring') }}" method="GET" class="flex items-center gap-2">
-                <input type="date" name="date" value="{{ $date }}" 
-                       class="rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    Filter
-                </button>
-            </form>
-        </div>
+<div class="page-content">
+    <div class="p-4 container-fluid">
+        <div class="border-0 shadow-sm card rounded-3">
+            <div class="p-4 card-body">
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50">
-                        <th class="p-4 font-semibold text-gray-600 border-b">Nama Siswa</th>
-                        <th class="p-4 font-semibold text-gray-600 border-b">Sholat</th>
-                        <th class="p-4 font-semibold text-gray-600 border-b">Waktu Absen</th>
-                        <th class="p-4 font-semibold text-gray-600 border-b text-center">Lokasi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse($attendances as $item)
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4">
-                            <div class="font-medium text-gray-800">{{ $item->student->user->name }}</div>
-                            <div class="text-xs text-gray-400">NISN: {{ $item->student->nisn }}</div>
-                        </td>
-                        <td class="p-4">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium uppercase
-                                {{ $item->prayer_name == 'subuh' ? 'bg-indigo-100 text-indigo-700' : '' }}
-                                {{ $item->prayer_name == 'dzuhur' ? 'bg-yellow-100 text-yellow-700' : '' }}
-                                {{ $item->prayer_name == 'ashar' ? 'bg-orange-100 text-orange-700' : '' }}
-                                {{ $item->prayer_name == 'maghrib' ? 'bg-red-100 text-red-700' : '' }}
-                                {{ $item->prayer_name == 'isya' ? 'bg-purple-100 text-purple-700' : '' }}
-                                {{ $item->prayer_name == 'dhuha' ? 'bg-green-100 text-green-700' : '' }}
-                            ">
-                                {{ $item->prayer_name }}
-                            </span>
-                        </td>
-                        <td class="p-4 text-gray-600 font-mono text-sm">
-                            {{ $item->check_in_time }}
-                        </td>
-                        <td class="p-4 text-center">
-                            @if($item->latitude && $item->longitude)
-                                <a href="https://www.google.com/maps?q={{ $item->latitude }},{{ $item->longitude }}" 
-                                   target="_blank"
-                                   class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-sm underline">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                   </svg>
-                                   Lihat Peta
-                                </a>
-                            @else
-                                <span class="text-gray-400 text-xs italic">Tanpa Koordinat</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="p-8 text-center text-gray-500 italic">
-                            Belum ada data absensi untuk tanggal ini.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                <!-- Header & Filter -->
+                <div class="gap-3 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <h1 class="mb-1 h3 fw-bold text-dark">Monitoring Absensi Sholat</h1>
+                        <p class="mb-0 text-muted small">Pantau kedisiplinan ibadah harian seluruh siswa.</p>
+                    </div>
+
+                    <!-- Filter Tanggal -->
+                    <form action="{{ route('admin.prayer.monitoring') }}" method="GET" class="gap-2 p-2 d-flex bg-light rounded-3">
+                        <input type="date" name="date" value="{{ $date }}"
+                            class="bg-transparent border-0 shadow-none form-control form-control-sm" style="width: auto;">
+                        <button type="submit" class="px-3 btn btn-primary btn-sm rounded-2">
+                            <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tabel Monitoring Matriks -->
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover border-top">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 py-3 border-bottom-0" style="min-width: 200px;">Nama Siswa</th>
+                                @foreach($prayerTypes as $type)
+                                <th class="py-3 text-center border-bottom-0">{{ $type }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($data as $item)
+                            <tr>
+                                <td class="px-4 py-3">
+                                    <div class="fw-bold text-dark">{{ $item->name }}</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">NIS: {{ $item->nis }}</div>
+                                </td>
+
+                                @foreach($prayerTypes as $type)
+                                @php
+                                    $status = $item->statuses[strtolower($type)];
+                                    $badgeClass = match(strtolower($status)) {
+                                        'hadir'     => 'bg-success',
+                                        'terlambat' => 'bg-warning text-dark',
+                                        'alpha'     => 'bg-danger bg-opacity-10 text-danger',
+                                        'izin', 'sakit' => 'bg-info text-white',
+                                        default     => 'bg-secondary'
+                                    };
+                                @endphp
+                                <td class="text-center">
+                                    <span class="badge {{ $badgeClass }} rounded-pill px-3 py-2 text-uppercase"
+                                          style="font-size: 0.65rem; min-width: 80px; letter-spacing: 0.5px;">
+                                        {{ $status }}
+                                    </span>
+                                </td>
+                                @endforeach
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="{{ count($prayerTypes) + 1 }}" class="py-5 italic text-center text-muted">
+                                    <i class="fas fa-info-circle me-1"></i> Belum ada data absensi untuk tanggal ini.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Legend / Keterangan Warna -->
+                <div class="flex-wrap gap-3 p-3 mt-4 border d-flex align-items-center bg-light rounded-3 border-light">
+                    <span class="tracking-wider small fw-bold text-muted text-uppercase" style="font-size: 0.7rem;">Keterangan:</span>
+                    <div class="gap-1 d-flex align-items-center small">
+                        <span class="p-1 badge bg-success rounded-circle"><span class="visually-hidden">.</span></span> Hadir
+                    </div>
+                    <div class="gap-1 d-flex align-items-center small">
+                        <span class="p-1 badge bg-warning rounded-circle"><span class="visually-hidden">.</span></span> Terlambat
+                    </div>
+                    <div class="gap-1 d-flex align-items-center small">
+                        <span class="p-1 bg-opacity-25 badge bg-danger rounded-circle"><span class="visually-hidden">.</span></span> Alpha
+                    </div>
+                    <div class="gap-1 d-flex align-items-center small">
+                        <span class="p-1 badge bg-info rounded-circle"><span class="visually-hidden">.</span></span> Izin/Sakit
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
-        </div>
-    </div>
+
+<style>
+    /* Tambahan agar header tabel tetap rapi saat scroll horizontal */
+    .table-responsive {
+        border-radius: 8px;
+    }
+    .table thead th {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #6c757d;
+        letter-spacing: 0.5px;
+    }
+    .table tbody td {
+        border-color: #f8f9fa;
+    }
+</style>
 </x-app-layout>
