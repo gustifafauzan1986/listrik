@@ -51,6 +51,7 @@ use App\Http\Controllers\WhatsappGatewayController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryLoanController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\PrayerController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -192,6 +193,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/loans/scan', [LoanController::class, 'scan'])->name('loans.scan');
         Route::post('/loans/store', [LoanController::class, 'store'])->name('loans.store');
         Route::post('/loans/return/{id}', [LoanController::class, 'returnItem'])->name('loans.return');
+
+        
 
     });
 
@@ -459,6 +462,10 @@ Route::middleware(['auth'])->group(function () {
          // [BARU] Cetak Kartu Sendiri
         // Cetak Kartu Sendiri
         Route::get('/my-card', [StudentAreaController::class, 'printCard'])->name('student.print.card');
+
+        // Fitur Absensi Sholat
+        Route::get('/prayer', [PrayerController::class, 'index'])->name('prayer.index');
+        Route::post('/prayer/store', [PrayerController::class, 'store'])->name('prayer.store');
 
     });
 });
