@@ -77,7 +77,7 @@
 
     <!-- MODAL JURNAL (REUSABLE) -->
     <div class="modal fade" id="journalModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title fw-bold"><i class="fas fa-pen me-2"></i> Input Jurnal</h5>
@@ -103,12 +103,12 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Aktivitas</label>
-                            <textarea class="form-control" name="activity" id="j_activity" rows="3"></textarea>
+                            <textarea class="form-control" name="activity" id="j_activity" rows="15"></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Catatan</label>
-                            <textarea class="form-control" name="notes" id="j_notes" rows="2"></textarea>
+                            <textarea class="form-control" name="notes" id="j_notes" rows="8"></textarea>
                         </div>
                     </form>
                 </div>

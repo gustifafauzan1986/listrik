@@ -227,9 +227,22 @@ $status = $guruId->status;
 						<div class="menu-title">Scan</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('student.profile')}}"><i class='bx bx-radio-circle'></i>profile</a></li>
+						<li> <a href="{{route('student.profile')}}"><i class='bx bx-radio-circle'></i>Profile</a></li>
 						<li> <a href="{{route('student.history.subject')}}"><i class='bx bx-radio-circle'></i>Subject</a></li>
 						<li> <a href="{{route('student.history.daily')}}"><i class='bx bx-radio-circle'></i>Daily</a></li>
+
+					</ul>
+				</li>
+
+                <li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class='bx bxs-barcode'></i>
+						</div>
+						<div class="menu-title">Absensi</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('prayer.index')}}"><i class='bx bx-radio-circle'></i>Sholat</a></li>
+
 
 					</ul>
 				</li>
