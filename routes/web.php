@@ -52,6 +52,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryLoanController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PrayerController;
+use App\Http\Controllers\PrayerMonitoringController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -446,6 +447,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/inventory-loan/{id}/print', [InventoryLoanController::class, 'printProof'])->name('inventory-loan.print');
         // Route Cetak Barcode
         Route::get('/inventory/{id}/barcode', [InventoryController::class, 'printBarcode'])->name('inventory.barcode');
+
+        Route::get('/monitoring-sholat', [PrayerMonitoringController::class, 'index'])->name('prayer.monitoring');
 
     });
 

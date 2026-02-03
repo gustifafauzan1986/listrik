@@ -17,7 +17,10 @@ class PrayerAttendance extends Model
         'check_in_time',
         'status',
         'photo_evidence',
-        'notes'
+        'notes',
+        'latitude',
+        'longitude'
+
     ];
 
     public function student()

@@ -14,7 +14,8 @@ class Student extends Model
     'nis',
     'name',
     'classroom_id',
-    'phone' // Pastikan ini ada jika Anda mengimport no_hp
+    'phone', // Pastikan ini ada jika Anda mengimport no_hp
+    'user_id' 
 ];
 
     public function user()
