@@ -103,12 +103,12 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Aktivitas</label>
-                            <textarea class="form-control" name="activity" id="j_activity" rows="15"></textarea>
+                            <textarea class="form-control" name="activity" id="j_activity" rows="10"></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Catatan</label>
-                            <textarea class="form-control" name="notes" id="j_notes" rows="8"></textarea>
+                            <textarea class="form-control" name="notes" id="j_notes" rows="4"></textarea>
                         </div>
                     </form>
                 </div>
