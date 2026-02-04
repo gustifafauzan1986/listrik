@@ -83,10 +83,8 @@
                                     <thead class="text-center table-light">
                                         <tr>
                                             <th width="5%">No</th>
-                                            <th width="10%">NIS</th>
-                                            <th width="25%" class="text-start">Nama Siswa</th>
-                                            <!-- KOLOM BARU: HISTORY -->
-                                            <th width="25%">History (5 Pertemuan Terakhir)</th>
+                                            <th width="15%">NIS</th>
+                                            <th width="30%" class="text-start">Nama Siswa</th>
                                             <th>Status Kehadiran Mapel</th>
                                         </tr>
                                     </thead>
@@ -119,13 +117,6 @@
                                                 $isAutoScan = ($recordedBy == 'face_scan' || $recordedBy == 'barcode_scan');
                                                 // Disabled jika belum absen gerbang OR sudah absen otomatis
                                                 $isDisabled = $isMissingGate || $isAutoScan;
-
-                                                // --- LOGIC HISTORY ---
-                                                // Mengambil data history dari variabel $allHistories (dikirim controller)
-                                                // Jika tidak ada data, return collection kosong
-                                                $histories = isset($allHistories) ? ($allHistories[$student->id] ?? collect()) : collect();
-                                                // Ambil 5 data terakhir
-                                                $histories = $histories->take(5);
                                             @endphp
                                             <tr class="student-row {{ $isMissingGate ? 'table-danger' : ($isAutoScan ? 'table-success' : '') }}">
                                                 <td class="text-center">{{ $index + 1 }}</td>
@@ -145,43 +136,6 @@
                                                         @endif
                                                     @endif
                                                 </td>
-
-                                                <!-- TAMPILAN KOLOM HISTORY -->
-                                                <td class="text-center bg-light">
-                                                    @if($histories->count() > 0)
-                                                        <div class="flex-wrap gap-1 d-flex justify-content-center">
-                                                            @foreach($histories as $hist)
-                                                                @php
-                                                                    $badgeClass = match($hist->status) {
-                                                                        'hadir', 'present' => 'bg-success',
-                                                                        'terlambat', 'late' => 'bg-warning text-dark',
-                                                                        'sakit', 'sick' => 'bg-info',
-                                                                        'izin', 'permission' => 'bg-primary',
-                                                                        'alpa', 'alpha' => 'bg-danger',
-                                                                        default => 'bg-secondary'
-                                                                    };
-                                                                    $statusLabel = ucfirst($hist->status);
-                                                                    // Singkatan 1 Huruf (H, T, S, I, A)
-                                                                    $statusShort = strtoupper(substr($statusLabel, 0, 1));
-                                                                    $dateLabel = \Carbon\Carbon::parse($hist->date)->format('d/m');
-                                                                @endphp
-                                                                <div class="text-center d-inline-block" style="line-height: 1;">
-                                                                    <span class="badge {{ $badgeClass }} rounded-1"
-                                                                          style="font-size: 0.65rem; min-width: 20px; padding: 2px;"
-                                                                          title="{{ $dateLabel }}: {{ $statusLabel }}">
-                                                                        {{ $statusShort }}
-                                                                    </span>
-                                                                    <div style="font-size: 0.55rem; margin-top: 2px; color: #666;">
-                                                                        {{ $dateLabel }}
-                                                                    </div>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    @else
-                                                        <span class="text-muted small">-</span>
-                                                    @endif
-                                                </td>
-
                                                 <td class="text-center">
                                                     @if($isMissingGate)
                                                         <div class="text-danger small fw-bold">
@@ -219,7 +173,7 @@
                                                 </td>
                                             </tr>
                                         @empty
-                                            <tr><td colspan="5" class="text-center text-muted">Belum ada siswa.</td></tr>
+                                            <tr><td colspan="4" class="text-center text-muted">Belum ada siswa.</td></tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -254,13 +208,13 @@
                             <p class="mb-0 small">Fitur ini digunakan jika terjadi kendala pada scanner gerbang (misal mati listrik/rusak). Guru dapat mengabsenkan massal sebagai <strong>"Hadir"</strong> di gerbang.</p>
                         </div>
 
-                        <p class="mb-2 fw-bold">Daftar Siswa Belum Scan Gerbang ({{ $studentsMissingGate->count() }}):</p>
+                        <p class="mb-2 fw-bold">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
 
-                        <div class="border rounded table-responsive" style="max-height: 300px; overflow-y:auto;">
-                            <table class="table mb-0 table-sm table-striped">
-                                <thead class="table-light sticky-top">
+                        <div class="table-responsive" style="max-height: 300px; overflow-y:auto;">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
                                     <tr>
-                                        <th width="40" class="text-center"><input type="checkbox" id="checkAll" checked></th>
+                                        <th width="40" class="text-center"><input type="checkbox" id="checkAll"></th>
                                         <th>Nama Siswa</th>
                                         <th>NIS</th>
                                     </tr>
@@ -279,35 +233,22 @@
                             </table>
                         </div>
 
-                        <div class="p-3 mt-3 border rounded bg-light">
-                            <label class="mb-2 fw-bold small d-block">Set Status Gerbang Sebagai:</label>
-                            <div class="gap-3 d-flex align-items-center">
-                                <select name="status" class="w-auto form-select form-select-sm">
-                                    <option value="hadir" selected>Hadir (Tepat Waktu)</option>
-                                    <option value="terlambat">Terlambat</option>
-                                    <option value="sakit">Sakit</option>
-                                    <option value="izin">Izin</option>
-                                    <option value="alpa">Alpa</option>
-                                </select>
-                                <span class="text-muted small fst-italic">*Pilih "Sakit/Izin" jika siswa memang tidak hadir.</span>
-                            </div>
+                        <div class="mt-3">
+                            <label class="fw-bold small">Set Status Gerbang Sebagai:</label>
+                            <select name="status" class="w-auto form-select d-inline-block ms-2">
+                                <option value="hadir" selected>Hadir (Tepat Waktu)</option>
+                                <option value="terlambat">Terlambat</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="px-4 btn btn-danger btn-sm fw-bold">Simpan & Buka Akses</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Simpan Absensi Gerbang</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('checkAll')?.addEventListener('change', function() {
-            let checkboxes = document.querySelectorAll('.student-check');
-            checkboxes.forEach(cb => cb.checked = this.checked);
-        });
-    </script>
     @endif
 
     <!-- 4. MODAL JURNAL PEMBELAJARAN -->
@@ -347,6 +288,15 @@
             </div>
         </div>
     </div>
+
+    @if(isset($studentsMissingGate) && $studentsMissingGate->count() > 0)
+    <script>
+        document.getElementById('checkAll')?.addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.student-check');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
+    @endif
 
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

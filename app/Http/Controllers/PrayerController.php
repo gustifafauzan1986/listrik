@@ -348,7 +348,73 @@ class PrayerController extends Controller
 
     //     return view('prayer.index', compact('schedule', 'attendances', 'today', 'student'));
     // }
-    {
+    // {
+    //     $user = Auth::user();
+
+    //     // Cek data siswa berdasarkan user login
+    //     $student = Student::where('user_id', $user->id)->first();
+
+    //     // --- FIX ERR_TOO_MANY_REDIRECTS ---
+    //     if (!$student) {
+    //         if (Route::has('dashboard')) {
+    //             return redirect()->route('dashboard')->with('error', 'Fitur Absensi Sholat khusus untuk akun Siswa.');
+    //         }
+    //         return redirect('/')->with('error', 'Fitur Absensi Sholat khusus untuk akun Siswa.');
+    //     }
+
+    //     // 1. Ambil Jadwal Sholat dari API equran.id
+    //     $cityId = '0306'; // Bukittinggi
+    //     $today = Carbon::now()->format('Y-m-d');
+
+    //     $schedule = [];
+    //     try {
+    //         // FIX FINAL: Menggunakan cURL native PHP
+    //         // Ini menghindari semua masalah "Undefined method" pada wrapper HTTP Laravel
+    //         $url = "https://equran.id/api/v2/shalat/jadwal/$cityId/$today";
+
+    //         $ch = curl_init();
+    //         curl_setopt($ch, CURLOPT_URL, $url);
+    //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    //         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // Timeout koneksi
+    //         curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Timeout total
+
+    //         $responseBody = curl_exec($ch);
+    //         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    //         $curlError = curl_error($ch);
+
+    //         // curl_close($ch); // Removed as it has no effect in PHP 8.0+ (CurlHandle automatically closes)
+
+    //         if ($httpCode == 200 && $responseBody) {
+    //             $data = json_decode($responseBody, true);
+
+    //             // Validasi struktur data
+    //             if (is_array($data) && isset($data['data']['jadwal'])) {
+    //                 $schedule = $data['data']['jadwal'];
+    //             } else {
+    //                 Log::warning("Format API Sholat tidak sesuai: " . substr($responseBody, 0, 200));
+    //                 throw new \Exception('Format data API berubah atau tidak valid');
+    //             }
+    //         } else {
+    //             throw new \Exception("Request API gagal. Status: $httpCode. Error: $curlError");
+    //         }
+    //     } catch (\Exception $e) {
+    //         // Fallback ke jadwal statis jika API error/timeout
+    //         Log::error("Prayer API Error: " . $e->getMessage());
+    //         $schedule = [
+    //             'subuh' => '04:55', 'dzuhur' => '12:25', 'ashar' => '15:40',
+    //             'maghrib' => '18:25', 'isya' => '19:35', 'dhuha' => '07:00'
+    //         ];
+    //     }
+
+    //     // 2. Cek Status Absensi Hari Ini
+    //     $attendances = PrayerAttendance::where('student_id', $student->id)
+    //                     ->whereDate('date', $today)
+    //                     ->pluck('check_in_time', 'prayer_name')
+    //                     ->toArray();
+
+    //     return view('prayer.index', compact('schedule', 'attendances', 'today', 'student'));
+    // }
+{
         $user = Auth::user();
 
         // Cek data siswa berdasarkan user login
@@ -362,47 +428,69 @@ class PrayerController extends Controller
             return redirect('/')->with('error', 'Fitur Absensi Sholat khusus untuk akun Siswa.');
         }
 
-        // 1. Ambil Jadwal Sholat dari API equran.id
-        $cityId = '0306'; // Bukittinggi
-        $today = Carbon::now()->format('Y-m-d');
+        // 1. Ambil Jadwal Sholat (API MYQURAN.COM)
+        $cityId = '0306'; // ID Kota Bukittinggi
+
+        // FIX: Pastikan Timezone Asia/Jakarta agar tanggal request benar
+        $dateObj = Carbon::now('Asia/Jakarta');
+        $year = $dateObj->format('Y');
+        $month = $dateObj->format('m');
+        $day = $dateObj->format('d');
+        $today = $dateObj->format('Y-m-d');
 
         $schedule = [];
+
         try {
-            // FIX FINAL: Menggunakan cURL native PHP
-            // Ini menghindari semua masalah "Undefined method" pada wrapper HTTP Laravel
-            $url = "https://equran.id/api/v2/shalat/jadwal/$cityId/$today";
+            $url = "https://api.myquran.com/v2/sholat/jadwal/$cityId/$year/$month/$day";
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // Timeout koneksi
-            curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Timeout total
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10); // Naikkan timeout jadi 10 detik
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+            // FIX UTAMA: Bypass SSL Verification (Sering error di localhost/hosting shared)
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Ikuti redirect jika ada
+
+            // User Agent
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
             $responseBody = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlError = curl_error($ch);
 
-            // curl_close($ch); // Removed as it has no effect in PHP 8.0+ (CurlHandle automatically closes)
+            // curl_close($ch); // Auto close PHP 8+
 
             if ($httpCode == 200 && $responseBody) {
                 $data = json_decode($responseBody, true);
 
-                // Validasi struktur data
+                // Validasi struktur data MyQuran
                 if (is_array($data) && isset($data['data']['jadwal'])) {
                     $schedule = $data['data']['jadwal'];
                 } else {
-                    Log::warning("Format API Sholat tidak sesuai: " . substr($responseBody, 0, 200));
-                    throw new \Exception('Format data API berubah atau tidak valid');
+                    Log::warning("Format API Sholat MyQuran tidak sesuai atau limit tercapai: " . substr($responseBody, 0, 200));
+                    throw new \Exception('Format data API tidak valid');
                 }
             } else {
-                throw new \Exception("Request API gagal. Status: $httpCode. Error: $curlError");
+                throw new \Exception("Request API MyQuran gagal. Status: $httpCode. Error: $curlError");
             }
+
         } catch (\Exception $e) {
-            // Fallback ke jadwal statis jika API error/timeout
+            // Fallback ke jadwal statis jika API error
             Log::error("Prayer API Error: " . $e->getMessage());
+
+            // Data Dummy (WIB)
             $schedule = [
-                'subuh' => '04:55', 'dzuhur' => '12:25', 'ashar' => '15:40',
-                'maghrib' => '18:25', 'isya' => '19:35', 'dhuha' => '07:00'
+                'subuh'   => '05:00',
+                'dzuhur'  => '12:30',
+                'ashar'   => '15:45',
+                'maghrib' => '18:30',
+                'isya'    => '19:45',
+                'dhuha'   => '07:00',
+                'imsak'   => '04:50',
+                'tanggal' => $dateObj->translatedFormat('l, d F Y') . ' (Data Offline)'
             ];
         }
 
@@ -414,6 +502,9 @@ class PrayerController extends Controller
 
         return view('prayer.index', compact('schedule', 'attendances', 'today', 'student'));
     }
+
+
+
 
     /**
      * Proses Simpan Absen Sholat dengan Validasi GPS Wajib

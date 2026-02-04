@@ -6,14 +6,14 @@
     <div class="page-content">
         <div class="row justify-content-center">
             <div class="col-md-10">
-                
+
                 <!-- Header -->
                 <div class="mb-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h4 class="mb-1 fw-bold text-primary">Absensi Manual</h4>
                         <small class="text-muted fw-bold">
-                            <i class="fas fa-book-open me-1"></i> {{ $schedule->subject->name }} 
-                            <span class="mx-2">|</span> 
+                            <i class="fas fa-book-open me-1"></i> {{ $schedule->subject->name }}
+                            <span class="mx-2">|</span>
                             <i class="fas fa-door-open me-1"></i> {{ $schedule->classroom->name }}
                         </small>
                     </div>
@@ -24,7 +24,7 @@
 
                 <!-- 1. ALERT & FITUR BANTUAN ABSEN GERBANG -->
                 @if(isset($gatePercentage) && $gatePercentage < 50)
-                    <div class="alert alert-danger shadow-sm border-left-danger d-flex align-items-center justify-content-between">
+                    <div class="shadow-sm alert alert-danger border-left-danger d-flex align-items-center justify-content-between">
                         <div>
                             <h5 class="alert-heading fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> PERHATIAN!</h5>
                             <p class="mb-0 small">
@@ -32,13 +32,13 @@
                                 <br>Siswa yang belum scan gerbang <strong>tidak dapat</strong> diabsen di mapel ini.
                             </p>
                         </div>
-                        <button type="button" class="btn btn-light text-danger fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkGateModal">
+                        <button type="button" class="shadow-sm btn btn-light text-danger fw-bold" data-bs-toggle="modal" data-bs-target="#bulkGateModal">
                             <i class="fas fa-magic me-1"></i> Bantuan: Absen Gerbang Otomatis
                         </button>
                     </div>
                 @elseif(isset($gatePercentage))
-                    <div class="alert alert-info small mb-4">
-                        <i class="fas fa-check-circle me-1"></i> 
+                    <div class="mb-4 alert alert-info small">
+                        <i class="fas fa-check-circle me-1"></i>
                         <strong>Status Gerbang Aman:</strong> {{ round($gatePercentage) }}% siswa sudah scan masuk.
                     </div>
                 @endif
@@ -51,7 +51,7 @@
 
                             <div class="table-responsive">
                                 <table class="table align-middle table-hover table-bordered">
-                                    <thead class="table-light text-center">
+                                    <thead class="text-center table-light">
                                         <tr>
                                             <th width="5%">No</th>
                                             <th width="15%">NIS</th>
@@ -63,7 +63,7 @@
                                         @forelse($students as $index => $student)
                                             @php
                                                 $dbStatus = $existingAttendances[$student->id] ?? null;
-                                                
+
                                                 $checked = '';
                                                 // Mapping status dari database
                                                 if ($dbStatus == 'present' || $dbStatus == 'hadir') $checked = 'hadir';
@@ -116,8 +116,8 @@
                                 </table>
                             </div>
 
-                            <div class="mt-4 d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                            <div class="gap-2 mt-4 d-grid">
+                                <button type="submit" class="shadow-sm btn btn-primary btn-lg">
                                     <i class="fas fa-save me-2"></i> Simpan Data Absensi Mapel
                                 </button>
                             </div>
@@ -134,19 +134,19 @@
     <div class="modal fade" id="bulkGateModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
+                <div class="text-white modal-header bg-danger">
                     <h5 class="modal-title fw-bold"><i class="fas fa-magic me-2"></i> Bantuan Absensi Gerbang</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('daily.store_bulk') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="alert alert-light border">
+                        <div class="border alert alert-light">
                             <p class="mb-0 small">Fitur ini digunakan jika terjadi kendala pada scanner gerbang atau siswa lupa scan. Guru/Piket dapat mengabsenkan mereka secara massal di gerbang agar status mapel terbuka.</p>
                         </div>
-                        
-                        <p class="fw-bold mb-2">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
-                        
+
+                        <p class="mb-2 fw-bold">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
+
                         <div class="table-responsive" style="max-height: 300px; overflow-y:auto;">
                             <table class="table table-sm table-bordered">
                                 <thead class="table-light">
@@ -172,14 +172,14 @@
 
                         <div class="mt-3">
                             <label class="fw-bold small">Set Status Gerbang Sebagai:</label>
-                            <select name="status" class="form-select w-auto d-inline-block ms-2">
+                            <select name="status" class="w-auto form-select d-inline-block ms-2">
                                 <option value="hadir" selected>Hadir (Tepat Waktu)</option>
                                 <option value="terlambat">Terlambat</option>
                                 <option value="sakit">Sakit</option>
                                 <option value="izin">Izin</option>
                                 <option value="alpa">Alpa</option>
                             </select>
-                            <div class="form-text text-muted small mt-1">
+                            <div class="mt-1 form-text text-muted small">
                                 *Pilih "Sakit/Izin" untuk siswa yang tidak hadir, agar data harian lengkap.
                             </div>
                         </div>

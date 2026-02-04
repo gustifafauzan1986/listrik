@@ -110,7 +110,7 @@ class AttendanceController extends Controller
         // VALIDASI 1: CEK KEHADIRAN GERBANG (DailyAttendance)
         // =================================================================
         $today = Carbon::today();
-        
+
         $dailyLog = DailyAttendance::where('student_id', $student->id)
                     ->whereDate('date', $today)
                     ->first();
@@ -134,7 +134,7 @@ class AttendanceController extends Controller
         // =========================================================
         // VALIDASI BARU: HARI DAN JAM (WAKTU)
         // =========================================================
-        
+
         $now = Carbon::now();
 
         // A. Validasi Hari
@@ -160,7 +160,7 @@ class AttendanceController extends Controller
         $endTime = Carbon::parse($schedule->end_time);
 
         // Opsional: Tambahkan toleransi waktu masuk (misal boleh absen 15 menit sebelum mulai)
-        // $startTime->subMinutes(15); 
+        // $startTime->subMinutes(15);
 
         if ($now->lessThan($startTime)) {
             return response()->json([
@@ -200,7 +200,7 @@ class AttendanceController extends Controller
 
         // VALIDASI 3: DUPLIKASI
         $today = Carbon::today();
-        
+
         $existing = Attendance::where('student_id', $student->id)
                     ->where('schedule_id', $schedule->id)
                     ->whereDate('date', $today)
@@ -208,17 +208,17 @@ class AttendanceController extends Controller
 
         if ($existing) {
             return response()->json([
-                'status' => 'warning', 
+                'status' => 'warning',
                 'message' => "Siswa {$student->name} SUDAH ABSEN sebelumnya!"
             ]);
         }
 
         // LOGIKA 4: STATUS KEHADIRAN
         $status = 'hadir'; // Default
-        
+
         // Reset startTime ke jam asli untuk perhitungan keterlambatan (jika tadi dimodifikasi buffer)
-        $jamMasuk = Carbon::parse($schedule->start_time); 
-        
+        $jamMasuk = Carbon::parse($schedule->start_time);
+
         // Toleransi Terlambat 15 menit setelah jam masuk
         if ($now->greaterThan($jamMasuk->addMinutes(15))) {
             $status = 'terlambat';
@@ -229,7 +229,7 @@ class AttendanceController extends Controller
             'student_id'   => $student->id,
             'schedule_id'  => $schedule->id,
             // Pastikan kolom subject_id ada di database. Jika belum migrasi, comment baris ini.
-            'subject_id'   => $schedule->subject_id, 
+            'subject_id'   => $schedule->subject_id,
             'date'         => $today->format('Y-m-d'),
             'check_in_time'=> $now->format('H:i:s'),
             'status'       => $status,
@@ -240,7 +240,7 @@ class AttendanceController extends Controller
             $mapel = $schedule->subject->name ?? '-';
             $waktu = $now->format('H:i');
             $statText = ($status == 'present') ? 'HADIR TEPAT WAKTU' : 'TERLAMBAT';
-            
+
             $message = "*LAPORAN KEHADIRAN MAPEL*\n\n" .
                        "Siswa: *{$student->name}*\n" .
                        "Mapel: {$mapel}\n" .
@@ -271,7 +271,7 @@ class AttendanceController extends Controller
 //         ]);
 
 //         $user = Auth::user();
-        
+
 //         // Cek data guru (jika user adalah guru)
 //         $teacher = Teacher::where('user_id', $user->id)->first();
 
@@ -288,7 +288,7 @@ class AttendanceController extends Controller
 
 //         if (!$schedule) {
 //             return response()->json([
-//                 'status' => 'error', 
+//                 'status' => 'error',
 //                 'message' => 'Jadwal tidak valid!'
 //             ]);
 //         }
@@ -315,7 +315,7 @@ class AttendanceController extends Controller
 
 //         // VALIDASI 3: DUPLIKASI
 //         $today = Carbon::today();
-        
+
 //         $existing = Attendance::where('student_id', $student->id)
 //                     ->where('schedule_id', $schedule->id)
 //                     ->whereDate('date', $today) // Gunakan kolom 'date'
@@ -323,14 +323,14 @@ class AttendanceController extends Controller
 
 //         if ($existing) {
 //             return response()->json([
-//                 'status' => 'warning', 
+//                 'status' => 'warning',
 //                 'message' => "Siswa {$student->name} SUDAH ABSEN sebelumnya!"
 //             ]);
 //         }
 
 //         // LOGIKA 4: STATUS KEHADIRAN
 //         $status = 'hadir'; // Default
-        
+
 //         $jamMasuk = Carbon::parse($schedule->start_time);
 //         $jamSekarang = Carbon::now();
 
@@ -354,7 +354,7 @@ class AttendanceController extends Controller
 //             $mapel = $schedule->subject->name ?? '-';
 //             $waktu = $jamSekarang->format('H:i');
 //             $statText = ($status == 'present') ? 'HADIR TEPAT WAKTU' : 'TERLAMBAT';
-            
+
 //             $message = "*LAPORAN KEHADIRAN MAPEL*\n\n" .
 //                        "Siswa: *{$student->name}*\n" .
 //                        "Mapel: {$mapel}\n" .
@@ -548,7 +548,7 @@ class AttendanceController extends Controller
     //     // ---------------------------------------------------------
     //     $jamMasuk = Carbon::parse($schedule->start_time);
     //     $jamSekarang = Carbon::now();
-        
+
     //     // Default status
     //     $statusBaru = 'hadir';
 
@@ -569,7 +569,7 @@ class AttendanceController extends Controller
 
     //     if ($existing) {
     //         // SKENARIO A: DATA SUDAH ADA
-            
+
     //         // Cek apakah statusnya sama persis?
     //         if ($existing->status === $statusBaru) {
     //             // JIKA SAMA: Jangan simpan, Jangan kirim notif, tapi beri respon sukses agar frontend tidak error
@@ -780,7 +780,7 @@ class AttendanceController extends Controller
     //     $inf_app = $settings['inf_app'] ?? 'Sistem Sekolah'; // Pakai default jika null
 
     //     $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
-        
+
 
     //     $teacher = Teacher::where('user_id', Auth::id())->first();
 
@@ -810,11 +810,11 @@ class AttendanceController extends Controller
 
     //         if ($attendance) {
     //             // SKENARIO A: DATA SUDAH ADA
-                
+
     //             // Cek apakah statusnya sama persis?
     //             if ($attendance->status === $status) {
     //                 // JIKA SAMA: Lewati loop ini. Jangan simpan, jangan kirim WA.
-    //                 continue; 
+    //                 continue;
     //             }
 
     //             // JIKA BEDA: Update datanya
@@ -829,7 +829,7 @@ class AttendanceController extends Controller
     //             Attendance::create([
     //                 'student_id'  => $studentId,
     //                 'schedule_id' => $schedule_id,
-    //                 'subject_id'   => $schedule->subject_id, 
+    //                 'subject_id'   => $schedule->subject_id,
     //                 'date'        => $date,
     //                 'check_in_time' => $now,
     //                 'status'      => $status
@@ -919,7 +919,7 @@ class AttendanceController extends Controller
 
     //     // 1. Cari Jadwal
     //     $query = Schedule::with(['classroom', 'subject'])->where('id', $schedule_id);
-        
+
     //     if ($user->jenis_user !== 'admin') {
     //         $query->where('teacher_id', $teacher->id);
     //     }
@@ -940,23 +940,231 @@ class AttendanceController extends Controller
     //     return view('attendance.manual', compact('schedule', 'students', 'existingAttendances'));
     // }
 
+    // public function createManual($schedule_id)
+    // {
+    //     $user = Auth::user();
+    //     $teacher = Teacher::where('user_id', $user->id)->first();
+
+    //     if ($user->jenis_user !== 'admin' && !$teacher) {
+    //         abort(403, 'Akses Ditolak');
+    //     }
+
+    //     // 1. Cari Jadwal
+    //     $query = Schedule::with(['classroom', 'subject'])->where('id', $schedule_id);
+
+    //     if ($user->jenis_user !== 'admin') {
+    //         $query->where('teacher_id', $teacher->id);
+    //     }
+
+    //     $schedule = $query->firstOrFail();
+
+    //     // 2. Ambil Semua Siswa di Kelas Ini
+    //     $students = Student::where('classroom_id', $schedule->classroom_id)
+    //                 ->orderBy('name')
+    //                 ->get();
+
+    //     // 3. Ambil Status Absensi Mapel Hari Ini
+    //     $existingAttendances = Attendance::where('schedule_id', $schedule_id)
+    //                             ->whereDate('created_at', Carbon::today())
+    //                             ->pluck('status', 'student_id')
+    //                             ->toArray();
+
+    //     // --- FITUR BARU: CEK PERSENTASE KEHADIRAN GERBANG (BANTUAN GURU) ---
+    //     $today = Carbon::today()->format('Y-m-d');
+
+    //     // Ambil ID siswa yang SUDAH absen gerbang hari ini
+    //     $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
+    //                         ->whereIn('student_id', $students->pluck('id'))
+    //                         ->whereNotNull('arrival_time')
+    //                         ->pluck('student_id')
+    //                         ->toArray();
+
+    //     $totalSiswa = $students->count();
+    //     $totalHadirGerbang = count($idsHadirGerbang);
+
+    //     // Hitung Persentase
+    //     $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
+
+    //     // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
+    //     $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
+
+    //     return view('attendance.manual', compact(
+    //         'schedule',
+    //         'students',
+    //         'existingAttendances',
+    //         'gatePercentage',
+    //         'studentsMissingGate'
+    //     ));
+    // }
+
+    // public function createManual($schedule_id)
+    // {
+    //     $user = Auth::user();
+    //     $teacher = Teacher::where('user_id', $user->id)->first();
+
+    //     // Validasi Akses: Admin boleh akses semua, Guru hanya jadwalnya sendiri
+    //     if ($user->jenis_user !== 'admin') {
+    //         if (!$teacher) {
+    //             abort(403, 'Akses Ditolak: Akun Anda bukan Guru.');
+    //         }
+    //         // Pastikan jadwal ini milik guru tersebut
+    //         $isOwner = Schedule::where('id', $schedule_id)->where('teacher_id', $teacher->id)->exists();
+    //         if (!$isOwner) {
+    //             abort(403, 'Akses Ditolak: Ini bukan jadwal mengajar Anda.');
+    //         }
+    //     }
+
+    //     // 1. Cari Jadwal
+    //     $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
+
+    //     // 2. Ambil Semua Siswa di Kelas Ini
+    //     $students = Student::where('classroom_id', $schedule->classroom_id)
+    //                 ->orderBy('name')
+    //                 ->get();
+
+    //     // 3. Ambil Status Absensi Mapel Hari Ini (agar form terisi jika sudah pernah simpan)
+    //     $existingAttendances = Attendance::where('schedule_id', $schedule_id)
+    //                             ->whereDate('date', Carbon::today())
+    //                             ->pluck('status', 'student_id')
+    //                             ->toArray();
+
+    //     // 4. [OPTIMASI] Ambil History Absensi Minggu-minggu Sebelumnya
+    //     // Kita ambil sekaligus (Eager Loading style) untuk mencegah query berulang di View
+    //     $allHistories = Attendance::where('schedule_id', $schedule_id)
+    //                         ->whereDate('date', '<', Carbon::today())
+    //                         ->orderBy('date', 'desc')
+    //                         ->get()
+    //                         ->groupBy('student_id');
+
+    //     // --- FITUR BARU: CEK PERSENTASE KEHADIRAN GERBANG (BANTUAN GURU) ---
+    //     $today = Carbon::today()->format('Y-m-d');
+
+    //     // Ambil ID siswa yang SUDAH absen gerbang hari ini
+    //     $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
+    //                         ->whereIn('student_id', $students->pluck('id'))
+    //                         ->whereNotNull('arrival_time')
+    //                         ->pluck('student_id')
+    //                         ->toArray();
+
+    //     $totalSiswa = $students->count();
+    //     $totalHadirGerbang = count($idsHadirGerbang);
+
+    //     // Hitung Persentase
+    //     $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
+
+    //     // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
+    //     $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
+
+    //     return view('attendance.manual', compact(
+    //         'schedule',
+    //         'students',
+    //         'existingAttendances',
+    //         'allHistories', // Dikirim ke view untuk kolom History
+    //         'gatePercentage',
+    //         'studentsMissingGate'
+    //     ));
+    // }
+
+    //  public function createManual($schedule_id)
+    // {
+    //     $user = Auth::user();
+    //     $teacher = Teacher::where('user_id', $user->id)->first();
+
+    //     // Validasi Akses: Admin boleh akses semua, Guru hanya jadwalnya sendiri
+    //     if ($user->jenis_user !== 'admin') {
+    //         if (!$teacher) {
+    //             abort(403, 'Akses Ditolak: Akun Anda bukan Guru.');
+    //         }
+    //         // Pastikan jadwal ini milik guru tersebut
+    //         $isOwner = Schedule::where('id', $schedule_id)->where('teacher_id', $teacher->id)->exists();
+    //         if (!$isOwner) {
+    //             abort(403, 'Akses Ditolak: Ini bukan jadwal mengajar Anda.');
+    //         }
+    //     }
+
+    //     // 1. Cari Jadwal
+    //     $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
+
+    //     // 2. Ambil Semua Siswa di Kelas Ini
+    //     $students = Student::where('classroom_id', $schedule->classroom_id)
+    //                 ->orderBy('name')
+    //                 ->get();
+
+    //     // 3. Ambil Status Absensi Mapel Hari Ini (agar form terisi jika sudah pernah simpan)
+    //     // Kita menggunakan keyBy untuk memudahkan akses array di view
+    //     $existingAttendances = Attendance::where('schedule_id', $schedule_id)
+    //                             ->whereDate('date', Carbon::today())
+    //                             ->get()
+    //                             ->mapWithKeys(function ($item) {
+    //                                 // Mengembalikan array lengkap agar recorded_by bisa diakses di view
+    //                                 return [$item->student_id => [
+    //                                     'status' => $item->status,
+    //                                     'recorded_by' => $item->recorded_by
+    //                                 ]];
+    //                             })
+    //                             ->toArray();
+
+    //     // 4. [OPTIMASI] Ambil History Absensi Minggu-minggu Sebelumnya
+    //     // Kita ambil sekaligus (Eager Loading style) untuk mencegah query berulang di View
+    //     $allHistories = Attendance::where('schedule_id', $schedule_id)
+    //                         ->whereDate('date', '<', Carbon::today())
+    //                         ->orderBy('date', 'desc')
+    //                         ->get()
+    //                         ->groupBy('student_id');
+
+    //     //dd($schedule);
+
+    //     // --- FITUR BARU: CEK PERSENTASE KEHADIRAN GERBANG (BANTUAN GURU) ---
+    //     $today = Carbon::today()->format('Y-m-d');
+
+    //     // Ambil ID siswa yang SUDAH absen gerbang hari ini
+    //     $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
+    //                         ->whereIn('student_id', $students->pluck('id'))
+    //                         ->whereNotNull('arrival_time')
+    //                         ->pluck('student_id')
+    //                         ->toArray();
+
+    //     $totalSiswa = $students->count();
+    //     $totalHadirGerbang = count($idsHadirGerbang);
+
+    //     // Hitung Persentase
+    //     $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
+
+    //     // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
+    //     $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
+
+    //     return view('attendance.manual', compact(
+    //         'schedule',
+    //         'students',
+    //         'existingAttendances',
+    //         'allHistories', // Dikirim ke view untuk kolom History
+    //         'gatePercentage',
+    //         'studentsMissingGate'
+    //     ));
+    // }
+
+     /**
+     * Halaman Input Absensi Manual Guru
+     */
     public function createManual($schedule_id)
     {
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->first();
 
-        if ($user->jenis_user !== 'admin' && !$teacher) {
-            abort(403, 'Akses Ditolak');
+        // Validasi Akses: Admin boleh akses semua, Guru hanya jadwalnya sendiri
+        if ($user->jenis_user !== 'admin') {
+            if (!$teacher) {
+                abort(403, 'Akses Ditolak: Akun Anda bukan Guru.');
+            }
+            // Pastikan jadwal ini milik guru tersebut
+            $isOwner = Schedule::where('id', $schedule_id)->where('teacher_id', $teacher->id)->exists();
+            if (!$isOwner) {
+                abort(403, 'Akses Ditolak: Ini bukan jadwal mengajar Anda.');
+            }
         }
 
         // 1. Cari Jadwal
-        $query = Schedule::with(['classroom', 'subject'])->where('id', $schedule_id);
-        
-        if ($user->jenis_user !== 'admin') {
-            $query->where('teacher_id', $teacher->id);
-        }
-
-        $schedule = $query->firstOrFail();
+        $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
 
         // 2. Ambil Semua Siswa di Kelas Ini
         $students = Student::where('classroom_id', $schedule->classroom_id)
@@ -965,14 +1173,30 @@ class AttendanceController extends Controller
 
         // 3. Ambil Status Absensi Mapel Hari Ini
         $existingAttendances = Attendance::where('schedule_id', $schedule_id)
-                                ->whereDate('created_at', Carbon::today())
-                                ->pluck('status', 'student_id')
+                                ->whereDate('date', Carbon::today())
+                                ->get()
+                                ->mapWithKeys(function ($item) {
+                                    return [$item->student_id => [
+                                        'status' => $item->status,
+                                        'recorded_by' => $item->recorded_by
+                                    ]];
+                                })
                                 ->toArray();
 
-        // --- FITUR BARU: CEK PERSENTASE KEHADIRAN GERBANG (BANTUAN GURU) ---
+        // 4. [FIXED] Ambil History Absensi Berdasarkan KELAS dan MAPEL (Bukan Schedule ID saja)
+        // Ini memastikan pertemuan di hari lain (misal Senin & Kamis) tetap muncul dalam history
+        $allHistories = Attendance::whereHas('schedule', function($q) use ($schedule) {
+                                $q->where('classroom_id', $schedule->classroom_id)
+                                  ->where('subject_id', $schedule->subject_id);
+                            })
+                            ->whereDate('date', '<', Carbon::today()) // Hanya ambil tanggal SEBELUM hari ini
+                            ->orderBy('date', 'desc')
+                            ->get()
+                            ->groupBy('student_id');
+
+        // --- FITUR BANTUAN GURU: CEK PERSENTASE KEHADIRAN GERBANG ---
         $today = Carbon::today()->format('Y-m-d');
-        
-        // Ambil ID siswa yang SUDAH absen gerbang hari ini
+
         $idsHadirGerbang = DailyAttendance::whereDate('date', $today)
                             ->whereIn('student_id', $students->pluck('id'))
                             ->whereNotNull('arrival_time')
@@ -981,18 +1205,16 @@ class AttendanceController extends Controller
 
         $totalSiswa = $students->count();
         $totalHadirGerbang = count($idsHadirGerbang);
-        
-        // Hitung Persentase
         $gatePercentage = $totalSiswa > 0 ? ($totalHadirGerbang / $totalSiswa) * 100 : 0;
-        
-        // Ambil data siswa yang BELUM absen gerbang (untuk ditampilkan di modal bantuan)
+
         $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
 
         return view('attendance.manual', compact(
-            'schedule', 
-            'students', 
+            'schedule',
+            'students',
             'existingAttendances',
-            'gatePercentage',      
+            'allHistories',
+            'gatePercentage',
             'studentsMissingGate'
         ));
     }
@@ -1000,143 +1222,170 @@ class AttendanceController extends Controller
     /**
      * Proses Simpan Manual dengan VALIDASI KETAT
      */
+    // public function storeManual(Request $request, $schedule_id)
+    // {
+    //     $request->validate([
+    //         'attendances' => 'required|array', // Key: student_id, Value: status
+    //     ]);
+
+    //     $user = Auth::user();
+    //     $teacher = Teacher::where('user_id', $user->id)->first();
+    //     $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
+
+    //     // Validasi Kepemilikan (Kecuali Admin)
+    //     if ($user->jenis_user !== 'admin') {
+    //         if (!$teacher || $schedule->teacher_id !== $teacher->id) {
+    //             abort(403, 'Unauthorized action.');
+    //         }
+    //     }
+
+    //     $now = Carbon::now();
+    //     $date = $now->format('Y-m-d');
+
+    //     // -------------------------------------------------------------
+    //     // 1. VALIDASI WAKTU (HARI & JAM)
+    //     // -------------------------------------------------------------
+    //     $daysMap = [
+    //         'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
+    //         'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
+    //     ];
+    //     $currentDayIndo = $daysMap[$now->format('l')];
+
+    //     // Cek Hari
+    //     if (strtolower($schedule->day) !== strtolower($currentDayIndo)) {
+    //         return redirect()->back()->with('error', "Gagal! Jadwal ini untuk hari {$schedule->day}, sekarang hari {$currentDayIndo}.");
+    //     }
+
+    //     // Cek Jam
+    //     $startTime = Carbon::parse($schedule->start_time)->setDate($now->year, $now->month, $now->day);
+    //     $endTime = Carbon::parse($schedule->end_time)->setDate($now->year, $now->month, $now->day);
+
+    //     // Validasi Jam Manual
+    //     /*
+    //     if ($now->lt($startTime) || $now->gt($endTime)) {
+    //          return redirect()->back()->with('error', "Gagal! Absensi hanya dibuka pada pukul {$schedule->start_time} - {$schedule->end_time}.");
+    //     }
+    //     */
+
+    //     // -------------------------------------------------------------
+    //     // 2. PROSES ABSENSI PER SISWA
+    //     // -------------------------------------------------------------
+    //     $updatedCount = 0;
+    //     $skippedCount = 0;
+
+    //     foreach ($request->attendances as $studentId => $status) {
+    //         if (!$status) continue;
+
+    //         // --- VALIDASI GERBANG (DAILY ATTENDANCE) ---
+    //         $dailyLog = DailyAttendance::where('student_id', $studentId)
+    //                     ->whereDate('date', $date)
+    //                     ->first();
+
+    //         // Aturan A: Harus sudah Scan Masuk
+    //         if (!$dailyLog || empty($dailyLog->arrival_time)) {
+    //             $skippedCount++;
+    //             continue; // Skip siswa ini (Belum datang ke sekolah)
+    //         }
+
+    //         // Aturan B: Tidak boleh sudah Scan Pulang
+    //         if (!empty($dailyLog->departure_time)) {
+    //             $skippedCount++;
+    //             continue; // Skip siswa ini (Sudah pulang)
+    //         }
+    //         // -------------------------------------------
+
+    //         // Cek data existing di mapel ini
+    //         $attendance = Attendance::where('student_id', $studentId)
+    //             ->where('schedule_id', $schedule_id)
+    //             ->whereDate('created_at', $date)
+    //             ->first();
+
+    //         $shouldSendNotif = false;
+
+    //         // PERBAIKAN: Gunakan nilai langsung dari Form (Bahasa Indonesia)
+    //         // Form mengirim: 'hadir', 'terlambat', 'izin', 'sakit', 'alpa'
+    //         // Database menerima nilai tersebut secara langsung.
+    //         $dbStatus = $status;
+
+    //         if ($attendance) {
+    //             // Update jika status beda
+    //             if ($attendance->status !== $dbStatus) {
+    //                 $attendance->update([
+    //                     'check_in_time' => $now->toTimeString(),
+    //                     'status' => $dbStatus
+    //                 ]);
+    //                 $shouldSendNotif = true;
+    //             }
+    //         } else {
+    //             // Create baru
+    //             Attendance::create([
+    //                 'student_id'   => $studentId,
+    //                 'schedule_id'  => $schedule_id,
+    //                 'subject_id'   => $schedule->subject_id,
+    //                 'date'         => $date,
+    //                 'check_in_time'=> $now->toTimeString(),
+    //                 'status'       => $dbStatus
+    //             ]);
+    //             $shouldSendNotif = true;
+    //         }
+
+    //         if ($shouldSendNotif) {
+    //             $updatedCount++;
+
+    //             // Kirim WA
+    //             $student = Student::find($studentId);
+    //             if ($student && !empty($student->phone)) {
+    //                 $mapel = $schedule->subject->name ?? '-';
+    //                 $statText = strtoupper($status);
+    //                 $message = "*LAPORAN KEHADIRAN MAPEL*\n\n" .
+    //                            "Siswa: *{$student->name}*\n" .
+    //                            "Mapel: {$mapel}\n" .
+    //                            "Status: {$statText}\n\n" .
+    //                            "_Sistem Absensi Sekolah_";
+
+    //                 try {
+    //                     SendWhatsappJob::dispatch($student->phone, $message);
+    //                 } catch (\Exception $e) {}
+    //             }
+    //         }
+    //     }
+
+    //     $msg = "Berhasil memproses $updatedCount data.";
+    //     if ($skippedCount > 0) {
+    //         $msg .= " (Peringatan: $skippedCount siswa dilewati karena belum scan masuk gerbang atau sudah pulang)";
+    //     }
+
+    //     if ($updatedCount > 0) {
+    //         return redirect()->route('schedule.index')->with('success', $msg);
+    //     } else {
+    //         return redirect()->route('schedule.index')->with('warning', $msg ?: 'Tidak ada perubahan data.');
+    //     }
+    // }
+
     public function storeManual(Request $request, $schedule_id)
     {
         $request->validate([
-            'attendances' => 'required|array', // Key: student_id, Value: status
+            'attendances' => 'array',
         ]);
 
-        $user = Auth::user();
-        $teacher = Teacher::where('user_id', $user->id)->first();
-        $schedule = Schedule::with(['classroom', 'subject'])->findOrFail($schedule_id);
-
-        // Validasi Kepemilikan (Kecuali Admin)
-        if ($user->jenis_user !== 'admin') {
-            if (!$teacher || $schedule->teacher_id !== $teacher->id) {
-                abort(403, 'Unauthorized action.');
-            }
-        }
-
-        $now = Carbon::now();
-        $date = $now->format('Y-m-d');
-
-        // -------------------------------------------------------------
-        // 1. VALIDASI WAKTU (HARI & JAM)
-        // -------------------------------------------------------------
-        $daysMap = [
-            'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
-            'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
-        ];
-        $currentDayIndo = $daysMap[$now->format('l')];
-
-        // Cek Hari
-        if (strtolower($schedule->day) !== strtolower($currentDayIndo)) {
-            return redirect()->back()->with('error', "Gagal! Jadwal ini untuk hari {$schedule->day}, sekarang hari {$currentDayIndo}.");
-        }
-
-        // Cek Jam
-        $startTime = Carbon::parse($schedule->start_time)->setDate($now->year, $now->month, $now->day);
-        $endTime = Carbon::parse($schedule->end_time)->setDate($now->year, $now->month, $now->day);
-
-        // Validasi Jam Manual
-        /*
-        if ($now->lt($startTime) || $now->gt($endTime)) {
-             return redirect()->back()->with('error', "Gagal! Absensi hanya dibuka pada pukul {$schedule->start_time} - {$schedule->end_time}.");
-        }
-        */
-
-        // -------------------------------------------------------------
-        // 2. PROSES ABSENSI PER SISWA
-        // -------------------------------------------------------------
-        $updatedCount = 0;
-        $skippedCount = 0;
+        $date = Carbon::now()->format('Y-m-d');
+        // Gunakan waktu sekarang atau default jam masuk mapel jika perlu
+        $checkInTime = Carbon::now()->format('H:i:s');
 
         foreach ($request->attendances as $studentId => $status) {
-            if (!$status) continue;
-
-            // --- VALIDASI GERBANG (DAILY ATTENDANCE) ---
-            $dailyLog = DailyAttendance::where('student_id', $studentId)
-                        ->whereDate('date', $date)
-                        ->first();
-
-            // Aturan A: Harus sudah Scan Masuk
-            if (!$dailyLog || empty($dailyLog->arrival_time)) {
-                $skippedCount++;
-                continue; // Skip siswa ini (Belum datang ke sekolah)
-            }
-
-            // Aturan B: Tidak boleh sudah Scan Pulang
-            if (!empty($dailyLog->departure_time)) {
-                $skippedCount++;
-                continue; // Skip siswa ini (Sudah pulang)
-            }
-            // -------------------------------------------
-
-            // Cek data existing di mapel ini
-            $attendance = Attendance::where('student_id', $studentId)
-                ->where('schedule_id', $schedule_id)
-                ->whereDate('created_at', $date)
-                ->first();
-
-            $shouldSendNotif = false;
-
-            // PERBAIKAN: Gunakan nilai langsung dari Form (Bahasa Indonesia)
-            // Form mengirim: 'hadir', 'terlambat', 'izin', 'sakit', 'alpa'
-            // Database menerima nilai tersebut secara langsung.
-            $dbStatus = $status;
-
-            if ($attendance) {
-                // Update jika status beda
-                if ($attendance->status !== $dbStatus) {
-                    $attendance->update([
-                        'check_in_time' => $now->toTimeString(),
-                        'status' => $dbStatus
-                    ]);
-                    $shouldSendNotif = true;
-                }
-            } else {
-                // Create baru
-                Attendance::create([
-                    'student_id'   => $studentId,
-                    'schedule_id'  => $schedule_id,
-                    'subject_id'   => $schedule->subject_id,
-                    'date'         => $date,
-                    'check_in_time'=> $now->toTimeString(),
-                    'status'       => $dbStatus
-                ]);
-                $shouldSendNotif = true;
-            }
-
-            if ($shouldSendNotif) {
-                $updatedCount++;
-                
-                // Kirim WA
-                $student = Student::find($studentId);
-                if ($student && !empty($student->phone)) {
-                    $mapel = $schedule->subject->name ?? '-';
-                    $statText = strtoupper($status);
-                    $message = "*LAPORAN KEHADIRAN MAPEL*\n\n" .
-                               "Siswa: *{$student->name}*\n" .
-                               "Mapel: {$mapel}\n" .
-                               "Status: {$statText}\n\n" .
-                               "_Sistem Absensi Sekolah_";
-                    
-                    try {
-                        SendWhatsappJob::dispatch($student->phone, $message);
-                    } catch (\Exception $e) {}
-                }
-            }
+            Attendance::updateOrCreate(
+                [
+                    'schedule_id' => $schedule_id,
+                    'student_id' => $studentId,
+                    'date' => $date
+                ],
+                [
+                    'status' => $status,
+                    'check_in_time' => $checkInTime
+                ]
+            );
         }
 
-        $msg = "Berhasil memproses $updatedCount data.";
-        if ($skippedCount > 0) {
-            $msg .= " (Peringatan: $skippedCount siswa dilewati karena belum scan masuk gerbang atau sudah pulang)";
-        }
-
-        if ($updatedCount > 0) {
-            return redirect()->route('schedule.index')->with('success', $msg);
-        } else {
-            return redirect()->route('schedule.index')->with('warning', $msg ?: 'Tidak ada perubahan data.');
-        }
+        return redirect()->route('schedule.index')->with('success', 'Data kehadiran berhasil disimpan.');
     }
 }
