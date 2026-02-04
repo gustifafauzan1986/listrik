@@ -37,20 +37,9 @@
         .grid-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 15px; }
         .grid-table th, .grid-table td { border: 1px solid #000; padding: 2px; text-align: center; vertical-align: middle; }
 
-        /* WARNA WARNI (STYLING BARU) */
-        .grid-table thead th {
-            background-color: #DCE6F1; /* Biru Muda untuk Header */
-        }
-        .grid-table tbody tr:nth-child(even) {
-            background-color: #F2F2F2; /* Abu Muda untuk Baris Genap (Zebra Striping) */
-        }
-        .bg-recap {
-            background-color: #EBF1DE; /* Hijau Muda untuk Kolom Jumlah */
-        }
-
         /* Rotasi Header Tanggal agar muat dan Jelas */
         .th-date {
-            height: 60px; /* Tinggi header agar teks vertikal muat */
+            height: 100px; /* Tinggi header agar teks vertikal muat */
             vertical-align: bottom;
             padding-bottom: 5px;
             width: 25px; /* Lebar kolom tanggal dipersempit */
@@ -142,7 +131,7 @@
                 @endif
 
                 <!-- HEADER REKAP -->
-                <th colspan="5" class="bg-recap">JUMLAH</th>
+                <th colspan="5">JUMLAH</th>
             </tr>
             <tr>
                 <!-- LOOP TANGGAL -->
@@ -156,11 +145,11 @@
 
                 @if(count($dates) == 0) <th>-</th> @endif
 
-                <th width="20" class="bg-recap">H</th>
-                <th width="20" class="bg-recap">S</th>
-                <th width="20" class="bg-recap">I</th>
-                <th width="20" class="bg-recap">A</th>
-                <th width="20" class="bg-recap">T</th>
+                <th width="20">H</th>
+                <th width="20">S</th>
+                <th width="20">I</th>
+                <th width="20">A</th>
+                <th width="20">T</th>
             </tr>
         </thead>
         <tbody>
@@ -175,30 +164,29 @@
                     @php
                         $status = $attendanceMap[$student->id][$date] ?? '-';
                         $color = '';
-                        // Menggunakan warna teks yang lebih jelas/gelap untuk dicetak
-                        if($status == 'S') $color = 'color:#0000FF;'; /* Biru */
-                        if($status == 'I') $color = 'color:#FF8C00;'; /* Oranye Tua */
-                        if($status == 'A') $color = 'color:#FF0000;'; /* Merah */
-                        if($status == 'T') $color = 'color:#8B4513;'; /* Coklat */
+                        if($status == 'S') $color = 'color:blue;';
+                        if($status == 'I') $color = 'color:orange;';
+                        if($status == 'A') $color = 'color:red;';
+                        if($status == 'T') $color = 'color:brown;';
                     @endphp
                     <td class="status-cell" style="{{ $color }}">{{ $status }}</td>
                 @endforeach
 
                 @if(count($dates) == 0) <td>-</td> @endif
 
-                <!-- REKAP PER SISWA (Diberi background pembeda) -->
-                <td class="bg-recap">{{ $recapMap[$student->id]['H'] }}</td>
-                <td class="bg-recap">{{ $recapMap[$student->id]['S'] }}</td>
-                <td class="bg-recap">{{ $recapMap[$student->id]['I'] }}</td>
-                <td class="bg-recap">{{ $recapMap[$student->id]['A'] }}</td>
-                <td class="bg-recap">{{ $recapMap[$student->id]['T'] }}</td>
+                <!-- REKAP PER SISWA -->
+                <td>{{ $recapMap[$student->id]['H'] }}</td>
+                <td>{{ $recapMap[$student->id]['S'] }}</td>
+                <td>{{ $recapMap[$student->id]['I'] }}</td>
+                <td>{{ $recapMap[$student->id]['A'] }}</td>
+                <td>{{ $recapMap[$student->id]['T'] }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
     <div style="font-size: 9pt; margin-bottom: 20px;">
-        <strong>Keterangan:</strong> (.) Hadir, (S) Sakit, (I) Izin, (A) Alpa, (T) Terlambat
+        <strong>Keterangan:</strong> (H) Hadir, (S) Sakit, (I) Izin, (A) Alpa, (T) Terlambat
     </div>
 
     <!-- TANDA TANGAN -->
