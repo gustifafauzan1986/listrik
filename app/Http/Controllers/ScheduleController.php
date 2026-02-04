@@ -55,7 +55,7 @@ class ScheduleController extends Controller
             return ($daysOrder[$schedule->day] ?? 99) * 10000 + (int)str_replace(':', '', $schedule->start_time);
         });
 
-        return view('schedule.index', compact('schedules'));
+        return view('guru.schedule.index', compact('schedules'));
     }
 
     /**
@@ -77,7 +77,7 @@ class ScheduleController extends Controller
         // 3. Ambil daftar Ruangan (Semua Ruangan)
         $rooms = Room::orderBy('name')->get();
 
-        return view('schedule.create', compact('classrooms', 'assignments', 'rooms'));
+        return view('guru.schedule.create', compact('classrooms', 'assignments', 'rooms'));
     }
 
     /**
@@ -155,7 +155,7 @@ class ScheduleController extends Controller
         // Ambil data ruangan
         $rooms = Room::orderBy('name')->get();
 
-        return view('schedule.edit', compact('schedule', 'classrooms', 'assignments', 'rooms'));
+        return view('guru.schedule.edit', compact('schedule', 'classrooms', 'assignments', 'rooms'));
     }
 
     /**
@@ -221,7 +221,7 @@ class ScheduleController extends Controller
                         ->latest()
                         ->get();
 
-        return view('schedule.show', compact('schedule', 'attendances'));
+        return view('guru.schedule.show', compact('schedule', 'attendances'));
     }
 
     /**
@@ -263,7 +263,7 @@ class ScheduleController extends Controller
         $allAssignments = TeachingAssignment::with(['classroom', 'subject'])->get();
         $rooms = Room::orderBy('name')->get(); // Data ruangan untuk admin
 
-        return view('schedule.all', compact('schedules', 'teachers', 'allAssignments', 'rooms'));
+        return view('guru.schedule.all', compact('schedules', 'teachers', 'allAssignments', 'rooms'));
     }
 
     /**

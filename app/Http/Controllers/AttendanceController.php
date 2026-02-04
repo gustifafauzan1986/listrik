@@ -1209,7 +1209,7 @@ class AttendanceController extends Controller
 
         $studentsMissingGate = $students->whereNotIn('id', $idsHadirGerbang);
 
-        return view('attendance.manual', compact(
+        return view('guru.pembelajaran.manual', compact(
             'schedule',
             'students',
             'existingAttendances',
@@ -1362,6 +1362,70 @@ class AttendanceController extends Controller
     //     }
     // }
 
+    // public function storeManual(Request $request, $schedule_id)
+    // {
+    //     $request->validate([
+    //         'attendances' => 'array',
+    //     ]);
+
+    //     $date = Carbon::now()->format('Y-m-d');
+    //     // Gunakan waktu sekarang atau default jam masuk mapel jika perlu
+    //     $checkInTime = Carbon::now()->format('H:i:s');
+
+    //     foreach ($request->attendances as $studentId => $status) {
+    //         Attendance::updateOrCreate(
+    //             [
+    //                 'schedule_id' => $schedule_id,
+    //                 'student_id' => $studentId,
+    //                 'date' => $date
+    //             ],
+    //             [
+    //                 'status' => $status,
+    //                 'check_in_time' => $checkInTime
+    //             ]
+    //         );
+    //     }
+
+    //     return redirect()->route('schedule.index')->with('success', 'Data kehadiran berhasil disimpan.');
+    // }
+
+    /**
+     * Proses Simpan Absensi Manual
+     */
+    // public function storeManual(Request $request, $schedule_id)
+    // {
+    //     $request->validate([
+    //         'attendances' => 'array',
+    //     ]);
+
+    //     $date = Carbon::now()->format('Y-m-d');
+    //     $checkInTime = Carbon::now()->format('H:i:s');
+
+    //     $schedule = Schedule::findOrFail($schedule_id);
+
+    //     if ($request->has('attendances')) {
+    //         foreach ($request->attendances as $studentId => $status) {
+    //             Attendance::updateOrCreate(
+    //                 [
+    //                     'schedule_id' => $schedule->id,
+    //                     'student_id' => $studentId,
+    //                     'date' => $date
+    //                 ],
+    //                 [
+    //                     'status' => $status,
+    //                     'check_in_time' => $checkInTime,
+    //                     'recorded_by' => 'teacher_manual'
+    //                 ]
+    //             );
+    //         }
+    //     }
+
+    //     return redirect()->route('schedule.index')->with('success', 'Data kehadiran berhasil disimpan.');
+    // }
+
+    /**
+     * Proses Simpan Absensi Manual
+     */
     public function storeManual(Request $request, $schedule_id)
     {
         $request->validate([
@@ -1369,21 +1433,26 @@ class AttendanceController extends Controller
         ]);
 
         $date = Carbon::now()->format('Y-m-d');
-        // Gunakan waktu sekarang atau default jam masuk mapel jika perlu
         $checkInTime = Carbon::now()->format('H:i:s');
 
-        foreach ($request->attendances as $studentId => $status) {
-            Attendance::updateOrCreate(
-                [
-                    'schedule_id' => $schedule_id,
-                    'student_id' => $studentId,
-                    'date' => $date
-                ],
-                [
-                    'status' => $status,
-                    'check_in_time' => $checkInTime
-                ]
-            );
+        $schedule = Schedule::findOrFail($schedule_id);
+
+        if ($request->has('attendances')) {
+            foreach ($request->attendances as $studentId => $status) {
+                Attendance::updateOrCreate(
+                    [
+                        'schedule_id' => $schedule->id,
+                        'student_id' => $studentId,
+                        'date' => $date
+                    ],
+                    [
+                        'subject_id' => $schedule->subject_id, // FIX: Menambahkan subject_id agar tidak null
+                        'status' => $status,
+                        'check_in_time' => $checkInTime,
+                        'recorded_by' => 'teacher_manual'
+                    ]
+                );
+            }
         }
 
         return redirect()->route('schedule.index')->with('success', 'Data kehadiran berhasil disimpan.');

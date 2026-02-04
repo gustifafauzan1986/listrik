@@ -48,7 +48,7 @@ class TeachingJournalController extends Controller
                             ->get()
                             ->keyBy('schedule_id');
 
-        return view('journal.index', compact('schedules', 'filledJournals', 'date'));
+        return view('guru.journal.index', compact('schedules', 'filledJournals', 'date'));
     }
 
     // Simpan atau Update Jurnal

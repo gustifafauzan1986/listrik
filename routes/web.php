@@ -53,6 +53,7 @@ use App\Http\Controllers\InventoryLoanController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PrayerController;
 use App\Http\Controllers\PrayerMonitoringController;
+use App\Http\Controllers\Guru\LaporanGuruController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -194,6 +195,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/loans/scan', [LoanController::class, 'scan'])->name('loans.scan');
         Route::post('/loans/store', [LoanController::class, 'store'])->name('loans.store');
         Route::post('/loans/return/{id}', [LoanController::class, 'returnItem'])->name('loans.return');
+        Route::get('/report/attendance-list/{schedule}', [LaporanGuruController::class, 'printAttendanceList'])->name('report.attendance_list');
 
 
 
