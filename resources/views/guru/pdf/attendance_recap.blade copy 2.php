@@ -173,10 +173,7 @@
                 <!-- LOOP STATUS PER TANGGAL -->
                 @foreach($dates as $date)
                     @php
-                        // Akses aman ke array attendanceMap
-                        $studentAtt = $attendanceMap[$student->id] ?? [];
-                        $status = $studentAtt[$date] ?? '-';
-
+                        $status = $attendanceMap[$student->id][$date] ?? '-';
                         $color = '';
                         // Menggunakan warna teks yang lebih jelas/gelap untuk dicetak
                         if($status == 'S') $color = 'color:#0000FF;'; /* Biru */
@@ -189,22 +186,19 @@
 
                 @if(count($dates) == 0) <td>-</td> @endif
 
-                <!-- REKAP PER SISWA (Safety check: ?? 0) -->
-                @php
-                    $recap = $recapMap[$student->id] ?? ['H'=>0, 'S'=>0, 'I'=>0, 'A'=>0, 'T'=>0];
-                @endphp
-                <td class="bg-recap">{{ $recap['H'] ?? 0 }}</td>
-                <td class="bg-recap">{{ $recap['S'] ?? 0 }}</td>
-                <td class="bg-recap">{{ $recap['I'] ?? 0 }}</td>
-                <td class="bg-recap">{{ $recap['A'] ?? 0 }}</td>
-                <td class="bg-recap">{{ $recap['T'] ?? 0 }}</td>
+                <!-- REKAP PER SISWA (Diberi background pembeda) -->
+                <td class="bg-recap">{{ $recapMap[$student->id]['H'] }}</td>
+                <td class="bg-recap">{{ $recapMap[$student->id]['S'] }}</td>
+                <td class="bg-recap">{{ $recapMap[$student->id]['I'] }}</td>
+                <td class="bg-recap">{{ $recapMap[$student->id]['A'] }}</td>
+                <td class="bg-recap">{{ $recapMap[$student->id]['T'] }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
     <div style="font-size: 9pt; margin-bottom: 20px;">
-        <strong>Keterangan:</strong> (H) Hadir, (S) Sakit, (I) Izin, (A) Alpa, (T) Terlambat
+        <strong>Keterangan:</strong> (.) Hadir, (S) Sakit, (I) Izin, (A) Alpa, (T) Terlambat
     </div>
 
     <!-- TANDA TANGAN -->
