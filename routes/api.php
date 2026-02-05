@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AttendanceApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ScannerController;
 use App\Http\Controllers\Api\WhatsappWebhookController;
+use App\Http\Controllers\Api\PrayerServerSyncController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -30,4 +31,7 @@ Route::post('/attendance', [AttendanceApiController::class, 'storeAttendance']);
 // --- WHATSAPP WEBHOOK (CHATBOT) ---
 // Endpoint ini dipanggil oleh Node.js Service saat ada pesan masuk
 Route::post('/whatsapp/webhook', [WhatsappWebhookController::class, 'handle']);
+
+// Endpoint untuk sinkronisasi antar server
+Route::get('/prayer/sync-export', [PrayerServerSyncController::class, 'exportData']);
 

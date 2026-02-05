@@ -456,6 +456,8 @@ Route::middleware(['auth'])->group(function () {
         // Setting Lokasi Masjid
         Route::get('/prayer/settings', [PrayerSettingController::class, 'index'])->name('admin.prayer.settings');
         Route::put('/prayer/settings', [PrayerSettingController::class, 'update'])->name('admin.prayer.settings.update');
+        Route::post('/prayer/sync', [PrayerSettingController::class, 'sync'])->name('admin.prayer.sync');
+        Route::post('/prayer/settings/pull-attendance', [PrayerSettingController::class, 'pullAttendance'])->name('admin.prayer.pull_attendance');
 
     });
 

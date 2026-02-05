@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PrayerAttendance;
 use App\Models\Student;
-use App\Models\Setting; // Pastikan model Setting diimport
+use App\Models\Setting;
+use App\Models\PrayerSchedule; // Pastikan model ini diimport
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
@@ -19,11 +20,9 @@ class PrayerController extends Controller
     public function index()
     {
         $user = Auth::user();
-
-        // Cek data siswa berdasarkan user login
         $student = Student::where('user_id', $user->id)->first();
 
-        // --- FIX ERR_TOO_MANY_REDIRECTS ---
+        // Cek Siswa & Redirect jika bukan siswa
         if (!$student) {
             if (Route::has('dashboard')) {
                 return redirect()->route('dashboard')->with('error', 'Fitur Absensi Sholat khusus untuk akun Siswa.');
@@ -31,80 +30,83 @@ class PrayerController extends Controller
             return redirect('/')->with('error', 'Fitur Absensi Sholat khusus untuk akun Siswa.');
         }
 
-        // 1. Ambil Jadwal Sholat (API MYQURAN.COM)
-        $cityId = '0306'; // ID Kota Bukittinggi
-
-        // FIX: Pastikan Timezone Asia/Jakarta agar tanggal request benar
         $dateObj = Carbon::now('Asia/Jakarta');
-        $year = $dateObj->format('Y');
-        $month = $dateObj->format('m');
-        $day = $dateObj->format('d');
         $today = $dateObj->format('Y-m-d');
-
         $schedule = [];
+        //dd($today);
 
-        try {
-            $url = "https://api.myquran.com/v2/sholat/jadwal/$cityId/$year/$month/$day";
+        // 1. CEK DATABASE LOKAL (Prioritas Utama)
+        // Jika Admin sudah melakukan sync, data akan diambil dari sini agar cepat
+        $localSchedule = PrayerSchedule::where('date', $today)->first();
 
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        if ($localSchedule) {
+            // Gunakan data dari database
+            $schedule = [
+                'subuh'   => $localSchedule->subuh,
+                'dhuha'   => $localSchedule->dhuha,
+                'dzuhur'  => $localSchedule->dzuhur,
+                'ashar'   => $localSchedule->ashar,
+                'maghrib' => $localSchedule->maghrib,
+                'isya'    => $localSchedule->isya,
+                'date'    => $localSchedule->date->format('Y-m-d'),
+                'source'  => 'database' // Marker debug
+            ];
+        } else {
+            // 2. FALLBACK KE API (Jika data lokal kosong)
+            // Mengambil ID Kota dari Setting atau default Bukittinggi
+            $cityId = Setting::value('prayer_city_id', '0306');
+            $year = $dateObj->format('Y');
+            $month = $dateObj->format('m');
+            $day = $dateObj->format('d');
 
-            // FIX UTAMA: Bypass SSL Verification (Sering error di localhost/hosting shared)
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            try {
+                $url = "https://api.myquran.com/v2/sholat/jadwal/$cityId/$year/$month/$day";
 
-            // User Agent
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+                // Menggunakan cURL Native untuk stabilitas
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
-            $responseBody = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($ch);
+                $responseBody = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
 
-            // curl_close($ch); // PHP 8+ auto close
-
-            if ($httpCode == 200 && $responseBody) {
-                $data = json_decode($responseBody, true);
-
-                // Validasi struktur data MyQuran
-                if (is_array($data) && isset($data['data']['jadwal'])) {
-                    $schedule = $data['data']['jadwal'];
-                } else {
-                    Log::warning("Format API Sholat MyQuran tidak sesuai: " . substr($responseBody, 0, 200));
-                    throw new \Exception('Format data API tidak valid');
+                if ($httpCode == 200 && $responseBody) {
+                    $data = json_decode($responseBody, true);
+                    if (is_array($data) && isset($data['data']['jadwal'])) {
+                        $schedule = $data['data']['jadwal'];
+                    }
                 }
-            } else {
-                throw new \Exception("Request API MyQuran gagal. Status: $httpCode. Error: $curlError");
+            } catch (\Exception $e) {
+                Log::error("Prayer API Fallback Error: " . $e->getMessage());
             }
 
-        } catch (\Exception $e) {
-            // Fallback ke jadwal statis jika API error
-            Log::error("Prayer API Error: " . $e->getMessage());
-
-            // Data Dummy (WIB)
-            $schedule = [
-                'subuh'   => '05:00',
-                'dzuhur'  => '12:30',
-                'ashar'   => '15:45',
-                'maghrib' => '18:30',
-                'isya'    => '19:45',
-                'dhuha'   => '07:00',
-                'imsak'   => '04:50',
-                'tanggal' => $dateObj->translatedFormat('l, d F Y') . ' (Data Offline)'
-            ];
+            // 3. FALLBACK TERAKHIR (Jika API & DB Gagal, gunakan data statis)
+            if (empty($schedule)) {
+                $schedule = [
+                    'subuh'   => '05:00',
+                    'dzuhur'  => '12:30',
+                    'ashar'   => '15:45',
+                    'maghrib' => '18:30',
+                    'isya'    => '19:45',
+                    'dhuha'   => '07:00',
+                ];
+            }
         }
 
-        // 2. Cek Status Absensi Hari Ini
+        // Cek Status Absensi Hari Ini
         $attendances = PrayerAttendance::where('student_id', $student->id)
                         ->whereDate('date', $today)
                         ->pluck('check_in_time', 'prayer_name')
                         ->toArray();
 
-        // 3. Ambil Konfigurasi Lokasi Masjid dari Database (Fitur Admin)
-        // Jika belum disetting, gunakan default (SMK N 1 Bukittinggi)
+        // Ambil Setting Lokasi dari Database (Dinamis)
         $masjidLat = (float) Setting::value('masjid_lat', -0.305123);
         $masjidLng = (float) Setting::value('masjid_lng', 100.369456);
         $radius    = (int) Setting::value('masjid_radius', 50);
@@ -112,7 +114,7 @@ class PrayerController extends Controller
         return view('prayer.index', compact('schedule', 'attendances', 'today', 'student', 'masjidLat', 'masjidLng', 'radius'));
     }
 
-     /**
+    /**
      * Proses Simpan Absen Sholat dengan Validasi GEOFENCING DINAMIS
      */
     public function store(Request $request)
@@ -143,7 +145,7 @@ class PrayerController extends Controller
         }
 
         // --- FITUR GEOFENCING DINAMIS ---
-        // Ambil Setting dari DB (sama dengan index)
+        // Ambil Setting dari DB (sama dengan index) agar validasi konsisten
         $masjidLat = (float) Setting::value('masjid_lat', -0.305123);
         $masjidLng = (float) Setting::value('masjid_lng', 100.369456);
         $maxRadius = (int) Setting::value('masjid_radius', 50);
