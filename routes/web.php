@@ -54,6 +54,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PrayerController;
 use App\Http\Controllers\PrayerMonitoringController;
 use App\Http\Controllers\Guru\LaporanGuruController;
+use App\Http\Controllers\Admin\PrayerSettingController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -451,6 +452,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/inventory/{id}/barcode', [InventoryController::class, 'printBarcode'])->name('inventory.barcode');
 
         Route::get('/monitoring-sholat', [PrayerMonitoringController::class, 'index'])->name('admin.prayer.monitoring');
+
+        // Setting Lokasi Masjid
+        Route::get('/prayer/settings', [PrayerSettingController::class, 'index'])->name('admin.prayer.settings');
+        Route::put('/prayer/settings', [PrayerSettingController::class, 'update'])->name('admin.prayer.settings.update');
 
     });
 
