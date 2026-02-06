@@ -342,16 +342,16 @@ class PrayerServerSyncController extends Controller
 
             // 4. Ambil Data Jurnal Guru (journals)
             // Jurnal tidak perlu join ke students, tapi bergantung pada schedule_id
-            $journalData = DB::table('journals')
+            $journalData = DB::table('teaching_journals')
                 ->select(
-                    'journals.schedule_id',
-                    'journals.date',
-                    'journals.topic',
-                    'journals.activity',
-                    'journals.attendance_summary',
-                    'journals.absent_details'
+                    'teaching_journals.schedule_id',
+                    'teaching_journals.date',
+                    'teaching_journals.topic',
+                    'teaching_journals.activity',
+                    'teaching_journals.attendance_summary',
+                    'teaching_journals.absent_details'
                 )
-                ->whereBetween('journals.date', [$startDate, $endDate])
+                ->whereBetween('teaching_journals.date', [$startDate, $endDate])
                 ->get();
 
             return response()->json([

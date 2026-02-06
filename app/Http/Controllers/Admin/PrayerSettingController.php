@@ -1026,10 +1026,10 @@ class PrayerSettingController extends Controller
             }
 
             // 4. Sinkronisasi Jurnal (Journal)
-            if (($syncType === 'all' || $syncType === 'journal') && isset($results['journal']['data'])) {
-                foreach ($results['journal']['data'] as $j) {
+            if (($syncType === 'all' || $syncType === 'teaching_journals') && isset($results['teaching_journals']['data'])) {
+                foreach ($results['teaching_journals']['data'] as $j) {
                     // Cek eksistensi jurnal berdasarkan Jadwal dan Tanggal
-                    $exists = DB::table('journals')
+                    $exists = DB::table('teaching_journals')
                                 ->where('schedule_id', $j['schedule_id'])
                                 ->where('date', $j['date'])
                                 ->first();
@@ -1048,14 +1048,14 @@ class PrayerSettingController extends Controller
                     ];
 
                     if ($exists) {
-                        DB::table('journals')->where('id', $exists->id)->update($journalData);
+                        DB::table('teaching_journals')->where('id', $exists->id)->update($journalData);
                     } else {
                         $journalData['id'] = (string) Str::uuid();
                         $journalData['schedule_id'] = $j['schedule_id'];
                         $journalData['date'] = $j['date'];
                         $journalData['created_at'] = now();
 
-                        DB::table('journals')->insert($journalData);
+                        DB::table('teaching_journals')->insert($journalData);
                     }
                     $processCount++;
                 }
