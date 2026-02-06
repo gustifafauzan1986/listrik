@@ -23,23 +23,8 @@
         .bg-gradient-info {
             background: linear-gradient(45deg, #36b9cc, #258391);
         }
-        .bg-gradient-purple {
-            background: linear-gradient(45deg, #6f42c1, #59359a);
-        }
-        .bg-gradient-orange {
-            background: linear-gradient(45deg, #fd7e14, #d66408);
-        }
-        .btn-purple {
-            background-color: #6f42c1; color: white;
-        }
-        .btn-purple:hover {
-            background-color: #59359a; color: white;
-        }
-        .btn-orange {
-            background-color: #fd7e14; color: white;
-        }
-        .btn-orange:hover {
-            background-color: #d66408; color: white;
+        .bg-gradient-warning {
+            background: linear-gradient(45deg, #f6c23e, #dda20a);
         }
     </style>
 
@@ -151,7 +136,7 @@
             <!-- KOLOM KANAN: PANEL AKSI (SYNC) -->
             <div class="col-lg-5">
 
-                <!-- 1. SYNC JADWAL SHOLAT (MYQURAN) -->
+                <!-- 1. SYNC JADWAL SHOLAT -->
                 <div class="mb-4 border-0 shadow-lg card">
                     <div class="text-white card-header bg-gradient-success">
                         <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Update Jadwal Sholat</h5>
@@ -161,8 +146,7 @@
                             Sinkronisasi jadwal sholat dari API <strong>MyQuran.com</strong> ke database lokal.
                         </p>
 
-                        <!-- Status Data Hari Ini -->
-                         @php
+                        @php
                             $todaySchedule = \App\Models\PrayerSchedule::where('date', date('Y-m-d'))->first();
                         @endphp
                         @if($todaySchedule)
@@ -208,21 +192,24 @@
                     </div>
                 </div>
 
-                <!-- 2. SINKRONISASI DATA SERVER -->
+                <!-- 2. TARIK DATA ABSENSI TERPADU (FULL SYNC) -->
                 <div class="mb-4 border-0 shadow-lg card">
                     <div class="text-white card-header bg-gradient-info">
-                        <h5 class="mb-0"><i class="fas fa-cloud-download-alt me-2"></i>Sinkronisasi Absensi</h5>
+                        <h5 class="mb-0"><i class="fas fa-cloud-download-alt me-2"></i>Sinkronisasi Absensi Terpadu</h5>
                     </div>
                     <div class="card-body">
                         <div class="p-2 mb-3 border rounded bg-light">
-                            <p class="mb-1 small fw-bold text-primary"><i class="fas fa-info-circle me-1"></i> Data Server Target:</p>
-                            <div class="mb-1 text-truncate small text-muted"><i class="fas fa-link me-1"></i> {{ $targetUrl ?? 'Belum disetting' }}</div>
+                            <p class="mb-1 small fw-bold text-primary"><i class="fas fa-info-circle me-1"></i> Data yang akan ditarik:</p>
+                            <ul class="mb-0 small text-muted ps-3">
+                                <li>Absensi Sholat Siswa</li>
+                                <li>Absensi Gerbang (Datang & Pulang)</li>
+                                <li>Absensi Pembelajaran (KBM)</li>
+                            </ul>
                         </div>
 
-                        <!-- Form Global untuk Tanggal -->
                         <form action="{{ route('admin.prayer.pull_attendance') }}" method="POST" id="syncForm">
                             @csrf
-                            <div class="mb-3 row g-2">
+                            <div class="mb-2 row g-2">
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold">Dari Tanggal</label>
                                     <input type="date" name="start_date" class="form-control" value="{{ date('Y-m-d') }}" required>
@@ -233,35 +220,19 @@
                                 </div>
                             </div>
 
-                            <p class="mb-2 fw-bold small text-dark">Pilih Data yang akan disinkron:</p>
-
-                            <!-- Tombol Sholat -->
-                            <button type="submit" name="type" value="prayer" class="mb-2 shadow-sm btn btn-info w-100 text-start" onclick="return confirmSync('prayer')">
-                                <i class="fas fa-mosque me-2"></i> Absensi Sholat
-                            </button>
-
-                            <!-- Tombol Gerbang -->
-                            <button type="submit" name="type" value="gate" class="mb-2 text-white shadow-sm btn btn-orange w-100 text-start" onclick="return confirmSync('gate')">
-                                <i class="fas fa-torii-gate me-2"></i> Absensi Gerbang (Datang/Pulang)
-                            </button>
-
-                            <!-- Tombol Pembelajaran -->
-                            <button type="submit" name="type" value="learning" class="mb-2 shadow-sm btn btn-purple w-100 text-start" onclick="return confirmSync('learning')">
-                                <i class="fas fa-book-reader me-2"></i> Absensi Pembelajaran (KBM)
-                            </button>
-
-                            <!-- Tombol Semua -->
-                            <hr class="my-3">
-                            <button type="submit" name="type" value="all" class="btn btn-secondary w-100" onclick="return confirmSync('all')">
-                                <i class="fas fa-sync-alt me-2"></i> Sinkron Semua Data
-                            </button>
-
-                            <!-- Loader -->
-                            <div id="syncLoader" class="mt-3 text-center d-none">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                <span class="ms-2 small text-muted">Menghubungi server target...</span>
+                            <div class="mt-3 d-grid">
+                                <button type="submit" class="text-white shadow-sm btn btn-info btn-lg" id="btnSync" onclick="return confirmSync()">
+                                    <i class="fas fa-sync-alt me-2"></i>Mulai Sinkronisasi Data
+                                </button>
+                                <div id="syncLoader" class="mt-2 text-center d-none">
+                                    <div class="spinner-border spinner-border-sm text-info" role="status"></div>
+                                    <span class="ms-2 small text-muted">Menghubungi server target...</span>
+                                </div>
                             </div>
                         </form>
+                    </div>
+                    <div class="py-2 bg-white card-footer">
+                        <small class="text-muted"><i class="fas fa-history me-1"></i> Gunakan NIS sebagai kunci pencocokan data.</small>
                     </div>
                 </div>
 
@@ -283,7 +254,7 @@
         }
 
         // Logic Sinkronisasi
-        function confirmSync(type) {
+        function confirmSync() {
             const url = document.querySelector("input[name='target_sync_url']").value;
             const key = document.querySelector("input[name='target_sync_key']").value;
 
@@ -292,25 +263,10 @@
                 return false;
             }
 
-            let msg = 'Sinkronisasi data?';
-            if(type === 'prayer') msg = 'Tarik data Absensi Sholat?';
-            if(type === 'gate') msg = 'Tarik data Absensi Gerbang?';
-            if(type === 'learning') msg = 'Tarik data Absensi Pembelajaran?';
-            if(type === 'all') msg = 'Tarik SEMUA data (Sholat, Gerbang, Pembelajaran)?';
-
-            if(confirm(msg)) {
-                // Tampilkan loader
+            if(confirm('Proses ini akan menarik data Sholat, Gerbang, dan Pembelajaran. Lanjutkan?')) {
+                document.getElementById('btnSync').disabled = true;
+                document.getElementById('btnSync').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sedang Menarik Data...';
                 document.getElementById('syncLoader').classList.remove('d-none');
-
-                // Disable tombol submit (visual only, biarkan event bubbling)
-                setTimeout(() => {
-                     const buttons = document.querySelectorAll('#syncForm button[type="submit"]');
-                     buttons.forEach(btn => {
-                        btn.style.opacity = '0.6';
-                        btn.style.pointerEvents = 'none';
-                     });
-                }, 100);
-
                 return true;
             }
             return false;

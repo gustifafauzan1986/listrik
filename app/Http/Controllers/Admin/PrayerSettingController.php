@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Setting;
 use App\Models\PrayerSchedule;
-use App\Models\PrayerAttendance;
-use App\Models\Student;
+use App\Models\PrayerAttendance; // Tambahan untuk pullAttendance
+use App\Models\Student;          // Tambahan untuk pullAttendance
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+// use Illuminate\Support\Facades\Http; // Dihapus karena diganti cURL Native
 
 class PrayerSettingController extends Controller
 {
@@ -20,22 +22,18 @@ class PrayerSettingController extends Controller
      */
     public function index()
     {
-        // 1. Setting Lokasi Masjid (Geofencing)
+        // Ambil data setting atau gunakan default
         $lat    = Setting::value('masjid_lat', -0.305123);
         $lng    = Setting::value('masjid_lng', 100.369456);
         $radius = Setting::value('masjid_radius', 50);
         $cityId = Setting::value('prayer_city_id', '0306'); // Default Bukittinggi
 
-        // 2. Setting Sinkronisasi Antar Server
-        // Key Lokal: Digunakan jika server INI menjadi SUMBER data bagi server lain (Server A)
-        $myServerKey = Setting::value('server_sync_key', \Illuminate\Support\Str::random(32));
+        // Setting Sinkronisasi Antar Server (Baru)
+        $myServerKey    = Setting::value('server_sync_key', \Illuminate\Support\Str::random(32)); // Key lokal
+        $targetUrl      = Setting::value('target_sync_url'); // URL Server Sumber
+        $targetKey      = Setting::value('target_sync_key'); // Key Server Sumber
 
-        // Target Server: Digunakan jika server INI mengambil data DARI server lain (Server B)
-        // Ini adalah konfigurasi untuk menginput URL dan Key API Server A di Server B
-        $targetUrl = Setting::value('target_sync_url');
-        $targetKey = Setting::value('target_sync_key');
-
-        // Data untuk dropdown sinkronisasi jadwal sholat
+        // Data untuk dropdown bulan/tahun sinkronisasi
         $years = range(Carbon::now()->year, Carbon::now()->year + 1);
         $months = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
@@ -46,7 +44,7 @@ class PrayerSettingController extends Controller
     }
 
     /**
-     * Simpan Pengaturan Lokasi, ID Kota, & Konfigurasi Server Sync
+     * Simpan Pengaturan Lokasi & ID Kota & Server Sync
      */
     public function update(Request $request)
     {
@@ -55,32 +53,21 @@ class PrayerSettingController extends Controller
             'masjid_lng'    => 'required|numeric',
             'masjid_radius' => 'required|numeric|min:5|max:1000',
             'prayer_city_id'=> 'required|string',
-            // Validasi input URL dan Key
-            'target_sync_url' => 'nullable|url',
-            'target_sync_key' => 'nullable|string',
-            'server_sync_key' => 'nullable|string',
         ]);
 
-        // Simpan Setting Lokasi & Kota
+        // Simpan ke tabel settings
         Setting::updateOrCreate(['key' => 'masjid_lat'], ['value' => $request->masjid_lat]);
         Setting::updateOrCreate(['key' => 'masjid_lng'], ['value' => $request->masjid_lng]);
         Setting::updateOrCreate(['key' => 'masjid_radius'], ['value' => $request->masjid_radius]);
         Setting::updateOrCreate(['key' => 'prayer_city_id'], ['value' => $request->prayer_city_id]);
 
-        // Simpan Konfigurasi Sync Server
-
-        // 1. Simpan Key Server Sendiri (Untuk Server A / Sumber)
+        // Simpan Konfigurasi Sync Server (Baru)
         if ($request->has('server_sync_key')) {
             Setting::updateOrCreate(['key' => 'server_sync_key'], ['value' => $request->server_sync_key]);
         }
-
-        // 2. Simpan URL & Key Server Target (Untuk Server B / Tujuan)
         if ($request->has('target_sync_url')) {
-            // Hapus trailing slash agar format URL konsisten
-            $cleanUrl = rtrim($request->target_sync_url, '/');
-            Setting::updateOrCreate(['key' => 'target_sync_url'], ['value' => $cleanUrl]);
+            Setting::updateOrCreate(['key' => 'target_sync_url'], ['value' => $request->target_sync_url]);
         }
-
         if ($request->has('target_sync_key')) {
             Setting::updateOrCreate(['key' => 'target_sync_key'], ['value' => $request->target_sync_key]);
         }
@@ -89,7 +76,7 @@ class PrayerSettingController extends Controller
     }
 
     /**
-     * Fitur 1: Sinkronisasi Jadwal Sholat dari MyQuran (Public API)
+     * Fitur Sinkronisasi Jadwal ke Database (MyQuran)
      */
     public function sync(Request $request)
     {
@@ -105,7 +92,6 @@ class PrayerSettingController extends Controller
         try {
             $url = "https://api.myquran.com/v2/sholat/jadwal/$cityId/$year/$month";
 
-            // cURL Request ke MyQuran
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -114,10 +100,11 @@ class PrayerSettingController extends Controller
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Laravel Prayer Sync');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
             $responseBody = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
             curl_close($ch);
 
             if ($httpCode == 200 && $responseBody) {
@@ -142,7 +129,7 @@ class PrayerSettingController extends Controller
                         $count++;
                     }
 
-                    return redirect()->back()->with('success', "Berhasil sinkronisasi $count data jadwal sholat.");
+                    return redirect()->back()->with('success', "Berhasil sinkronisasi $count data jadwal sholat untuk periode $month/$year.");
                 } else {
                     return redirect()->back()->with('error', 'Format data API MyQuran tidak sesuai.');
                 }
@@ -157,7 +144,8 @@ class PrayerSettingController extends Controller
     }
 
     /**
-     * Fitur 2: Tarik Data Absensi dari Server Lain (Server Tujuan)
+     * BARU: Tarik Data Absensi dari Server Lain
+     * MENGGUNAKAN CURL NATIVE (Untuk menghindari error 'Undefined method successful')
      */
     // public function pullAttendance(Request $request)
     // {
@@ -174,14 +162,15 @@ class PrayerSettingController extends Controller
     //     }
 
     //     try {
-    //         // Bangun URL Endpoint (Server A)
+    //         // Pastikan URL valid dan arahkan ke endpoint export
+    //         // Hapus trailing slash jika ada, lalu tambah path api
     //         $endpoint = rtrim($targetUrl, '/') . '/api/prayer/sync-export';
 
-    //         // Parameter Query
+    //         // Bangun query string
     //         $queryParams = http_build_query([
     //             'start_date' => $request->start_date,
     //             'end_date'   => $request->end_date,
-    //             'key'        => $targetKey // Fallback query param
+    //             'key'        => $targetKey // Fallback jika header tidak terbaca di beberapa server
     //         ]);
 
     //         $urlWithParams = $endpoint . '?' . $queryParams;
@@ -191,22 +180,23 @@ class PrayerSettingController extends Controller
     //         curl_setopt($ch, CURLOPT_URL, $urlWithParams);
     //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     //         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-    //         curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout lebih lama (data bisa banyak)
+    //         curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout lebih lama untuk data banyak
 
-    //         // Bypass SSL (Opsional, untuk lokal/dev)
+    //         // Bypass SSL untuk menghindari error sertifikat
     //         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     //         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
     //         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
-    //         // Set Headers (Auth)
+    //         // Set Headers
     //         curl_setopt($ch, CURLOPT_HTTPHEADER, [
     //             'X-Server-Key: ' . $targetKey,
     //             'Accept: application/json'
     //         ]);
 
+    //         // User Agent
     //         curl_setopt($ch, CURLOPT_USERAGENT, 'Laravel App Sync Client');
 
-    //         // Eksekusi Request
+    //         // Eksekusi
     //         $responseBody = curl_exec($ch);
     //         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     //         $curlError = curl_error($ch);
@@ -222,12 +212,12 @@ class PrayerSettingController extends Controller
     //                 $skippedCount = 0;
 
     //                 foreach ($attendances as $row) {
-    //                     // LOGIKA PENTING: Mencocokkan data berdasarkan NIS
-    //                     // Pastikan tabel students memiliki kolom 'nis' yang unik
+    //                     // Cari siswa lokal berdasarkan NIS (Pencocokan Data)
+    //                     // Pastikan table students punya kolom 'nis'
     //                     $localStudent = Student::where('nis', $row['nis'])->first();
 
     //                     if ($localStudent) {
-    //                         // Update atau Buat Data Absensi Baru
+    //                         // Update atau Buat Data Absensi
     //                         PrayerAttendance::updateOrCreate(
     //                             [
     //                                 'student_id'  => $localStudent->id,
@@ -239,18 +229,17 @@ class PrayerSettingController extends Controller
     //                                 'status'        => $row['status'],
     //                                 'latitude'      => $row['latitude'],
     //                                 'longitude'     => $row['longitude'],
-    //                                 // created_at & updated_at otomatis dihandle Eloquent atau bisa manual
+    //                                 // Timestamp bisa diupdate atau biarkan default
     //                             ]
     //                         );
     //                         $importedCount++;
     //                     } else {
-    //                         // Data dilewati jika siswa dengan NIS tersebut tidak ditemukan di server ini
-    //                         $skippedCount++;
+    //                         $skippedCount++; // Siswa tidak ditemukan di database lokal
     //                     }
     //                 }
 
     //                 $msg = "Berhasil menarik $importedCount data absensi.";
-    //                 if ($skippedCount > 0) $msg .= " ($skippedCount data dilewati karena NIS siswa tidak ditemukan).";
+    //                 if ($skippedCount > 0) $msg .= " ($skippedCount data dilewati karena NIS siswa tidak ditemukan di server ini).";
 
     //                 return redirect()->back()->with('success', $msg);
     //             } else {
@@ -267,17 +256,17 @@ class PrayerSettingController extends Controller
     //     }
     // }
 
-        /**
-     * Menarik data dari server target (Full Sync)
-     */
     public function pullAttendance(Request $request)
     {
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date',
+            'type' => 'nullable|in:all,prayer,learning,gate', // Validasi tipe
         ]);
 
-        // Ambil config dari table settings (pastikan record ini ada di database)
+        $syncType = $request->input('type', 'all'); // Default 'all' jika tidak ada input
+
+        // Ambil config dari table settings
         $targetUrl = DB::table('settings')->where('key', 'target_sync_url')->value('value');
         $targetKey = DB::table('settings')->where('key', 'target_sync_key')->value('value');
 
@@ -287,19 +276,21 @@ class PrayerSettingController extends Controller
 
         try {
             // Memanggil HTTP Client Laravel
-            // rtrim untuk memastikan tidak ada double slash pada URL
             $apiUrl = rtrim($targetUrl, '/') . '/api/sync/export-all';
 
-            $response = Http::withHeaders([
-                'X-Api-Key' => $targetKey,
-                'Accept' => 'application/json'
-            ])->timeout(120)->get($apiUrl, [
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'key' => $targetKey
-            ]);
+            /** @var \Illuminate\Http\Client\Response $response */
+            $response = Http::withoutVerifying() // <--- FIX: Bypass SSL Verification (cURL Error 60)
+                ->withHeaders([
+                    'X-Api-Key' => $targetKey,
+                    'Accept' => 'application/json'
+                ])
+                ->timeout(120) // Timeout 2 menit
+                ->get($apiUrl, [
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'key' => $targetKey
+                ]);
 
-            // Periksa kegagalan koneksi (seperti 404, 500, atau timeout)
             if ($response->failed()) {
                 Log::error("Sync Failed: " . $response->body());
                 return back()->with('error', "Server Target Error (Status: " . $response->status() . ")");
@@ -312,11 +303,12 @@ class PrayerSettingController extends Controller
             }
 
             $results = $result['results'];
+            $processCount = 0;
 
             DB::beginTransaction();
 
             // 1. Sinkronisasi Sholat
-            if (isset($results['prayer']['data'])) {
+            if (($syncType === 'all' || $syncType === 'prayer') && isset($results['prayer']['data'])) {
                 foreach ($results['prayer']['data'] as $p) {
                     $studentId = DB::table('students')->where('nis', $p['nis'])->value('id');
                     if ($studentId) {
@@ -330,12 +322,13 @@ class PrayerSettingController extends Controller
                                 'updated_at' => now()
                             ]
                         );
+                        $processCount++;
                     }
                 }
             }
 
             // 2. Sinkronisasi Gerbang
-            if (isset($results['gate']['data'])) {
+            if (($syncType === 'all' || $syncType === 'gate') && isset($results['gate']['data'])) {
                 foreach ($results['gate']['data'] as $g) {
                     $studentId = DB::table('students')->where('nis', $g['nis'])->value('id');
                     if ($studentId) {
@@ -350,12 +343,13 @@ class PrayerSettingController extends Controller
                                 'updated_at' => now()
                             ]
                         );
+                        $processCount++;
                     }
                 }
             }
 
             // 3. Sinkronisasi Pembelajaran
-            if (isset($results['learning']['data'])) {
+            if (($syncType === 'all' || $syncType === 'learning') && isset($results['learning']['data'])) {
                 foreach ($results['learning']['data'] as $l) {
                     $studentId = DB::table('students')->where('nis', $l['nis'])->value('id');
                     if ($studentId) {
@@ -370,12 +364,21 @@ class PrayerSettingController extends Controller
                                 'updated_at' => now()
                             ]
                         );
+                        $processCount++;
                     }
                 }
             }
 
             DB::commit();
-            return back()->with('success', 'Sinkronisasi data berhasil diselesaikan.');
+
+            $typeLabels = [
+                'all' => 'Semua Data',
+                'prayer' => 'Absensi Sholat',
+                'gate' => 'Absensi Gerbang',
+                'learning' => 'Absensi Pembelajaran'
+            ];
+
+            return back()->with('success', "Sinkronisasi " . ($typeLabels[$syncType] ?? 'Data') . " berhasil ($processCount data diproses).");
 
         } catch (\Exception $e) {
             DB::rollBack();
