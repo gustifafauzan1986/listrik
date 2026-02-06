@@ -29,10 +29,6 @@
         .bg-gradient-orange {
             background: linear-gradient(45deg, #fd7e14, #d66408);
         }
-        .bg-gradient-teal {
-            background: linear-gradient(45deg, #20c997, #1aa179);
-        }
-
         .btn-purple {
             background-color: #6f42c1; color: white;
         }
@@ -44,12 +40,6 @@
         }
         .btn-orange:hover {
             background-color: #d66408; color: white;
-        }
-        .btn-teal {
-            background-color: #20c997; color: white;
-        }
-        .btn-teal:hover {
-            background-color: #1aa179; color: white;
         }
     </style>
 
@@ -65,12 +55,6 @@
         @if(session('error'))
             <div class="mb-3 alert alert-danger alert-dismissible fade show">
                 <i class="fas fa-exclamation-triangle me-2"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-        @if(session('warning'))
-            <div class="mb-3 alert alert-warning alert-dismissible fade show">
-                <i class="fas fa-exclamation-circle me-2"></i> {{ session('warning') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -266,11 +250,6 @@
                                 <i class="fas fa-book-reader me-2"></i> Absensi Pembelajaran (KBM)
                             </button>
 
-                            <!-- Tombol Jurnal (BARU) -->
-                            <button type="submit" name="type" value="journal" class="mb-2 shadow-sm btn btn-teal w-100 text-start" onclick="return confirmSync('journal')">
-                                <i class="fas fa-book-open me-2"></i> Jurnal Guru
-                            </button>
-
                             <!-- Tombol Semua -->
                             <hr class="my-3">
                             <button type="submit" name="type" value="all" class="btn btn-secondary w-100" onclick="return confirmSync('all')">
@@ -317,8 +296,7 @@
             if(type === 'prayer') msg = 'Tarik data Absensi Sholat?';
             if(type === 'gate') msg = 'Tarik data Absensi Gerbang?';
             if(type === 'learning') msg = 'Tarik data Absensi Pembelajaran?';
-            if(type === 'journal') msg = 'Tarik data Jurnal Guru?';
-            if(type === 'all') msg = 'Tarik SEMUA data (Sholat, Gerbang, Pembelajaran, Jurnal)?';
+            if(type === 'all') msg = 'Tarik SEMUA data (Sholat, Gerbang, Pembelajaran)?';
 
             if(confirm(msg)) {
                 // Tampilkan loader

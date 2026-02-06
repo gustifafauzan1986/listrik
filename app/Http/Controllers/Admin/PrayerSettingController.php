@@ -611,12 +611,235 @@ class PrayerSettingController extends Controller
     // }
 
     //terbaru
+    // public function pullAttendance(Request $request)
+    // {
+    //     $request->validate([
+    //         'start_date' => 'required|date',
+    //         'end_date' => 'required|date',
+    //         'type' => 'nullable|in:all,prayer,learning,gate', // Validasi tipe
+    //     ]);
+
+    //     $syncType = $request->input('type', 'all'); // Default 'all' jika tidak ada input
+
+    //     // Ambil config dari table settings
+    //     $targetUrl = DB::table('settings')->where('key', 'target_sync_url')->value('value');
+    //     $targetKey = DB::table('settings')->where('key', 'target_sync_key')->value('value');
+
+    //     if (!$targetUrl || !$targetKey) {
+    //         return back()->with('error', 'Konfigurasi URL atau API Key target belum diatur di sistem.');
+    //     }
+
+    //     try {
+    //         // Memanggil HTTP Client Laravel
+    //         $apiUrl = rtrim($targetUrl, '/') . '/api/sync/export-all';
+
+    //         /** @var \Illuminate\Http\Client\Response $response */
+    //         $response = Http::withoutVerifying() // FIX: Bypass SSL Verification (cURL Error 60)
+    //             ->withHeaders([
+    //                 'X-Api-Key' => $targetKey,
+    //                 'Accept' => 'application/json'
+    //             ])
+    //             ->timeout(120) // Timeout 2 menit
+    //             ->get($apiUrl, [
+    //                 'start_date' => $request->start_date,
+    //                 'end_date' => $request->end_date,
+    //                 'key' => $targetKey
+    //             ]);
+
+    //         if ($response->failed()) {
+    //             Log::error("Sync Failed: " . $response->body());
+    //             return back()->with('error', "Server Target Error (Status: " . $response->status() . ")");
+    //         }
+
+    //         $result = $response->json();
+
+    //         if (!isset($result['status']) || $result['status'] !== 'success') {
+    //             return back()->with('error', 'Format respon server tidak valid atau kunci salah.');
+    //         }
+
+    //         $results = $result['results'];
+
+    //         // --- DIAGNOSA: CEK APAKAH ADA DATA DARI SERVER? ---
+    //         $totalRemote = ($results['prayer']['total'] ?? 0) + ($results['gate']['total'] ?? 0) + ($results['learning']['total'] ?? 0);
+
+    //         if ($totalRemote === 0) {
+    //             return back()->with('warning', "Koneksi ke Server Sumber BERHASIL, tetapi TIDAK ADA DATA absensi pada rentang tanggal tersebut.");
+    //         }
+    //         // ---------------------------------------------------
+
+    //         $processCount = 0;
+    //         $skippedCount = 0; // Menghitung data yang dilewati karena NIS tidak ketemu
+
+    //         DB::beginTransaction();
+
+    //         // 1. Sinkronisasi Sholat (LOGIKA DIPERBAIKI: Generate UUID manual)
+    //         if (($syncType === 'all' || $syncType === 'prayer') && isset($results['prayer']['data'])) {
+    //             foreach ($results['prayer']['data'] as $p) {
+    //                 $studentId = DB::table('students')->where('nis', $p['nis'])->value('id');
+
+    //                 if ($studentId) {
+    //                     // Cek Manual apakah data sudah ada
+    //                     $exists = DB::table('prayer_attendances')
+    //                                 ->where('student_id', $studentId)
+    //                                 ->where('date', $p['date'])
+    //                                 ->where('prayer_name', $p['prayer_name'])
+    //                                 ->first();
+
+    //                     if ($exists) {
+    //                         // UPDATE
+    //                         DB::table('prayer_attendances')
+    //                             ->where('id', $exists->id)
+    //                             ->update([
+    //                                 'check_in_time' => $p['check_in_time'],
+    //                                 'status' => $p['status'],
+    //                                 'latitude' => $p['latitude'],
+    //                                 'longitude' => $p['longitude'],
+    //                                 'updated_at' => now()
+    //                             ]);
+    //                     } else {
+    //                         // INSERT BARU (Generate UUID)
+    //                         DB::table('prayer_attendances')->insert([
+    //                             'id' => (string) Str::uuid(), // <--- FIX ERROR NULL ID
+    //                             'student_id' => $studentId,
+    //                             'date' => $p['date'],
+    //                             'prayer_name' => $p['prayer_name'],
+    //                             'check_in_time' => $p['check_in_time'],
+    //                             'status' => $p['status'],
+    //                             'latitude' => $p['latitude'],
+    //                             'longitude' => $p['longitude'],
+    //                             'created_at' => now(),
+    //                             'updated_at' => now()
+    //                         ]);
+    //                     }
+    //                     $processCount++;
+    //                 } else {
+    //                     $skippedCount++;
+    //                 }
+    //             }
+    //         }
+
+    //         // 2. Sinkronisasi Gerbang (Menggunakan UUID Manual Check)
+    //         if (($syncType === 'all' || $syncType === 'gate') && isset($results['gate']['data'])) {
+    //             foreach ($results['gate']['data'] as $g) {
+    //                 $studentId = DB::table('students')->where('nis', $g['nis'])->value('id');
+
+    //                 if ($studentId) {
+    //                     // Cek eksistensi manual karena UUID tidak boleh di-update sembarangan
+    //                     $exists = DB::table('daily_attendances')
+    //                                 ->where('student_id', $studentId)
+    //                                 ->where('date', $g['date'])
+    //                                 ->first();
+
+    //                     if ($exists) {
+    //                         DB::table('daily_attendances')->where('id', $exists->id)->update([
+    //                             'arrival_time' => $g['arrival_time'],
+    //                             'departure_time' => $g['departure_time'],
+    //                             'status' => $g['status'],
+    //                             'recorded_by' => 'Sync System',
+    //                             'updated_at' => now()
+    //                         ]);
+    //                     } else {
+    //                         DB::table('daily_attendances')->insert([
+    //                             'id' => (string) Str::uuid(),
+    //                             'student_id' => $studentId,
+    //                             'date' => $g['date'],
+    //                             'arrival_time' => $g['arrival_time'],
+    //                             'departure_time' => $g['departure_time'],
+    //                             'status' => $g['status'],
+    //                             'recorded_by' => 'Sync System',
+    //                             'created_at' => now(),
+    //                             'updated_at' => now()
+    //                         ]);
+    //                     }
+    //                     $processCount++;
+    //                 } else {
+    //                     $skippedCount++;
+    //                 }
+    //             }
+    //         }
+
+    //         // 3. Sinkronisasi Pembelajaran (Menggunakan UUID Manual Check)
+    //         if (($syncType === 'all' || $syncType === 'learning') && isset($results['learning']['data'])) {
+    //             foreach ($results['learning']['data'] as $l) {
+    //                 $studentId = DB::table('students')->where('nis', $l['nis'])->value('id');
+
+    //                 if ($studentId) {
+    //                     $exists = DB::table('attendances')
+    //                                 ->where('student_id', $studentId)
+    //                                 ->where('schedule_id', $l['schedule_id'])
+    //                                 ->where('date', $l['date'])
+    //                                 ->first();
+
+    //                     if ($exists) {
+    //                         DB::table('attendances')->where('id', $exists->id)->update([
+    //                             'subject_id' => $l['subject_id'],
+    //                             'check_in_time' => $l['check_in_time'],
+    //                             'status' => $l['status'],
+    //                             'recorded_by' => 'Sync System',
+    //                             'updated_at' => now()
+    //                         ]);
+    //                     } else {
+    //                         DB::table('attendances')->insert([
+    //                             'id' => (string) Str::uuid(),
+    //                             'student_id' => $studentId,
+    //                             'schedule_id' => $l['schedule_id'],
+    //                             'date' => $l['date'],
+    //                             'subject_id' => $l['subject_id'],
+    //                             'check_in_time' => $l['check_in_time'],
+    //                             'status' => $l['status'],
+    //                             'recorded_by' => 'Sync System',
+    //                             'created_at' => now(),
+    //                             'updated_at' => now()
+    //                         ]);
+    //                     }
+    //                     $processCount++;
+    //                 } else {
+    //                     $skippedCount++;
+    //                 }
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         $typeLabels = [
+    //             'all' => 'Semua Data',
+    //             'prayer' => 'Absensi Sholat',
+    //             'gate' => 'Absensi Gerbang',
+    //             'learning' => 'Absensi Pembelajaran'
+    //         ];
+
+    //         // LOGIKA PESAN HASIL
+    //         $msgTitle = "Sinkronisasi " . ($typeLabels[$syncType] ?? 'Data');
+
+    //         if ($processCount > 0) {
+    //             $message = "$msgTitle BERHASIL. $processCount data telah disimpan/diupdate.";
+    //             if ($skippedCount > 0) {
+    //                 // Jika ada sukses tapi ada juga yang gagal
+    //                 return back()->with('warning', "$message Namun, ada $skippedCount data DILEWATI karena NIS Siswa tidak ditemukan di database lokal.");
+    //             }
+    //             return back()->with('success', $message);
+    //         } else {
+    //             // Jika 0 processed
+    //             if ($skippedCount > 0) {
+    //                 return back()->with('error', "$msgTitle GAGAL MEMPROSES DATA. $skippedCount data ditemukan tetapi NIS Siswa tidak ada yang cocok di database lokal ini.");
+    //             } else {
+    //                 return back()->with('warning', "Koneksi sukses, tetapi tidak ada data baru yang perlu diproses.");
+    //             }
+    //         }
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         Log::error("Pull Attendance Error: " . $e->getMessage());
+    //         return back()->with('error', 'Koneksi gagal: ' . $e->getMessage());
+    //     }
+    // }
+
     public function pullAttendance(Request $request)
     {
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date',
-            'type' => 'nullable|in:all,prayer,learning,gate', // Validasi tipe
+            'type' => 'nullable|in:all,prayer,learning,gate,journal', // Validasi tipe ditambah journal
         ]);
 
         $syncType = $request->input('type', 'all'); // Default 'all' jika tidak ada input
@@ -660,10 +883,13 @@ class PrayerSettingController extends Controller
             $results = $result['results'];
 
             // --- DIAGNOSA: CEK APAKAH ADA DATA DARI SERVER? ---
-            $totalRemote = ($results['prayer']['total'] ?? 0) + ($results['gate']['total'] ?? 0) + ($results['learning']['total'] ?? 0);
+            $totalRemote = ($results['prayer']['total'] ?? 0) +
+                           ($results['gate']['total'] ?? 0) +
+                           ($results['learning']['total'] ?? 0) +
+                           ($results['journal']['total'] ?? 0);
 
             if ($totalRemote === 0) {
-                return back()->with('warning', "Koneksi ke Server Sumber BERHASIL, tetapi TIDAK ADA DATA absensi pada rentang tanggal tersebut.");
+                return back()->with('warning', "Koneksi ke Server Sumber BERHASIL, tetapi TIDAK ADA DATA absensi/jurnal pada rentang tanggal tersebut.");
             }
             // ---------------------------------------------------
 
@@ -799,13 +1025,50 @@ class PrayerSettingController extends Controller
                 }
             }
 
+            // 4. Sinkronisasi Jurnal (Journal)
+            if (($syncType === 'all' || $syncType === 'journal') && isset($results['journal']['data'])) {
+                foreach ($results['journal']['data'] as $j) {
+                    // Cek eksistensi jurnal berdasarkan Jadwal dan Tanggal
+                    $exists = DB::table('journals')
+                                ->where('schedule_id', $j['schedule_id'])
+                                ->where('date', $j['date'])
+                                ->first();
+
+                    // Pastikan format JSON valid untuk kolom attendance_summary
+                    $attendanceSummary = is_array($j['attendance_summary'])
+                                        ? json_encode($j['attendance_summary'])
+                                        : $j['attendance_summary'];
+
+                    $journalData = [
+                        'topic' => $j['topic'],
+                        'activity' => $j['activity'],
+                        'attendance_summary' => $attendanceSummary,
+                        'absent_details' => $j['absent_details'],
+                        'updated_at' => now()
+                    ];
+
+                    if ($exists) {
+                        DB::table('journals')->where('id', $exists->id)->update($journalData);
+                    } else {
+                        $journalData['id'] = (string) Str::uuid();
+                        $journalData['schedule_id'] = $j['schedule_id'];
+                        $journalData['date'] = $j['date'];
+                        $journalData['created_at'] = now();
+
+                        DB::table('journals')->insert($journalData);
+                    }
+                    $processCount++;
+                }
+            }
+
             DB::commit();
 
             $typeLabels = [
                 'all' => 'Semua Data',
                 'prayer' => 'Absensi Sholat',
                 'gate' => 'Absensi Gerbang',
-                'learning' => 'Absensi Pembelajaran'
+                'learning' => 'Absensi Pembelajaran',
+                'journal' => 'Jurnal Guru'
             ];
 
             // LOGIKA PESAN HASIL
