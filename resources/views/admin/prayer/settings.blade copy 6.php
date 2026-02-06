@@ -23,9 +23,6 @@
         .bg-gradient-info {
             background: linear-gradient(45deg, #36b9cc, #258391);
         }
-        .bg-gradient-warning {
-            background: linear-gradient(45deg, #f6c23e, #dda20a);
-        }
     </style>
 
     <div class="page-content">
@@ -97,6 +94,7 @@
                             <!-- 2. PENGATURAN API & SINKRONISASI -->
                             <h6 class="pb-2 mb-3 fw-bold text-primary border-bottom"><i class="fas fa-network-wired me-2"></i>Koneksi Antar Server</h6>
 
+                            <!-- Bagian A: Identitas Server Ini -->
                             <div class="p-3 mb-3 border rounded bg-light">
                                 <label class="mb-1 form-label fw-bold text-dark">Server Key (Lokal)</label>
                                 <p class="mb-2 small text-muted">Salin key ini jika server ini bertindak sebagai <b>SUMBER DATA</b> untuk server lain.</p>
@@ -109,6 +107,7 @@
                                 </div>
                             </div>
 
+                            <!-- Bagian B: Input Server Target (Sesuai Request Anda) -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">URL Server Target</label>
                                 <input type="url" name="target_sync_url" class="form-control" value="{{ $targetUrl }}" placeholder="Contoh: https://sekolahpusat.sch.id">
@@ -143,9 +142,10 @@
                     </div>
                     <div class="card-body">
                         <p class="mb-3 small text-muted">
-                            Sinkronisasi jadwal sholat dari API <strong>MyQuran.com</strong> ke database lokal.
+                            Sinkronisasi jadwal sholat dari API <strong>MyQuran.com</strong> ke database lokal agar aplikasi berjalan lebih cepat.
                         </p>
 
+                        <!-- Status Data Hari Ini -->
                         @php
                             $todaySchedule = \App\Models\PrayerSchedule::where('date', date('Y-m-d'))->first();
                         @endphp
@@ -192,47 +192,30 @@
                     </div>
                 </div>
 
-                <!-- 2. TARIK DATA ABSENSI TERPADU (FULL SYNC) -->
+                <!-- 2. TARIK DATA ABSENSI (SYNC SERVER) -->
                 <div class="mb-4 border-0 shadow-lg card">
                     <div class="text-white card-header bg-gradient-info">
-                        <h5 class="mb-0"><i class="fas fa-cloud-download-alt me-2"></i>Sinkronisasi Absensi Terpadu</h5>
+                        <h5 class="mb-0"><i class="fas fa-cloud-download-alt me-2"></i>Tarik Absensi Server</h5>
                     </div>
                     <div class="card-body">
-                        <div class="p-2 mb-3 border rounded bg-light">
-                            <p class="mb-1 small fw-bold text-primary"><i class="fas fa-info-circle me-1"></i> Data yang akan ditarik:</p>
-                            <ul class="mb-0 small text-muted ps-3">
-                                <li>Absensi Sholat Siswa</li>
-                                <li>Absensi Gerbang (Datang & Pulang)</li>
-                                <li>Absensi Pembelajaran (KBM)</li>
-                            </ul>
-                        </div>
+                        <p class="mb-3 small text-muted">
+                            Tarik data absensi siswa dari <strong>Server Target</strong> berdasarkan URL dan Key yang telah diinput di sebelah kiri.
+                        </p>
 
-                        <form action="{{ route('admin.prayer.pull_attendance') }}" method="POST" id="syncForm">
+                        <form action="{{ route('admin.prayer.pull_attendance') }}" method="POST">
                             @csrf
-                            <div class="mb-2 row g-2">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold">Dari Tanggal</label>
-                                    <input type="date" name="start_date" class="form-control" value="{{ date('Y-m-d') }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold">Sampai Tanggal</label>
-                                    <input type="date" name="end_date" class="form-control" value="{{ date('Y-m-d') }}" required>
-                                </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold">Dari Tanggal</label>
+                                <input type="date" name="start_date" class="form-control" value="{{ date('Y-m-01') }}" required>
                             </div>
-
-                            <div class="mt-3 d-grid">
-                                <button type="submit" class="text-white shadow-sm btn btn-info btn-lg" id="btnSync" onclick="return confirmSync()">
-                                    <i class="fas fa-sync-alt me-2"></i>Mulai Sinkronisasi Data
-                                </button>
-                                <div id="syncLoader" class="mt-2 text-center d-none">
-                                    <div class="spinner-border spinner-border-sm text-info" role="status"></div>
-                                    <span class="ms-2 small text-muted">Menghubungi server target...</span>
-                                </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Sampai Tanggal</label>
+                                <input type="date" name="end_date" class="form-control" value="{{ date('Y-m-d') }}" required>
                             </div>
+                            <button type="submit" class="text-white btn btn-info w-100" onclick="return confirm('Pastikan URL dan Key sudah benar disimpan. Lanjutkan?');">
+                                <i class="fas fa-download me-2"></i>Tarik Data Absensi
+                            </button>
                         </form>
-                    </div>
-                    <div class="py-2 bg-white card-footer">
-                        <small class="text-muted"><i class="fas fa-history me-1"></i> Gunakan NIS sebagai kunci pencocokan data.</small>
                     </div>
                 </div>
 
@@ -247,29 +230,10 @@
         function copyKey() {
             const copyText = document.querySelector("input[name='server_sync_key']");
             copyText.select();
-            copyText.setSelectionRange(0, 99999);
+            copyText.setSelectionRange(0, 99999); // Mobile support
             navigator.clipboard.writeText(copyText.value).then(() => {
                 alert("Key berhasil disalin ke clipboard!");
             });
-        }
-
-        // Logic Sinkronisasi
-        function confirmSync() {
-            const url = document.querySelector("input[name='target_sync_url']").value;
-            const key = document.querySelector("input[name='target_sync_key']").value;
-
-            if(!url || !key) {
-                alert("URL dan API Key Server Target belum diisi!");
-                return false;
-            }
-
-            if(confirm('Proses ini akan menarik data Sholat, Gerbang, dan Pembelajaran. Lanjutkan?')) {
-                document.getElementById('btnSync').disabled = true;
-                document.getElementById('btnSync').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sedang Menarik Data...';
-                document.getElementById('syncLoader').classList.remove('d-none');
-                return true;
-            }
-            return false;
         }
 
         // --- LOGIKA PETA ---
@@ -280,6 +244,7 @@
             let curLng = {{ $lng }};
             let curRadius = {{ $radius }};
 
+            // Delay init map agar tidak render error di dalam card/modal
             setTimeout(() => {
                 if (L.DomUtil.get('map') && L.DomUtil.get('map')._leaflet_id) {
                      L.DomUtil.get('map')._leaflet_id = null;
@@ -296,22 +261,28 @@
                     maxZoom: 19
                 }).addTo(map);
 
+                // Fix tampilan tile yang kadang grey
                 setTimeout(() => { map.invalidateSize(); }, 200);
 
+                // Marker & Circle
                 marker = L.marker([curLat, curLng], { draggable: true, autoPan: true }).addTo(map);
                 circle = L.circle([curLat, curLng], { color: 'green', fillColor: '#2ecc71', fillOpacity: 0.2, radius: curRadius }).addTo(map);
 
+                // Event Drag Marker
                 marker.on('dragend', function (e) {
                     const pos = marker.getLatLng();
                     updateFormInputs(pos.lat, pos.lng);
                 });
 
+                // Event Klik Peta
                 map.on('click', function(e) {
                     updateMarkerPosition(e.latlng.lat, e.latlng.lng);
                 });
 
+                // Fungsi global untuk update radius dari input number
                 window.updateRadius = function(val) { if(circle) circle.setRadius(val); }
 
+                // Fungsi global untuk update manual lat/lng
                 window.manualInputUpdate = function() {
                     const lat = parseFloat(document.getElementById('lat').value);
                     const lng = parseFloat(document.getElementById('lng').value);
@@ -338,12 +309,15 @@
             document.getElementById('lng').value = lng;
         }
 
+        // Pencarian Lokasi via Nominatim
         function searchLocation() {
             const query = document.getElementById('searchPlace').value;
             if (!query) return;
 
             const btn = document.querySelector('button[onclick="searchLocation()"]');
             const icon = btn.querySelector('i');
+            const originalClass = icon.className;
+
             icon.className = 'fas fa-spinner fa-spin';
             btn.disabled = true;
 
@@ -353,11 +327,15 @@
                     if (data && data.length > 0) {
                         updateMarkerPosition(parseFloat(data[0].lat), parseFloat(data[0].lon));
                     } else {
-                        alert('Lokasi tidak ditemukan.');
+                        alert('Lokasi tidak ditemukan. Coba kata kunci lain.');
                     }
                 })
+                .catch(e => {
+                    console.error(e);
+                    alert('Gagal mencari lokasi. Periksa koneksi internet.');
+                })
                 .finally(() => {
-                    icon.className = 'fas fa-search';
+                    icon.className = originalClass;
                     btn.disabled = false;
                 });
         }

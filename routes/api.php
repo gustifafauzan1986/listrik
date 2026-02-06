@@ -35,4 +35,5 @@ Route::post('/attendance', [AttendanceApiController::class, 'storeAttendance']);
 
 // Endpoint untuk sinkronisasi antar server
 Route::get('/prayer/sync-export', [PrayerServerSyncController::class, 'exportData']);
+Route::get('/sync/export-all', [PrayerServerSyncController::class, 'exportAll']);
 
