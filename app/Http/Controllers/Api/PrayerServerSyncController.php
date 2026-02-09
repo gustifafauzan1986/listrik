@@ -394,6 +394,122 @@ class PrayerServerSyncController extends Controller
      /**
      * Export Terpadu: Sholat, Gerbang, Pembelajaran, dan Jurnal (teaching_journals)
      */
+    // public function exportAll(Request $request)
+    // {
+    //     try {
+    //         $startDate = $request->query('start_date');
+    //         $endDate = $request->query('end_date');
+
+    //         if (!$startDate || !$endDate) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'Parameter start_date dan end_date wajib diisi (YYYY-MM-DD).'
+    //             ], 400);
+    //         }
+
+    //         // 1. Ambil Data Absensi Sholat
+    //         $prayerData = DB::table('prayer_attendances')
+    //             ->join('students', 'prayer_attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'prayer_attendances.date',
+    //                 'prayer_attendances.prayer_name',
+    //                 'prayer_attendances.check_in_time',
+    //                 'prayer_attendances.status',
+    //                 'prayer_attendances.latitude',
+    //                 'prayer_attendances.longitude'
+    //             )
+    //             ->whereBetween('prayer_attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 2. Ambil Data Absensi Gerbang (daily_attendances)
+    //         $gateData = DB::table('daily_attendances')
+    //             ->join('students', 'daily_attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'daily_attendances.date',
+    //                 'daily_attendances.arrival_time',
+    //                 'daily_attendances.departure_time',
+    //                 'daily_attendances.status',
+    //                 'daily_attendances.recorded_by'
+    //             )
+    //             ->whereBetween('daily_attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 3. Ambil Data Absensi Pembelajaran (attendances)
+    //         $learningData = DB::table('attendances')
+    //             ->join('students', 'attendances.student_id', '=', 'students.id')
+    //             // Sertakan UUID schedule dan subject untuk referensi di server tujuan
+    //             ->select(
+    //                 'students.nis',
+    //                 'attendances.schedule_id',
+    //                 'attendances.subject_id',
+    //                 'attendances.date',
+    //                 'attendances.check_in_time',
+    //                 'attendances.status',
+    //                 'attendances.recorded_by'
+    //             )
+    //             ->whereBetween('attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 4. Ambil Data Jurnal Guru (teaching_journals)
+    //         // Menggunakan collect([]) default agar tidak error jika tabel tidak ada
+    //         $journalData = collect([]);
+
+    //         // Cek ketersediaan tabel 'teaching_journals' sebelum query
+    //         if (Schema::hasTable('teaching_journals')) {
+    //             $journalData = DB::table('teaching_journals')
+    //                 ->select(
+    //                     'teaching_journals.schedule_id',
+    //                     'teaching_journals.date',
+    //                     'teaching_journals.topic',
+    //                     'teaching_journals.activity',
+    //                     'teaching_journals.attendance_summary',
+    //                     'teaching_journals.absent_details'
+    //                 )
+    //                 ->whereBetween('teaching_journals.date', [$startDate, $endDate])
+    //                 ->get();
+    //         }
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'filter' => [
+    //                 'start' => $startDate,
+    //                 'end' => $endDate
+    //             ],
+    //             'results' => [
+    //                 'prayer' => [
+    //                     'total' => $prayerData->count(),
+    //                     'data' => $prayerData
+    //                 ],
+    //                 'gate' => [
+    //                     'total' => $gateData->count(),
+    //                     'data' => $gateData
+    //                 ],
+    //                 'learning' => [
+    //                     'total' => $learningData->count(),
+    //                     'data' => $learningData
+    //                 ],
+    //                 'journal' => [
+    //                     'total' => $journalData->count(),
+    //                     'data' => $journalData
+    //                 ]
+    //             ]
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Full Sync Export Error: ' . $e->getMessage());
+
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    /**
+     * Export Terpadu: Sholat, Gerbang, Pembelajaran, Jurnal, dan Siswa
+     */
     public function exportAll(Request $request)
     {
         try {
@@ -439,7 +555,6 @@ class PrayerServerSyncController extends Controller
             // 3. Ambil Data Absensi Pembelajaran (attendances)
             $learningData = DB::table('attendances')
                 ->join('students', 'attendances.student_id', '=', 'students.id')
-                // Sertakan UUID schedule dan subject untuk referensi di server tujuan
                 ->select(
                     'students.nis',
                     'attendances.schedule_id',
@@ -453,10 +568,7 @@ class PrayerServerSyncController extends Controller
                 ->get();
 
             // 4. Ambil Data Jurnal Guru (teaching_journals)
-            // Menggunakan collect([]) default agar tidak error jika tabel tidak ada
             $journalData = collect([]);
-
-            // Cek ketersediaan tabel 'teaching_journals' sebelum query
             if (Schema::hasTable('teaching_journals')) {
                 $journalData = DB::table('teaching_journals')
                     ->select(
@@ -470,6 +582,21 @@ class PrayerServerSyncController extends Controller
                     ->whereBetween('teaching_journals.date', [$startDate, $endDate])
                     ->get();
             }
+
+            // 5. Ambil Data Master Siswa (students)
+            // Mengambil semua siswa (tidak difilter tanggal) agar data master selalu sinkron
+            // Menggunakan leftJoin classrooms untuk mengambil nama kelas (memudahkan mapping di server tujuan)
+            $studentData = DB::table('students')
+                ->leftJoin('classrooms', 'students.classroom_id', '=', 'classrooms.id')
+                ->select(
+                    'students.nis',
+                    'students.name',
+                    'students.face_descriptor',
+                    'students.phone',
+                    'students.address',
+                    'classrooms.name as classroom_name' 
+                )
+                ->get();
 
             return response()->json([
                 'status' => 'success',
@@ -493,6 +620,10 @@ class PrayerServerSyncController extends Controller
                     'journal' => [
                         'total' => $journalData->count(),
                         'data' => $journalData
+                    ],
+                    'student' => [
+                        'total' => $studentData->count(),
+                        'data' => $studentData
                     ]
                 ]
             ], 200);
