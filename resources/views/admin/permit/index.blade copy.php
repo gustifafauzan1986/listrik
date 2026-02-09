@@ -32,16 +32,7 @@
                             @forelse($permits as $p)
                             <tr>
                                 <td class="ps-4">
-                                    <div class="fw-bold">
-                                        @if($p->image_evidence)
-                                            {{-- Klik Nama untuk lihat Foto --}}
-                                            <a href="javascript:void(0)" onclick="showImg('{{ asset('storage/'.$p->image_evidence) }}', '{{ $p->student->name }}')" class="text-decoration-none text-dark" title="Klik untuk lihat foto">
-                                                {{ $p->student->name }} <i class="opacity-50 fas fa-camera text-primary small ms-1"></i>
-                                            </a>
-                                        @else
-                                            {{ $p->student->name }}
-                                        @endif
-                                    </div>
+                                    <div class="fw-bold">{{ $p->student->name }}</div>
                                     <small class="text-muted">{{ $p->student->nis }}</small>
                                 </td>
                                 <td><span class="badge bg-secondary">{{ $p->reason }}</span></td>
@@ -63,7 +54,7 @@
                                 </td>
                                 <td>
                                     @if($p->image_evidence)
-                                        <button class="btn btn-sm btn-outline-info" onclick="showImg('{{ asset('storage/'.$p->image_evidence) }}', '{{ $p->student->name }}')"><i class="fas fa-image"></i></button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="showImg('{{ asset('storage/'.$p->image_evidence) }}')"><i class="fas fa-image"></i></button>
                                     @endif
                                 </td>
                             </tr>
@@ -78,26 +69,12 @@
     </div>
 
     <!-- Modal Image -->
-    <div class="modal fade" id="imgModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Bukti Wajah</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="text-center modal-body">
-                    <img id="previewImg" src="" class="mb-2 rounded shadow-sm img-fluid" style="max-height: 400px;">
-                    <h5 class="mt-2 fw-bold text-dark" id="studentNameLabel"></h5>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="imgModal"><div class="modal-dialog modal-center"><div class="modal-content"><img id="previewImg" src="" class="img-fluid"></div></div></div>
 
     @push('scripts')
     <script>
-        function showImg(src, name = '') {
+        function showImg(src) {
             document.getElementById('previewImg').src = src;
-            document.getElementById('studentNameLabel').innerText = name;
             new bootstrap.Modal(document.getElementById('imgModal')).show();
         }
     </script>
