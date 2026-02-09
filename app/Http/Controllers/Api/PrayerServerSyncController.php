@@ -510,6 +510,134 @@ class PrayerServerSyncController extends Controller
     /**
      * Export Terpadu: Sholat, Gerbang, Pembelajaran, Jurnal, dan Siswa
      */
+    // public function exportAll(Request $request)
+    // {
+    //     try {
+    //         $startDate = $request->query('start_date');
+    //         $endDate = $request->query('end_date');
+
+    //         if (!$startDate || !$endDate) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'Parameter start_date dan end_date wajib diisi (YYYY-MM-DD).'
+    //             ], 400);
+    //         }
+
+    //         // 1. Ambil Data Absensi Sholat
+    //         $prayerData = DB::table('prayer_attendances')
+    //             ->join('students', 'prayer_attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'prayer_attendances.date',
+    //                 'prayer_attendances.prayer_name',
+    //                 'prayer_attendances.check_in_time',
+    //                 'prayer_attendances.status',
+    //                 'prayer_attendances.latitude',
+    //                 'prayer_attendances.longitude'
+    //             )
+    //             ->whereBetween('prayer_attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 2. Ambil Data Absensi Gerbang (daily_attendances)
+    //         $gateData = DB::table('daily_attendances')
+    //             ->join('students', 'daily_attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'daily_attendances.date',
+    //                 'daily_attendances.arrival_time',
+    //                 'daily_attendances.departure_time',
+    //                 'daily_attendances.status',
+    //                 'daily_attendances.recorded_by'
+    //             )
+    //             ->whereBetween('daily_attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 3. Ambil Data Absensi Pembelajaran (attendances)
+    //         $learningData = DB::table('attendances')
+    //             ->join('students', 'attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'attendances.schedule_id',
+    //                 'attendances.subject_id',
+    //                 'attendances.date',
+    //                 'attendances.check_in_time',
+    //                 'attendances.status',
+    //                 'attendances.recorded_by'
+    //             )
+    //             ->whereBetween('attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 4. Ambil Data Jurnal Guru (teaching_journals)
+    //         $journalData = collect([]);
+    //         if (Schema::hasTable('teaching_journals')) {
+    //             $journalData = DB::table('teaching_journals')
+    //                 ->select(
+    //                     'teaching_journals.schedule_id',
+    //                     'teaching_journals.date',
+    //                     'teaching_journals.topic',
+    //                     'teaching_journals.activity',
+    //                     'teaching_journals.attendance_summary',
+    //                     'teaching_journals.absent_details'
+    //                 )
+    //                 ->whereBetween('teaching_journals.date', [$startDate, $endDate])
+    //                 ->get();
+    //         }
+
+    //         // 5. Ambil Data Master Siswa (students)
+    //         // Mengambil semua siswa (tidak difilter tanggal) agar data master selalu sinkron
+    //         // Menggunakan leftJoin classrooms untuk mengambil nama kelas (memudahkan mapping di server tujuan)
+    //         $studentData = DB::table('students')
+    //             ->leftJoin('classrooms', 'students.classroom_id', '=', 'classrooms.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'students.name',
+    //                 'students.face_descriptor',
+    //                 'students.phone',
+    //                 'students.address',
+    //                 'classrooms.name as classroom_name'
+    //             )
+    //             ->get();
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'filter' => [
+    //                 'start' => $startDate,
+    //                 'end' => $endDate
+    //             ],
+    //             'results' => [
+    //                 'prayer' => [
+    //                     'total' => $prayerData->count(),
+    //                     'data' => $prayerData
+    //                 ],
+    //                 'gate' => [
+    //                     'total' => $gateData->count(),
+    //                     'data' => $gateData
+    //                 ],
+    //                 'learning' => [
+    //                     'total' => $learningData->count(),
+    //                     'data' => $learningData
+    //                 ],
+    //                 'journal' => [
+    //                     'total' => $journalData->count(),
+    //                     'data' => $journalData
+    //                 ],
+    //                 'student' => [
+    //                     'total' => $studentData->count(),
+    //                     'data' => $studentData
+    //                 ]
+    //             ]
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Full Sync Export Error: ' . $e->getMessage());
+
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function exportAll(Request $request)
     {
         try {
@@ -538,7 +666,7 @@ class PrayerServerSyncController extends Controller
                 ->whereBetween('prayer_attendances.date', [$startDate, $endDate])
                 ->get();
 
-            // 2. Ambil Data Absensi Gerbang (daily_attendances)
+            // 2. Ambil Data Absensi Gerbang
             $gateData = DB::table('daily_attendances')
                 ->join('students', 'daily_attendances.student_id', '=', 'students.id')
                 ->select(
@@ -552,7 +680,7 @@ class PrayerServerSyncController extends Controller
                 ->whereBetween('daily_attendances.date', [$startDate, $endDate])
                 ->get();
 
-            // 3. Ambil Data Absensi Pembelajaran (attendances)
+            // 3. Ambil Data Absensi Pembelajaran
             $learningData = DB::table('attendances')
                 ->join('students', 'attendances.student_id', '=', 'students.id')
                 ->select(
@@ -568,35 +696,52 @@ class PrayerServerSyncController extends Controller
                 ->get();
 
             // 4. Ambil Data Jurnal Guru (teaching_journals)
+            // FIX: Cek kolom terlebih dahulu untuk menghindari error "Column not found"
             $journalData = collect([]);
             if (Schema::hasTable('teaching_journals')) {
-                $journalData = DB::table('teaching_journals')
-                    ->select(
-                        'teaching_journals.schedule_id',
-                        'teaching_journals.date',
-                        'teaching_journals.topic',
-                        'teaching_journals.activity',
-                        'teaching_journals.attendance_summary',
-                        'teaching_journals.absent_details'
-                    )
-                    ->whereBetween('teaching_journals.date', [$startDate, $endDate])
+                $query = DB::table('teaching_journals');
+
+                // Daftar kolom wajib yang pasti ada
+                $selects = ['schedule_id', 'date', 'topic', 'activity'];
+
+                // Cek kolom opsional (agar tidak error jika tabel belum dimigrasi kolom barunya)
+                if (Schema::hasColumn('teaching_journals', 'attendance_summary')) {
+                    $selects[] = 'attendance_summary';
+                } else {
+                    $selects[] = DB::raw('NULL as attendance_summary');
+                }
+
+                if (Schema::hasColumn('teaching_journals', 'absent_details')) {
+                    $selects[] = 'absent_details';
+                } else {
+                    $selects[] = DB::raw('NULL as absent_details');
+                }
+
+                $journalData = $query->select($selects)
+                    ->whereBetween('date', [$startDate, $endDate])
                     ->get();
             }
 
-            // 5. Ambil Data Master Siswa (students)
-            // Mengambil semua siswa (tidak difilter tanggal) agar data master selalu sinkron
-            // Menggunakan leftJoin classrooms untuk mengambil nama kelas (memudahkan mapping di server tujuan)
+            // 5. Ambil Data Master Siswa
             $studentData = DB::table('students')
                 ->leftJoin('classrooms', 'students.classroom_id', '=', 'classrooms.id')
-                ->select(
-                    'students.nis',
-                    'students.name',
-                    'students.face_descriptor',
-                    'students.phone',
-                    'students.address',
-                    'classrooms.name as classroom_name' 
-                )
+                ->select('students.*', 'classrooms.name as classroom_name')
                 ->get();
+
+            // 6. MASTER DATA (Guru, Mapel, Ruangan, Jurusan)
+            // Join users untuk ambil data login guru
+            $teacherData = DB::table('teachers')
+                ->join('users', 'teachers.user_id', '=', 'users.id')
+                ->select('teachers.*', 'users.email', 'users.name as user_name', 'users.username')
+                ->get();
+
+            $subjectData = Schema::hasTable('subjects') ? DB::table('subjects')->get() : collect([]);
+            $roomData = Schema::hasTable('rooms') ? DB::table('rooms')->get() : collect([]);
+            $majorData = Schema::hasTable('majors') ? DB::table('majors')->get() : collect([]);
+
+            // 7. Data Kelas & Jadwal
+            $classroomData = Schema::hasTable('classrooms') ? DB::table('classrooms')->get() : collect([]);
+            $scheduleData = Schema::hasTable('schedules') ? DB::table('schedules')->get() : collect([]);
 
             return response()->json([
                 'status' => 'success',
@@ -605,32 +750,23 @@ class PrayerServerSyncController extends Controller
                     'end' => $endDate
                 ],
                 'results' => [
-                    'prayer' => [
-                        'total' => $prayerData->count(),
-                        'data' => $prayerData
-                    ],
-                    'gate' => [
-                        'total' => $gateData->count(),
-                        'data' => $gateData
-                    ],
-                    'learning' => [
-                        'total' => $learningData->count(),
-                        'data' => $learningData
-                    ],
-                    'journal' => [
-                        'total' => $journalData->count(),
-                        'data' => $journalData
-                    ],
-                    'student' => [
-                        'total' => $studentData->count(),
-                        'data' => $studentData
-                    ]
+                    'prayer' => ['total' => $prayerData->count(), 'data' => $prayerData],
+                    'gate' => ['total' => $gateData->count(), 'data' => $gateData],
+                    'learning' => ['total' => $learningData->count(), 'data' => $learningData],
+                    'journal' => ['total' => $journalData->count(), 'data' => $journalData],
+                    'student' => ['total' => $studentData->count(), 'data' => $studentData],
+                    // Data Master Baru
+                    'teacher' => ['total' => $teacherData->count(), 'data' => $teacherData],
+                    'subject' => ['total' => $subjectData->count(), 'data' => $subjectData],
+                    'room' => ['total' => $roomData->count(), 'data' => $roomData],
+                    'major' => ['total' => $majorData->count(), 'data' => $majorData],
+                    'classroom' => ['total' => $classroomData->count(), 'data' => $classroomData],
+                    'schedule' => ['total' => $scheduleData->count(), 'data' => $scheduleData],
                 ]
             ], 200);
 
         } catch (\Exception $e) {
             Log::error('Full Sync Export Error: ' . $e->getMessage());
-
             return response()->json([
                 'status' => 'error',
                 'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()
