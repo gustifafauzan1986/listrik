@@ -55,6 +55,8 @@ use App\Http\Controllers\PrayerController;
 use App\Http\Controllers\PrayerMonitoringController;
 use App\Http\Controllers\Guru\LaporanGuruController;
 use App\Http\Controllers\Admin\PrayerSettingController;
+use App\Http\Controllers\Admin\MbgController;
+use App\Http\Controllers\Admin\StudentPermitController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -458,6 +460,17 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/prayer/settings', [PrayerSettingController::class, 'update'])->name('admin.prayer.settings.update');
         Route::post('/prayer/sync', [PrayerSettingController::class, 'sync'])->name('admin.prayer.sync');
         Route::post('/prayer/settings/pull-attendance', [PrayerSettingController::class, 'pullAttendance'])->name('admin.prayer.pull_attendance');
+
+        Route::get('/admin/mbg', [MbgController::class, 'index'])->name('admin.mbg.index');
+        Route::get('/admin/mbg/scan', [MbgController::class, 'scan'])->name('admin.mbg.scan');
+        // Proses Simpan Data (AJAX dari Scanner)
+        Route::post('/admin/mbg/store', [MbgController::class, 'store'])->name('admin.mbg.store');
+
+        Route::get('/admin/permit', [StudentPermitController::class, 'index'])->name('admin.permit.index');
+        Route::get('/admin/permit/scan', [StudentPermitController::class, 'scan'])->name('admin.permit.scan');
+        // Proses Simpan Data (AJAX dari Scanner)
+        Route::post('/admin/permit/store', [StudentPermitController::class, 'store'])->name('admin.permit.store');
+
 
     });
 
