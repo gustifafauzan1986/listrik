@@ -9,6 +9,7 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage; // Needed for saving images
 
 class PrayerServerSyncController extends Controller
 {
