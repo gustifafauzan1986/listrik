@@ -7,37 +7,21 @@
     <style>
         #map { z-index: 1; }
         .map-wrapper { position: relative; z-index: 1; }
-        /* Gradients */
         .bg-gradient-primary { background: linear-gradient(45deg, #4e73df, #224abe); }
         .bg-gradient-success { background: linear-gradient(45deg, #1cc88a, #13855c); }
         .bg-gradient-info { background: linear-gradient(45deg, #36b9cc, #258391); }
         .bg-gradient-purple { background: linear-gradient(45deg, #6f42c1, #59359a); }
         .bg-gradient-orange { background: linear-gradient(45deg, #fd7e14, #d66408); }
         .bg-gradient-teal { background: linear-gradient(45deg, #20c997, #1aa179); }
-        .bg-gradient-dark { background: linear-gradient(45deg, #343a40, #23272b); }
-        .bg-gradient-red { background: linear-gradient(45deg, #e74a3b, #c0392b); }
 
-        /* Custom Buttons */
         .btn-purple { background-color: #6f42c1; color: white; }
         .btn-purple:hover { background-color: #59359a; color: white; }
-        
         .btn-orange { background-color: #fd7e14; color: white; }
         .btn-orange:hover { background-color: #d66408; color: white; }
-        
         .btn-teal { background-color: #20c997; color: white; }
         .btn-teal:hover { background-color: #1aa179; color: white; }
-        
         .btn-indigo { background-color: #6610f2; color: white; }
         .btn-indigo:hover { background-color: #520dc2; color: white; }
-        
-        .btn-dark-custom { background-color: #343a40; color: white; }
-        .btn-dark-custom:hover { background-color: #23272b; color: white; }
-
-        .btn-pink { background-color: #e83e8c; color: white; }
-        .btn-pink:hover { background-color: #d63384; color: white; }
-
-        .btn-red-custom { background-color: #e74a3b; color: white; }
-        .btn-red-custom:hover { background-color: #c0392b; color: white; }
     </style>
 
     <div class="page-content">
@@ -194,58 +178,35 @@
 
                             <p class="mb-2 fw-bold small text-dark">Pilih Data yang akan disinkron:</p>
 
-                            <!-- GROUP 1: MASTER DATA -->
-                            <div class="mb-2">
-                                <label class="small text-muted fw-bold">1. Data Master (Jalankan Pertama Kali)</label>
-                                
-                                <button type="submit" name="type" value="master" class="mb-1 shadow-sm btn btn-dark-custom w-100 text-start" onclick="return confirmSync('master')">
-                                    <i class="fas fa-database me-2"></i> Master Data (Guru, Kelas, Mapel)
-                                </button>
-                                
-                                <button type="submit" name="type" value="student" class="mb-1 shadow-sm btn btn-indigo w-100 text-start" onclick="return confirmSync('student')">
-                                    <i class="fas fa-users me-2"></i> Data Siswa
-                                </button>
-                                
-                                <button type="submit" name="type" value="schedule" class="mb-1 shadow-sm btn btn-secondary w-100 text-start" onclick="return confirmSync('schedule')">
-                                    <i class="fas fa-calendar-week me-2"></i> Jadwal Pelajaran
-                                </button>
-                            </div>
+                            <!-- TOMBOL DATA SISWA (NEW) -->
+                            <button type="submit" name="type" value="student" class="mb-2 shadow-sm btn btn-indigo w-100 text-start" onclick="return confirmSync('student')">
+                                <i class="fas fa-users me-2"></i> Data Siswa (Master)
+                            </button>
+                            
+                            <!-- Tombol Sholat -->
+                            <button type="submit" name="type" value="prayer" class="mb-2 shadow-sm btn btn-info w-100 text-start" onclick="return confirmSync('prayer')">
+                                <i class="fas fa-mosque me-2"></i> Absensi Sholat
+                            </button>
 
-                            <!-- GROUP 2: ABSENSI HARIAN -->
-                            <div class="mb-2">
-                                <label class="small text-muted fw-bold">2. Data Harian</label>
-                                
-                                <button type="submit" name="type" value="prayer" class="mb-1 shadow-sm btn btn-info w-100 text-start" onclick="return confirmSync('prayer')">
-                                    <i class="fas fa-mosque me-2"></i> Absensi Sholat
-                                </button>
-                                
-                                <button type="submit" name="type" value="gate" class="mb-1 text-white shadow-sm btn btn-orange w-100 text-start" onclick="return confirmSync('gate')">
-                                    <i class="fas fa-torii-gate me-2"></i> Absensi Gerbang
-                                </button>
-                                
-                                <button type="submit" name="type" value="learning" class="mb-1 shadow-sm btn btn-purple w-100 text-start" onclick="return confirmSync('learning')">
-                                    <i class="fas fa-book-reader me-2"></i> Absensi Pembelajaran
-                                </button>
-                                
-                                <button type="submit" name="type" value="journal" class="mb-1 shadow-sm btn btn-teal w-100 text-start" onclick="return confirmSync('journal')">
-                                    <i class="fas fa-book-open me-2"></i> Jurnal Guru
-                                </button>
-                                
-                                <!-- MBG BUTTON -->
-                                <button type="submit" name="type" value="mbg" class="mb-1 shadow-sm btn btn-pink w-100 text-start" onclick="return confirmSync('mbg')">
-                                    <i class="fas fa-utensils me-2"></i> Makan Bergizi Gratis (MBG)
-                                </button>
-                                
-                                <!-- PERMIT BUTTON -->
-                                <button type="submit" name="type" value="permit" class="mb-1 shadow-sm btn btn-red-custom w-100 text-start" onclick="return confirmSync('permit')">
-                                    <i class="fas fa-id-card-alt me-2"></i> Izin Keluar/Masuk (Permit)
-                                </button>
-                            </div>
+                            <!-- Tombol Gerbang -->
+                            <button type="submit" name="type" value="gate" class="mb-2 text-white shadow-sm btn btn-orange w-100 text-start" onclick="return confirmSync('gate')">
+                                <i class="fas fa-torii-gate me-2"></i> Absensi Gerbang
+                            </button>
+
+                            <!-- Tombol Pembelajaran -->
+                            <button type="submit" name="type" value="learning" class="mb-2 shadow-sm btn btn-purple w-100 text-start" onclick="return confirmSync('learning')">
+                                <i class="fas fa-book-reader me-2"></i> Absensi Pembelajaran
+                            </button>
+
+                            <!-- Tombol Jurnal -->
+                            <button type="submit" name="type" value="journal" class="mb-2 shadow-sm btn btn-teal w-100 text-start" onclick="return confirmSync('journal')">
+                                <i class="fas fa-book-open me-2"></i> Jurnal Guru
+                            </button>
                             
                             <!-- Tombol Semua -->
                             <hr class="my-3">
-                            <button type="submit" name="type" value="all" class="btn btn-success w-100" onclick="return confirmSync('all')">
-                                <i class="fas fa-sync-alt me-2"></i> Sinkron SEMUA Data
+                            <button type="submit" name="type" value="all" class="btn btn-secondary w-100" onclick="return confirmSync('all')">
+                                <i class="fas fa-sync-alt me-2"></i> Sinkron Semua Data
                             </button>
 
                             <div id="syncLoader" class="mt-3 text-center d-none">
@@ -276,16 +237,12 @@
             if(!url || !key) { alert("URL dan API Key belum diisi!"); return false; }
 
             let msg = 'Sinkronisasi data?';
-            if(type === 'master') msg = 'Tarik Master Data (Guru, Mapel, Kelas, Ruangan)?\nJalankan ini SEBELUM menarik jadwal!';
-            if(type === 'student') msg = 'Tarik Data Siswa?';
-            if(type === 'schedule') msg = 'Tarik Jadwal Pelajaran?\nPastikan Master Data sudah ditarik.';
+            if(type === 'student') msg = 'Tarik Data Master SISWA?\n(Disarankan dijalankan pertama kali sebelum absensi)';
             if(type === 'prayer') msg = 'Tarik data Absensi Sholat?';
             if(type === 'gate') msg = 'Tarik data Absensi Gerbang?';
             if(type === 'learning') msg = 'Tarik data Absensi Pembelajaran?';
             if(type === 'journal') msg = 'Tarik data Jurnal Guru?';
-            if(type === 'mbg') msg = 'Tarik data Absensi MBG (Makan Bergizi)?';
-            if(type === 'permit') msg = 'Tarik data Izin Siswa (Permit)?';
-            if(type === 'all') msg = 'Tarik SEMUA data? (Proses ini mungkin memakan waktu lama)';
+            if(type === 'all') msg = 'Tarik SEMUA data?';
 
             if(confirm(msg)) {
                 document.getElementById('syncLoader').classList.remove('d-none');
