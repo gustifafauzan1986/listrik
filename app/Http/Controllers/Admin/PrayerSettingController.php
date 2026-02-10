@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage; // Needed for saving images
 // use Illuminate\Support\Facades\Http; // Dihapus karena diganti cURL Native
 
 class PrayerSettingController extends Controller
@@ -2043,13 +2044,361 @@ class PrayerSettingController extends Controller
     //     }
     // }
 
+    // public function pullAttendance(Request $request)
+    // {
+    //     $request->validate([
+    //         'start_date' => 'required|date',
+    //         'end_date' => 'required|date',
+    //         // Tambahkan tipe 'permit' dan tipe lainnya
+    //         'type' => 'nullable|in:all,prayer,learning,gate,journal,student,master,schedule,mbg,permit', 
+    //     ]);
+
+    //     $syncType = $request->input('type', 'all');
+
+    //     $targetUrl = DB::table('settings')->where('key', 'target_sync_url')->value('value');
+    //     $targetKey = DB::table('settings')->where('key', 'target_sync_key')->value('value');
+
+    //     if (!$targetUrl || !$targetKey) {
+    //         return back()->with('error', 'Konfigurasi URL atau API Key target belum diatur di sistem.');
+    //     }
+
+    //     try {
+    //         $apiUrl = rtrim($targetUrl, '/') . '/api/sync/export-all';
+
+    //         /** @var \Illuminate\Http\Client\Response $response */
+    //         $response = Http::withoutVerifying()
+    //             ->withHeaders([
+    //                 'X-Api-Key' => $targetKey,
+    //                 'Accept' => 'application/json'
+    //             ])
+    //             ->timeout(180) // Timeout diperpanjang
+    //             ->get($apiUrl, [
+    //                 'start_date' => $request->start_date,
+    //                 'end_date' => $request->end_date,
+    //                 'key' => $targetKey
+    //             ]);
+
+    //         if ($response->failed()) {
+    //             Log::error("Sync Failed: " . $response->body());
+    //             return back()->with('error', "Server Target Error (Status: " . $response->status() . ")");
+    //         }
+
+    //         $result = $response->json();
+
+    //         if (!isset($result['status']) || $result['status'] !== 'success') {
+    //             return back()->with('error', 'Format respon server tidak valid atau kunci salah.');
+    //         }
+
+    //         $res = $result['results'];
+            
+    //         // Hitung Total Data
+    //         $totalRemote = ($res['prayer']['total'] ?? 0) + 
+    //                        ($res['gate']['total'] ?? 0) + 
+    //                        ($res['learning']['total'] ?? 0) +
+    //                        ($res['journal']['total'] ?? 0) +
+    //                        ($res['student']['total'] ?? 0) +
+    //                        ($res['teacher']['total'] ?? 0) + // Master Guru
+    //                        ($res['schedule']['total'] ?? 0) + // Jadwal
+    //                        ($res['mbg']['total'] ?? 0) +      // MBG
+    //                        ($res['permit']['total'] ?? 0);    // Permit
+            
+    //         if ($totalRemote === 0) {
+    //             return back()->with('warning', "Koneksi BERHASIL, tetapi TIDAK ADA DATA pada rentang tanggal tersebut.");
+    //         }
+
+    //         $processCount = 0;
+    //         $skippedCount = 0;
+            
+    //         DB::beginTransaction();
+
+    //         // === 1. SYNC MASTER DATA (JURUSAN, RUANGAN, MAPEL, GURU, KELAS) ===
+    //         if ($syncType === 'all' || $syncType === 'master') {
+    //             // Majors
+    //             if(isset($res['major']['data'])) {
+    //                 foreach($res['major']['data'] as $m) {
+    //                     DB::table('majors')->updateOrInsert(['id' => $m['id']], ['name' => $m['name'], 'code' => $m['code'] ?? null, 'updated_at' => now()]);
+    //                 }
+    //             }
+    //             // Rooms
+    //             if(isset($res['room']['data'])) {
+    //                 foreach($res['room']['data'] as $r) {
+    //                     DB::table('rooms')->updateOrInsert(['id' => $r['id']], ['name' => $r['name'], 'capacity' => $r['capacity'] ?? 0, 'updated_at' => now()]);
+    //                 }
+    //             }
+    //             // Subjects
+    //             if(isset($res['subject']['data'])) {
+    //                 foreach($res['subject']['data'] as $sub) {
+    //                     DB::table('subjects')->updateOrInsert(['id' => $sub['id']], ['name' => $sub['name'], 'code' => $sub['code'] ?? null, 'updated_at' => now()]);
+    //                 }
+    //             }
+    //             // Teachers (User & Teacher)
+    //             if(isset($res['teacher']['data'])) {
+    //                 foreach($res['teacher']['data'] as $t) {
+    //                     $user = DB::table('users')->where('email', $t['email'])->first();
+    //                     $userId = $user ? $user->id : (string) Str::uuid();
+    //                     if(!$user) {
+    //                         DB::table('users')->insert(['id' => $userId, 'name' => $t['user_name'], 'email' => $t['email'], 'username' => $t['username'] ?? explode('@', $t['email'])[0], 'password' => Hash::make('12345678'), 'role' => 'teacher', 'created_at' => now(), 'updated_at' => now()]);
+    //                     }
+    //                     DB::table('teachers')->updateOrInsert(['id' => $t['id']], ['user_id' => $userId, 'name' => $t['name'], 'nip' => $t['nip'], 'gender' => $t['gender'], 'phone' => $t['phone'], 'place_of_birth' => $t['place_of_birth'], 'date_of_birth' => $t['date_of_birth'], 'address' => $t['address'], 'updated_at' => now()]);
+    //                     $processCount++;
+    //                 }
+    //             }
+    //             // Classrooms
+    //             if(isset($res['classroom']['data'])) {
+    //                 foreach($res['classroom']['data'] as $c) {
+    //                     DB::table('classrooms')->updateOrInsert(['id' => $c['id']], ['name' => $c['name'], 'homeroom_teacher_id' => $c['homeroom_teacher_id'], 'counseling_teacher_id' => $c['counseling_teacher_id'], 'class_leader_id' => $c['class_leader_id'], 'updated_at' => now()]);
+    //                     $processCount++;
+    //                 }
+    //             }
+    //         }
+
+    //         // === 2. SYNC SISWA ===
+    //         if (($syncType === 'all' || $syncType === 'student') && isset($res['student']['data'])) {
+    //             foreach ($res['student']['data'] as $s) {
+    //                 $classId = $s['classroom_id'];
+    //                 // Fallback cari kelas by Name jika UUID beda
+    //                 if(!DB::table('classrooms')->where('id', $s['classroom_id'])->exists() && !empty($s['classroom_name'])) {
+    //                     $cls = DB::table('classrooms')->where('name', $s['classroom_name'])->first();
+    //                     if($cls) $classId = $cls->id;
+    //                 }
+
+    //                 $exists = DB::table('students')->where('nis', $s['nis'])->first();
+    //                 $studentData = [
+    //                     'name' => $s['name'], 'face_descriptor' => $s['face_descriptor'],
+    //                     'phone' => $s['phone'], 'address' => $s['address'],
+    //                     'classroom_id' => $classId, 'updated_at' => now()
+    //                 ];
+
+    //                 if ($exists) {
+    //                     DB::table('students')->where('id', $exists->id)->update($studentData);
+    //                 } else {
+    //                     $studentData['id'] = $s['id']; // Gunakan ID sumber jika belum ada
+    //                     $studentData['nis'] = $s['nis'];
+    //                     $studentData['created_at'] = now();
+    //                     DB::table('students')->insert($studentData);
+    //                 }
+    //                 $processCount++;
+    //             }
+    //         }
+
+    //         // === 3. SYNC JADWAL ===
+    //         if (($syncType === 'all' || $syncType === 'schedule') && isset($res['schedule']['data'])) {
+    //             foreach($res['schedule']['data'] as $sch) {
+    //                 $teacherExists = DB::table('teachers')->where('id', $sch['teacher_id'])->exists();
+    //                 $classExists = DB::table('classrooms')->where('id', $sch['classroom_id'])->exists();
+    //                 $subjectExists = DB::table('subjects')->where('id', $sch['subject_id'])->exists();
+
+    //                 if($teacherExists && $classExists && $subjectExists) {
+    //                     DB::table('schedules')->updateOrInsert(['id' => $sch['id']], [
+    //                         'teacher_id' => $sch['teacher_id'], 'classroom_id' => $sch['classroom_id'],
+    //                         'subject_id' => $sch['subject_id'], 'room_id' => $sch['room_id'] ?? null,
+    //                         'day' => $sch['day'], 'start_time' => $sch['start_time'], 'end_time' => $sch['end_time'],
+    //                         'updated_at' => now()
+    //                     ]);
+    //                     $processCount++;
+    //                 }
+    //             }
+    //         }
+
+    //         // === 4. Izin Siswa (Permit) - BARU ===
+    //         if (($syncType === 'all' || $syncType === 'permit') && isset($res['permit']['data'])) {
+    //             foreach ($res['permit']['data'] as $perm) {
+    //                 $studentId = DB::table('students')->where('nis', $perm['nis'])->value('id');
+                    
+    //                 if ($studentId) {
+    //                     // Cek eksistensi berdasarkan ID Asli dari server sumber
+    //                     $exists = DB::table('student_permits')->where('id', $perm['id'])->first();
+
+    //                     $permitData = [
+    //                         'student_id' => $studentId,
+    //                         'date' => $perm['date'],
+    //                         'time_out' => $perm['time_out'],
+    //                         'time_in' => $perm['time_in'],
+    //                         'reason' => $perm['reason'],
+    //                         'description' => $perm['description'],
+    //                         'status' => $perm['status'],
+    //                         'method' => $perm['method'],
+    //                         'image_evidence' => $perm['image_evidence'],
+    //                         'recorded_by' => 'Sync System',
+    //                         'updated_at' => now()
+    //                     ];
+
+    //                     if ($exists) {
+    //                         DB::table('student_permits')->where('id', $perm['id'])->update($permitData);
+    //                     } else {
+    //                         $permitData['id'] = $perm['id']; // Gunakan ID sumber
+    //                         $permitData['created_at'] = now();
+    //                         DB::table('student_permits')->insert($permitData);
+    //                     }
+    //                     $processCount++;
+    //                 } else {
+    //                     $skippedCount++;
+    //                 }
+    //             }
+    //         }
+
+    //         // === 5. MBG (Makan Bergizi Gratis) ===
+    //         if (($syncType === 'all' || $syncType === 'mbg') && isset($res['mbg']['data'])) {
+    //             foreach ($res['mbg']['data'] as $m) {
+    //                 $studentId = DB::table('students')->where('nis', $m['nis'])->value('id');
+    //                 if ($studentId) {
+    //                     $exists = DB::table('mbg_attendances')->where('student_id', $studentId)->where('date', $m['date'])->first();
+    //                     $mbgData = [
+    //                         'check_in_time' => $m['check_in_time'], 'status' => $m['status'],
+    //                         'method' => $m['method'] ?? 'barcode', 'image_evidence' => $m['image_evidence'] ?? null,
+    //                         'recorded_by' => 'Sync System', 'updated_at' => now()
+    //                     ];
+    //                     if ($exists) { DB::table('mbg_attendances')->where('id', $exists->id)->update($mbgData); }
+    //                     else { 
+    //                         $mbgData['id'] = (string) Str::uuid(); $mbgData['student_id'] = $studentId; $mbgData['date'] = $m['date']; $mbgData['created_at'] = now(); 
+    //                         DB::table('mbg_attendances')->insert($mbgData); 
+    //                     }
+    //                     $processCount++;
+    //                 } else { $skippedCount++; }
+    //             }
+    //         }
+
+    //         // === 6. Absensi Sholat ===
+    //         if (($syncType === 'all' || $syncType === 'prayer') && isset($res['prayer']['data'])) {
+    //             foreach ($res['prayer']['data'] as $p) {
+    //                 $studentId = DB::table('students')->where('nis', $p['nis'])->value('id');
+    //                 if ($studentId) {
+    //                     DB::table('prayer_attendances')->updateOrInsert(
+    //                         ['student_id' => $studentId, 'date' => $p['date'], 'prayer_name' => $p['prayer_name']],
+    //                         ['check_in_time' => $p['check_in_time'], 'status' => $p['status'], 'latitude' => $p['latitude'], 'longitude' => $p['longitude'], 'updated_at' => now()]
+    //                     );
+    //                     $processCount++;
+    //                 } else { $skippedCount++; }
+    //             }
+    //         }
+
+    //         // === 7. Absensi Gerbang ===
+    //         if (($syncType === 'all' || $syncType === 'gate') && isset($res['gate']['data'])) {
+    //             foreach ($res['gate']['data'] as $g) {
+    //                 $studentId = DB::table('students')->where('nis', $g['nis'])->value('id');
+    //                 if ($studentId) {
+    //                     $exists = DB::table('daily_attendances')->where('student_id', $studentId)->where('date', $g['date'])->first();
+    //                     if ($exists) {
+    //                         DB::table('daily_attendances')->where('id', $exists->id)->update(['arrival_time' => $g['arrival_time'], 'departure_time' => $g['departure_time'], 'status' => $g['status'], 'updated_at' => now()]);
+    //                     } else {
+    //                         DB::table('daily_attendances')->insert(['id' => (string) Str::uuid(), 'student_id' => $studentId, 'date' => $g['date'], 'arrival_time' => $g['arrival_time'], 'departure_time' => $g['departure_time'], 'status' => $g['status'], 'created_at' => now()]);
+    //                     }
+    //                     $processCount++;
+    //                 } else { $skippedCount++; }
+    //             }
+    //         }
+
+    //         // === 8. Absensi Pembelajaran ===
+    //         if (($syncType === 'all' || $syncType === 'learning') && isset($res['learning']['data'])) {
+    //             foreach ($res['learning']['data'] as $l) {
+    //                 $studentId = DB::table('students')->where('nis', $l['nis'])->value('id');
+    //                 if ($studentId) {
+    //                     $exists = DB::table('attendances')->where('student_id', $studentId)->where('schedule_id', $l['schedule_id'])->where('date', $l['date'])->first();
+    //                     if ($exists) {
+    //                         DB::table('attendances')->where('id', $exists->id)->update(['subject_id' => $l['subject_id'], 'check_in_time' => $l['check_in_time'], 'status' => $l['status'], 'updated_at' => now()]);
+    //                     } else {
+    //                         DB::table('attendances')->insert(['id' => (string) Str::uuid(), 'student_id' => $studentId, 'schedule_id' => $l['schedule_id'], 'date' => $l['date'], 'check_in_time' => $l['check_in_time'], 'status' => $l['status'], 'created_at' => now()]);
+    //                     }
+    //                     $processCount++;
+    //                 } else { $skippedCount++; }
+    //             }
+    //         }
+
+    //         // === 9. Jurnal Guru ===
+    //         if (($syncType === 'all' || $syncType === 'journal') && isset($res['journal']['data'])) {
+    //             foreach ($res['journal']['data'] as $j) {
+    //                 $exists = DB::table('teaching_journals')->where('schedule_id', $j['schedule_id'])->where('date', $j['date'])->first();
+    //                 $journalData = ['topic' => $j['topic'], 'activity' => $j['activity'], 'updated_at' => now()];
+    //                 if (isset($j['notes'])) $journalData['notes'] = $j['notes'];
+    //                 elseif (isset($j['absent_details'])) $journalData['notes'] = $j['absent_details'];
+    //                 if (isset($j['photo_evidence'])) $journalData['photo_evidence'] = $j['photo_evidence'];
+                    
+    //                 if ($exists) { DB::table('teaching_journals')->where('id', $exists->id)->update($journalData); }
+    //                 else { 
+    //                     // Auto-increment ID assumed if not UUID
+    //                     $journalData['schedule_id'] = $j['schedule_id']; $journalData['date'] = $j['date']; $journalData['created_at'] = now(); 
+    //                     DB::table('teaching_journals')->insert($journalData); 
+    //                 }
+    //                 $processCount++;
+    //             }
+    //         }
+
+    //         DB::commit();
+            
+    //         $typeLabels = [
+    //             'all' => 'Semua Data', 'prayer' => 'Absensi Sholat', 'gate' => 'Absensi Gerbang', 'learning' => 'Absensi Pembelajaran', 
+    //             'journal' => 'Jurnal Guru', 'student' => 'Data Siswa', 'mbg' => 'Absensi MBG', 'permit' => 'Izin Siswa'
+    //         ];
+
+    //         $msgTitle = "Sinkronisasi " . ($typeLabels[$syncType] ?? 'Data');
+            
+    //         if ($processCount > 0) {
+    //             $message = "$msgTitle BERHASIL. $processCount data telah disimpan/diupdate.";
+    //             if ($skippedCount > 0) {
+    //                 return back()->with('warning', "$message Namun, ada $skippedCount data DILEWATI karena NIS Siswa tidak ditemukan.");
+    //             }
+    //             return back()->with('success', $message);
+    //         } else {
+    //             if ($skippedCount > 0) {
+    //                 return back()->with('error', "$msgTitle GAGAL. Data ditemukan tetapi NIS Siswa tidak cocok.");
+    //             } else {
+    //                 return back()->with('warning', "Koneksi sukses, tetapi tidak ada data baru yang perlu diproses.");
+    //             }
+    //         }
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         Log::error("Pull Attendance Error: " . $e->getMessage());
+    //         return back()->with('error', 'Koneksi gagal: ' . $e->getMessage());
+    //     }
+    // }
+
+    /**
+     * Helper: Simpan gambar Base64 ke Storage lokal
+     * Mengembalikan path file yang disimpan
+     */
+    private function saveBase64Image($item, $field, $defaultPath = null)
+    {
+        $base64Key = $field . '_base64';
+
+        // Cek jika ada data base64 dikirim
+        if (isset($item[$base64Key]) && !empty($item[$base64Key])) {
+            try {
+                // Decode
+                $imageContent = base64_decode($item[$base64Key]);
+
+                // Gunakan path asli dari server sumber jika memungkinkan
+                $path = $item[$field];
+
+                // Jika path kosong/null di data asli tapi ada base64 (case jarang), generate nama baru
+                if (!$path) {
+                    $path = 'synced_images/' . uniqid() . '.jpg';
+                }
+
+                // Agar folder otomatis terbuat
+                $directory = dirname($path);
+                if (!Storage::disk('public')->exists($directory)) {
+                    Storage::disk('public')->makeDirectory($directory);
+                }
+
+                Storage::disk('public')->put($path, $imageContent);
+
+                return $path; // Kembalikan path untuk disimpan di DB
+            } catch (\Exception $e) {
+                Log::error("Gagal simpan gambar sync ($path): " . $e->getMessage());
+            }
+        }
+
+        // Jika tidak ada data base64 baru, kembalikan path lama (atau null)
+        return $item[$field] ?? $defaultPath;
+    }
+
     public function pullAttendance(Request $request)
     {
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date',
-            // Tambahkan tipe 'permit' dan tipe lainnya
-            'type' => 'nullable|in:all,prayer,learning,gate,journal,student,master,schedule,mbg,permit', 
+            'type' => 'nullable|in:all,prayer,learning,gate,journal,student,master,schedule,mbg,permit',
         ]);
 
         $syncType = $request->input('type', 'all');
@@ -2070,7 +2419,7 @@ class PrayerSettingController extends Controller
                     'X-Api-Key' => $targetKey,
                     'Accept' => 'application/json'
                 ])
-                ->timeout(180) // Timeout diperpanjang
+                ->timeout(300) // Timeout diperpanjang karena kirim gambar
                 ->get($apiUrl, [
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date,
@@ -2089,48 +2438,44 @@ class PrayerSettingController extends Controller
             }
 
             $res = $result['results'];
-            
+
             // Hitung Total Data
-            $totalRemote = ($res['prayer']['total'] ?? 0) + 
-                           ($res['gate']['total'] ?? 0) + 
+            $totalRemote = ($res['prayer']['total'] ?? 0) +
+                           ($res['gate']['total'] ?? 0) +
                            ($res['learning']['total'] ?? 0) +
                            ($res['journal']['total'] ?? 0) +
                            ($res['student']['total'] ?? 0) +
-                           ($res['teacher']['total'] ?? 0) + // Master Guru
-                           ($res['schedule']['total'] ?? 0) + // Jadwal
-                           ($res['mbg']['total'] ?? 0) +      // MBG
-                           ($res['permit']['total'] ?? 0);    // Permit
-            
+                           ($res['teacher']['total'] ?? 0) +
+                           ($res['schedule']['total'] ?? 0) +
+                           ($res['mbg']['total'] ?? 0) +
+                           ($res['permit']['total'] ?? 0);
+
             if ($totalRemote === 0) {
                 return back()->with('warning', "Koneksi BERHASIL, tetapi TIDAK ADA DATA pada rentang tanggal tersebut.");
             }
 
             $processCount = 0;
             $skippedCount = 0;
-            
+
             DB::beginTransaction();
 
             // === 1. SYNC MASTER DATA (JURUSAN, RUANGAN, MAPEL, GURU, KELAS) ===
             if ($syncType === 'all' || $syncType === 'master') {
-                // Majors
                 if(isset($res['major']['data'])) {
                     foreach($res['major']['data'] as $m) {
                         DB::table('majors')->updateOrInsert(['id' => $m['id']], ['name' => $m['name'], 'code' => $m['code'] ?? null, 'updated_at' => now()]);
                     }
                 }
-                // Rooms
                 if(isset($res['room']['data'])) {
                     foreach($res['room']['data'] as $r) {
                         DB::table('rooms')->updateOrInsert(['id' => $r['id']], ['name' => $r['name'], 'capacity' => $r['capacity'] ?? 0, 'updated_at' => now()]);
                     }
                 }
-                // Subjects
                 if(isset($res['subject']['data'])) {
                     foreach($res['subject']['data'] as $sub) {
                         DB::table('subjects')->updateOrInsert(['id' => $sub['id']], ['name' => $sub['name'], 'code' => $sub['code'] ?? null, 'updated_at' => now()]);
                     }
                 }
-                // Teachers (User & Teacher)
                 if(isset($res['teacher']['data'])) {
                     foreach($res['teacher']['data'] as $t) {
                         $user = DB::table('users')->where('email', $t['email'])->first();
@@ -2139,14 +2484,11 @@ class PrayerSettingController extends Controller
                             DB::table('users')->insert(['id' => $userId, 'name' => $t['user_name'], 'email' => $t['email'], 'username' => $t['username'] ?? explode('@', $t['email'])[0], 'password' => Hash::make('12345678'), 'role' => 'teacher', 'created_at' => now(), 'updated_at' => now()]);
                         }
                         DB::table('teachers')->updateOrInsert(['id' => $t['id']], ['user_id' => $userId, 'name' => $t['name'], 'nip' => $t['nip'], 'gender' => $t['gender'], 'phone' => $t['phone'], 'place_of_birth' => $t['place_of_birth'], 'date_of_birth' => $t['date_of_birth'], 'address' => $t['address'], 'updated_at' => now()]);
-                        $processCount++;
                     }
                 }
-                // Classrooms
                 if(isset($res['classroom']['data'])) {
                     foreach($res['classroom']['data'] as $c) {
                         DB::table('classrooms')->updateOrInsert(['id' => $c['id']], ['name' => $c['name'], 'homeroom_teacher_id' => $c['homeroom_teacher_id'], 'counseling_teacher_id' => $c['counseling_teacher_id'], 'class_leader_id' => $c['class_leader_id'], 'updated_at' => now()]);
-                        $processCount++;
                     }
                 }
             }
@@ -2155,7 +2497,6 @@ class PrayerSettingController extends Controller
             if (($syncType === 'all' || $syncType === 'student') && isset($res['student']['data'])) {
                 foreach ($res['student']['data'] as $s) {
                     $classId = $s['classroom_id'];
-                    // Fallback cari kelas by Name jika UUID beda
                     if(!DB::table('classrooms')->where('id', $s['classroom_id'])->exists() && !empty($s['classroom_name'])) {
                         $cls = DB::table('classrooms')->where('name', $s['classroom_name'])->first();
                         if($cls) $classId = $cls->id;
@@ -2171,7 +2512,7 @@ class PrayerSettingController extends Controller
                     if ($exists) {
                         DB::table('students')->where('id', $exists->id)->update($studentData);
                     } else {
-                        $studentData['id'] = $s['id']; // Gunakan ID sumber jika belum ada
+                        $studentData['id'] = $s['id'];
                         $studentData['nis'] = $s['nis'];
                         $studentData['created_at'] = now();
                         DB::table('students')->insert($studentData);
@@ -2199,14 +2540,14 @@ class PrayerSettingController extends Controller
                 }
             }
 
-            // === 4. Izin Siswa (Permit) - BARU ===
-            if (($syncType === 'all' || $syncType === 'permit') && isset($res['permit']['data'])) {
+             // === 4. Izin Siswa (Permit) ===
+             if (($syncType === 'all' || $syncType === 'permit') && isset($res['permit']['data'])) {
                 foreach ($res['permit']['data'] as $perm) {
                     $studentId = DB::table('students')->where('nis', $perm['nis'])->value('id');
                     
                     if ($studentId) {
-                        // Cek eksistensi berdasarkan ID Asli dari server sumber
-                        $exists = DB::table('student_permits')->where('id', $perm['id'])->first();
+                        // Proses Gambar Evidence
+                        $imagePath = $this->saveBase64Image($perm, 'image_evidence');
 
                         $permitData = [
                             'student_id' => $studentId,
@@ -2217,21 +2558,13 @@ class PrayerSettingController extends Controller
                             'description' => $perm['description'],
                             'status' => $perm['status'],
                             'method' => $perm['method'],
-                            'image_evidence' => $perm['image_evidence'],
+                            'image_evidence' => $imagePath, // Path lokal yang baru disimpan
                             'recorded_by' => 'Sync System',
                             'updated_at' => now()
                         ];
 
-                        if ($exists) {
-                            DB::table('student_permits')->where('id', $perm['id'])->update($permitData);
-                        } else {
-                            $permitData['id'] = $perm['id']; // Gunakan ID sumber
-                            $permitData['created_at'] = now();
-                            DB::table('student_permits')->insert($permitData);
-                        }
+                        DB::table('student_permits')->updateOrInsert(['id' => $perm['id']], $permitData);
                         $processCount++;
-                    } else {
-                        $skippedCount++;
                     }
                 }
             }
@@ -2241,23 +2574,71 @@ class PrayerSettingController extends Controller
                 foreach ($res['mbg']['data'] as $m) {
                     $studentId = DB::table('students')->where('nis', $m['nis'])->value('id');
                     if ($studentId) {
-                        $exists = DB::table('mbg_attendances')->where('student_id', $studentId)->where('date', $m['date'])->first();
+                        // Proses Gambar-gambar MBG
+                        $imgEvidence = $this->saveBase64Image($m, 'image_evidence');
+                        $imgTaken = $this->saveBase64Image($m, 'taken_image');
+                        $imgReturned = $this->saveBase64Image($m, 'returned_image');
+
                         $mbgData = [
-                            'check_in_time' => $m['check_in_time'], 'status' => $m['status'],
-                            'method' => $m['method'] ?? 'barcode', 'image_evidence' => $m['image_evidence'] ?? null,
-                            'recorded_by' => 'Sync System', 'updated_at' => now()
+                            'student_id' => $studentId,
+                            'date' => $m['date'],
+                            'check_in_time' => $m['check_in_time'], 
+                            'status' => $m['status'],
+                            'method' => $m['method'] ?? 'barcode',
+                            'taken_at' => $m['taken_at'] ?? null,
+                            'taken_method' => $m['taken_method'] ?? null,
+                            'returned_at' => $m['returned_at'] ?? null,
+                            'returned_method' => $m['returned_method'] ?? null,
+                            'image_evidence' => $imgEvidence,
+                            'taken_image' => $imgTaken,
+                            'returned_image' => $imgReturned,
+                            'recorded_by' => 'Sync System', 
+                            'updated_at' => now()
                         ];
-                        if ($exists) { DB::table('mbg_attendances')->where('id', $exists->id)->update($mbgData); }
-                        else { 
-                            $mbgData['id'] = (string) Str::uuid(); $mbgData['student_id'] = $studentId; $mbgData['date'] = $m['date']; $mbgData['created_at'] = now(); 
-                            DB::table('mbg_attendances')->insert($mbgData); 
+                        
+                        // Fallback Logic ID
+                        if(isset($m['id'])) {
+                             DB::table('mbg_attendances')->updateOrInsert(['id' => $m['id']], $mbgData);
+                        } else {
+                             $exists = DB::table('mbg_attendances')->where('student_id', $studentId)->where('date', $m['date'])->first();
+                             if($exists) DB::table('mbg_attendances')->where('id', $exists->id)->update($mbgData);
+                             else { $mbgData['id'] = (string) Str::uuid(); DB::table('mbg_attendances')->insert($mbgData); }
                         }
                         $processCount++;
-                    } else { $skippedCount++; }
+                    }
                 }
             }
 
-            // === 6. Absensi Sholat ===
+            // === 6. Jurnal Guru ===
+            if (($syncType === 'all' || $syncType === 'journal') && isset($res['journal']['data'])) {
+                foreach ($res['journal']['data'] as $j) {
+                    // Proses Gambar Jurnal
+                    $photoPath = $this->saveBase64Image($j, 'photo_evidence');
+
+                    $journalData = [
+                        'topic' => $j['topic'], 
+                        'activity' => $j['activity'], 
+                        'photo_evidence' => $photoPath,
+                        'updated_at' => now()
+                    ];
+                    if (isset($j['notes'])) $journalData['notes'] = $j['notes'];
+                    
+                    if(isset($j['id']) && Str::isUuid($j['id'])) {
+                        DB::table('teaching_journals')->updateOrInsert(['id' => $j['id']], array_merge($journalData, ['schedule_id' => $j['schedule_id'], 'date' => $j['date']]));
+                    } else {
+                        $exists = DB::table('teaching_journals')->where('schedule_id', $j['schedule_id'])->where('date', $j['date'])->first();
+                        if ($exists) { DB::table('teaching_journals')->where('id', $exists->id)->update($journalData); }
+                        else { 
+                            $journalData['schedule_id'] = $j['schedule_id']; $journalData['date'] = $j['date']; $journalData['created_at'] = now(); 
+                            $journalData['id'] = (string) Str::uuid();
+                            DB::table('teaching_journals')->insert($journalData);
+                        }
+                    }
+                    $processCount++;
+                }
+            }
+
+            // === 7. Absensi Sholat ===
             if (($syncType === 'all' || $syncType === 'prayer') && isset($res['prayer']['data'])) {
                 foreach ($res['prayer']['data'] as $p) {
                     $studentId = DB::table('students')->where('nis', $p['nis'])->value('id');
@@ -2267,11 +2648,11 @@ class PrayerSettingController extends Controller
                             ['check_in_time' => $p['check_in_time'], 'status' => $p['status'], 'latitude' => $p['latitude'], 'longitude' => $p['longitude'], 'updated_at' => now()]
                         );
                         $processCount++;
-                    } else { $skippedCount++; }
+                    }
                 }
             }
 
-            // === 7. Absensi Gerbang ===
+            // === 8. Absensi Gerbang ===
             if (($syncType === 'all' || $syncType === 'gate') && isset($res['gate']['data'])) {
                 foreach ($res['gate']['data'] as $g) {
                     $studentId = DB::table('students')->where('nis', $g['nis'])->value('id');
@@ -2283,11 +2664,11 @@ class PrayerSettingController extends Controller
                             DB::table('daily_attendances')->insert(['id' => (string) Str::uuid(), 'student_id' => $studentId, 'date' => $g['date'], 'arrival_time' => $g['arrival_time'], 'departure_time' => $g['departure_time'], 'status' => $g['status'], 'created_at' => now()]);
                         }
                         $processCount++;
-                    } else { $skippedCount++; }
+                    }
                 }
             }
 
-            // === 8. Absensi Pembelajaran ===
+            // === 9. Absensi Pembelajaran ===
             if (($syncType === 'all' || $syncType === 'learning') && isset($res['learning']['data'])) {
                 foreach ($res['learning']['data'] as $l) {
                     $studentId = DB::table('students')->where('nis', $l['nis'])->value('id');
@@ -2299,26 +2680,7 @@ class PrayerSettingController extends Controller
                             DB::table('attendances')->insert(['id' => (string) Str::uuid(), 'student_id' => $studentId, 'schedule_id' => $l['schedule_id'], 'date' => $l['date'], 'check_in_time' => $l['check_in_time'], 'status' => $l['status'], 'created_at' => now()]);
                         }
                         $processCount++;
-                    } else { $skippedCount++; }
-                }
-            }
-
-            // === 9. Jurnal Guru ===
-            if (($syncType === 'all' || $syncType === 'journal') && isset($res['journal']['data'])) {
-                foreach ($res['journal']['data'] as $j) {
-                    $exists = DB::table('teaching_journals')->where('schedule_id', $j['schedule_id'])->where('date', $j['date'])->first();
-                    $journalData = ['topic' => $j['topic'], 'activity' => $j['activity'], 'updated_at' => now()];
-                    if (isset($j['notes'])) $journalData['notes'] = $j['notes'];
-                    elseif (isset($j['absent_details'])) $journalData['notes'] = $j['absent_details'];
-                    if (isset($j['photo_evidence'])) $journalData['photo_evidence'] = $j['photo_evidence'];
-                    
-                    if ($exists) { DB::table('teaching_journals')->where('id', $exists->id)->update($journalData); }
-                    else { 
-                        // Auto-increment ID assumed if not UUID
-                        $journalData['schedule_id'] = $j['schedule_id']; $journalData['date'] = $j['date']; $journalData['created_at'] = now(); 
-                        DB::table('teaching_journals')->insert($journalData); 
                     }
-                    $processCount++;
                 }
             }
 
@@ -2332,7 +2694,7 @@ class PrayerSettingController extends Controller
             $msgTitle = "Sinkronisasi " . ($typeLabels[$syncType] ?? 'Data');
             
             if ($processCount > 0) {
-                $message = "$msgTitle BERHASIL. $processCount data telah disimpan/diupdate.";
+                $message = "$msgTitle BERHASIL. $processCount data (termasuk gambar) telah diproses.";
                 if ($skippedCount > 0) {
                     return back()->with('warning', "$message Namun, ada $skippedCount data DILEWATI karena NIS Siswa tidak ditemukan.");
                 }

@@ -945,6 +945,205 @@ class PrayerServerSyncController extends Controller
      /**
      * Export Terpadu: Absensi, Jurnal, Siswa, Guru, Kelas, Mapel, Jadwal, MBG, & Izin
      */
+    // public function exportAll(Request $request)
+    // {
+    //     try {
+    //         $startDate = $request->query('start_date');
+    //         $endDate = $request->query('end_date');
+
+    //         if (!$startDate || !$endDate) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'Parameter start_date dan end_date wajib diisi (YYYY-MM-DD).'
+    //             ], 400);
+    //         }
+
+    //         // 1. Ambil Data Absensi Sholat
+    //         $prayerData = DB::table('prayer_attendances')
+    //             ->join('students', 'prayer_attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'prayer_attendances.date',
+    //                 'prayer_attendances.prayer_name',
+    //                 'prayer_attendances.check_in_time',
+    //                 'prayer_attendances.status',
+    //                 'prayer_attendances.latitude',
+    //                 'prayer_attendances.longitude'
+    //             )
+    //             ->whereBetween('prayer_attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 2. Ambil Data Absensi Gerbang
+    //         $gateData = DB::table('daily_attendances')
+    //             ->join('students', 'daily_attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'daily_attendances.date',
+    //                 'daily_attendances.arrival_time',
+    //                 'daily_attendances.departure_time',
+    //                 'daily_attendances.status',
+    //                 'daily_attendances.recorded_by'
+    //             )
+    //             ->whereBetween('daily_attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 3. Ambil Data Absensi Pembelajaran
+    //         $learningData = DB::table('attendances')
+    //             ->join('students', 'attendances.student_id', '=', 'students.id')
+    //             ->select(
+    //                 'students.nis',
+    //                 'attendances.schedule_id',
+    //                 'attendances.subject_id',
+    //                 'attendances.date',
+    //                 'attendances.check_in_time',
+    //                 'attendances.status',
+    //                 'attendances.recorded_by'
+    //             )
+    //             ->whereBetween('attendances.date', [$startDate, $endDate])
+    //             ->get();
+
+    //         // 4. Ambil Data Jurnal Guru (teaching_journals)
+    //         $journalData = collect([]);
+    //         if (Schema::hasTable('teaching_journals')) {
+    //             $query = DB::table('teaching_journals');
+    //             $selects = ['schedule_id', 'date', 'topic', 'activity'];
+                
+    //             if (Schema::hasColumn('teaching_journals', 'notes')) $selects[] = 'notes';
+    //             if (Schema::hasColumn('teaching_journals', 'photo_evidence')) $selects[] = 'photo_evidence';
+                
+    //             // Handle kolom opsional/mapping
+    //             $selects[] = Schema::hasColumn('teaching_journals', 'attendance_summary') ? 'attendance_summary' : DB::raw('NULL as attendance_summary');
+    //             $selects[] = Schema::hasColumn('teaching_journals', 'absent_details') ? 'absent_details' : DB::raw('NULL as absent_details');
+
+    //             $journalData = $query->select($selects)
+    //                 ->whereBetween('date', [$startDate, $endDate])
+    //                 ->get();
+    //         }
+
+    //         // 5. Ambil Data Master Siswa
+    //         $studentData = DB::table('students')
+    //             ->leftJoin('classrooms', 'students.classroom_id', '=', 'classrooms.id')
+    //             ->select('students.*', 'classrooms.name as classroom_name')
+    //             ->get();
+
+    //         // 6. MASTER DATA (Guru, Mapel, Ruangan, Jurusan)
+    //         $teacherData = DB::table('teachers')
+    //             ->join('users', 'teachers.user_id', '=', 'users.id')
+    //             ->select('teachers.*', 'users.email', 'users.name as user_name', 'users.username')
+    //             ->get();
+
+    //         $subjectData = Schema::hasTable('subjects') ? DB::table('subjects')->get() : collect([]);
+    //         $roomData = Schema::hasTable('rooms') ? DB::table('rooms')->get() : collect([]);
+    //         $majorData = Schema::hasTable('majors') ? DB::table('majors')->get() : collect([]);
+            
+    //         // 7. Data Kelas & Jadwal
+    //         $classroomData = Schema::hasTable('classrooms') ? DB::table('classrooms')->get() : collect([]);
+    //         $scheduleData = Schema::hasTable('schedules') ? DB::table('schedules')->get() : collect([]);
+
+    //         // 8. Data Absensi MBG (Makan Bergizi Gratis)
+    //         $mbgData = collect([]);
+    //         if (Schema::hasTable('mbg_attendances')) {
+    //             $mbgData = DB::table('mbg_attendances')
+    //                 ->join('students', 'mbg_attendances.student_id', '=', 'students.id')
+    //                 ->select(
+    //                     'students.nis',
+    //                     'mbg_attendances.date',
+    //                     'mbg_attendances.check_in_time',
+    //                     'mbg_attendances.status',
+    //                     'mbg_attendances.method',
+    //                     'mbg_attendances.image_evidence'
+    //                 )
+    //                 ->whereBetween('mbg_attendances.date', [$startDate, $endDate])
+    //                 ->get();
+    //         }
+
+    //         // 9. Data Izin Siswa (Student Permits) - BARU
+    //         $permitData = collect([]);
+    //         if (Schema::hasTable('student_permits')) {
+    //             $permitData = DB::table('student_permits')
+    //                 ->join('students', 'student_permits.student_id', '=', 'students.id')
+    //                 ->select(
+    //                     'students.nis',
+    //                     'student_permits.id', // Kirim ID asli agar sync update berjalan tepat
+    //                     'student_permits.date',
+    //                     'student_permits.time_out',
+    //                     'student_permits.time_in',
+    //                     'student_permits.reason',
+    //                     'student_permits.description',
+    //                     'student_permits.status',
+    //                     'student_permits.method',
+    //                     'student_permits.image_evidence',
+    //                     'student_permits.recorded_by'
+    //                 )
+    //                 ->whereBetween('student_permits.date', [$startDate, $endDate])
+    //                 ->get();
+    //         }
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'filter' => [
+    //                 'start' => $startDate,
+    //                 'end' => $endDate
+    //             ],
+    //             'results' => [
+    //                 'prayer' => ['total' => $prayerData->count(), 'data' => $prayerData],
+    //                 'gate' => ['total' => $gateData->count(), 'data' => $gateData],
+    //                 'learning' => ['total' => $learningData->count(), 'data' => $learningData],
+    //                 'journal' => ['total' => $journalData->count(), 'data' => $journalData],
+    //                 'student' => ['total' => $studentData->count(), 'data' => $studentData],
+    //                 'teacher' => ['total' => $teacherData->count(), 'data' => $teacherData],
+    //                 'subject' => ['total' => $subjectData->count(), 'data' => $subjectData],
+    //                 'room' => ['total' => $roomData->count(), 'data' => $roomData],
+    //                 'major' => ['total' => $majorData->count(), 'data' => $majorData],
+    //                 'classroom' => ['total' => $classroomData->count(), 'data' => $classroomData],
+    //                 'schedule' => ['total' => $scheduleData->count(), 'data' => $scheduleData],
+    //                 'mbg' => ['total' => $mbgData->count(), 'data' => $mbgData],
+    //                 'permit' => ['total' => $permitData->count(), 'data' => $permitData], // Tambahan Baru
+    //             ]
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Full Sync Export Error: ' . $e->getMessage());
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    /**
+     * Helper untuk mengubah file gambar fisik menjadi Base64 string.
+     * * @param \Illuminate\Support\Collection $collection
+     * @param array $fields Daftar nama kolom yang berisi path gambar
+     * @return \Illuminate\Support\Collection
+     */
+    private function attachBase64Images($collection, $fields)
+    {
+        return $collection->map(function ($item) use ($fields) {
+            foreach ($fields as $field) {
+                // Cek apakah kolom ada dan memiliki path gambar
+                if (isset($item->$field) && !empty($item->$field)) {
+                    $path = $item->$field;
+                    // Cek apakah file fisik ada di storage public
+                    if (Storage::disk('public')->exists($path)) {
+                        try {
+                            $fileContent = Storage::disk('public')->get($path);
+                            // Buat key baru dengan akhiran '_base64' (contoh: photo_evidence_base64)
+                            $key = $field . '_base64';
+                            $item->$key = base64_encode($fileContent);
+                        } catch (\Exception $e) {
+                            Log::error("Gagal encode gambar $path: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
+            return $item;
+        });
+    }
+
+    /**
+     * Export Terpadu: Absensi, Jurnal, Siswa, Guru, Kelas, Mapel, Jadwal, MBG, & Izin
+     */
     public function exportAll(Request $request)
     {
         try {
@@ -958,7 +1157,9 @@ class PrayerServerSyncController extends Controller
                 ], 400);
             }
 
-            // 1. Ambil Data Absensi Sholat
+            // --- 1. DATA MASTER & BASIC ---
+
+            // Absensi Sholat (Tanpa Gambar)
             $prayerData = DB::table('prayer_attendances')
                 ->join('students', 'prayer_attendances.student_id', '=', 'students.id')
                 ->select(
@@ -973,7 +1174,7 @@ class PrayerServerSyncController extends Controller
                 ->whereBetween('prayer_attendances.date', [$startDate, $endDate])
                 ->get();
 
-            // 2. Ambil Data Absensi Gerbang
+            // Absensi Gerbang
             $gateData = DB::table('daily_attendances')
                 ->join('students', 'daily_attendances.student_id', '=', 'students.id')
                 ->select(
@@ -987,7 +1188,7 @@ class PrayerServerSyncController extends Controller
                 ->whereBetween('daily_attendances.date', [$startDate, $endDate])
                 ->get();
 
-            // 3. Ambil Data Absensi Pembelajaran
+            // Absensi Pembelajaran
             $learningData = DB::table('attendances')
                 ->join('students', 'attendances.student_id', '=', 'students.id')
                 ->select(
@@ -1002,81 +1203,75 @@ class PrayerServerSyncController extends Controller
                 ->whereBetween('attendances.date', [$startDate, $endDate])
                 ->get();
 
-            // 4. Ambil Data Jurnal Guru (teaching_journals)
-            $journalData = collect([]);
-            if (Schema::hasTable('teaching_journals')) {
-                $query = DB::table('teaching_journals');
-                $selects = ['schedule_id', 'date', 'topic', 'activity'];
-                
-                if (Schema::hasColumn('teaching_journals', 'notes')) $selects[] = 'notes';
-                if (Schema::hasColumn('teaching_journals', 'photo_evidence')) $selects[] = 'photo_evidence';
-                
-                // Handle kolom opsional/mapping
-                $selects[] = Schema::hasColumn('teaching_journals', 'attendance_summary') ? 'attendance_summary' : DB::raw('NULL as attendance_summary');
-                $selects[] = Schema::hasColumn('teaching_journals', 'absent_details') ? 'absent_details' : DB::raw('NULL as absent_details');
-
-                $journalData = $query->select($selects)
-                    ->whereBetween('date', [$startDate, $endDate])
-                    ->get();
-            }
-
-            // 5. Ambil Data Master Siswa
+            // Data Master Siswa
             $studentData = DB::table('students')
                 ->leftJoin('classrooms', 'students.classroom_id', '=', 'classrooms.id')
                 ->select('students.*', 'classrooms.name as classroom_name')
                 ->get();
 
-            // 6. MASTER DATA (Guru, Mapel, Ruangan, Jurusan)
+            // Data Master Guru
             $teacherData = DB::table('teachers')
                 ->join('users', 'teachers.user_id', '=', 'users.id')
                 ->select('teachers.*', 'users.email', 'users.name as user_name', 'users.username')
                 ->get();
 
+            // Data Master Lainnya
             $subjectData = Schema::hasTable('subjects') ? DB::table('subjects')->get() : collect([]);
             $roomData = Schema::hasTable('rooms') ? DB::table('rooms')->get() : collect([]);
             $majorData = Schema::hasTable('majors') ? DB::table('majors')->get() : collect([]);
-            
-            // 7. Data Kelas & Jadwal
             $classroomData = Schema::hasTable('classrooms') ? DB::table('classrooms')->get() : collect([]);
             $scheduleData = Schema::hasTable('schedules') ? DB::table('schedules')->get() : collect([]);
 
-            // 8. Data Absensi MBG (Makan Bergizi Gratis)
+
+            // --- 2. DATA DENGAN GAMBAR (JURNAL, MBG, PERMIT) ---
+
+            // A. Jurnal Guru (Ada Foto: photo_evidence)
+            $journalData = collect([]);
+            if (Schema::hasTable('teaching_journals')) {
+                $query = DB::table('teaching_journals')->whereBetween('date', [$startDate, $endDate]);
+                
+                // Ambil semua kolom
+                $journalData = $query->get();
+                
+                // Encode Gambar Jurnal jika kolomnya ada
+                if (Schema::hasColumn('teaching_journals', 'photo_evidence')) {
+                    $journalData = $this->attachBase64Images($journalData, ['photo_evidence']);
+                }
+            }
+
+            // B. MBG Attendance (Ada Foto: image_evidence, taken_image, returned_image)
             $mbgData = collect([]);
             if (Schema::hasTable('mbg_attendances')) {
                 $mbgData = DB::table('mbg_attendances')
                     ->join('students', 'mbg_attendances.student_id', '=', 'students.id')
-                    ->select(
-                        'students.nis',
-                        'mbg_attendances.date',
-                        'mbg_attendances.check_in_time',
-                        'mbg_attendances.status',
-                        'mbg_attendances.method',
-                        'mbg_attendances.image_evidence'
-                    )
+                    ->select('students.nis', 'mbg_attendances.*') // Select * agar ID dan semua kolom terbawa
                     ->whereBetween('mbg_attendances.date', [$startDate, $endDate])
                     ->get();
+
+                // Daftar kolom gambar yang mungkin ada
+                $mbgImageFields = [];
+                if (Schema::hasColumn('mbg_attendances', 'image_evidence')) $mbgImageFields[] = 'image_evidence';
+                if (Schema::hasColumn('mbg_attendances', 'taken_image')) $mbgImageFields[] = 'taken_image';
+                if (Schema::hasColumn('mbg_attendances', 'returned_image')) $mbgImageFields[] = 'returned_image';
+                
+                if(!empty($mbgImageFields)) {
+                    $mbgData = $this->attachBase64Images($mbgData, $mbgImageFields);
+                }
             }
 
-            // 9. Data Izin Siswa (Student Permits) - BARU
+            // C. Izin Siswa / Student Permits (Ada Foto: image_evidence)
             $permitData = collect([]);
             if (Schema::hasTable('student_permits')) {
                 $permitData = DB::table('student_permits')
                     ->join('students', 'student_permits.student_id', '=', 'students.id')
-                    ->select(
-                        'students.nis',
-                        'student_permits.id', // Kirim ID asli agar sync update berjalan tepat
-                        'student_permits.date',
-                        'student_permits.time_out',
-                        'student_permits.time_in',
-                        'student_permits.reason',
-                        'student_permits.description',
-                        'student_permits.status',
-                        'student_permits.method',
-                        'student_permits.image_evidence',
-                        'student_permits.recorded_by'
-                    )
+                    ->select('students.nis', 'student_permits.*') // Select * agar ID terbawa untuk sync update
                     ->whereBetween('student_permits.date', [$startDate, $endDate])
                     ->get();
+                
+                // Encode Gambar Permit
+                if (Schema::hasColumn('student_permits', 'image_evidence')) {
+                    $permitData = $this->attachBase64Images($permitData, ['image_evidence']);
+                }
             }
 
             return response()->json([
@@ -1089,7 +1284,6 @@ class PrayerServerSyncController extends Controller
                     'prayer' => ['total' => $prayerData->count(), 'data' => $prayerData],
                     'gate' => ['total' => $gateData->count(), 'data' => $gateData],
                     'learning' => ['total' => $learningData->count(), 'data' => $learningData],
-                    'journal' => ['total' => $journalData->count(), 'data' => $journalData],
                     'student' => ['total' => $studentData->count(), 'data' => $studentData],
                     'teacher' => ['total' => $teacherData->count(), 'data' => $teacherData],
                     'subject' => ['total' => $subjectData->count(), 'data' => $subjectData],
@@ -1097,8 +1291,10 @@ class PrayerServerSyncController extends Controller
                     'major' => ['total' => $majorData->count(), 'data' => $majorData],
                     'classroom' => ['total' => $classroomData->count(), 'data' => $classroomData],
                     'schedule' => ['total' => $scheduleData->count(), 'data' => $scheduleData],
+                    // Data dengan Gambar Base64
+                    'journal' => ['total' => $journalData->count(), 'data' => $journalData],
                     'mbg' => ['total' => $mbgData->count(), 'data' => $mbgData],
-                    'permit' => ['total' => $permitData->count(), 'data' => $permitData], // Tambahan Baru
+                    'permit' => ['total' => $permitData->count(), 'data' => $permitData],
                 ]
             ], 200);
 
