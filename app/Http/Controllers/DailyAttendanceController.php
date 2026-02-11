@@ -17,6 +17,8 @@ use App\Models\AttendanceSetting; // Jangan lupa import model ini
 use Illuminate\Support\Facades\DB; // Tambahkan import DB
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage; // Penting untuk simpan foto
+use Illuminate\Support\Facades\Log;
 
 class DailyAttendanceController extends Controller
 {
@@ -34,100 +36,487 @@ class DailyAttendanceController extends Controller
      * Logika: Cek Datang -> Cek Pulang -> Kirim WA
      * Route: POST /daily-attendance
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nis' => 'required'
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'nis' => 'required'
+    //     ]);
 
-        // 1. Cari Siswa
-        $student = Student::with('classroom')->where('nis', $request->nis)->first();
-        if (!$student) {
-            return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan!']);
-        }
+    //     // 1. Cari Siswa
+    //     $student = Student::with('classroom')->where('nis', $request->nis)->first();
+    //     if (!$student) {
+    //         return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan!']);
+    //     }
 
-        $date = date('Y-m-d');
-        $time = date('H:i:s');
+    //     $date = date('Y-m-d');
+    //     $time = date('H:i:s');
 
-        // 2. Cek Data Absensi Hari Ini
-        $attendance = DailyAttendance::where('student_id', $student->id)
-                        ->where('date', $date)
-                        ->first();
+    //     // 2. Cek Data Absensi Hari Ini
+    //     $attendance = DailyAttendance::where('student_id', $student->id)
+    //                     ->where('date', $date)
+    //                     ->first();
 
 
-        // AMBIL PENGATURAN DARI DATABASE
-        // Kita ambil data pertama (karena setting biasanya cuma 1 baris)
-        $setting = AttendanceSetting::first();
+    //     // AMBIL PENGATURAN DARI DATABASE
+    //     // Kita ambil data pertama (karena setting biasanya cuma 1 baris)
+    //     $setting = AttendanceSetting::first();
 
-        // Fallback value jika database setting kosong (safety code)
-        $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
-        $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
+    //     // Fallback value jika database setting kosong (safety code)
+    //     $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
+    //     $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
 
-        // ==========================================================
-        // SKENARIO PULANG (DATA SUDAH ADA)
-        // ==========================================================
-        if ($attendance) {
-            // Jika jam pulang sudah terisi, tolak scan
-            if ($attendance->departure_time) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => "Siswa {$student->name} sudah absen pulang hari ini!"
-                ]);
-            }
+    //     // ==========================================================
+    //     // SKENARIO PULANG (DATA SUDAH ADA)
+    //     // ==========================================================
+    //     if ($attendance) {
+    //         // Jika jam pulang sudah terisi, tolak scan
+    //         if ($attendance->departure_time) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Siswa {$student->name} sudah absen pulang hari ini!"
+    //             ]);
+    //         }
 
-            // --- TAMBAHAN FITUR: Validasi Jam Pulang (10:00) ---
-            // Membuat objek waktu jam 10:00 hari ini
-            //$jamBatasPulang = Carbon::createFromTime(18, 0, 0);
+    //         // --- TAMBAHAN FITUR: Validasi Jam Pulang (10:00) ---
+    //         // Membuat objek waktu jam 10:00 hari ini
+    //         //$jamBatasPulang = Carbon::createFromTime(18, 0, 0);
 
-            // Cek apakah waktu sekarang kurang dari jam 10:00
-            if (Carbon::now()->lessThan($batasBolehPulang)) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul " .$batasBolehPulang." "
-                ]);
-            }
-            // ------
+    //         // Cek apakah waktu sekarang kurang dari jam 10:00
+    //         if (Carbon::now()->lessThan($batasBolehPulang)) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul " .$batasBolehPulang." "
+    //             ]);
+    //         }
+    //         // ------
 
-            // Update Jam Pulang
-            $attendance->update(['departure_time' => $time]);
+    //         // Update Jam Pulang
+    //         $attendance->update(['departure_time' => $time]);
 
-            // Kirim WA Pulang (Antrian)
-            $this->sendNotification($student, 'pulang', $time);
+    //         // Kirim WA Pulang (Antrian)
+    //         $this->sendNotification($student, 'pulang', $time);
 
-            return response()->json([
-                'status' => 'success',
-                'type' => 'out', // Sinyal ke JS untuk warna Biru
-                'message' => 'Hati-hati di jalan! (Absen Pulang)',
-                'student' => $student->name
-            ]);
-        }
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'type' => 'out', // Sinyal ke JS untuk warna Biru
+    //             'message' => 'Hati-hati di jalan! (Absen Pulang)',
+    //             'student' => $student->name
+    //         ]);
+    //     }
 
-        // ==========================================================
-        // SKENARIO DATANG (DATA BARU)
-        // ==========================================================
+    //     // ==========================================================
+    //     // SKENARIO DATANG (DATA BARU)
+    //     // ==========================================================
 
-        // Logika Terlambat (Batas jam 07:00)
-        // $jamMasukSekolah = Carbon::createFromTime(7, 0, 0); Lama
-        $jamMasukSekolah = Carbon::createFromTimeString($batasTerlambat); // Ambil dari DB
-        $status = Carbon::now()->greaterThan($jamMasukSekolah) ? 'terlambat' : 'hadir';
+    //     // Logika Terlambat (Batas jam 07:00)
+    //     // $jamMasukSekolah = Carbon::createFromTime(7, 0, 0); Lama
+    //     $jamMasukSekolah = Carbon::createFromTimeString($batasTerlambat); // Ambil dari DB
+    //     $status = Carbon::now()->greaterThan($jamMasukSekolah) ? 'terlambat' : 'hadir';
 
-        DailyAttendance::create([
-            'student_id' => $student->id,
-            'date' => $date,
-            'arrival_time' => $time,
-            'status' => $status
-        ]);
+    //     DailyAttendance::create([
+    //         'student_id' => $student->id,
+    //         'date' => $date,
+    //         'arrival_time' => $time,
+    //         'status' => $status
+    //     ]);
 
-        // Kirim WA Datang (Antrian)
-        $this->sendNotification($student, 'datang', $time, $status);
+    //     // Kirim WA Datang (Antrian)
+    //     $this->sendNotification($student, 'datang', $time, $status);
 
-        return response()->json([
-            'status' => 'success',
-            'type' => 'in', // Sinyal ke JS untuk warna Hijau
-            'message' => 'Selamat Datang! (Absen Masuk)',
-            'student' => $student->name . ' (' . strtoupper($status) . ')'
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'type' => 'in', // Sinyal ke JS untuk warna Hijau
+    //         'message' => 'Selamat Datang! (Absen Masuk)',
+    //         'student' => $student->name . ' (' . strtoupper($status) . ')'
+    //     ]);
+    // }
+
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'nis' => 'required'
+    //     ]);
+
+    //     // 1. Cari Siswa
+    //     $student = Student::with('classroom')->where('nis', $request->nis)->first();
+    //     if (!$student) {
+    //         return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan!'], 404);
+    //     }
+
+    //     $date = date('Y-m-d');
+    //     $time = date('H:i:s'); // Format waktu standar H:i:s
+
+    //     // 2. Cek Data Absensi Hari Ini
+    //     $attendance = DailyAttendance::where('student_id', $student->id)
+    //                     ->where('date', $date)
+    //                     ->first();
+
+    //     // 3. AMBIL PENGATURAN DARI DATABASE
+    //     $setting = AttendanceSetting::first();
+
+    //     // Fallback value jika database setting kosong
+    //     $jamMulaiScan = $setting ? $setting->start_check_in_time : '06:00:00';
+    //     $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
+    //     $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
+
+    //     // --- VALIDASI AWAL: JAM BUKA SCAN ---
+    //     // Cegah siswa absen terlalu pagi (misal jam 3 pagi)
+    //     if ($time < $jamMulaiScan) {
+    //          return response()->json([
+    //             'status' => 'error',
+    //             'message' => "Absensi belum dibuka. Dimulai pukul " . substr($jamMulaiScan, 0, 5)
+    //         ], 400);
+    //     }
+
+    //     // ==========================================================
+    //     // SKENARIO PULANG (DATA SUDAH ADA)
+    //     // ==========================================================
+    //     if ($attendance) {
+    //         // Jika jam pulang sudah terisi, tolak scan (Double Check-out)
+    //         if ($attendance->departure_time) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Siswa {$student->name} sudah absen pulang hari ini!"
+    //             ], 400);
+    //         }
+
+    //         // --- VALIDASI JAM PULANG ---
+    //         // Cek apakah waktu sekarang kurang dari batas boleh pulang
+    //         // Menggunakan perbandingan string waktu H:i:s yang aman
+    //         if ($time < $batasBolehPulang) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul " . substr($batasBolehPulang, 0, 5)
+    //             ], 400);
+    //         }
+
+    //         // Update Jam Pulang
+    //         $attendance->update([
+    //             'departure_time' => $time,
+    //             'updated_at' => now()
+    //         ]);
+
+    //         // Kirim WA Pulang (Antrian)
+    //         $this->sendNotification($student, 'pulang', $time);
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'type' => 'CHECK_OUT', // Sinyal ke Frontend (Warna Biru)
+    //             'message' => 'Hati-hati di jalan! (Absen Pulang)',
+    //             'student' => $student,
+    //             'time' => $time
+    //         ]);
+    //     }
+
+    //     // ==========================================================
+    //     // SKENARIO DATANG (DATA BARU)
+    //     // ==========================================================
+
+    //     // Logika Terlambat
+    //     // Jika waktu scan lebih besar dari batas terlambat -> late
+    //     $status = ($time > $batasTerlambat) ? 'late' : 'present';
+
+    //     DailyAttendance::create([
+    //         'id' => (string) Str::uuid(),
+    //         'student_id' => $student->id,
+    //         'date' => $date,
+    //         'arrival_time' => $time,
+    //         'status' => $status,
+    //         'recorded_by' => 'Scanner Gate'
+    //     ]);
+
+    //     // Kirim WA Datang (Antrian)
+    //     $this->sendNotification($student, 'datang', $time, $status);
+
+    //     $statusLabel = ($status == 'late') ? 'TERLAMBAT' : 'HADIR';
+    //     $message = ($status == 'late')
+    //         ? "Anda Terlambat! Batas jam " . substr($batasTerlambat, 0, 5)
+    //         : "Selamat Datang! (Absen Masuk)";
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'type' => 'CHECK_IN', // Sinyal ke Frontend (Warna Hijau/Merah)
+    //         'attendance_status' => $status, // late/present
+    //         'message' => $message,
+    //         'student' => $student,
+    //         'time' => $time
+    //     ]);
+    // }
+
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'nis' => 'required'
+    //     ]);
+
+    //     // 1. Cari Siswa
+    //     $student = Student::with('classroom')->where('nis', $request->nis)->first();
+    //     if (!$student) {
+    //         return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan!'], 404);
+    //     }
+
+    //     $date = date('Y-m-d');
+    //     $time = date('H:i:s'); // Format waktu standar H:i:s
+
+    //     // 2. Cek Data Absensi Hari Ini
+    //     $attendance = DailyAttendance::where('student_id', $student->id)
+    //                     ->where('date', $date)
+    //                     ->first();
+
+    //     // 3. AMBIL PENGATURAN DARI DATABASE
+    //     $setting = AttendanceSetting::first();
+
+    //     // Fallback value jika database setting kosong
+    //     $jamMulaiScan = $setting ? $setting->start_check_in_time : '06:00:00';
+    //     $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
+    //     $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
+
+    //     // --- VALIDASI AWAL: JAM BUKA SCAN ---
+    //     if ($time < $jamMulaiScan) {
+    //          return response()->json([
+    //             'status' => 'error',
+    //             'message' => "Absensi belum dibuka. Dimulai pukul " . substr($jamMulaiScan, 0, 5)
+    //         ], 400);
+    //     }
+
+    //     // ==========================================================
+    //     // SKENARIO PULANG (DATA SUDAH ADA)
+    //     // ==========================================================
+    //     if ($attendance) {
+    //         // Jika jam pulang sudah terisi, tolak scan
+    //         if ($attendance->departure_time) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Siswa {$student->name} sudah absen pulang hari ini!"
+    //             ], 400);
+    //         }
+
+    //         // --- VALIDASI JAM PULANG ---
+    //         if ($time < $batasBolehPulang) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul " . substr($batasBolehPulang, 0, 5)
+    //             ], 400);
+    //         }
+
+    //         // Update Jam Pulang
+    //         $attendance->update([
+    //             'departure_time' => $time,
+    //             'updated_at' => now()
+    //         ]);
+
+    //         // Kirim WA Pulang (Antrian)
+    //         $this->sendNotification($student, 'pulang', $time);
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'type' => 'CHECK_OUT', // Sinyal ke Frontend (Warna Biru)
+    //             'message' => 'Hati-hati di jalan! (Absen Pulang)',
+    //             'student' => $student,
+    //             'time' => $time
+    //         ]);
+    //     }
+
+    //     // ==========================================================
+    //     // SKENARIO DATANG (DATA BARU)
+    //     // ==========================================================
+
+    //     // Logika Terlambat & Penentuan Status Database
+    //     // Cek Migration Anda: Enum statusnya apa? ('hadir', 'terlambat') atau ('present', 'late')?
+    //     // Berdasarkan error log, sepertinya DB menolak 'late'. Jadi kita coba pakai 'terlambat'.
+
+    //     $isLate = ($time > $batasTerlambat);
+
+    //     // GANTI BAGIAN INI SESUAI ENUM MIGRATION DATABASE ANDA
+    //     $statusDB = $isLate ? 'terlambat' : 'hadir';
+
+    //     DailyAttendance::create([
+    //         'id' => (string) Str::uuid(),
+    //         'student_id' => $student->id,
+    //         'date' => $date,
+    //         'arrival_time' => $time,
+    //         'status' => $statusDB, // Gunakan variabel yang sudah disesuaikan
+    //         'recorded_by' => 'Scanner Gate'
+    //     ]);
+
+    //     // Kirim WA Datang (Antrian)
+    //     $this->sendNotification($student, 'datang', $time, $statusDB);
+
+    //     $statusLabel = $isLate ? 'TERLAMBAT' : 'HADIR';
+    //     $message = $isLate
+    //         ? "Anda Terlambat! Batas jam " . substr($batasTerlambat, 0, 5)
+    //         : "Selamat Datang! (Absen Masuk)";
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'type' => 'CHECK_IN',
+    //         'attendance_status' => $isLate ? 'late' : 'present', // Untuk frontend JS tetap pakai late/present biar warna bener
+    //         'message' => $message,
+    //         'student' => $student,
+    //         'time' => $time
+    //     ]);
+    // }
+
+    /**
+     * Handle Absensi Gerbang (Datang & Pulang) via Scan
+     */
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'nis' => 'required',
+    //         'image' => 'nullable|string' // Validasi input gambar base64
+    //     ]);
+
+    //     // 1. Cari Siswa
+    //     $student = Student::with('classroom')->where('nis', $request->nis)->first();
+    //     if (!$student) {
+    //         return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan!'], 404);
+    //     }
+
+    //     $date = date('Y-m-d');
+    //     $time = date('H:i:s'); // Format waktu standar H:i:s
+
+    //     // 2. Cek Data Absensi Hari Ini
+    //     $attendance = DailyAttendance::where('student_id', $student->id)
+    //                     ->where('date', $date)
+    //                     ->first();
+
+    //     // 3. AMBIL PENGATURAN DARI DATABASE
+    //     $setting = AttendanceSetting::first();
+
+    //     // Fallback value jika database setting kosong
+    //     $jamMulaiScan = $setting ? $setting->start_check_in_time : '06:00:00';
+    //     $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
+    //     $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
+
+    //     // --- VALIDASI AWAL: JAM BUKA SCAN ---
+    //     // Cegah siswa absen terlalu pagi (misal jam 3 pagi)
+    //     if ($time < $jamMulaiScan) {
+    //          return response()->json([
+    //             'status' => 'error',
+    //             'message' => "Absensi belum dibuka. Dimulai pukul " . substr($jamMulaiScan, 0, 5)
+    //         ], 400);
+    //     }
+
+    //     // ==========================================================
+    //     // SKENARIO PULANG (DATA MASUK SUDAH ADA)
+    //     // ==========================================================
+    //     if ($attendance) {
+    //         // Jika jam pulang sudah terisi, tolak scan (Prevent Double Check-out)
+    //         if ($attendance->departure_time) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Siswa {$student->name} sudah absen pulang hari ini!"
+    //             ], 400);
+    //         }
+
+    //         // --- VALIDASI JAM PULANG ---
+    //         // Cek apakah waktu sekarang kurang dari batas boleh pulang
+    //         if ($time < $batasBolehPulang) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => "Belum waktunya pulang! Absen pulang baru dibuka pukul " . substr($batasBolehPulang, 0, 5)
+    //             ], 400);
+    //         }
+
+    //         // SIMPAN FOTO PULANG
+    //         $photoPath = $this->saveImage($request->image, $student->nis, 'out', $date);
+
+    //         // Update Jam Pulang
+    //         $attendance->update([
+    //             'departure_time' => $time,
+    //             'photo_out' => $photoPath, // Simpan path foto
+    //             'updated_at' => now()
+    //         ]);
+
+    //         // Kirim Notifikasi (Antrian)
+    //         $this->sendNotification($student, 'pulang', $time);
+
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'type' => 'CHECK_OUT', // Sinyal ke Frontend (Warna Biru)
+    //             'message' => 'Hati-hati di jalan! (Absen Pulang)',
+    //             'student' => $student,
+    //             'time' => $time
+    //         ]);
+    //     }
+
+    //     // ==========================================================
+    //     // SKENARIO DATANG (DATA BARU)
+    //     // ==========================================================
+
+    //     // Logika Terlambat & Penentuan Status Database
+    //     $isLate = ($time > $batasTerlambat);
+    //     $statusDB = $isLate ? 'terlambat' : 'hadir';
+
+    //     // SIMPAN FOTO DATANG
+    //     $photoPath = $this->saveImage($request->image, $student->nis, 'in', $date);
+
+    //     DailyAttendance::create([
+    //         'id' => (string) Str::uuid(),
+    //         'student_id' => $student->id,
+    //         'date' => $date,
+    //         'arrival_time' => $time,
+    //         'status' => $statusDB,
+    //         'photo_in' => $photoPath, // Simpan path foto
+    //         'recorded_by' => 'Scanner Gate'
+    //     ]);
+
+    //     // Kirim Notifikasi (Antrian)
+    //     $this->sendNotification($student, 'datang', $time, $statusDB);
+
+    //     $statusLabel = $isLate ? 'TERLAMBAT' : 'HADIR';
+    //     $message = $isLate
+    //         ? "Anda Terlambat! Batas jam " . substr($batasTerlambat, 0, 5)
+    //         : "Selamat Datang! (Absen Masuk)";
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'type' => 'CHECK_IN',
+    //         'attendance_status' => $isLate ? 'late' : 'present',
+    //         'message' => $message,
+    //         'student' => $student,
+    //         'time' => $time
+    //     ]);
+    // }
+
+    /**
+     * Helper untuk menyimpan gambar Base64 ke Storage
+     */
+    // private function saveImage($base64Image, $nis, $type, $date)
+    // {
+    //     // Jika tidak ada gambar dikirim (misal scan manual tanpa kamera), return null
+    //     if (!$base64Image) return null;
+
+    //     try {
+    //         // Bersihkan header data:image jika ada
+    //         if (strpos($base64Image, 'data:image') !== false) {
+    //             $image = str_replace('data:image/jpeg;base64,', '', $base64Image);
+    //             $image = str_replace(' ', '+', $image);
+
+    //             // Struktur Folder: public/attendance/gate/{in/out}/{tanggal}/
+    //             $folder = "attendance/gate/{$type}/{$date}";
+
+    //             // Nama File: NIS_TIMESTAMP.jpg
+    //             $filename = "{$nis}_" . time() . ".jpg";
+    //             $fullPath = "{$folder}/{$filename}";
+
+    //             // Buat folder jika belum ada
+    //             if (!Storage::disk('public')->exists($folder)) {
+    //                 Storage::disk('public')->makeDirectory($folder);
+    //             }
+
+    //             // Simpan file
+    //             Storage::disk('public')->put($fullPath, base64_decode($image));
+
+    //             return $fullPath;
+    //         }
+    //     } catch (\Exception $e) {
+    //         Log::error("Gagal menyimpan foto absensi gerbang ({$type}) untuk NIS {$nis}: " . $e->getMessage());
+    //     }
+
+    //     return null;
+    // }
 
     // =============================================================
     // FITUR INPUT MANUAL (ADMIN/GURU PIKET)
@@ -287,79 +676,161 @@ class DailyAttendanceController extends Controller
     /**
      * API JSON untuk Data Realtime (Updated)
      */
+    // public function getRealtimeData(Request $request)
+    // {
+    //     $today = date('Y-m-d');
+
+    //     // 1. Query Data Live (Tabel)
+    //     $query = DailyAttendance::with(['student.classroom'])
+    //                     ->where('date', $today);
+
+    //     if ($request->filled('classroom_id')) {
+    //         $query->whereHas('student', function($q) use ($request) {
+    //             $q->where('classroom_id', $request->classroom_id);
+    //         });
+    //     }
+
+    //     $attendances = $query->orderBy('updated_at', 'desc')->take(20)->get();
+
+    //     $data = $attendances->map(function($item) {
+    //         $jam = $item->departure_time ? $item->departure_time : $item->arrival_time;
+    //         $statusLabel = 'DATANG';
+    //         $badgeColor = 'success';
+
+    //         if ($item->departure_time) {
+    //             $statusLabel = 'PULANG';
+    //             $badgeColor = 'primary';
+    //         } elseif ($item->status == 'terlambat') {
+    //             $statusLabel = 'TERLAMBAT';
+    //             $badgeColor = 'warning';
+    //         }
+
+    //         return [
+    //             'nis' => $item->student->nis,
+    //             'name' => $item->student->name,
+    //             'class' => $item->student->classroom->name ?? '-',
+    //             'time' => Carbon::parse($jam)->format('H:i:s'),
+    //             'status_label' => $statusLabel,
+    //             'badge_color' => $badgeColor,
+    //         ];
+    //     });
+
+    //     // 2. Hitung Summary Global
+    //     $summaryQuery = DailyAttendance::where('date', $today);
+    //     if ($request->filled('classroom_id')) {
+    //         $summaryQuery->whereHas('student', function($q) use ($request) {
+    //             $q->where('classroom_id', $request->classroom_id);
+    //         });
+    //     }
+    //     $hadirCount = (clone $summaryQuery)->count();
+    //     $pulangCount = (clone $summaryQuery)->whereNotNull('departure_time')->count();
+
+
+    //     // 3. [BARU] Hitung Rekapitulasi Per Kelas
+    //     // Kita join tabel agar bisa group by nama kelas
+    //     $rekapKelas = DailyAttendance::join('students', 'daily_attendances.student_id', '=', 'students.id')
+    //         ->join('classrooms', 'students.classroom_id', '=', 'classrooms.id')
+    //         ->where('daily_attendances.date', $today)
+    //         ->select(
+    //             'classrooms.name as nama_kelas',
+    //             DB::raw('count(daily_attendances.arrival_time) as total_datang'),
+    //             DB::raw('count(daily_attendances.departure_time) as total_pulang')
+    //         )
+    //         ->groupBy('classrooms.id', 'classrooms.name')
+    //         ->orderBy('classrooms.name', 'asc')
+    //         ->get();
+
+    //     return response()->json([
+    //         'data' => $data,
+    //         'summary' => [
+    //             'hadir' => $hadirCount,
+    //             'pulang' => $pulangCount
+    //         ],
+    //         'rekap_kelas' => $rekapKelas // Kirim data rekap ke view
+    //     ]);
+    // }
+
     public function getRealtimeData(Request $request)
-    {
-        $today = date('Y-m-d');
+{
+    $today = date('Y-m-d');
 
-        // 1. Query Data Live (Tabel)
-        $query = DailyAttendance::with(['student.classroom'])
-                        ->where('date', $today);
+    // 1. Query Data Live (Tabel)
+    $query = DailyAttendance::with(['student.classroom'])
+                            ->where('date', $today);
 
-        if ($request->filled('classroom_id')) {
-            $query->whereHas('student', function($q) use ($request) {
-                $q->where('classroom_id', $request->classroom_id);
-            });
-        }
-
-        $attendances = $query->orderBy('updated_at', 'desc')->take(20)->get();
-
-        $data = $attendances->map(function($item) {
-            $jam = $item->departure_time ? $item->departure_time : $item->arrival_time;
-            $statusLabel = 'DATANG';
-            $badgeColor = 'success';
-
-            if ($item->departure_time) {
-                $statusLabel = 'PULANG';
-                $badgeColor = 'primary';
-            } elseif ($item->status == 'terlambat') {
-                $statusLabel = 'TERLAMBAT';
-                $badgeColor = 'warning';
-            }
-
-            return [
-                'nis' => $item->student->nis,
-                'name' => $item->student->name,
-                'class' => $item->student->classroom->name ?? '-',
-                'time' => Carbon::parse($jam)->format('H:i:s'),
-                'status_label' => $statusLabel,
-                'badge_color' => $badgeColor,
-            ];
+    if ($request->filled('classroom_id')) {
+        $query->whereHas('student', function($q) use ($request) {
+            $q->where('classroom_id', $request->classroom_id);
         });
-
-        // 2. Hitung Summary Global
-        $summaryQuery = DailyAttendance::where('date', $today);
-        if ($request->filled('classroom_id')) {
-            $summaryQuery->whereHas('student', function($q) use ($request) {
-                $q->where('classroom_id', $request->classroom_id);
-            });
-        }
-        $hadirCount = (clone $summaryQuery)->count();
-        $pulangCount = (clone $summaryQuery)->whereNotNull('departure_time')->count();
-
-
-        // 3. [BARU] Hitung Rekapitulasi Per Kelas
-        // Kita join tabel agar bisa group by nama kelas
-        $rekapKelas = DailyAttendance::join('students', 'daily_attendances.student_id', '=', 'students.id')
-            ->join('classrooms', 'students.classroom_id', '=', 'classrooms.id')
-            ->where('daily_attendances.date', $today)
-            ->select(
-                'classrooms.name as nama_kelas',
-                DB::raw('count(daily_attendances.arrival_time) as total_datang'),
-                DB::raw('count(daily_attendances.departure_time) as total_pulang')
-            )
-            ->groupBy('classrooms.id', 'classrooms.name')
-            ->orderBy('classrooms.name', 'asc')
-            ->get();
-
-        return response()->json([
-            'data' => $data,
-            'summary' => [
-                'hadir' => $hadirCount,
-                'pulang' => $pulangCount
-            ],
-            'rekap_kelas' => $rekapKelas // Kirim data rekap ke view
-        ]);
     }
+
+    $attendances = $query->orderBy('updated_at', 'desc')->take(20)->get();
+
+    $data = $attendances->map(function($item) {
+        // Tentukan jam terakhir aktivitas
+        $jam = $item->departure_time ? $item->departure_time : $item->arrival_time;
+
+        // Logika Status & Warna
+        $statusLabel = 'DATANG';
+        $badgeColor = 'success';
+
+        // Tentukan foto mana yang ditampilkan (Foto Pulang jika sudah pulang, jika tidak Foto Masuk)
+        $fotoPath = $item->photo_in;
+
+        if ($item->departure_time) {
+            $statusLabel = 'PULANG';
+            $badgeColor = 'primary';
+            $fotoPath = $item->photo_out; // Gunakan foto capture saat pulang
+        } elseif ($item->status == 'terlambat') {
+            $statusLabel = 'TERLAMBAT';
+            $badgeColor = 'warning';
+        }
+
+        return [
+            'nis' => $item->student->nis,
+            'name' => $item->student->name,
+            'class' => $item->student->classroom->name ?? '-',
+            'time' => Carbon::parse($jam)->format('H:i:s'),
+            'status_label' => $statusLabel,
+            'badge_color' => $badgeColor,
+            // Generate URL Asset untuk foto wajah
+            'photo_url' => $fotoPath ? asset('storage/' . $fotoPath) : asset('images/default-user.png'),
+        ];
+    });
+
+    // 2. Hitung Summary Global
+    $summaryQuery = DailyAttendance::where('date', $today);
+    if ($request->filled('classroom_id')) {
+        $summaryQuery->whereHas('student', function($q) use ($request) {
+            $q->where('classroom_id', $request->classroom_id);
+        });
+    }
+    $hadirCount = (clone $summaryQuery)->count();
+    $pulangCount = (clone $summaryQuery)->whereNotNull('departure_time')->count();
+
+
+    // 3. Hitung Rekapitulasi Per Kelas
+    $rekapKelas = DailyAttendance::join('students', 'daily_attendances.student_id', '=', 'students.id')
+        ->join('classrooms', 'students.classroom_id', '=', 'classrooms.id')
+        ->where('daily_attendances.date', $today)
+        ->select(
+            'classrooms.name as nama_kelas',
+            DB::raw('count(daily_attendances.arrival_time) as total_datang'),
+            DB::raw('count(daily_attendances.departure_time) as total_pulang')
+        )
+        ->groupBy('classrooms.id', 'classrooms.name')
+        ->orderBy('classrooms.name', 'asc')
+        ->get();
+
+    return response()->json([
+        'data' => $data,
+        'summary' => [
+            'hadir' => $hadirCount,
+            'pulang' => $pulangCount
+        ],
+        'rekap_kelas' => $rekapKelas
+    ]);
+}
 
     /**
      * API JSON untuk Data Realtime
@@ -747,6 +1218,153 @@ class DailyAttendanceController extends Controller
     }
 
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nis' => 'required',
+            'image' => 'nullable|string', // Validasi input gambar base64
+        ]);
 
+        // 1. Cari Siswa
+        $student = Student::with('classroom')->where('nis', $request->nis)->first();
+        if (!$student) {
+            return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan!'], 404);
+        }
+
+        $date = date('Y-m-d');
+        $time = date('H:i:s'); // Format waktu standar H:i:s
+
+        // 2. Cek Data Absensi Hari Ini
+        $attendance = DailyAttendance::where('student_id', $student->id)
+                        ->where('date', $date)
+                        ->first();
+
+        // 3. AMBIL PENGATURAN DARI DATABASE
+        $setting = AttendanceSetting::first();
+
+        // Fallback value jika database setting kosong
+        $jamMulaiScan = $setting ? $setting->start_check_in_time : '06:00:00';
+        $batasTerlambat = $setting ? $setting->late_limit_time : '07:00:00';
+        $batasBolehPulang = $setting ? $setting->early_departure_time : '10:00:00';
+
+        // --- VALIDASI AWAL: JAM BUKA SCAN ---
+        if ($time < $jamMulaiScan) {
+             return response()->json([
+                'status' => 'error',
+                'message' => "Absensi belum dibuka. Dimulai pukul " . substr($jamMulaiScan, 0, 5)
+            ], 400);
+        }
+
+        // ==========================================================
+        // SKENARIO PULANG (CHECK-OUT)
+        // ==========================================================
+        if ($attendance) {
+            // Jika jam pulang sudah terisi, tolak scan
+            if ($attendance->departure_time) {
+                return response()->json(['status' => 'error', 'message' => "Siswa {$student->name} sudah absen pulang hari ini!"], 400);
+            }
+
+            // Validasi Jam Pulang
+            if ($time < $batasBolehPulang) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Belum waktunya pulang! Dibuka pukul " . substr($batasBolehPulang, 0, 5)
+                ], 400);
+            }
+
+            // SIMPAN FOTO PULANG
+            $photoPath = $this->saveImage($request->image, $student->nis, 'out', $date);
+
+            // Update Data
+            $attendance->update([
+                'departure_time' => $time,
+                'photo_out' => $photoPath, // Simpan path foto
+                'updated_at' => now()
+            ]);
+
+            $this->sendNotification($student, 'pulang', $time);
+
+            return response()->json([
+                'status' => 'success',
+                'type' => 'CHECK_OUT',
+                'message' => 'Hati-hati di jalan! (Absen Pulang)',
+                'student' => $student,
+                'time' => $time
+            ]);
+        }
+
+        // ==========================================================
+        // SKENARIO DATANG (CHECK-IN)
+        // ==========================================================
+
+        $isLate = ($time > $batasTerlambat);
+        $statusDB = $isLate ? 'terlambat' : 'hadir';
+
+        // SIMPAN FOTO DATANG
+        $photoPath = $this->saveImage($request->image, $student->nis, 'in', $date);
+
+        DailyAttendance::create([
+            'id' => (string) Str::uuid(),
+            'student_id' => $student->id,
+            'date' => $date,
+            'arrival_time' => $time,
+            'status' => $statusDB,
+            'photo_in' => $photoPath, // Simpan path foto
+            'recorded_by' => 'Scanner Gate'
+        ]);
+
+        $this->sendNotification($student, 'datang', $time, $statusDB);
+
+        $message = $isLate
+            ? "Anda Terlambat! Batas jam " . substr($batasTerlambat, 0, 5)
+            : "Selamat Datang! (Absen Masuk)";
+
+        return response()->json([
+            'status' => 'success',
+            'type' => 'CHECK_IN',
+            'attendance_status' => $isLate ? 'late' : 'present',
+            'message' => $message,
+            'student' => $student,
+            'time' => $time
+        ]);
+    }
+
+    /**
+     * Helper untuk menyimpan gambar Base64 ke Storage
+     */
+    private function saveImage($base64Image, $nis, $type, $date)
+    {
+        // Jika tidak ada gambar dikirim (misal scan manual tanpa kamera), return null
+        if (!$base64Image) return null;
+
+        try {
+            // Bersihkan header data:image jika ada
+            if (strpos($base64Image, 'data:image') !== false) {
+                $image = str_replace('data:image/jpeg;base64,', '', $base64Image);
+                $image = str_replace(' ', '+', $image);
+
+                // Struktur Folder: public/attendance/gate/{in/out}/{tanggal}/
+                $folder = "attendance/gate/{$type}/{$date}";
+
+                // Nama File: NIS_TIMESTAMP.jpg
+                $filename = "{$nis}_" . time() . ".jpg";
+                $fullPath = "{$folder}/{$filename}";
+
+                // Buat folder jika belum ada
+                if (!Storage::disk('public')->exists($folder)) {
+                    Storage::disk('public')->makeDirectory($folder);
+                }
+
+                // Simpan file
+                Storage::disk('public')->put($fullPath, base64_decode($image));
+
+                return $fullPath;
+            }
+        } catch (\Exception $e) {
+            Log::error("Gagal menyimpan foto absensi gerbang ({$type}) untuk NIS {$nis}: " . $e->getMessage());
+        }
+
+        return null;
+    }
 
 }

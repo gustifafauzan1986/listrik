@@ -11,12 +11,14 @@ class DailyAttendance extends Model
     use HasFactory, HasUuid;
 
     protected $fillable = [
-        'student_id', 
-        'date', 
+        'student_id',
+        'date',
         'arrival_time',
-        'departure_time', 
-        'status', 
-        'recorded_by'
+        'departure_time',
+        'status',
+        'recorded_by',
+        'photo_in',
+        'photo_out'
     ];
 
     public function student()

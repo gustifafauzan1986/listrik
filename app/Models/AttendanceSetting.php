@@ -11,6 +11,7 @@ class AttendanceSetting extends Model
 
     // HANYA kolom database yang boleh ada di sini
     protected $fillable = [
+        'start_check_in_time',
         'late_limit_time',
         'early_departure_time'
     ];

@@ -18,7 +18,7 @@ class SettingController extends Controller
         // Contoh: ['school_name' => 'SMK 1', 'logo_left' => 'settings/logo.png']
         $settings = Setting::pluck('value', 'key')->toArray();
 
-        return view('settings.index', compact('settings'));
+        return view('admin.settings.index', compact('settings'));
     }
 
     /**
@@ -107,26 +107,55 @@ class SettingController extends Controller
     public function settingAttendance()
 {
     $setting = AttendanceSetting::first();
-    return view('settings.attendance', compact('setting'));
+    return view('admin.settings.attendance', compact('setting'));
 }
+
+    // public function updateAttendance(Request $request)
+    // {
+    //     $request->validate([
+    //         'late_limit_time' => 'required',
+    //         'early_departure_time' => 'required',
+    //     ]);
+
+    //     $setting = AttendanceSetting::first();
+
+    //     // Jika belum ada data, buat baru. Jika ada, update.
+    //     if(!$setting) {
+    //         AttendanceSetting::create($request->all());
+    //     } else {
+    //         $setting->update([
+    //             'late_limit_time' => $request->late_limit_time,
+    //             'early_departure_time' => $request->early_departure_time
+    //         ]);
+    //     }
+
+    //     return back()->with('success', 'Jam operasional absensi berhasil diperbarui!');
+    // }
 
     public function updateAttendance(Request $request)
     {
+        // 1. Validasi Input
         $request->validate([
-            'late_limit_time' => 'required',
+            'start_check_in_time' => 'required', // Wajib diisi
+            'late_limit_time' => 'required|after:start_check_in_time', // Harus setelah jam mulai
             'early_departure_time' => 'required',
         ]);
 
+        // 2. Ambil Data Setting yang ada
         $setting = AttendanceSetting::first();
 
-        // Jika belum ada data, buat baru. Jika ada, update.
-        if(!$setting) {
-            AttendanceSetting::create($request->all());
+        // Data yang akan disimpan
+        $data = [
+            'start_check_in_time' => $request->start_check_in_time,
+            'late_limit_time' => $request->late_limit_time,
+            'early_departure_time' => $request->early_departure_time,
+        ];
+
+        // 3. Simpan atau Update
+        if (!$setting) {
+            AttendanceSetting::create($data);
         } else {
-            $setting->update([
-                'late_limit_time' => $request->late_limit_time,
-                'early_departure_time' => $request->early_departure_time
-            ]);
+            $setting->update($data);
         }
 
         return back()->with('success', 'Jam operasional absensi berhasil diperbarui!');
