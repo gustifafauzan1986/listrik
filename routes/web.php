@@ -512,6 +512,7 @@ Route::middleware(['auth'])->group(function () {
             // Pemilihan PKL Siswa
             Route::get('/internships', [InternshipStudentController::class, 'index'])->name('internships.index');
             Route::post('/internships/apply', [InternshipStudentController::class, 'apply'])->name('internships.apply');
+            Route::get('/printConsentLetter', [InternshipStudentController::class, 'printConsentLetter'])->name('printConsentLetter');
         });
     });
 });
