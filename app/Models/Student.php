@@ -38,4 +38,12 @@ class Student extends Model
         return $this->hasMany(PrayerAttendance::class);
     }
 
+    /**
+     * Relasi ke tabel internships (Tempat PKL)
+     */
+    public function internships()
+    {
+        return $this->hasMany(Internship::class);
+    }
+
 }

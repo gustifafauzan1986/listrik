@@ -57,6 +57,9 @@ use App\Http\Controllers\Guru\LaporanGuruController;
 use App\Http\Controllers\Admin\PrayerSettingController;
 use App\Http\Controllers\Admin\MbgController;
 use App\Http\Controllers\Admin\StudentPermitController;
+use App\Http\Controllers\Admin\IndustryController;
+use App\Http\Controllers\Admin\InternshipController;
+use App\Http\Controllers\Student\InternshipStudentController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -471,26 +474,42 @@ Route::middleware(['auth'])->group(function () {
         // Proses Simpan Data (AJAX dari Scanner)
         Route::post('/admin/permit/store', [StudentPermitController::class, 'store'])->name('admin.permit.store');
 
+        // --- ROUTE PKL ---
+        // Anda mungkin perlu membuat IndustryController terpisah untuk CRUD Master Data DUDI
+        Route::resource('admin/industries', IndustryController::class)->except(['show']);
+
+        // Route Penempatan PKL (Sesuai yang dibuat di atas)
+        Route::get('admin/internships', [InternshipController::class, 'index'])->name('admin.internships.index');
+        Route::post('admin/internships', [InternshipController::class, 'store'])->name('admin.internships.store');
+        Route::patch('admin/internships/{id}/status', [InternshipController::class, 'updateStatus'])->name('admin.internships.status');
+        Route::delete('admin/internships/{id}', [InternshipController::class, 'destroy'])->name('admin.internships.destroy');
+        Route::get('siswa/internships', [InternshipController::class, 'index'])->name('admin.internships.index');
+
 
     });
 
     Route::middleware(['role:siswa'])->group(function () {
+        Route::prefix('student')->name('student.')->group(function() {
 
-        // Profil Siswa (Edit No HP & Alamat)
-        Route::get('/siswa/dashboard', [SiswaDashboardController::class, 'dashboard'])->name('students.dashboard');
-        Route::get('/my-profile', [StudentAreaController::class, 'profileStudent'])->name('student.profile');
-        Route::put('/my-profile', [StudentAreaController::class, 'updateProfile'])->name('student.profile.update');
-        // Riwayat Absensi
-        Route::get('/my-history/subject', [StudentAreaController::class, 'historySubject'])->name('student.history.subject');
-        Route::get('/my-history/daily', [StudentAreaController::class, 'historyDaily'])->name('student.history.daily');
+            // Profil Siswa (Edit No HP & Alamat)
+            Route::get('/dashboard', [SiswaDashboardController::class, 'dashboard'])->name('dashboard');
+            Route::get('/my-profile', [StudentAreaController::class, 'profileStudent'])->name('profile');
+            Route::put('/my-profile', [StudentAreaController::class, 'updateProfile'])->name('profile.update');
+            // Riwayat Absensi
+            Route::get('/my-history/subject', [StudentAreaController::class, 'historySubject'])->name('history.subject');
+            Route::get('/my-history/daily', [StudentAreaController::class, 'historyDaily'])->name('history.daily');
 
-         // [BARU] Cetak Kartu Sendiri
-        // Cetak Kartu Sendiri
-        Route::get('/my-card', [StudentAreaController::class, 'printCard'])->name('student.print.card');
+            // [BARU] Cetak Kartu Sendiri
+            // Cetak Kartu Sendiri
+            Route::get('/my-card', [StudentAreaController::class, 'printCard'])->name('print.card');
 
-        // Fitur Absensi Sholat
-        Route::get('/prayer', [PrayerController::class, 'index'])->name('prayer.index');
-        Route::post('/prayer/store', [PrayerController::class, 'store'])->name('prayer.store');
+            // Fitur Absensi Sholat
+            Route::get('/prayer', [PrayerController::class, 'index'])->name('prayer.index');
+            Route::post('/prayer/store', [PrayerController::class, 'store'])->name('prayer.store');
 
+            // Pemilihan PKL Siswa
+            Route::get('/internships', [InternshipStudentController::class, 'index'])->name('internships.index');
+            Route::post('/internships/apply', [InternshipStudentController::class, 'apply'])->name('internships.apply');
+        });
     });
 });
