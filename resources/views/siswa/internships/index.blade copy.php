@@ -21,52 +21,22 @@
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <div class="col-md-7">
+                        <div class="col-md-8">
                             <h5 class="fw-bold text-dark">{{ $myInternship->industry->name }}</h5>
                             <p class="mb-1 text-muted"><i class="fas fa-map-marker-alt me-2"></i>{{ $myInternship->industry->address }}</p>
-                            <p class="mb-3 text-muted"><i class="fas fa-user-tie me-2"></i>Pembimbing: {{ $myInternship->advisor->name ?? 'Belum ditentukan' }}</p>
-
-                            <!-- ACTION BUTTONS -->
-                            <div class="flex-wrap gap-2 d-flex">
-                                <!-- 1. Cetak Surat -->
-                                <a href="{{ route('student.internships.agreement') }}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold">
-                                    <i class="fas fa-print me-1"></i> Cetak Surat Izin
-                                </a>
-
-                                <!-- 2. Upload Surat -->
-                                <button class="btn btn-warning btn-sm text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                                    <i class="fas fa-upload me-1"></i> {{ $myInternship->parent_consent_file ? 'Update Surat' : 'Upload Surat' }}
-                                </button>
-
-                                <!-- 3. Lihat Berkas -->
-                                @if($myInternship->parent_consent_file)
-                                    <a href="{{ asset('storage/'.$myInternship->parent_consent_file) }}" target="_blank" class="text-white btn btn-info btn-sm fw-bold">
-                                        <i class="fas fa-eye me-1"></i> Lihat Berkas
-                                    </a>
-                                @endif
-                            </div>
+                            <p class="mb-0 text-muted"><i class="fas fa-user-tie me-2"></i>Pembimbing: {{ $myInternship->advisor->name ?? 'Belum ditentukan' }}</p>
                         </div>
-
-                        <div class="mt-3 text-center col-md-5 text-md-end mt-md-0">
-                            <div class="mb-2 fw-bold text-muted">Status Pengajuan:</div>
+                        <div class="text-center col-md-4 text-md-end mt-3 mt-md-0">
+                            <div class="mb-2">Status Pengajuan:</div>
                             @if($myInternship->status == 'pending')
-                                <span class="px-3 py-2 badge bg-warning text-dark fs-6"><i class="fas fa-clock me-1"></i> Menunggu Persetujuan</span>
+                                <span class="badge bg-warning text-dark fs-6 px-3 py-2"><i class="fas fa-clock me-1"></i> Menunggu Persetujuan</span>
                             @elseif($myInternship->status == 'active')
-                                <span class="px-3 py-2 badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i> Disetujui / Aktif</span>
+                                <span class="badge bg-success fs-6 px-3 py-2"><i class="fas fa-check-circle me-1"></i> Disetujui / Aktif</span>
                             @elseif($myInternship->status == 'completed')
-                                <span class="px-3 py-2 badge bg-info text-dark fs-6"><i class="fas fa-flag-checkered me-1"></i> Selesai</span>
+                                <span class="badge bg-info text-dark fs-6 px-3 py-2"><i class="fas fa-flag-checkered me-1"></i> Selesai</span>
                             @elseif($myInternship->status == 'cancelled')
-                                <span class="px-3 py-2 badge bg-danger fs-6"><i class="fas fa-times-circle me-1"></i> Ditolak / Dibatalkan</span>
+                                <span class="badge bg-danger fs-6 px-3 py-2"><i class="fas fa-times-circle me-1"></i> Ditolak / Dibatalkan</span>
                             @endif
-
-                            <!-- Status Upload -->
-                            <div class="mt-2 small">
-                                @if($myInternship->parent_consent_file)
-                                    <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Surat Izin Terupload</span>
-                                @else
-                                    <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle"></i> Surat Izin Belum Diupload</span>
-                                @endif
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -76,7 +46,7 @@
         <!-- DAFTAR TEMPAT PKL YANG TERSEDIA -->
         @if(!$myInternship || in_array($myInternship->status, ['completed', 'cancelled']))
             <div class="border-0 shadow-sm card">
-                <div class="py-3 bg-white border-bottom card-header">
+                <div class="bg-white border-bottom card-header py-3">
                     <h6 class="mb-0 fw-bold text-dark">Daftar Industri / Tempat PKL Tersedia</h6>
                 </div>
                 <div class="p-0 card-body">
@@ -92,7 +62,7 @@
                             </thead>
                             <tbody>
                                 @forelse($industries as $ind)
-                                    @php
+                                    @php 
                                         $sisaKuota = $ind->quota - $ind->terisi;
                                         $isFull = ($ind->quota > 0 && $sisaKuota <= 0);
                                     @endphp
@@ -138,41 +108,4 @@
         @endif
 
     </div>
-
-    <!-- MODAL UPLOAD SURAT IZIN -->
-    @if($myInternship)
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('student.internships.upload') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" name="internship_id" value="{{ $myInternship->id }}">
-
-                    <div class="modal-header bg-warning text-dark">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-upload me-2"></i> Upload Surat Izin Orang Tua</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="alert alert-info small">
-                            <i class="fas fa-info-circle me-1"></i> Silakan <strong>cetak surat izin</strong> terlebih dahulu, minta tanda tangan orang tua di atas materai, lalu foto/scan dan upload di sini.
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">File Surat (PDF/JPG/PNG)</label>
-                            <input type="file" name="file" class="form-control" required accept=".pdf,.jpg,.jpeg,.png">
-                            <small class="text-muted">Maksimal ukuran file 2MB.</small>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary fw-bold">Upload Berkas</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    @endif
-
 </x-app-layout>
