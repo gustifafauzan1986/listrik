@@ -102,6 +102,18 @@ $status = $guruId->status;
 					</ul>
 				</li>
 
+                <li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class="bx bx-cog"></i>
+						</div>
+						<div class="menu-title">PKL</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('admin.internships.index')}}"><i class='bx bx-radio-circle'></i>Penempatan</a></li>
+						<li> <a href="{{route('industries.index')}}"><i class='bx bx-radio-circle'></i>DUDIKA</a></li>
+					</ul>
+				</li>
+
                 <li class="menu-label">Forms & Tables</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
@@ -224,7 +236,7 @@ $status = $guruId->status;
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bxs-barcode'></i>
 						</div>
-						<div class="menu-title">Scan</div>
+						<div class="menu-title">My Profile</div>
 					</a>
 					<ul>
 						<li> <a href="{{route('student.profile')}}"><i class='bx bx-radio-circle'></i>Profile</a></li>
@@ -242,6 +254,19 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{route('student.prayer.index')}}"><i class='bx bx-radio-circle'></i>Sholat</a></li>
+
+
+					</ul>
+				</li>
+
+                <li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class='bx bxs-barcode'></i>
+						</div>
+						<div class="menu-title">PKL</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('student.internships.index')}}"><i class='bx bx-radio-circle'></i>Tentukan</a></li>
 
 
 					</ul>

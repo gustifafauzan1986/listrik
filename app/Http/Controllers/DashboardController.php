@@ -25,11 +25,11 @@ class DashboardController extends Controller
         } elseif ($request->user()->jenis_user === 'guru') {
             // Mengarah ke fitur Dashboard Guru yang sudah kita buat sebelumnya
             // Jika ingin menggunakan URL murni sesuai request: $url = 'guru/dashboard';
-            return redirect()->route('teacher.dashboard'); 
+            return redirect()->route('teacher.dashboard');
         } elseif ($request->user()->jenis_user === 'piket') {
             $url = 'piket/dashboard';
         } elseif ($request->user()->jenis_user === 'siswa') {
-            $url = 'siswa/dashboard';
+            $url = 'student/dashboard';
         }
 
         return redirect($url);
@@ -44,12 +44,12 @@ class DashboardController extends Controller
         'present_count' => Attendance::where('date', $today)
                             ->where('status', 'hadir')
                             ->count(),
-                            
+
         // Hitung total terlambat hari ini
         'late_count'    => Attendance::where('date', $today)
                             ->where('status', 'terlambat')
                             ->count(),
-                            
+
         // Total siswa terdaftar
         'total_students'=> User::count(),
 

@@ -202,7 +202,7 @@
             });
 
             $.ajax({
-                url: "{{ route('prayer.store') }}",
+                url: "{{ route('student.prayer.store') }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",

@@ -484,6 +484,8 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('admin/internships/{id}/status', [InternshipController::class, 'updateStatus'])->name('admin.internships.status');
         Route::delete('admin/internships/{id}', [InternshipController::class, 'destroy'])->name('admin.internships.destroy');
         Route::get('siswa/internships', [InternshipController::class, 'index'])->name('admin.internships.index');
+        // Route untuk Import Industri
+        Route::post('admin/industries/import', [IndustryController::class, 'import'])->name('industries.import');
 
 
     });

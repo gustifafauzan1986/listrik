@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Industry;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\IndustryImport;
+use Illuminate\Support\Facades\Log;
 
 class IndustryController extends Controller
 {
@@ -71,7 +74,7 @@ class IndustryController extends Controller
     public function destroy($id)
     {
         $industry = Industry::findOrFail($id);
-        
+
         // Opsional: Cek jika ada siswa yang masih PKL di sini sebelum dihapus
         if ($industry->internships()->count() > 0) {
             return redirect()->back()->with('error', 'Gagal menghapus! Industri ini masih memiliki data penempatan siswa PKL.');
@@ -80,5 +83,34 @@ class IndustryController extends Controller
         $industry->delete();
 
         return redirect()->back()->with('success', 'Data Industri / Tempat PKL berhasil dihapus.');
+    }
+
+    /**
+     * Import data Industri dari Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120', // Maks 5MB
+        ]);
+
+        try {
+            $import = new IndustryImport();
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+
+            $message = "Berhasil mengimpor {$imported} data industri.";
+            if ($skipped > 0) {
+                $message .= " ({$skipped} data dilewati karena nama perusahaan sudah ada).";
+            }
+
+            return redirect()->back()->with('success', $message);
+
+        } catch (\Exception $e) {
+            Log::error('Import Industri Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memproses file. Pastikan format header Excel sesuai (nama_perusahaan, sektor, alamat, kontak_person, telepon, kuota). Error: ' . $e->getMessage());
+        }
     }
 }

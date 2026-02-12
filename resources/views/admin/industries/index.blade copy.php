@@ -3,52 +3,37 @@
 <x-app-layout>
     <div class="page-content">
         <!-- Header -->
-        <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold text-primary"><i class="fas fa-building me-2"></i>Data Master Industri (DU/DI)</h4>
-            <div class="gap-2 d-flex">
-                <button class="shadow-sm btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#importIndustryModal">
-                    <i class="fas fa-file-excel me-1"></i> Import Excel
-                </button>
-                <button class="shadow-sm btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addIndustryModal">
-                    <i class="fas fa-plus me-1"></i> Tambah Tempat PKL
-                </button>
-            </div>
+            <button class="btn btn-primary shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#addIndustryModal">
+                <i class="fas fa-plus me-1"></i> Tambah Tempat PKL
+            </button>
         </div>
 
         <!-- Alert Notifikasi -->
         @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show">
-                <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+            <div class="alert alert-success alert-dismissible fade show"><i class="fas fa-check-circle me-2"></i>{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
         @endif
         @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+            <div class="alert alert-danger alert-dismissible fade show"><i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
         @endif
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show">
-                <ul class="mb-0">
-                    @foreach($errors->all() as $err)
-                        <li>{{ $err }}</li>
-                    @endforeach
-                </ul>
+                <ul class="mb-0">@foreach($errors->all() as $err) <li>{{ $err }}</li> @endforeach</ul>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
-        <div class="border-0 shadow-lg card">
-            <div class="py-3 bg-white card-header">
-                <form method="GET" class="gap-2 d-flex w-50">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white py-3">
+                <form method="GET" class="d-flex gap-2 w-50">
                     <input type="text" name="search" class="form-control" placeholder="Cari nama perusahaan / sektor..." value="{{ request('search') }}">
                     <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> Cari</button>
                 </form>
             </div>
-            <div class="p-0 card-body">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table mb-0 align-middle table-hover">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-4" width="5%">No</th>
@@ -90,26 +75,26 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="7" class="py-4 text-center text-muted">Belum ada data industri/DU-DI.</td></tr>
+                            <tr><td colspan="7" class="text-center py-4 text-muted">Belum ada data industri/DU-DI.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="bg-white card-footer">
+            <div class="card-footer bg-white">
                 {{ $industries->links() }}
             </div>
         </div>
     </div>
 
-    <!-- MODAL TAMBAH / EDIT INDUSTRI -->
+    <!-- MODAL TAMBAH / EDIT -->
     <div class="modal fade" id="addIndustryModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form action="{{ route('industries.store') }}" method="POST" id="formIndustry">
                     @csrf
                     <div id="method-container"></div>
-                    <div class="text-white modal-header bg-primary">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="modalTitle"><i class="fas fa-building me-2"></i> Tambah Tempat PKL</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
@@ -123,7 +108,7 @@
                                 <label class="form-label fw-bold">Bidang Usaha / Sektor</label>
                                 <input type="text" name="sector" id="inp_sector" class="form-control" placeholder="Telekomunikasi">
                             </div>
-
+                            
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Nama Pembimbing (Contact Person)</label>
                                 <input type="text" name="contact_person" id="inp_contact_person" class="form-control" placeholder="Bpk. Budi">
@@ -154,45 +139,15 @@
         </div>
     </div>
 
-    <!-- MODAL IMPORT EXCEL -->
-    <div class="modal fade" id="importIndustryModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('industries.import') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="text-white modal-header bg-success">
-                        <h5 class="modal-title"><i class="fas fa-file-excel me-2"></i> Import Data Industri</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-info small">
-                            <i class="fas fa-info-circle me-1"></i> Pastikan file Excel Anda memiliki header baris pertama dengan nama berikut (huruf kecil semua):<br>
-                            <b>nama_perusahaan, sektor, alamat, kontak_person, telepon, kuota</b>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Pilih File (Excel/CSV)</label>
-                            <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
-                            <div class="form-text">Maksimal ukuran file: 5MB.</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-success"><i class="fas fa-upload me-1"></i> Mulai Import</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     @push('scripts')
     <script>
         function editIndustry(data) {
             // Ubah Title
             document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i> Edit Tempat PKL';
-
+            
             // Ubah Route Action & Tambahkan Method PUT
             let form = document.getElementById('formIndustry');
-            form.action = '/admin/industries/' + data.id; // Sesuaikan URL dengan route di web.php
+            form.action = '/admin/industries/' + data.id; // Pastikan URL sesuai dengan prefix Anda di web.php
             document.getElementById('method-container').innerHTML = '<input type="hidden" name="_method" value="PUT">';
 
             // Isi Value
