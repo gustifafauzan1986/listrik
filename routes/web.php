@@ -54,12 +54,14 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PrayerController;
 use App\Http\Controllers\PrayerMonitoringController;
 use App\Http\Controllers\Guru\LaporanGuruController;
+use App\Http\Controllers\Guru\InternshipAssessmentController;
 use App\Http\Controllers\Admin\PrayerSettingController;
 use App\Http\Controllers\Admin\MbgController;
 use App\Http\Controllers\Admin\StudentPermitController;
 use App\Http\Controllers\Admin\IndustryController;
 use App\Http\Controllers\Admin\InternshipController;
 use App\Http\Controllers\Student\InternshipStudentController;
+use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -203,6 +205,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/loans/return/{id}', [LoanController::class, 'returnItem'])->name('loans.return');
         Route::get('/report/attendance-list/{schedule}', [LaporanGuruController::class, 'printAttendanceList'])->name('report.attendance_list');
 
+        // Penilaian PKL
+    Route::get('/guru/internships', [InternshipAssessmentController::class, 'index'])->name('teacher.internships.index');
+    Route::get('/guru/internships/{id}/assess', [InternshipAssessmentController::class, 'create'])->name('teacher.internships.assess');
+    Route::post('/guru/internships/{id}/store', [InternshipAssessmentController::class, 'store'])->name('teacher.internships.store');
 
 
     });
@@ -514,6 +520,10 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/internships/apply', [InternshipStudentController::class, 'apply'])->name('internships.apply');
             Route::get('/printConsentLetter', [InternshipStudentController::class, 'printConsentLetter'])->name('internships.agreement');
             Route::get('/upload', [InternshipStudentController::class, 'upload'])->name('internships.upload');
+
+            Route::get('/internships/attendance', [InternshipAttendanceController::class, 'index'])->name('internships.attendance.index');
+
+            Route::post('/internships/attendance', [InternshipAttendanceController::class, 'store'])->name('internships.attendance.store');
         });
     });
 });

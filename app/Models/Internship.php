@@ -33,4 +33,13 @@ class Internship extends Model
     {
         return $this->belongsTo(Teacher::class, 'advisor_id');
     }
+
+     /**
+     * Relasi ke InternshipGrade (Nilai PKL)
+     * One-to-One: Satu internship punya satu nilai akhir.
+     */
+    public function grade()
+    {
+        return $this->hasOne(InternshipGrade::class);
+    }
 }
