@@ -2,21 +2,9 @@
 
 <x-app-layout>
     <div class="page-content">
-        <!-- HEADER -->
-        <div class="mb-4 d-flex justify-content-between align-items-center">
-            <div>
-                <a href="{{ route('teacher.internships.index') }}" class="text-decoration-none text-muted"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
-                <h4 class="mt-2 fw-bold text-primary">Form Penilaian PKL</h4>
-            </div>
-
-            <!-- TOMBOL CETAK SERTIFIKAT (Hanya muncul jika sudah dinilai) -->
-            @if($internship->grade)
-            <div>
-                <a href="{{ route('teacher.internships.certificate', $internship->id) }}" target="_blank" class="shadow-sm btn btn-warning fw-bold">
-                    <i class="fas fa-certificate me-2"></i> Cetak Sertifikat
-                </a>
-            </div>
-            @endif
+        <div class="mb-4">
+            <a href="{{ route('teacher.internships.index') }}" class="text-decoration-none text-muted"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
+            <h4 class="mt-2 fw-bold text-primary">Form Penilaian PKL</h4>
         </div>
 
         <div class="row">
@@ -50,7 +38,7 @@
                     </div>
                 </div>
 
-                <!-- 2. REKAP KEHADIRAN -->
+                <!-- 2. REKAP KEHADIRAN (NEW) -->
                 <div class="mb-4 border-0 shadow-sm card">
                     <div class="py-3 bg-white card-header">
                         <h6 class="mb-0 fw-bold"><i class="fas fa-chart-pie me-2"></i>Rekap Kehadiran</h6>
@@ -77,7 +65,7 @@
                     </div>
                 </div>
 
-                <!-- 3. JURNAL KEGIATAN -->
+                <!-- 3. JURNAL KEGIATAN (NEW) -->
                 <div class="border-0 shadow-sm card">
                     <div class="py-3 bg-white card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0 fw-bold"><i class="fas fa-book-open me-2"></i>Jurnal Kegiatan</h6>

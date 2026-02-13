@@ -9,6 +9,9 @@ use App\Models\InternshipGrade;
 use App\Models\InternshipAttendance; // Import Model Absensi
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf; // Pastikan DomPDF terinstall
+use App\Models\Setting; // Import Setting untuk data sekolah
+
 
 class InternshipAssessmentController extends Controller
 {
@@ -129,5 +132,50 @@ class InternshipAssessmentController extends Controller
 
         return redirect()->route('teacher.internships.index')
             ->with('success', 'Nilai PKL untuk siswa ' . $internship->student->name . ' berhasil disimpan.');
+    }
+
+     /**
+     * CETAK SERTIFIKAT PKL (PDF)
+     */
+    public function printCertificate($id)
+    {
+        $teacher = $this->getTeacher();
+
+        // Ambil data internship + nilai
+        $internship = Internship::with(['student.classroom', 'industry', 'grade'])
+            ->where('id', $id)
+            ->where('advisor_id', $teacher->id)
+            ->firstOrFail();
+
+        // Cek apakah nilai sudah ada
+        if (!$internship->grade) {
+            return redirect()->back()->with('error', 'Sertifikat tidak dapat dicetak karena penilaian belum selesai.');
+        }
+
+        // Tentukan Predikat
+        $score = $internship->grade->final_score;
+        $predikat = 'Cukup';
+        if ($score >= 90) $predikat = 'Sangat Baik';
+        elseif ($score >= 80) $predikat = 'Baik';
+        elseif ($score >= 70) $predikat = 'Cukup';
+        else $predikat = 'Kurang';
+
+        // Data Sekolah & Tanda Tangan
+        $school = [
+            'name' => Setting::value('school_name', 'SMK NEGERI 1 BUKITTINGGI'),
+            'logo_left' => Setting::value('logo_left'),
+            'sign_city' => Setting::value('sign_city', 'Bukittinggi'),
+
+            // Tanda Tangan Kepala Sekolah
+            'headmaster_name' => Setting::value('sign_name', '.........................'),
+            'headmaster_nip' => Setting::value('sign_nip', '.........................'),
+        ];
+
+        $pdf = Pdf::loadView('guru.internships.certificate_pdf', compact('internship', 'school', 'teacher', 'predikat'));
+
+        // Setup Kertas Landscape (Sertifikat)
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->stream('Sertifikat_PKL_' . str_replace(' ', '_', $internship->student->name) . '.pdf');
     }
 }

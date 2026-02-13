@@ -209,6 +209,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/guru/internships', [InternshipAssessmentController::class, 'index'])->name('teacher.internships.index');
     Route::get('/guru/internships/{id}/assess', [InternshipAssessmentController::class, 'create'])->name('teacher.internships.assess');
     Route::post('/guru/internships/{id}/store', [InternshipAssessmentController::class, 'store'])->name('teacher.internships.store');
+    Route::get('/guru/internships/{id}/certificate', [InternshipAssessmentController::class, 'printCertificate'])->name('teacher.internships.certificate');
 
 
     });
