@@ -103,7 +103,7 @@
     </div>
 
     <!-- MODAL TAMBAH / EDIT INDUSTRI -->
-    <div class="modal fade" id="addIndustryModal" tabindex="-1">
+    <!-- <div class="modal fade" id="addIndustryModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form action="{{ route('industries.store') }}" method="POST" id="formIndustry">
@@ -148,6 +148,77 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary" id="btnSubmit">Simpan Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <div class="modal fade" id="addIndustryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form action="{{ route('industries.store') }}" method="POST" id="formIndustry">
+                    @csrf
+                    <div id="method-container"></div>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalTitle"><i class="fas fa-map-marker-alt me-2"></i> Kelola Tempat PKL</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nama Perusahaan</label>
+                                <input type="text" name="name" id="inp_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Sektor</label>
+                                <input type="text" name="sector" id="inp_sector" class="form-control">
+                            </div>
+                            
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-primary">Titik Lokasi Absensi (Wajib)</label>
+                                
+                                <div class="input-group mb-2">
+                                    <input type="text" id="searchMapInput" class="form-control" placeholder="Cari lokasi di peta...">
+                                    <button type="button" class="btn btn-outline-primary" onclick="searchLocation()">Cari</button>
+                                </div>
+
+                                <div id="map" style="height: 300px; width: 100%; border-radius: 8px; border: 2px solid #ddd;"></div>
+                                <small class="text-muted"><i class="fas fa-info-circle"></i> Klik pada peta atau geser marker untuk menentukan titik.</small>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Latitude</label>
+                                <input type="text" name="latitude" id="inp_lat" class="form-control bg-light" readonly required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Longitude</label>
+                                <input type="text" name="longitude" id="inp_lng" class="form-control bg-light" readonly required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Radius Izin (Meter)</label>
+                                <input type="number" name="radius" id="inp_radius" class="form-control" value="100" min="10" onchange="updateRadiusCircle(this.value)">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Alamat Lengkap</label>
+                                <textarea name="address" id="inp_address" class="form-control" rows="2" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Kontak</label>
+                                <input type="text" name="phone" id="inp_phone" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Kuota</label>
+                                <input type="number" name="quota" id="inp_quota" class="form-control" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Data</button>
                     </div>
                 </form>
             </div>
@@ -218,4 +289,105 @@
         });
     </script>
     @endpush
+
+    @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map, marker, circle;
+    // Default: Bukittinggi
+    let defaultLat = -0.305123;
+    let defaultLng = 100.369456;
+
+    function initMap() {
+        if(map) return; // Jangan init ulang
+
+        map = L.map('map').setView([defaultLat, defaultLng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Event Klik Peta
+        map.on('click', function(e) {
+            setMarker(e.latlng.lat, e.latlng.lng);
+        });
+    }
+
+    function setMarker(lat, lng) {
+        if (marker) map.removeLayer(marker);
+        if (circle) map.removeLayer(circle);
+
+        marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+        
+        let radius = document.getElementById('inp_radius').value || 100;
+        circle = L.circle([lat, lng], {radius: radius, color: 'blue', fillOpacity: 0.1}).addTo(map);
+
+        // Update Input
+        document.getElementById('inp_lat').value = lat;
+        document.getElementById('inp_lng').value = lng;
+
+        // Event drag marker
+        marker.on('dragend', function(e) {
+            let pos = marker.getLatLng();
+            setMarker(pos.lat, pos.lng);
+        });
+        
+        map.panTo([lat, lng]);
+    }
+
+    function updateRadiusCircle(val) {
+        if(circle) circle.setRadius(val);
+    }
+
+    // Fix Peta Grey saat Modal Muncul
+    document.getElementById('addIndustryModal').addEventListener('shown.bs.modal', function () {
+        initMap();
+        setTimeout(() => { map.invalidateSize(); }, 100);
+    });
+
+    function editIndustry(data) {
+        // ... (Logika pengisian form standar Anda sebelumnya) ...
+        document.getElementById('modalTitle').innerHTML = 'Edit Industri';
+        document.getElementById('formIndustry').action = '/admin/industries/' + data.id;
+        document.getElementById('method-container').innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+        document.getElementById('inp_name').value = data.name;
+        document.getElementById('inp_address').value = data.address;
+        document.getElementById('inp_phone').value = data.phone;
+        document.getElementById('inp_quota').value = data.quota;
+        
+        // Load Lokasi ke Peta
+        if(data.latitude && data.longitude) {
+            document.getElementById('inp_lat').value = data.latitude;
+            document.getElementById('inp_lng').value = data.longitude;
+            document.getElementById('inp_radius').value = data.radius;
+            
+            // Tunggu modal tampil baru set marker
+            setTimeout(() => {
+                setMarker(data.latitude, data.longitude);
+                map.setView([data.latitude, data.longitude], 16);
+            }, 500);
+        } else {
+            // Reset jika belum ada lokasi
+            document.getElementById('inp_lat').value = '';
+            document.getElementById('inp_lng').value = '';
+        }
+
+        var myModal = new bootstrap.Modal(document.getElementById('addIndustryModal'));
+        myModal.show();
+    }
+    
+    function searchLocation() {
+        let query = document.getElementById('searchMapInput').value;
+        if(!query) return;
+        
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.length > 0) {
+                    setMarker(data[0].lat, data[0].lon);
+                } else {
+                    alert('Lokasi tidak ditemukan');
+                }
+            });
+    }
+</script>
+@endpush
 </x-app-layout>

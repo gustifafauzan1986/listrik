@@ -490,7 +490,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('admin/internships', [InternshipController::class, 'store'])->name('admin.internships.store');
         Route::patch('admin/internships/{id}/status', [InternshipController::class, 'updateStatus'])->name('admin.internships.status');
         Route::delete('admin/internships/{id}', [InternshipController::class, 'destroy'])->name('admin.internships.destroy');
-        Route::get('siswa/internships', [InternshipController::class, 'index'])->name('admin.internships.index');
+        Route::get('admin/internships', [InternshipController::class, 'index'])->name('admin.internships.index');
+        Route::post('admin/internships/assign/{id}', [InternshipController::class, 'assignAdvisor'])->name('admin.internships.assign');
         // Route untuk Import Industri
         Route::post('admin/industries/import', [IndustryController::class, 'import'])->name('industries.import');
 

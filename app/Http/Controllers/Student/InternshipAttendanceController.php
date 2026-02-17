@@ -284,6 +284,28 @@ class InternshipAttendanceController extends Controller
             ->where('status', 'active')
             ->firstOrFail();
 
+
+        $industry = $internship->industry;
+
+        // VALIDASI GEOLOKASI DINAMIS
+        if ($industry->latitude && $industry->longitude) {
+            $distance = $this->calculateDistance(
+                $request->latitude, 
+                $request->longitude, 
+                $industry->latitude, 
+                $industry->longitude
+            );
+
+            $maxRadius = $industry->radius ?? 100; // Default 100m jika null
+
+            if ($distance > $maxRadius) {
+                return back()->with('error', "Anda berada di luar lokasi PKL! Jarak: " . round($distance) . "m. (Max: $maxRadius m)");
+            }
+        } else {
+            // Opsional: Tolak jika industri belum disetting lokasinya oleh admin
+            return back()->with('error', 'Lokasi kantor belum disetting oleh Admin. Hubungi Guru Pembimbing.');
+        }
+
         $type = $request->input('type'); // 'check_in' atau 'check_out'
 
         // ==========================================================
@@ -379,5 +401,18 @@ class InternshipAttendanceController extends Controller
         }
 
         return back()->with('error', 'Tipe absensi tidak valid.');
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        // Rumus Haversine (Sama seperti sebelumnya)
+        $earthRadius = 6371000;
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return $earthRadius * $c;
     }
 }

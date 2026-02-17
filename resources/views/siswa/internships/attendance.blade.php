@@ -285,4 +285,18 @@
     </script>
     @endpush
 
+    @push('scripts')
+<script>
+    // Ambil koordinat dari PHP
+    const targetLat = {{ $internship->industry->latitude ?? 0 }};
+    const targetLng = {{ $internship->industry->longitude ?? 0 }};
+    const targetRadius = {{ $internship->industry->radius ?? 100 }};
+    const targetName = "{{ $internship->industry->name }}";
+
+    // ... (Kode Leaflet Siswa) ...
+    // Gunakan variabel di atas untuk menggambar Circle dan Marker tujuan di peta siswa
+    // Gantikan hardcoded MasjidLat/Lng dengan targetLat/Lng
+</script>
+@endpush
+
 </x-app-layout>

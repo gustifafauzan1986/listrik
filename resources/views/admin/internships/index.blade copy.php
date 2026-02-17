@@ -1,4 +1,4 @@
-@section('title', 'Penempatan PKL Siswa')
+@section('title', 'Penentuan Tempat PKL')
 
 <x-app-layout>
     <div class="page-content">
@@ -53,8 +53,7 @@
                                 <th class="ps-4">Siswa</th>
                                 <th>Tempat PKL</th>
                                 <th>Periode</th>
-                                <th>Guru Pembimbing</th> <!-- Updated Column Header -->
-                                <th class="text-center">Surat Izin</th>
+                                <th>Guru Pembimbing</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
@@ -76,43 +75,7 @@
                                         <i class="far fa-calendar-check text-danger me-1"></i> {{ $item->end_date->format('d M Y') }}
                                     </div>
                                 </td>
-                                
-                                <!-- Updated Advisor Column -->
-                                <td>
-                                    @if($item->advisor)
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <span>{{ $item->advisor->name }}</span>
-                                            
-                                            @if($item->advisor_status == 'pending')
-                                                <!-- Tombol Approve Request Siswa -->
-                                                <button class="btn btn-sm btn-warning ms-2 py-0 px-2" title="Siswa Mengajukan Ini (Klik untuk Setujui/Ganti)" 
-                                                        onclick="setAdvisor('{{ $item->id }}', '{{ $item->advisor_id }}')">
-                                                    <i class="fas fa-clock"></i> Req
-                                                </button>
-                                            @else
-                                                <!-- Tombol Ganti (Sudah Approved) -->
-                                                <button class="btn btn-sm btn-light text-secondary ms-2 py-0 px-2" title="Ganti Pembimbing" 
-                                                        onclick="setAdvisor('{{ $item->id }}', '{{ $item->advisor_id }}')">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <button class="btn btn-sm btn-outline-primary dashed-border w-100" onclick="setAdvisor('{{ $item->id }}', '')">
-                                            + Set Pembimbing
-                                        </button>
-                                    @endif
-                                </td>
-
-                                <td class="text-center">
-                                    @if($item->parent_consent_file)
-                                        <a href="{{ asset('storage/'.$item->parent_consent_file) }}" target="_blank" class="btn btn-sm btn-info text-white" title="Lihat Surat">
-                                            <i class="fas fa-file-pdf"></i> Lihat
-                                        </a>
-                                    @else
-                                        <span class="badge bg-secondary">Belum Upload</span>
-                                    @endif
-                                </td>
+                                <td>{{ $item->advisor->name ?? 'Belum Ditentukan' }}</td>
                                 <td class="text-center">
                                     <form action="{{ route('admin.internships.status', $item->id) }}" method="POST">
                                         @csrf @method('PATCH')
@@ -134,7 +97,7 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="7" class="text-center py-5 text-muted">Belum ada data penempatan PKL.</td></tr>
+                            <tr><td colspan="6" class="text-center py-5 text-muted">Belum ada data penempatan PKL.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -193,7 +156,6 @@
                                     <option value="{{ $t->id }}">{{ $t->name }}</option>
                                 @endforeach
                             </select>
-                            <small class="text-muted">Bisa dikosongkan dan diisi nanti.</small>
                         </div>
 
                         <div class="row g-2">
@@ -216,54 +178,4 @@
             </div>
         </div>
     </div>
-
-    <!-- MODAL SET PEMBIMBING (NEW) -->
-    <div class="modal fade" id="advisorModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="" method="POST" id="formAdvisor">
-                    @csrf
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title"><i class="fas fa-chalkboard-teacher me-2"></i> Tentukan Pembimbing</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Pilih Guru Pembimbing</label>
-                            <select name="advisor_id" id="modal_advisor_select" class="form-select" required>
-                                <option value="">-- Pilih Guru --</option>
-                                @foreach($teachers as $t)
-                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
-                                @endforeach
-                            </select>
-                            <div class="form-text">Memilih di sini akan otomatis menyetujui request siswa (jika status Pending).</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-success">Simpan / Setujui</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    @push('scripts')
-    <script>
-        function setAdvisor(internshipId, currentAdvisorId) {
-            // Set Action URL
-            let url = "{{ route('admin.internships.assign', ':id') }}";
-            url = url.replace(':id', internshipId);
-            document.getElementById('formAdvisor').action = url;
-
-            // Set Selected Advisor
-            document.getElementById('modal_advisor_select').value = currentAdvisorId;
-            
-            // Show Modal
-            var myModal = new bootstrap.Modal(document.getElementById('advisorModal'));
-            myModal.show();
-        }
-    </script>
-    @endpush
-
 </x-app-layout>

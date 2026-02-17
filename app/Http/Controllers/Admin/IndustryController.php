@@ -40,6 +40,9 @@ class IndustryController extends Controller
             'contact_person' => 'nullable|string|max:255',
             'phone'          => 'nullable|string|max:50',
             'quota'          => 'required|integer|min:0',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'radius' => 'required|numeric|min:10',
         ]);
 
         Industry::create($request->all());
@@ -61,6 +64,9 @@ class IndustryController extends Controller
             'contact_person' => 'nullable|string|max:255',
             'phone'          => 'nullable|string|max:50',
             'quota'          => 'required|integer|min:0',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'radius' => 'required|numeric|min:10',
         ]);
 
         $industry->update($request->all());

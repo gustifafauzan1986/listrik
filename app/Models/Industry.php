@@ -11,7 +11,8 @@ class Industry extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'name', 'sector', 'address', 'contact_person', 'phone', 'quota'
+        'name', 'sector', 'address', 'contact_person', 'phone', 'quota',
+        'latitude', 'longitude', 'radius' // Tambahkan ini
     ];
 
     public function internships()
