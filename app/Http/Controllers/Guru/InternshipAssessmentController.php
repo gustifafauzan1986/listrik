@@ -30,6 +30,13 @@ class InternshipAssessmentController extends Controller
     {
         $teacher = $this->getTeacher();
 
+        // --- GATEKEEPING: Cek apakah Guru ini Pembimbing? ---
+        // Menggunakan method isAdvisor() yang sudah ditambahkan di Model Teacher
+        if (!$teacher->isAdvisor()) {
+            // Jika bukan pembimbing, kembalikan ke dashboard dengan pesan error
+            return redirect()->route('dashboard')->with('error', 'Menu PKL hanya dapat diakses oleh Guru Pembimbing yang telah ditentukan Admin.');
+        }
+
         // Ambil data PKL dimana guru ini adalah PEMBIMBINGNYA (advisor_id)
         $internships = Internship::with(['student.classroom', 'industry', 'grade'])
             ->where('advisor_id', $teacher->id)

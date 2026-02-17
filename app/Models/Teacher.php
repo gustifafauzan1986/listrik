@@ -57,5 +57,25 @@ class Teacher extends Model
 
     public function assignments() {
     return $this->hasMany(TeachingAssignment::class);
-}
+    }
+
+    
+    // --- FITUR BARU: RELASI PKL ---
+
+    /**
+     * Relasi ke Internships dimana guru ini diset sebagai Pembimbing (advisor_id)
+     */
+    public function internships()
+    {
+        return $this->hasMany(Internship::class, 'advisor_id');
+    }
+
+    /**
+     * Helper: Cek apakah guru ini memiliki setidaknya satu siswa bimbingan PKL
+     * Digunakan di Blade untuk menyembunyikan menu
+     */
+    public function isAdvisor()
+    {
+        return $this->internships()->exists();
+    }
 }
