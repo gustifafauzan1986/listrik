@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Industry;
 use App\Models\Internship;
 use App\Models\Student;
+use App\Models\Teacher;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Setting; // Import Setting Model
 use Illuminate\Support\Facades\Storage;
@@ -86,15 +87,58 @@ class InternshipStudentController extends Controller
     // }
 
     /**
+     * Helper: Cek apakah kelas siswa diizinkan untuk PKL
+     */
+    private function checkAccess($student)
+    {
+        // Pastikan relasi classroom diload. Jika tidak punya kelas, tolak.
+        if (!$student->classroom) {
+            return false;
+        }
+        // Cek flag is_pkl_active pada tabel classrooms
+        return $student->classroom->is_pkl_active;
+    }
+
+    /**
      * Halaman Utama Pemilihan PKL untuk Siswa
      */
-    public function index()
+    // public function index()
+    // {
+    //     $user = Auth::user();
+    //     $student = Student::where('user_id', $user->id)->first();
+
+    //     if (!$student) {
+    //         return redirect()->back()->with('error', 'Data siswa tidak ditemukan pada akun ini.');
+    //     }
+
+    //     // Cek pengajuan PKL siswa saat ini
+    //     $myInternship = Internship::with('industry', 'advisor')
+    //         ->where('student_id', $student->id)
+    //         ->orderBy('created_at', 'desc')
+    //         ->first();
+
+    //     // Ambil daftar Industri beserta jumlah kuota yang sudah terisi
+    //     $industries = Industry::withCount(['internships as terisi' => function($q) {
+    //         $q->whereIn('status', ['pending', 'active']);
+    //     }])->orderBy('name')->get();
+
+    //     return view('siswa.internships.index', compact('industries', 'myInternship'));
+    // }
+
+        public function index()
     {
         $user = Auth::user();
-        $student = Student::where('user_id', $user->id)->first();
+        // Load relasi classroom untuk pengecekan
+        $student = Student::with('classroom')->where('user_id', $user->id)->first();
 
         if (!$student) {
             return redirect()->back()->with('error', 'Data siswa tidak ditemukan pada akun ini.');
+        }
+
+        // --- GATEKEEPING: CEK MAPPING KELAS ---
+        // Jika kelas tidak aktif PKL, tampilkan halaman terkunci
+        if (!$this->checkAccess($student)) {
+            return view('siswa.internships.locked', compact('student'));
         }
 
         // Cek pengajuan PKL siswa saat ini
@@ -108,7 +152,10 @@ class InternshipStudentController extends Controller
             $q->whereIn('status', ['pending', 'active']);
         }])->orderBy('name')->get();
 
-        return view('siswa.internships.index', compact('industries', 'myInternship'));
+        // Data Guru untuk pilihan pembimbing (jika siswa boleh request)
+        $teachers = Teacher::orderBy('name')->get();
+
+        return view('siswa.internships.index', compact('industries', 'myInternship', 'teachers'));
     }
 
     /**

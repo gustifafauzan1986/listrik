@@ -10,7 +10,7 @@ class Classroom extends Model
 {
     use HasUuid;
 
-    protected $fillable = ['name', 'major_id', 'homeroom_teacher_id', 'counseling_teacher_id', 'class_leader_id'];
+    protected $fillable = ['name', 'major_id', 'homeroom_teacher_id', 'counseling_teacher_id', 'class_leader_id', 'is_pkl_active'];
 
     // Relasi: Satu Kelas punya banyak Siswa
     public function students()

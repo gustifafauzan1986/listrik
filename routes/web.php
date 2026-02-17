@@ -60,6 +60,7 @@ use App\Http\Controllers\Admin\MbgController;
 use App\Http\Controllers\Admin\StudentPermitController;
 use App\Http\Controllers\Admin\IndustryController;
 use App\Http\Controllers\Admin\InternshipController;
+use App\Http\Controllers\Admin\PKLMappingController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
@@ -494,6 +495,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('admin/internships/assign/{id}', [InternshipController::class, 'assignAdvisor'])->name('admin.internships.assign');
         // Route untuk Import Industri
         Route::post('admin/industries/import', [IndustryController::class, 'import'])->name('industries.import');
+
+        // Mapping Kelas PKL
+        Route::get('/admin/pkl/mapping', [PKLMappingController::class, 'index'])->name('admin.pkl.mapping');
+        Route::put('/admin/pkl/mapping', [PKLMappingController::class, 'update'])->name('admin.pkl.mapping.update');
 
 
     });
