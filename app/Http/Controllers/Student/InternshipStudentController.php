@@ -203,7 +203,13 @@ class InternshipStudentController extends Controller
 
      /**
      * Upload Surat Persetujuan Orang Tua
+     * 
      */
+
+    public function upload(){
+        tes;
+    }
+
     public function uploadConsent(Request $request)
     {
         $request->validate([
@@ -298,5 +304,80 @@ class InternshipStudentController extends Controller
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->stream('Surat_Izin_Ortu_' . $student->name . '.pdf');
+    }
+
+     /**
+     * Halaman Lihat Transkrip Nilai (Web View)
+     */
+    public function transcript()
+    {
+        $user = Auth::user();
+        $student = Student::where('user_id', $user->id)->firstOrFail();
+
+        // Ambil data PKL yang sudah ada nilainya (grade)
+        $internship = Internship::with(['industry', 'grade', 'advisor'])
+            ->where('student_id', $student->id)
+            ->whereHas('grade') // Hanya tampil jika sudah dinilai guru
+            ->first();
+
+        if (!$internship) {
+            return redirect()->route('student.internships.index')
+                ->with('error', 'Nilai PKL belum diterbitkan oleh Guru Pembimbing.');
+        }
+
+        // Hitung Predikat
+        $score = $internship->grade->final_score;
+        $predikat = 'Kurang';
+        if ($score >= 90) $predikat = 'Sangat Baik';
+        elseif ($score >= 80) $predikat = 'Baik';
+        elseif ($score >= 70) $predikat = 'Cukup';
+
+        return view('siswa.internships.transcript', compact('student', 'internship', 'predikat'));
+    }
+
+    /**
+     * Cetak Transkrip Nilai (PDF Download)
+     */
+    public function printTranscript()
+    {
+        $user = Auth::user();
+        $student = Student::with('classroom')->where('user_id', $user->id)->firstOrFail();
+
+        $internship = Internship::with(['industry', 'grade', 'advisor'])
+            ->where('student_id', $student->id)
+            ->whereHas('grade')
+            ->firstOrFail();
+
+        // Hitung Predikat
+        $score = $internship->grade->final_score;
+        $predikat = 'Kurang';
+        if ($score >= 90) $predikat = 'Sangat Baik';
+        elseif ($score >= 80) $predikat = 'Baik';
+        elseif ($score >= 70) $predikat = 'Cukup';
+
+        // Data Sekolah & Pejabat Penandatangan
+        $school = [
+            'name' => Setting::value('school_name', 'SMK NEGERI 1 BUKITTINGGI'),
+            'address' => Setting::value('school_address', 'Jalan Iskandar Teja Sukmana - Padang Gamuak'),
+            'phone' => Setting::value('school_phone', ''),
+            'email' => Setting::value('school_email', ''),
+            'logo_left' => Setting::value('logo_left'),
+            'logo_right' => Setting::value('logo_right'),
+            'provinsi_name' => Setting::value('provinsi_name', 'SUMATERA BARAT'),
+            'sign_city' => Setting::value('sign_city', 'Bukittinggi'),
+            
+            // Kepala Sekolah
+            'headmaster_name' => Setting::value('sign_name', '.........................'),
+            'headmaster_nip' => Setting::value('sign_nip', '.........................'),
+            
+            // Kepala Bengkel / Kaprog (Opsional, jika ada di format)
+            'kabeng_name' => Setting::value('kabeng_name', '.........................'),
+            'kabeng_nip' => Setting::value('kabeng_nip', '.........................'),
+        ];
+
+        $pdf = Pdf::loadView('siswa.internships.transcript_pdf', compact('student', 'internship', 'school', 'predikat'));
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Transkrip_Nilai_PKL_' . str_replace(' ', '_', $student->name) . '.pdf');
     }
 }

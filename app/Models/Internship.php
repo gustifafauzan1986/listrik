@@ -11,7 +11,7 @@ class Internship extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'student_id', 'industry_id', 'advisor_id', 'start_date', 'end_date', 'status', 'advisor_status'
+        'student_id', 'industry_id', 'advisor_id', 'start_date', 'end_date', 'status', 'advisor_status', 'parent_consent_file'
     ];
 
     protected $casts = [

@@ -3,7 +3,7 @@
 <x-app-layout>
     <div class="page-content">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <div class="card shadow-lg border-0">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i> Mapping Kelas PKL</h5>

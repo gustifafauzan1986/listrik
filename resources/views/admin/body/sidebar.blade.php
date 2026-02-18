@@ -42,21 +42,40 @@ $status = $guruId->status;
 					</a>
 				</li>
 				@if ($status === '1' ?? '0')
-                 @role('guru')
+                @role('guru')
 
-				<li class="menu-label">Pembelajaran</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class='bx bx-bookmark-heart'></i>
-						</div>
-						<div class="menu-title">Schedule</div>
-					</a>
-					<ul>
-						<li> <a href="{{route('schedule.index')}}"><i class='bx bx-radio-circle'></i>PBM</a></li>
-						<li> <a href="{{route('journal.index')}}"><i class='bx bx-radio-circle'></i>Jurnal</a></li>
+				<!-- Menu Guru -->
+					@if(Auth::user()->hasRole('guru') && Auth::user()->teacher)
 
-					</ul>
-				</li>
+						<li class="menu-label">Pembelajaran</li>
+						<li>
+							<a class="has-arrow" href="javascript:;">
+								<div class="parent-icon"><i class='bx bx-bookmark-heart'></i>
+								</div>
+								<div class="menu-title">Schedule</div>
+							</a>
+							<ul>
+								<li> <a href="{{route('schedule.index')}}"><i class='bx bx-radio-circle'></i>PBM</a></li>
+								<li> <a href="{{route('journal.index')}}"><i class='bx bx-radio-circle'></i>Jurnal</a></li>
+
+							</ul>
+						</li>
+
+						<!-- Menu Bimbingan PKL (Hanya Jika Guru Adalah Pembimbing) -->
+						@if(Auth::user()->teacher->isAdvisor())
+						<li>
+							<a class="has-arrow" href="javascript:;">
+								<div class="parent-icon"><i class='bx bx-bookmark-heart'></i>
+								</div>
+								<div class="menu-title">PKL</div>
+							</a>
+							<ul>
+								<li> <a href="{{ route('teacher.internships.index') }}"><i class='bx bx-radio-circle'></i>Bimbingan</a></li>
+
+							</ul>
+						</li>
+						@endif
+					@endif
 
                 @endrole
 
@@ -109,8 +128,9 @@ $status = $guruId->status;
 						<div class="menu-title">PKL</div>
 					</a>
 					<ul>
-						<li> <a href="{{route('admin.internships.index')}}"><i class='bx bx-radio-circle'></i>Penempatan</a></li>
-						<li> <a href="{{route('industries.index')}}"><i class='bx bx-radio-circle'></i>DUDIKA</a></li>
+						<li> <a href="{{route('admin.pkl.mapping')}}"><i class='bx bx-radio-circle'></i>01.Maping</a></li>
+						<li> <a href="{{route('industries.index')}}"><i class='bx bx-radio-circle'></i>02.DUDI</a></li>
+						<li> <a href="{{route('admin.internships.index')}}"><i class='bx bx-radio-circle'></i>03.Penempatan</a></li>
 					</ul>
 				</li>
 

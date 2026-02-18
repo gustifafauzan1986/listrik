@@ -55,6 +55,7 @@ use App\Http\Controllers\PrayerController;
 use App\Http\Controllers\PrayerMonitoringController;
 use App\Http\Controllers\Guru\LaporanGuruController;
 use App\Http\Controllers\Guru\InternshipAssessmentController;
+use App\Http\Controllers\Guru\DashboardGuruController;
 use App\Http\Controllers\Admin\PrayerSettingController;
 use App\Http\Controllers\Admin\MbgController;
 use App\Http\Controllers\Admin\StudentPermitController;
@@ -145,7 +146,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/print-card-siswa/{id}', [StudentAreaController::class, 'printSingle'])->name('print.siswa.single');
 
         // Route Khusus Dashboard Guru
-        Route::get('/guru/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
+        Route::get('/guru/dashboard', [DashboardGuruController::class, 'index'])->name('teacher.dashboard');
 
 
     });
@@ -207,10 +208,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/report/attendance-list/{schedule}', [LaporanGuruController::class, 'printAttendanceList'])->name('report.attendance_list');
 
         // Penilaian PKL
-    Route::get('/guru/internships', [InternshipAssessmentController::class, 'index'])->name('teacher.internships.index');
-    Route::get('/guru/internships/{id}/assess', [InternshipAssessmentController::class, 'create'])->name('teacher.internships.assess');
-    Route::post('/guru/internships/{id}/store', [InternshipAssessmentController::class, 'store'])->name('teacher.internships.store');
-    Route::get('/guru/internships/{id}/certificate', [InternshipAssessmentController::class, 'printCertificate'])->name('teacher.internships.certificate');
+        Route::get('/guru/internships', [InternshipAssessmentController::class, 'index'])->name('teacher.internships.index');
+        Route::get('/guru/internships/{id}/assess', [InternshipAssessmentController::class, 'create'])->name('teacher.internships.assess');
+        Route::post('/guru/internships/{id}/store', [InternshipAssessmentController::class, 'store'])->name('teacher.internships.store');
+        Route::get('/guru/internships/{id}/certificate', [InternshipAssessmentController::class, 'printCertificate'])->name('teacher.internships.certificate');
 
 
     });
@@ -526,11 +527,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/internships', [InternshipStudentController::class, 'index'])->name('internships.index');
             Route::post('/internships/apply', [InternshipStudentController::class, 'apply'])->name('internships.apply');
             Route::get('/printConsentLetter', [InternshipStudentController::class, 'printConsentLetter'])->name('internships.agreement');
-            Route::get('/upload', [InternshipStudentController::class, 'upload'])->name('internships.upload');
+            Route::post('/upload', [InternshipStudentController::class, 'uploadConsent'])->name('internships.upload');
 
             Route::get('/internships/attendance', [InternshipAttendanceController::class, 'index'])->name('internships.attendance.index');
 
             Route::post('/internships/attendance', [InternshipAttendanceController::class, 'store'])->name('internships.attendance.store');
+
+            Route::get('internships/transcript', [InternshipStudentController::class, 'transcript'])->name('internships.transcript');
+            Route::get('internships/transcript/print', [InternshipStudentController::class, 'printTranscript'])->name('internships.print_transcript');
         });
     });
 });

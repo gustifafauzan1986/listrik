@@ -39,6 +39,12 @@
                                     <i class="fas fa-print me-1"></i> Cetak Surat Izin
                                 </a>
 
+                                @if($myInternship && $myInternship->status == 'completed')
+                                    <a href="{{ route('student.internships.transcript') }}" class="btn btn-success fw-bold w-100 mt-2">
+                                        <i class="fas fa-certificate me-1"></i> Lihat Transkrip Nilai
+                                    </a>
+                                @endif
+
                                 <!-- Upload Surat -->
                                 <button class="btn btn-warning btn-sm text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#uploadModal">
                                     <i class="fas fa-upload me-1"></i> {{ $myInternship->parent_consent_file ? 'Update Surat' : 'Upload Surat' }}
