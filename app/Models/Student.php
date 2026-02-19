@@ -46,4 +46,24 @@ class Student extends Model
         return $this->hasMany(Internship::class);
     }
 
+    // Tambahkan method ini
+    public function violations()
+    {
+        return $this->hasMany(StudentViolation::class);
+    }
+
+    public function violationPoints()
+    {
+        // Student has many ViolationType THROUGH Violation
+        return $this->hasManyThrough(
+            ViolationType::class,
+            Violation::class,
+            'student_id',        // Foreign key di tabel violations
+            'id',                // Foreign key di tabel violation_types (biasanya id)
+            'id',                // Local key di tabel students
+            'violation_type_id'  // Local key di tabel violations
+        );
+    }
+
+
 }

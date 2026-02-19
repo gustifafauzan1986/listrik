@@ -64,6 +64,7 @@ use App\Http\Controllers\Admin\IndustryController;
 use App\Http\Controllers\Admin\InternshipController;
 use App\Http\Controllers\Admin\InternshipTimelineController;
 use App\Http\Controllers\Admin\PKLMappingController;
+use App\Http\Controllers\Admin\GuidanceController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Http\Controllers\Student\DashboardStudentController;
@@ -154,12 +155,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/guru/dashboard', [DashboardGuruController::class, 'index'])->name('teacher.dashboard');
 
                 // Fitur Set Lokasi PKL
-        Route::get('/industries/locations', [IndustryGuruController::class, 'index'])->name('teacher.industries.locations');
+        Route::get('/guru/industri/lokasi', [IndustryGuruController::class, 'index'])->name('teacher.industries.locations');
         Route::put('/industries/{id}/location', [IndustryGuruController::class, 'update'])->name('teacher.industries.update_location');
 
         // Monitoring Siswa
-        Route::get('/monitoring', [MonitoringController::class, 'index'])->name('teacher.monitoring.index');
-        Route::get('/monitoring/{classroomId}', [MonitoringController::class, 'show'])->name('teacher.monitoring.show');
+        Route::get('/guru/monitoring', [MonitoringController::class, 'index'])->name('teacher.monitoring.index');
+        Route::get('/guru/monitoring/{classroomId}', [MonitoringController::class, 'show'])->name('teacher.monitoring.show');
         // Route Cetak Laporan Monitoring
         Route::post('/monitoring/print', [MonitoringController::class, 'printReport'])->name('teacher.monitoring.print');
 
@@ -228,8 +229,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/guru/internships/{id}/store', [InternshipAssessmentController::class, 'store'])->name('teacher.internships.store');
         Route::get('/guru/internships/{id}/certificate', [InternshipAssessmentController::class, 'printCertificate'])->name('teacher.internships.certificate');
 
-
-
+        Route::get('/guidance', [GuidanceController::class, 'index'])->name('admin.guidance.index');
+        Route::get('/guidance/create', [GuidanceController::class, 'create'])->name('admin.guidance.create');
+        Route::get('/guidance{id}', [GuidanceController::class, 'show'])->name('admin.guidance.show');
+        
+        // Simpan Pembinaan
+        Route::post('/guidance{id}/store', [GuidanceController::class, 'storeGuidance'])->name('admin.guidance.store');
+        
+        // Simpan Pelanggaran
+        Route::post('/guidance{id}/violation', [GuidanceController::class, 'storeViolation'])->name('admin.violation.store');
     });
 
     // =========================================================================
