@@ -12,7 +12,7 @@
                 </div>
                 <div class="text-center">
                     <small class="d-block text-white-50 uppercase fw-bold">Total Poin Pelanggaran</small>
-                    <h2 class="mb-0 fw-bold">{{ $student->violations->sum(fn($v) => $v->type->points ?? 0) }}</h2>
+                    <h2 class="mb-0 fw-bold">{{ $student->violations->sum(fn($v) => $v->type->points) }}</h2>
                 </div>
             </div>
         </div>
@@ -43,11 +43,11 @@
                                     <tr>
                                         <td class="ps-3 text-muted small">{{ \Carbon\Carbon::parse($v->date)->format('d/m/y') }}</td>
                                         <td>
-                                            <span class="fw-bold d-block text-dark">{{ $v->type->name ?? 'Unknown' }}</span>
+                                            <span class="fw-bold d-block text-dark">{{ $v->type->name }}</span>
                                             <small class="text-muted">{{ $v->note }}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-danger rounded-pill">{{ $v->type->points ?? 0 }}</span>
+                                            <span class="badge bg-danger rounded-pill">{{ $v->type->points }}</span>
                                         </td>
                                     </tr>
                                     @empty
@@ -69,32 +69,13 @@
                             @forelse($student->guidances->sortByDesc('date') as $g)
                             <li class="list-group-item px-0">
                                 <div class="d-flex justify-content-between">
-                                    <span class="fw-bold text-primary">{{ $g->teacher->name ?? ($g->teacher->user->name ?? 'Unknown') }} <small class="text-muted">({{ ucfirst($g->role_context) }})</small></span>
+                                    <span class="fw-bold text-primary">{{ $g->teacher->name }} <small class="text-muted">({{ ucfirst($g->role_context) }})</small></span>
                                     <small class="text-muted">{{ \Carbon\Carbon::parse($g->date)->format('d M Y') }}</small>
                                 </div>
                                 <p class="mb-1 small mt-1"><strong>Masalah:</strong> {{ $g->problem_summary }}</p>
-                                <p class="mb-0 small text-success"><strong>Solusi/Janji:</strong> {{ $g->advice }} / {{ $g->student_commitment }}</p>
-                                
-                                <!-- STATUS UPLOAD SURAT DARI SISWA -->
-                                @if($g->agreement_file)
-                                    <div class="mt-2 p-2 bg-light rounded border">
-                                        <a href="{{ asset('storage/'.$g->agreement_file) }}" target="_blank" class="btn btn-sm btn-info text-white fw-bold">
-                                            <i class="fas fa-file-signature me-1"></i> Lihat Surat (Dari Siswa)
-                                        </a>
-                                    </div>
-                                @else
-                                    <div class="mt-2 text-danger small">
-                                        <i class="fas fa-exclamation-circle"></i> Siswa belum upload surat perjanjian yang ditandatangani.
-                                    </div>
-                                @endif
-
-                                <!-- TOMBOL CETAK SURAT PERJANJIAN -->
-                                <div class="mt-3 d-flex justify-content-between align-items-center">
+                                <p class="mb-0 small text-success"><strong>Solusi:</strong> {{ $g->advice }}</p>
+                                <div class="mt-2">
                                     <span class="badge bg-{{ $g->status == 'resolved' ? 'success' : 'warning' }}">{{ ucfirst($g->status) }}</span>
-                                    
-                                    <a href="{{ route('admin.guidance.print_agreement', $g->id) }}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold">
-                                        <i class="fas fa-print me-1"></i> Cetak Surat Perjanjian
-                                    </a>
                                 </div>
                             </li>
                             @empty

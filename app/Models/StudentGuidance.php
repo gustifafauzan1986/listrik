@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class StudentGuidance extends Model {
     use HasUuids;
-    protected $fillable = ['student_id', 'teacher_id', 'date', 'problem_summary', 'advice', 'student_commitment', 'status', 'role_context', 'photo_evidence'];
+    protected $fillable = ['student_id', 'teacher_id', 'date', 'problem_summary', 'advice', 'student_commitment', 'status', 'role_context', 'photo_evidence', 'agreement_file'];
 
     public function student() {
         return $this->belongsTo(Student::class);

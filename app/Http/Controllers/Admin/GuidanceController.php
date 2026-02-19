@@ -11,6 +11,7 @@ use App\Models\StudentViolation;
 use App\Models\StudentGuidance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Setting;
 
 class GuidanceController extends Controller
 {
@@ -178,5 +179,32 @@ class GuidanceController extends Controller
         ]);
 
         return back()->with('success', 'Laporan pembinaan berhasil disimpan.');
+    }
+
+    /**
+     * Cetak Surat Perjanjian Pembinaan
+     */
+    public function printAgreement($guidanceId)
+    {
+        // Cari data pembinaan beserta relasinya
+        $guidance = StudentGuidance::with(['student.classroom', 'teacher.user'])->findOrFail($guidanceId);
+        $student = $guidance->student;
+        
+        // Ambil data sekolah dari pengaturan (atau gunakan default)
+        $school = [
+            'name' => Setting::value('school_name', 'SMK NEGERI 1 BUKITTINGGI'),
+            'address' => Setting::value('school_address', 'Jalan Iskandar Teja Sukmana'),
+            'phone' => Setting::value('school_phone', '(0752) 32330'),
+            'email' => Setting::value('school_email', 'smkn1_bkt@yahoo.com'),
+            'logo_left' => Setting::value('logo_left'),
+            'logo_right' => Setting::value('logo_right'),
+            'provinsi_name' => Setting::value('provinsi_name', 'SUMATERA BARAT'),
+            'sign_city' => Setting::value('sign_city', 'Bukittinggi'),
+            'headmaster_name' => Setting::value('sign_name', 'Drs. MUHAMMAD DININ'),
+            'headmaster_nip' => Setting::value('sign_nip', '19640817 198903 1 030'),
+        ];
+
+        // Tampilkan view print (HTML biasa tanpa butuh library PDF agar format A4 pas)
+        return view('admin.guidance.print_agreement', compact('guidance', 'student', 'school'));
     }
 }

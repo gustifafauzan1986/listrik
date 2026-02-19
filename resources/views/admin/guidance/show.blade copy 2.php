@@ -75,19 +75,6 @@
                                 <p class="mb-1 small mt-1"><strong>Masalah:</strong> {{ $g->problem_summary }}</p>
                                 <p class="mb-0 small text-success"><strong>Solusi/Janji:</strong> {{ $g->advice }} / {{ $g->student_commitment }}</p>
                                 
-                                <!-- STATUS UPLOAD SURAT DARI SISWA -->
-                                @if($g->agreement_file)
-                                    <div class="mt-2 p-2 bg-light rounded border">
-                                        <a href="{{ asset('storage/'.$g->agreement_file) }}" target="_blank" class="btn btn-sm btn-info text-white fw-bold">
-                                            <i class="fas fa-file-signature me-1"></i> Lihat Surat (Dari Siswa)
-                                        </a>
-                                    </div>
-                                @else
-                                    <div class="mt-2 text-danger small">
-                                        <i class="fas fa-exclamation-circle"></i> Siswa belum upload surat perjanjian yang ditandatangani.
-                                    </div>
-                                @endif
-
                                 <!-- TOMBOL CETAK SURAT PERJANJIAN -->
                                 <div class="mt-3 d-flex justify-content-between align-items-center">
                                     <span class="badge bg-{{ $g->status == 'resolved' ? 'success' : 'warning' }}">{{ ucfirst($g->status) }}</span>

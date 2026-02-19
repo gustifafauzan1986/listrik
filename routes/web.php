@@ -71,6 +71,7 @@ use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Http\Controllers\Student\DashboardStudentController;
 use App\Http\Controllers\Student\PrayerStudentController;
 use App\Http\Controllers\Student\RamadanJournalStudentController;
+use App\Http\Controllers\Student\GuidanceStudentController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -245,6 +246,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/violationt/update/{id}', [ViolationTypeController::class, 'update'])->name('admin.violation-types.update');
         Route::post('/violationt/store', [ViolationTypeController::class, 'store'])->name('admin.violation-types.store');
         Route::delete('/violationt/destroy', [ViolationTypeController::class, 'destroy'])->name('admin.violation-types.destroy');
+
+        Route::get('/guidance/{guidanceId}/print-agreement', [GuidanceController::class, 'printAgreement'])->name('admin.guidance.print_agreement');
+
     });
 
     // =========================================================================
@@ -575,6 +579,9 @@ Route::middleware(['auth'])->group(function () {
             // Jurnal Ramadhan
             Route::get('/ramadhan', [RamadanJournalStudentController::class, 'index'])->name('ramadan.index');
             Route::post('/ramadhan', [RamadanJournalStudentController::class, 'store'])->name('ramadan.store');
+
+            Route::get('/guidance', [GuidanceStudentController::class, 'index'])->name('guidance.index');
+            Route::post('/guidance/{id}/upload', [GuidanceStudentController::class, 'uploadAgreement'])->name('guidance.upload');
         });
     });
 });
