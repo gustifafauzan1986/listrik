@@ -38,19 +38,9 @@ class Student extends Model
         return $this->hasMany(PrayerAttendance::class);
     }
 
-    /**
-     * Relasi ke tabel internships (Tempat PKL)
-     */
-    public function internships()
-    {
-        return $this->hasMany(Internship::class);
-    }
 
-    // Tambahkan method ini
-    public function violations()
-    {
-        return $this->hasMany(StudentViolation::class);
-    }
+
+    
 
     public function violationPoints()
     {
@@ -63,6 +53,30 @@ class Student extends Model
             'id',                // Local key di tabel students
             'violation_type_id'  // Local key di tabel violations
         );
+    }
+
+    /**
+     * Relasi ke tabel internships (Tempat PKL)
+     */
+    public function internships()
+    {
+        return $this->hasMany(Internship::class);
+    }
+
+    /**
+     * Relasi ke riwayat pelanggaran (Bimbingan Konseling)
+     */
+    public function violations()
+    {
+        return $this->hasMany(StudentViolation::class);
+    }
+
+    /**
+     * Relasi ke riwayat pembinaan / konseling
+     */
+    public function guidances()
+    {
+        return $this->hasMany(StudentGuidance::class);
     }
 
 

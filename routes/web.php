@@ -65,6 +65,7 @@ use App\Http\Controllers\Admin\InternshipController;
 use App\Http\Controllers\Admin\InternshipTimelineController;
 use App\Http\Controllers\Admin\PKLMappingController;
 use App\Http\Controllers\Admin\GuidanceController;
+use App\Http\Controllers\Admin\ViolationTypeController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Http\Controllers\Student\DashboardStudentController;
@@ -231,13 +232,19 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/guidance', [GuidanceController::class, 'index'])->name('admin.guidance.index');
         Route::get('/guidance/create', [GuidanceController::class, 'create'])->name('admin.guidance.create');
-        Route::get('/guidance{id}', [GuidanceController::class, 'show'])->name('admin.guidance.show');
+        Route::get('/guidance/{id}', [GuidanceController::class, 'show'])->name('admin.guidance.show');
         
         // Simpan Pembinaan
-        Route::post('/guidance{id}/store', [GuidanceController::class, 'storeGuidance'])->name('admin.guidance.store');
+        Route::post('/guidance/{id}/store', [GuidanceController::class, 'storeGuidance'])->name('admin.guidance.store');
         
         // Simpan Pelanggaran
-        Route::post('/guidance{id}/violation', [GuidanceController::class, 'storeViolation'])->name('admin.violation.store');
+        Route::post('/guidance/{id}/violation', [GuidanceController::class, 'storeViolation'])->name('admin.violation.store');
+        Route::get('/violationt/index', [ViolationTypeController::class, 'index'])->name('admin.violation-types.index');
+        Route::get('/violationt/create', [ViolationTypeController::class, 'create'])->name('admin.violation-types.create');
+        Route::get('/violationt/edit/{id}', [ViolationTypeController::class, 'edit'])->name('admin.violation-types.edit');
+        Route::put('/violationt/update/{id}', [ViolationTypeController::class, 'update'])->name('admin.violation-types.update');
+        Route::post('/violationt/store', [ViolationTypeController::class, 'store'])->name('admin.violation-types.store');
+        Route::delete('/violationt/destroy', [ViolationTypeController::class, 'destroy'])->name('admin.violation-types.destroy');
     });
 
     // =========================================================================
