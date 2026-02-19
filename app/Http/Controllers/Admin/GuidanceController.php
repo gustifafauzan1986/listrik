@@ -207,4 +207,66 @@ class GuidanceController extends Controller
         // Tampilkan view print (HTML biasa tanpa butuh library PDF agar format A4 pas)
         return view('admin.guidance.print_agreement', compact('guidance', 'student', 'school'));
     }
+
+    /**
+     * Buat dan Kirim Surat Panggilan Orang Tua (Beserta WA)
+     */
+    public function sendSummon(Request $request, $guidanceId)
+    {
+        // $request->validate([
+        //     'summon_date' => 'required|date',
+        //     'summon_time' => 'required',
+        // ]);
+
+        $guidance = StudentGuidance::with(['student.classroom'])->findOrFail($guidanceId);
+        $student = $guidance->student;
+
+        // 1. Ambil Data Sekolah
+        $school = \App\Models\Setting::pluck('value', 'key')->toArray();
+        
+        // 2. Generate PDF Surat Panggilan
+        // Menggunakan view summon_pdf yang sudah Anda buat sebelumnya
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.guidance.summon_pdf', compact('guidance', 'student', 'school', 'request'));
+        
+        // Simpan PDF ke Storage public
+        $fileName = 'surat_panggilan_' . $student->nis . '_' . time() . '.pdf';
+        $filePath = 'guidance_summons/' . $fileName;
+        \Illuminate\Support\Facades\Storage::disk('public')->put($filePath, $pdf->output());
+
+        // 3. Update Database Status Panggilan
+        $guidance->update([
+            'is_summoned' => true,
+            'summon_date' => $request->summon_date,
+            'summon_time' => $request->summon_time,
+            'summon_file' => $filePath
+        ]);
+
+        // 4. Kirim WhatsApp ke Orang Tua
+        // Asumsi model Student memiliki kolom 'parent_phone', jika tidak fallback ke nomor HP siswa
+        $parentPhone = $student->parent_phone ?? $student->phone; 
+        
+        if ($parentPhone) {
+            $dateFormatted = \Carbon\Carbon::parse($request->summon_date)->translatedFormat('l, d F Y');
+            
+            $message = "*SURAT PANGGILAN ORANG TUA/WALI*\n\n"
+                     . "Yth. Bapak/Ibu Orang Tua/Wali dari *{$student->name}*,\n\n"
+                     . "Sehubungan dengan evaluasi kedisiplinan dan pembinaan siswa, kami mengharap kehadiran Bapak/Ibu pada:\n\n"
+                     . "📅 Hari/Tgl: {$dateFormatted}\n"
+                     . "⏰ Waktu: {$request->summon_time} WIB\n"
+                     . "📍 Tempat: Ruang BK / Ruang Kepala Bengkel SMKN 1 Bukittinggi\n\n"
+                     . "Mengingat pentingnya hal ini, kami sangat mengharapkan kehadiran Bapak/Ibu tepat pada waktunya. Surat panggilan resmi dapat diunduh melalui tautan berikut:\n"
+                     . asset('storage/'.$filePath) . "\n\n"
+                     . "Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.\n\n"
+                     . "_Hormat Kami,_\n_Pihak Sekolah_";
+
+            // Memasukkan pengiriman WA ke dalam antrean (Queue) agar tidak memblokir respon halaman
+            try {
+                \App\Jobs\SendWhatsappJob::dispatch($parentPhone, $message);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal dispatch WA Summons: " . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', 'Surat panggilan berhasil dibuat dan otomatis dikirim ke WA Orang Tua.');
+    }
 }

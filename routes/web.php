@@ -249,6 +249,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/guidance/{guidanceId}/print-agreement', [GuidanceController::class, 'printAgreement'])->name('admin.guidance.print_agreement');
 
+        Route::post('/guidance/{id}/summon', [GuidanceController::class, 'sendSummon'])->name('admin.guidance.summon');
     });
 
     // =========================================================================

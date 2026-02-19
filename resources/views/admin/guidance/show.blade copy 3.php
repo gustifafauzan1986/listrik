@@ -17,13 +17,6 @@
             </div>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4">
-                <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
         <div class="row">
             
             <!-- KOLOM KIRI: RIWAYAT PELANGGARAN -->
@@ -69,94 +62,43 @@
                 <!-- RIWAYAT PEMBINAAN SEBELUMNYA -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3">
-                        <h6 class="mb-0 fw-bold text-success"><i class="fas fa-history me-2"></i>Riwayat Pembinaan & Tindakan</h6>
+                        <h6 class="mb-0 fw-bold text-success"><i class="fas fa-history me-2"></i>Riwayat Pembinaan</h6>
                     </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             @forelse($student->guidances->sortByDesc('date') as $g)
-                            <li class="list-group-item px-0 pb-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <span class="fw-bold text-primary">{{ $g->teacher->name ?? ($g->teacher->user->name ?? 'Unknown') }}</span> 
-                                        <small class="text-muted">({{ ucfirst($g->role_context) }})</small>
-                                    </div>
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold text-primary">{{ $g->teacher->name ?? ($g->teacher->user->name ?? 'Unknown') }} <small class="text-muted">({{ ucfirst($g->role_context) }})</small></span>
                                     <small class="text-muted">{{ \Carbon\Carbon::parse($g->date)->format('d M Y') }}</small>
                                 </div>
-                                <p class="mb-1 small mt-2"><strong>Masalah:</strong> {{ $g->problem_summary }}</p>
-                                <p class="mb-2 small text-success"><strong>Solusi/Janji:</strong> {{ $g->advice }} / {{ $g->student_commitment }}</p>
+                                <p class="mb-1 small mt-1"><strong>Masalah:</strong> {{ $g->problem_summary }}</p>
+                                <p class="mb-0 small text-success"><strong>Solusi/Janji:</strong> {{ $g->advice }} / {{ $g->student_commitment }}</p>
                                 
-                                <!-- STATUS UPLOAD SURAT DARI SISWA (Jika ada) -->
+                                <!-- STATUS UPLOAD SURAT DARI SISWA -->
                                 @if($g->agreement_file)
-                                    <div class="mb-2">
-                                        <a href="{{ asset('storage/'.$g->agreement_file) }}" target="_blank" class="badge bg-info text-white text-decoration-none">
-                                            <i class="fas fa-file-signature me-1"></i> Bukti Perjanjian Siswa
+                                    <div class="mt-2 p-2 bg-light rounded border">
+                                        <a href="{{ asset('storage/'.$g->agreement_file) }}" target="_blank" class="btn btn-sm btn-info text-white fw-bold">
+                                            <i class="fas fa-file-signature me-1"></i> Lihat Surat (Dari Siswa)
                                         </a>
+                                    </div>
+                                @else
+                                    <div class="mt-2 text-danger small">
+                                        <i class="fas fa-exclamation-circle"></i> Siswa belum upload surat perjanjian yang ditandatangani.
                                     </div>
                                 @endif
 
-                                <!-- TOMBOL AKSI: CETAK PERJANJIAN & PANGGILAN ORTU -->
-                                <div class="mt-3 d-flex justify-content-between align-items-center bg-light p-2 rounded border">
-                                    <span class="badge bg-{{ $g->status == 'resolved' ? 'success' : 'warning' }} text-dark">{{ ucfirst($g->status) }}</span>
+                                <!-- TOMBOL CETAK SURAT PERJANJIAN -->
+                                <div class="mt-3 d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-{{ $g->status == 'resolved' ? 'success' : 'warning' }}">{{ ucfirst($g->status) }}</span>
                                     
-                                    <div class="btn-group">
-                                        <!-- Tombol Perjanjian -->
-                                        <a href="{{ route('admin.guidance.print_agreement', $g->id) }}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold" title="Cetak Surat Perjanjian untuk ditandatangani siswa">
-                                            <i class="fas fa-file-contract me-1"></i> Perjanjian
-                                        </a>
-                                        
-                                        <!-- Tombol Panggilan Orang Tua -->
-                                        @if($g->is_summoned && $g->summon_file)
-                                            <!-- Jika sudah dipanggil, tampilkan tombol lihat PDF -->
-                                            <a href="{{ asset('storage/'.$g->summon_file) }}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold">
-                                                <i class="fas fa-file-pdf me-1"></i> Surat Panggilan
-                                            </a>
-                                        @else
-                                            <!-- Jika belum, tampilkan tombol modal untuk memanggil -->
-                                            <button type="button" class="btn btn-sm btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#summonModal{{ $g->id }}">
-                                                <i class="fas fa-bullhorn me-1"></i> Panggil Ortu
-                                            </button>
-                                        @endif
-                                    </div>
+                                    <a href="{{ route('admin.guidance.print_agreement', $g->id) }}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold">
+                                        <i class="fas fa-print me-1"></i> Cetak Surat Perjanjian
+                                    </a>
                                 </div>
-
-                                <!-- MODAL INPUT PANGGILAN ORTU (Spesifik per item) -->
-                                @if(!$g->is_summoned)
-                                <div class="modal fade" id="summonModal{{ $g->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <!-- Pastikan route admin.guidance.summon sudah ada di web.php -->
-                                            <form action="{{ route('admin.guidance.summon', $g->id) }}" method="POST">
-                                                @csrf
-                                                <div class="modal-header bg-danger text-white">
-                                                    <h5 class="modal-title"><i class="fas fa-envelope-open-text me-2"></i> Buat Surat Panggilan</h5>
-                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="alert alert-warning small">
-                                                        <i class="fas fa-info-circle me-1"></i> Surat akan dibuat dalam format PDF dan tautannya akan otomatis dikirim ke WhatsApp Orang Tua (<strong>{{ $student->parent_phone ?? $student->phone ?? 'Nomor tidak tersedia' }}</strong>).
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Hari / Tanggal Panggilan</label>
-                                                        <input type="date" name="summon_date" class="form-control" required min="{{ date('Y-m-d') }}">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Waktu Panggilan (WIB)</label>
-                                                        <input type="time" name="summon_time" class="form-control" required value="08:00">
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-danger fw-bold"><i class="fas fa-paper-plane me-1"></i> Buat & Kirim WA</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endif
-
                             </li>
                             @empty
-                            <div class="text-center text-muted small py-4">Belum ada riwayat pembinaan.</div>
+                            <div class="text-center text-muted small">Belum ada riwayat pembinaan.</div>
                             @endforelse
                         </ul>
                     </div>

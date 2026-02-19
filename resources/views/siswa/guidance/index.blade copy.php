@@ -1,45 +1,10 @@
 @section('title', 'Riwayat Kedisiplinan')
 
 <x-app-layout>
-    <!-- Custom CSS untuk Efek Berkedip (Pulse) -->
-    <style>
-        @keyframes pulseAlert {
-            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-        }
-        .alert-flashing {
-            animation: pulseAlert 2s infinite;
-            border-left: 6px solid #dc3545 !important;
-            background-color: #fff5f5;
-        }
-    </style>
-
     <div class="page-content">
         <div class="mb-4 d-flex justify-content-between align-items-center">
             <h4 class="fw-bold text-primary"><i class="fas fa-user-shield me-2"></i>Riwayat Kedisiplinan & Pembinaan</h4>
         </div>
-
-        <!-- ALERT PANGGILAN ORANG TUA (BERKEDIP) -->
-        @php
-            // Cek apakah ada panggilan ortu yang masih aktif (belum resolved/selesai)
-            $activeSummons = $student->guidances->where('is_summoned', true)->whereIn('status', ['open', 'monitoring', 'escalated']);
-        @endphp
-        
-        @if($activeSummons->count() > 0)
-            <div class="alert alert-danger alert-flashing mb-4 p-4 rounded-3 d-flex align-items-center">
-                <div class="me-4 text-danger">
-                    <i class="fas fa-exclamation-triangle fa-3x"></i>
-                </div>
-                <div>
-                    <h4 class="fw-bold text-danger mb-1 text-uppercase">Panggilan Orang Tua / Wali!</h4>
-                    <p class="mb-0 text-dark">
-                        Sekolah telah menerbitkan Surat Panggilan untuk Orang Tua/Wali Anda. 
-                        Silakan cek detail pada <strong>Riwayat Pembinaan</strong> di bawah, unduh surat panggilannya, dan segera sampaikan kepada Orang Tua Anda.
-                    </p>
-                </div>
-            </div>
-        @endif
 
         <!-- Header Info Siswa -->
         <div class="card border-0 shadow-sm mb-4 bg-primary text-white">
@@ -118,25 +83,7 @@
                                 <p class="mb-1 small mt-2"><strong>Masalah:</strong> {{ $g->problem_summary }}</p>
                                 <p class="mb-2 small text-success"><strong>Solusi/Janji:</strong> {{ $g->advice }} / {{ $g->student_commitment }}</p>
                                 
-                                <!-- INFO PANGGILAN ORANG TUA (JIKA ADA) -->
-                                @if($g->is_summoned)
-                                    <div class="mt-3 p-3 bg-danger-subtle border border-danger rounded-3 shadow-sm">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="fw-bold text-danger mb-0"><i class="fas fa-bullhorn me-1"></i> Panggilan Orang Tua</h6>
-                                            <span class="badge bg-danger">Wajib Hadir</span>
-                                        </div>
-                                        <p class="mb-1 small text-dark"><i class="far fa-calendar-alt me-1"></i> <strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($g->summon_date)->translatedFormat('l, d F Y') }}</p>
-                                        <p class="mb-3 small text-dark"><i class="far fa-clock me-1"></i> <strong>Waktu:</strong> {{ \Carbon\Carbon::parse($g->summon_time)->format('H:i') }} WIB</p>
-                                        
-                                        @if($g->summon_file)
-                                            <a href="{{ asset('storage/'.$g->summon_file) }}" target="_blank" class="btn btn-sm btn-danger fw-bold w-100">
-                                                <i class="fas fa-download me-1"></i> Unduh Surat Panggilan
-                                            </a>
-                                        @endif
-                                    </div>
-                                @endif
-
-                                <!-- FORM UPLOAD SURAT PERJANJIAN -->
+                                <!-- FORM UPLOAD SURAT -->
                                 <div class="p-3 bg-light rounded border border-secondary mt-3">
                                     <h6 class="fw-bold small mb-2"><i class="fas fa-file-contract me-1"></i> Surat Perjanjian</h6>
                                     
