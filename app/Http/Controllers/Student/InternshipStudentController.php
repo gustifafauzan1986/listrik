@@ -8,6 +8,7 @@ use App\Models\Industry;
 use App\Models\Internship;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\InternshipTimeline; // Import Model Timeline
 use Illuminate\Support\Facades\Auth;
 use App\Models\Setting; // Import Setting Model
 use Illuminate\Support\Facades\Storage;
@@ -155,7 +156,11 @@ class InternshipStudentController extends Controller
         // Data Guru untuk pilihan pembimbing (jika siswa boleh request)
         $teachers = Teacher::orderBy('name')->get();
 
-        return view('siswa.internships.index', compact('industries', 'myInternship', 'teachers'));
+        // --- FITUR BARU: AMBIL TIMELINE KEGIATAN ---
+        // Mengambil data timeline urut berdasarkan tanggal mulai
+        $timelines = InternshipTimeline::orderBy('start_date', 'asc')->get();
+
+        return view('siswa.internships.index', compact('industries', 'myInternship', 'teachers', 'timelines'));
     }
 
     /**

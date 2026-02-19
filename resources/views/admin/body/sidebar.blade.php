@@ -128,6 +128,7 @@ $status = $guruId->status;
 						<div class="menu-title">PKL</div>
 					</a>
 					<ul>
+						<li> <a href="{{route('admin.timeline.index')}}"><i class='bx bx-radio-circle'></i>00.Timeline</a></li>
 						<li> <a href="{{route('admin.pkl.mapping')}}"><i class='bx bx-radio-circle'></i>01.Maping</a></li>
 						<li> <a href="{{route('industries.index')}}"><i class='bx bx-radio-circle'></i>02.DUDI</a></li>
 						<li> <a href="{{route('admin.internships.index')}}"><i class='bx bx-radio-circle'></i>03.Penempatan</a></li>
@@ -287,6 +288,7 @@ $status = $guruId->status;
 					</a>
 					<ul>
 						<li> <a href="{{route('student.internships.index')}}"><i class='bx bx-radio-circle'></i>Tentukan</a></li>
+						<li> <a href="{{route('student.internships.attendance.index')}}"><i class='bx bx-radio-circle'></i>Presensi</a></li>
 
 
 					</ul>

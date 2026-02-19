@@ -51,19 +51,24 @@ use App\Http\Controllers\WhatsappGatewayController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryLoanController;
 use App\Http\Controllers\LoanController;
-use App\Http\Controllers\PrayerController;
 use App\Http\Controllers\PrayerMonitoringController;
 use App\Http\Controllers\Guru\LaporanGuruController;
 use App\Http\Controllers\Guru\InternshipAssessmentController;
 use App\Http\Controllers\Guru\DashboardGuruController;
+use App\Http\Controllers\Guru\IndustryGuruController;
+use App\Http\Controllers\Guru\MonitoringController;
 use App\Http\Controllers\Admin\PrayerSettingController;
 use App\Http\Controllers\Admin\MbgController;
 use App\Http\Controllers\Admin\StudentPermitController;
 use App\Http\Controllers\Admin\IndustryController;
 use App\Http\Controllers\Admin\InternshipController;
+use App\Http\Controllers\Admin\InternshipTimelineController;
 use App\Http\Controllers\Admin\PKLMappingController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
+use App\Http\Controllers\Student\DashboardStudentController;
+use App\Http\Controllers\Student\PrayerStudentController;
+use App\Http\Controllers\Student\RamadanJournalStudentController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -148,6 +153,16 @@ Route::middleware(['auth'])->group(function () {
         // Route Khusus Dashboard Guru
         Route::get('/guru/dashboard', [DashboardGuruController::class, 'index'])->name('teacher.dashboard');
 
+                // Fitur Set Lokasi PKL
+        Route::get('/industries/locations', [IndustryGuruController::class, 'index'])->name('teacher.industries.locations');
+        Route::put('/industries/{id}/location', [IndustryGuruController::class, 'update'])->name('teacher.industries.update_location');
+
+        // Monitoring Siswa
+        Route::get('/monitoring', [MonitoringController::class, 'index'])->name('teacher.monitoring.index');
+        Route::get('/monitoring/{classroomId}', [MonitoringController::class, 'show'])->name('teacher.monitoring.show');
+        // Route Cetak Laporan Monitoring
+        Route::post('/monitoring/print', [MonitoringController::class, 'printReport'])->name('teacher.monitoring.print');
+
 
     });
     // =========================================================================
@@ -212,6 +227,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/guru/internships/{id}/assess', [InternshipAssessmentController::class, 'create'])->name('teacher.internships.assess');
         Route::post('/guru/internships/{id}/store', [InternshipAssessmentController::class, 'store'])->name('teacher.internships.store');
         Route::get('/guru/internships/{id}/certificate', [InternshipAssessmentController::class, 'printCertificate'])->name('teacher.internships.certificate');
+
 
 
     });
@@ -501,6 +517,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/pkl/mapping', [PKLMappingController::class, 'index'])->name('admin.pkl.mapping');
         Route::put('/admin/pkl/mapping', [PKLMappingController::class, 'update'])->name('admin.pkl.mapping.update');
 
+        Route::get('/admin/pkl/timeline', [InternshipTimelineController::class, 'index'])->name('admin.timeline.index');
+        Route::post('/admin/pkl/timeline', [InternshipTimelineController::class, 'store'])->name('admin.timeline.store');
+        Route::put('/admin/pkl/timeline/{id}', [InternshipTimelineController::class, 'update'])->name('admin.timeline.update');
+        Route::delete('/admin/pkl/timeline/{id}', [InternshipTimelineController::class, 'destroy'])->name('admin.timeline.destroy');
+
 
     });
 
@@ -508,7 +529,8 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('student')->name('student.')->group(function() {
 
             // Profil Siswa (Edit No HP & Alamat)
-            Route::get('/dashboard', [SiswaDashboardController::class, 'dashboard'])->name('dashboard');
+            Route::get('/dashboard', [DashboardStudentController::class, 'index'])->name('dashboard');
+            // Route::get('/dashboard', [SiswaDashboardController::class, 'dashboard'])->name('dashboard');
             Route::get('/my-profile', [StudentAreaController::class, 'profileStudent'])->name('profile');
             Route::put('/my-profile', [StudentAreaController::class, 'updateProfile'])->name('profile.update');
             // Riwayat Absensi
@@ -520,8 +542,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/my-card', [StudentAreaController::class, 'printCard'])->name('print.card');
 
             // Fitur Absensi Sholat
-            Route::get('/prayer', [PrayerController::class, 'index'])->name('prayer.index');
-            Route::post('/prayer/store', [PrayerController::class, 'store'])->name('prayer.store');
+            Route::get('/prayer', [PrayerStudentController::class, 'index'])->name('prayer.index');
+            Route::post('/prayer/store', [PrayerStudentController::class, 'store'])->name('prayer.store');
 
             // Pemilihan PKL Siswa
             Route::get('/internships', [InternshipStudentController::class, 'index'])->name('internships.index');
@@ -535,6 +557,9 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('internships/transcript', [InternshipStudentController::class, 'transcript'])->name('internships.transcript');
             Route::get('internships/transcript/print', [InternshipStudentController::class, 'printTranscript'])->name('internships.print_transcript');
+            // Jurnal Ramadhan
+            Route::get('/ramadhan', [RamadanJournalStudentController::class, 'index'])->name('ramadan.index');
+            Route::post('/ramadhan', [RamadanJournalStudentController::class, 'store'])->name('ramadan.store');
         });
     });
 });
