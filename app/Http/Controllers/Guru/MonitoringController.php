@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Teacher;
 use App\Models\Classroom;
 use App\Models\Student;
+use App\Models\Setting;
 use App\Models\DailyAttendance; // Gerbang
 use App\Models\Attendance;      // Pembelajaran
 use App\Models\PrayerAttendance;// Sholat
@@ -182,7 +183,7 @@ class MonitoringController extends Controller
 
         $periodLabel = $startDate->translatedFormat('F Y');
 
-        $pdf = Pdf::loadView('siswa.pdf.monitoring_report', compact('data', 'title', 'classroom', 'school', 'periodLabel', 'teacher', 'request'));
+        $pdf = Pdf::loadView('guru.pdf.monitoring_report', compact('data', 'title', 'classroom', 'school', 'periodLabel', 'teacher', 'request'));
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->stream('Laporan_Monitoring_' . str_replace(' ', '_', $classroom->name) . '.pdf');
