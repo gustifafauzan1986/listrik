@@ -81,18 +81,33 @@ class TeacherDataTable extends DataTable
      * Get the dataTable columns definition.
      */
     public function getColumns(): array
+    // {
+    //     return [
+    //         Column::make('DT_RowIndex')->title('No')->orderable(false)->searchable(false)->width(30),
+    //         Column::computed('nama_lengkap')->title('Nama Lengkap'),
+    //         Column::make('nip')->title('NIP')->addClass('text-center'),
+    //         Column::make('gender')->title('L/P')->addClass('text-center'),
+    //         Column::computed('email_login')->title('Email (Login)'),
+    //         Column::make('phone')->title('No. HP'),
+    //         Column::computed('keterangan')->title('Keterangan')->addClass('text-center'),
+    //         Column::computed('action')->title('Aksi')->exportable(false)->printable(false)->addClass('text-center'),
+    //     ];
+    // }
+
+
     {
-        return [
-            Column::make('DT_RowIndex')->title('No')->orderable(false)->searchable(false)->width(30),
-            Column::computed('nama_lengkap')->title('Nama Lengkap'),
-            Column::make('nip')->title('NIP')->addClass('text-center'),
-            Column::make('gender')->title('L/P')->addClass('text-center'),
-            Column::computed('email_login')->title('Email (Login)'),
-            Column::make('phone')->title('No. HP'),
-            Column::computed('keterangan')->title('Keterangan')->addClass('text-center'),
-            Column::computed('action')->title('Aksi')->exportable(false)->printable(false)->addClass('text-center'),
-        ];
-    }
+    return [
+        Column::make('DT_RowIndex')->title('No')->orderable(false)->searchable(false)->width(30),
+        // Tambahkan 'name' sebagai data agar bisa dicari, tapi title tetap 'Nama Lengkap'
+        Column::make('user.name')->title('Nama Lengkap'), 
+        Column::make('nip')->title('NIP')->addClass('text-center'),
+        Column::make('gender')->title('L/P')->addClass('text-center'),
+        Column::make('user.email')->title('Email (Login)'),
+        Column::make('phone')->title('No. HP'),
+        Column::computed('keterangan')->title('Keterangan')->addClass('text-center'),
+        Column::computed('action')->title('Aksi')->addClass('text-center'),
+    ];
+}
 
     /**
      * Get the filename for export.
