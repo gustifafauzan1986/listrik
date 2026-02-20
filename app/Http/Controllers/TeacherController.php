@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Major;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TeacherExport;
+use App\DataTables\TeacherDataTable;
 
 class TeacherController extends Controller
 {
@@ -23,23 +24,28 @@ class TeacherController extends Controller
     /**
      * Tampilkan Daftar Guru
      */
-    public function index(Request $request)
+    // public function index(Request $request)
+    // {
+    //     $query = Teacher::with('user');
+
+    //     // Fitur Pencarian (Nama, Email, NIP)
+    //     if ($request->has('search')) {
+    //         $search = $request->search;
+    //         $query->whereHas('user', function($q) use ($search) {
+    //             $q->where('name', 'LIKE', "%{$search}%")
+    //               ->orWhere('email', 'LIKE', "%{$search}%");
+    //         })->orWhere('nip', 'LIKE', "%{$search}%");
+    //     }
+
+    //     // Pagination 10 data per halaman
+    //     $teachers = $query->paginate(10);
+
+    //     return view('teachers.index', compact('teachers'));
+    // }
+
+    public function index(TeacherDataTable $dataTable)
     {
-        $query = Teacher::with('user');
-
-        // Fitur Pencarian (Nama, Email, NIP)
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%");
-            })->orWhere('nip', 'LIKE', "%{$search}%");
-        }
-
-        // Pagination 10 data per halaman
-        $teachers = $query->paginate(10);
-
-        return view('teachers.index', compact('teachers'));
+        return $dataTable->render('teachers.index'); // Sesuaikan path view Anda
     }
 
     /**
