@@ -72,9 +72,32 @@ class TeacherDataTable extends DataTable
                     ->columns($this->getColumns())
                     ->minifiedAjax()
                     ->orderBy(1)
+                    // ->parameters([
+                    //     'language' => ['url' => '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json']
+                    // ]);
+
                     ->parameters([
-                        'language' => ['url' => '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json']
+                    // Ganti URL dengan objek bahasa langsung
+                    'language' => [
+                        'emptyTable' => 'Tidak ada data yang tersedia pada tabel ini',
+                        'info' => 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+                        'infoEmpty' => 'Menampilkan 0 sampai 0 dari 0 entri',
+                        'infoFiltered' => '(disaring dari _MAX_ entri keseluruhan)',
+                        'lengthMenu' => 'Tampilkan _MENU_ entri',
+                        'loadingRecords' => 'Sedang memuat...',
+                        'processing' => 'Sedang memproses...',
+                        'search' => 'Cari:',
+                        'zeroRecords' => 'Tidak ditemukan data yang sesuai',
+                        'paginate' => [
+                            'first' => 'Pertama',
+                            'last' => 'Terakhir',
+                            'next' => 'Selanjutnya',
+                            'previous' => 'Sebelumnya'
+                        ]
+                    ]
                     ]);
+
+
     }
 
     /**
