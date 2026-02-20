@@ -9,6 +9,7 @@ use App\Models\Teacher;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB; // Import DB Facade untuk Transaction
 use Spatie\Permission\Models\Role;
+use App\DataTables\UserDataTable;
 
 class UserController extends Controller
 {
@@ -84,10 +85,15 @@ class UserController extends Controller
     }
 
 
-     public function allUser(){
-        $allUser = User::latest()->get();
-        return view('users.all', compact('allUser'));
-    }/* End Method */
+    //  public function allUser(){
+    //     $allUser = User::latest()->get();
+    //     return view('users.all', compact('allUser'));
+    // }/* End Method */
+
+    public function allUser(UserDataTable $dataTable)
+    {
+        return $dataTable->render('users.all');
+    }
 
     public function UpdateStatusUser(Request $request){
         $id = Auth::user()->id;

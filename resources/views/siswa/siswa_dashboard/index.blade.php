@@ -1,4 +1,4 @@
-@section('title', 'Dashboard Guru')
+@section('title', 'Dashboard Siswa')
 
 <x-app-layout>
     <div class="page-content">

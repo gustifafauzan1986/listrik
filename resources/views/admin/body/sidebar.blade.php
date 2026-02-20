@@ -33,6 +33,7 @@ $status = $guruId->status;
         </div>
     </div>
 			<!--navigation-->
+		<li>
 			<ul class="metismenu" id="menu">
                 <li>
 					<a href="{{route('dashboard')}}">
@@ -151,7 +152,7 @@ $status = $guruId->status;
 				</li>
 
 
-				{{-- <li>
+				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class="bx bx-grid-alt"></i>
 					</div>
@@ -161,14 +162,13 @@ $status = $guruId->status;
 					<li> <a href="{{route('users.import')}}"><i class='bx bx-radio-circle'></i>Impor Guru</a>
 				</li>
 			</ul>
-		</li> --}}
+		</li> 
 
 		<li>
 			<a class="has-arrow" href="javascript:;">
-				<div class="parent-icon"> <i class="bx bxs-report"></i>
-			</div>
-			<div class="menu-title">Laporan</div>
-		</a>
+				<div class="parent-icon"> <i class="bx bxs-report"></i></div>
+				<div class="menu-title">Laporan</div>
+			</a>
 		<ul>
 			<li> <a href="{{route('report.index')}}"><i class='bx bx-border-all'></i>Pembelajaran</a>
 			<li> <a href="{{route('daily_attendance.report')}}"><i class='bx bx-border-all'></i>Gerbang</a>
