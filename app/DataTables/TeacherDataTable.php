@@ -43,11 +43,18 @@ class TeacherDataTable extends DataTable
                 return $html;
             })
             ->addColumn('action', function($row) {
+
                 return '
                 <div class="btn-group">
-                    <a href="'.route('teachers.show', $row->id).'" class="btn btn-sm btn-success text-white"><i class="bx bx-info-circle"></i></a>
-                    <button type="button" class="btn btn-sm btn-warning text-white btn-edit" data-id="'.$row->id.'"><i class="bx bx-message-square-edit"></i></button>
-                    <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="'.$row->id.'"><i class="bx bx-message-square-x"></i></button>
+                    <button type="button" class="btn btn-sm btn-warning btn-edit" data-id="'.$row->id.'">
+                        <i class="bx bx-message-square-edit"></i>
+                    </button>
+                    <form action="'.route('teachers.destroy', $row->id).'" method="POST" class="d-inline">
+                        '.csrf_field().method_field('DELETE').'
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Yakin hapus?\')">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </form>
                 </div>';
             })
             ->rawColumns(['keterangan', 'action']);
@@ -59,7 +66,9 @@ class TeacherDataTable extends DataTable
     public function query(Teacher $model): QueryBuilder
     {
         // Gunakan with() agar tidak terjadi N+1 query problem
-        return $model->newQuery()->with(['user', 'major']);
+        // return $model->newQuery()->with(['user', 'major']);
+        // Pastikan kolom 'id' ikut dipanggil
+        return $model->newQuery()->with('user')->select('teachers.*');
     }
 
     /**

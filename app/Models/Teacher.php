@@ -8,6 +8,12 @@ use App\Traits\HasUuid;
 
 class Teacher extends Model
 {
+    // Jika kolom primary key Anda adalah string UUID
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    // Pastikan nama tabel benar
+    protected $table = 'teachers';
     use HasFactory, HasUuid;
 
     protected $fillable = [
@@ -26,13 +32,24 @@ class Teacher extends Model
         'tugas_tambahan'
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class, 'major_id', 'id');
+    }
+
     /**
      * Relasi ke User (Akun Login)
      */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    // public function user()
+    // {
+        
+    //     return $this->belongsTo(User::class);
+    // }
 
     /**
      * Relasi ke Jadwal Mengajar
@@ -50,10 +67,10 @@ class Teacher extends Model
          return $this->belongsTo(User::class);
     }
 
-    public function major()
-    {
-        return $this->belongsTo(Major::class);
-    }
+    // public function major()
+    // {
+    //     return $this->belongsTo(Major::class);
+    // }
 
     public function assignments() {
     return $this->hasMany(TeachingAssignment::class);

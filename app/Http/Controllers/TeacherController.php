@@ -9,6 +9,7 @@ use App\Models\Major;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TeacherExport;
 use App\DataTables\TeacherDataTable;
+use Illuminate\Support\Facades\DB;
 
 class TeacherController extends Controller
 {
@@ -48,15 +49,91 @@ class TeacherController extends Controller
         return $dataTable->render('teachers.index'); // Sesuaikan path view Anda
     }
 
+    // public function editJson($id)
+    // {
+    //     $teacher = Teacher::with('user')->findOrFail($id);
+    //     return response()->json($teacher);
+    // }
+
+    // public function editJson($id)
+    // {
+    //     try {
+    //         // Gunakan with('user') karena di modal kita memanggil data.user.name
+    //         $teacher = Teacher::with('user')->findOrFail($id);
+    //         return response()->json($teacher);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+    public function editJson($id)
+    {
+        // // Gunakan with('user') agar data akun ikut terambil
+        // $teacher = Teacher::with('user')->find($id);
+
+        // if (!$teacher) {
+        //     return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        // }
+
+        // return response()->json($teacher);
+        // Eager loading relasi user
+        // $teacher = \App\Models\Teacher::with('user')->find($id);
+
+        // if (!$teacher) {
+        //     return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        // }
+
+        // return response()->json($teacher);
+
+        // Eager load relasi 'user'
+        // $teacher = \App\Models\Teacher::with('user')->where('id', $id)->first();
+
+        // if (!$teacher) {
+        //     // Jika sampai di sini, artinya ID "eee65b94..." tidak ada di kolom 'id' tabel teachers
+        //     return response()->json([
+        //         'message' => 'Data tidak ditemukan',
+        //         'debug_id_yang_dicari' => $id 
+        //     ], 404);
+        // }
+
+        // return response()->json($teacher);
+        // 1. Cek tanpa relasi dulu untuk memastikan ID-nya ada
+        $cekData = \DB::table('teachers')->where('id', $id)->first();
+        
+        if (!$cekData) {
+            // Jika masuk ke sini, berarti UUID tersebut memang TIDAK ADA di tabel 'teachers'
+            // Cek apakah ID tersebut sebenarnya adalah 'user_id'?
+            return response()->json([
+                'message' => 'Data tidak ditemukan di tabel teachers',
+                'id_dicari' => $id,
+                'saran' => 'Pastikan kolom ID di tabel teachers berisi UUID tersebut.'
+            ], 404);
+        }
+
+        // 2. Jika ada, ambil dengan relasi user
+        $teacher = \App\Models\Teacher::with('user')->find($id);
+
+        return response()->json($teacher);
+        }
+
     /**
      * Form Edit Guru
      */
+    // public function edit($id)
+    // {
+    //     $majors = Major::get();
+    //     $teacher = Teacher::with('user')->findOrFail($id);
+    //     return view('teachers.edit', compact('teacher', 'majors'));
+    // }
+
     public function edit($id)
-    {
-        $majors = Major::get();
-        $teacher = Teacher::with('user')->findOrFail($id);
-        return view('teachers.edit', compact('teacher', 'majors'));
-    }
+{
+    // Menggunakan findOrFail agar jika tidak ada langsung melempar 404 yang benar (ModelNotFound)
+    // with('user') memastikan data nama dan email ikut terbawa
+    $teacher = \App\Models\Teacher::with('user')->findOrFail($id);
+
+    return view('teachers.edit', compact('teacher'));
+}
 
     /**
      * Update Data Guru

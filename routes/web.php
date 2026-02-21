@@ -66,6 +66,7 @@ use App\Http\Controllers\Admin\InternshipTimelineController;
 use App\Http\Controllers\Admin\PKLMappingController;
 use App\Http\Controllers\Admin\GuidanceController;
 use App\Http\Controllers\Admin\ViolationTypeController;
+use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Http\Controllers\Student\DashboardStudentController;
@@ -264,6 +265,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/import-users', [UserImportController::class, 'index'])->name('users.import');
         Route::post('/import-users', [UserImportController::class, 'store'])->name('users.import.store');
 
+        // Role & Permission Routes
+        Route::get('/admin/roles', [RolePermissionController::class, 'index'])->name('admin.roles.index');
+        Route::post('/admin/roles', [RolePermissionController::class, 'storeRole'])->name('admin.roles.store');
+        Route::get('/admin/roles/{id}/edit', [RolePermissionController::class, 'editRole'])->name('admin.roles.edit');
+        Route::put('/admin/roles/{id}', [RolePermissionController::class, 'updateRolePermissions'])->name('admin.roles.update');
+        Route::delete('/admin/roles/{id}', [RolePermissionController::class, 'destroyRole'])->name('admin.roles.destroy');
 
         // ROUTE MANAGE ROLE (Resourceful Route)
         Route::resource('roles', RoleController::class);
@@ -391,7 +398,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/classrooms/{id}/print-ids', [ClassroomController::class, 'printAllIdsPdf'])->name('classrooms.print_ids');
         Route::get('/teachers/export', [TeacherController::class, 'export'])->name('teachers.export');
         // PERBAIKAN: method 'show' tidak lagi di-exclude agar halaman detail guru bisa diakses
-        Route::resource('teachers', TeacherController::class)->except(['create', 'store']);
+        // Pastikan baris ini ada di web.php
+        // Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
+        // Route::get('/teachers/show/{id}', [TeacherController::class, 'show'])->name('teachers.show');
+        Route::get('/teachers/edit-json/{id}', [TeacherController::class, 'editJson'])->name('teachers.edit.json');
+        // Route::get('teachers/edit-json/{id}', [TeacherController::class, 'editJson'])
+        // ->name('teachers.edit.json')
+        // ->where('id', '[a-f0-9-]+'); // Regex untuk menerima format UUID
+        Route::resource('teachers', TeacherController::class);
+        // Jika masih 404, tambahkan baris eksplisit ini DI ATAS resource:
+    Route::get('teachers/{teacher}/edit', [App\Http\Controllers\TeacherController::class, 'edit'])->name('teachers.edit');
+        // Route::resource('teachers', TeacherController::class)->except(['create', 'store']);
+        // Route::resource('teachers', App\Http\Controllers\TeacherController::class)
+        //   ->parameters(['teachers' => 'teacher']) // Menyamakan parameter
+        //   ->where(['teacher' => '[a-f0-9-]+']); // Memaksa Laravel menerima format UUID
 
         // Route::resource('students', StudentController::class)->except(['create', 'show', 'store', 'index']);
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');

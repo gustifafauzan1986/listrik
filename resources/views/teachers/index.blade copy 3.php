@@ -154,7 +154,43 @@
                 }
             });
         });
-        
+        // $(document).on('click', '.btn-edit', function() {
+        //     let id = $(this).data('id');
+        //     let btn = $(this);
+            
+        //     // Membuat URL dinamis dari nama Route Laravel
+        //     let urlAction = "{{ route('teachers.edit.json', ':id') }}";
+        //     urlAction = urlAction.replace(':id', id); 
+
+        //     // Visual feedback saat loading
+        //     btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+        //     $.ajax({
+        //         url: urlAction,
+        //         type: "GET",
+        //         dataType: "JSON",
+        //         success: function(data) {
+        //             // Isi form modal
+        //             $('#edit_name').val(data.user.name);
+        //             $('#edit_email').val(data.user.email);
+        //             $('#edit_nip').val(data.nip);
+        //             $('#edit_phone').val(data.phone);
+        //             $('#edit_gender').val(data.gender);
+                    
+        //             // Update Action URL Form untuk proses Update (PUT)
+        //             let updateUrl = "{{ url('teachers') }}/" + id;
+        //             $('#formEditTeacher').attr('action', updateUrl);
+                    
+        //             $('#modalEditTeacher').modal('show');
+        //             btn.prop('disabled', false).html('<i class="bx bx-message-square-edit"></i>');
+        //         },
+        //         error: function(xhr) {
+        //             console.error("Detail Error:", xhr.responseText);
+        //             alert("Gagal mengambil data. Error: " + xhr.status + " (" + xhr.statusText + ")");
+        //             btn.prop('disabled', false).html('<i class="bx bx-message-square-edit"></i>');
+        //         }
+        //     });
+        // });
 
     </script>
 </x-app-layout>
