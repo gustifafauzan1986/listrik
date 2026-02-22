@@ -41,23 +41,20 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="text-muted italic">Gateway yang offline tidak dapat dipilih.</small>
                                 </div>
 
                                 <hr>
 
                                 <div class="mb-3 p-3 bg-light rounded border">
                                     <label class="form-label fw-bold d-block mb-2">Target Penerima <span class="text-danger">*</span></label>
-                                    <div class="form-check form-check-inline me-3">
+                                    <div class="form-check form-check-inline me-4">
                                         <input class="form-check-input" type="radio" name="target_type" id="target_parents" value="parents" checked>
-                                        <label class="form-check-label fw-bold" for="target_parents">Per Kelas</label>
-                                    </div>
-                                    <div class="form-check form-check-inline me-3">
-                                        <input class="form-check-input" type="radio" name="target_type" id="target_teachers" value="teachers">
-                                        <label class="form-check-label fw-bold" for="target_teachers">Seluruh Guru</label>
+                                        <label class="form-check-label fw-bold" for="target_parents">Orang Tua Siswa (Per Kelas)</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="target_type" id="target_manual" value="manual">
-                                        <label class="form-check-label fw-bold" for="target_manual">Nomor Manual</label>
+                                        <input class="form-check-input" type="radio" name="target_type" id="target_teachers" value="teachers">
+                                        <label class="form-check-label fw-bold" for="target_teachers">Seluruh Guru</label>
                                     </div>
                                 </div>
 
@@ -71,29 +68,23 @@
                                     </select>
                                 </div>
 
-                                <div class="mb-3" id="wrapper_manual" style="display: none;">
-                                    <label class="form-label fw-bold">Masukkan Nomor HP <span class="text-danger">*</span></label>
-                                    <textarea name="manual_numbers" id="manual_numbers" class="form-control border-primary" rows="3" placeholder="Contoh: 62812345678, 62898765432"></textarea>
-                                    <small class="text-muted">Pisahkan nomor dengan koma atau baris baru. Gunakan kode negara (62).</small>
-                                </div>
-
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Isi Pesan <span class="text-danger">*</span></label>
-                                    <textarea name="message" class="form-control border-primary" rows="6" placeholder="Tulis pesan Anda di sini..." required></textarea>
-                                    <div class="form-text text-end">
-                                        Gunakan <b>*teks*</b> (tebal), <b>_teks_</b> (miring), <b>~teks~</b> (coret).
+                                    <textarea name="message" class="form-control border-primary" rows="6" placeholder="Tulis pengumuman di sini..." required></textarea>
+                                    <div class="form-text">
+                                        Tips: Gunakan <b>*teks*</b> untuk tebal, <b>_teks_</b> untuk miring.
                                     </div>
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="form-label fw-bold">Lampiran File (Opsional)</label>
                                     <input type="file" name="attachment" class="form-control">
-                                    <div class="form-text">Maksimal 5MB (Gambar/Dokumen).</div>
+                                    <div class="form-text">JPG, PNG, PDF, atau DOC (Max 5MB).</div>
                                 </div>
 
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary btn-lg shadow">
-                                        <i class="fab fa-whatsapp me-2"></i> Kirim Broadcast
+                                        <i class="fab fa-whatsapp me-2"></i> Kirim Broadcast Sekarang
                                     </button>
                                 </div>
                             </form>
@@ -102,13 +93,7 @@
 
                     <div class="shadow card">
                         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-history me-2"></i> Riwayat Pengiriman</h5>
-                            @if(isset($logs) && $logs->count() > 0)
-                                <form action="{{ route('whatsapp.logs.clear') }}" method="POST" onsubmit="return confirm('Hapus semua riwayat?');">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger">Bersihkan Riwayat</button>
-                                </form>
-                            @endif
+                            <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-history me-2"></i> Riwayat Broadcast Terakhir</h5>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -117,6 +102,7 @@
                                         <tr>
                                             <th class="ps-4">Waktu</th>
                                             <th>Tujuan</th>
+                                            <th>Pesan</th>
                                             <th>Status</th>
                                             <th class="text-end pe-4">Aksi</th>
                                         </tr>
@@ -126,6 +112,7 @@
                                         <tr>
                                             <td class="ps-4 small">{{ $log->created_at->format('d/m H:i') }}</td>
                                             <td class="fw-bold">{{ $log->recipient_number }}</td>
+                                            <td><small class="text-truncate d-inline-block" style="max-width: 250px;">{{ $log->message }}</small></td>
                                             <td>
                                                 @if($log->status == 'success')
                                                     <span class="badge bg-success">Terkirim</span>
@@ -136,12 +123,14 @@
                                             <td class="text-end pe-4">
                                                 <form action="{{ route('whatsapp.logs.delete', $log->id) }}" method="POST">
                                                     @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-link text-danger"><i class="fas fa-trash"></i></button>
+                                                    <button class="btn btn-sm btn-link text-danger p-0"><i class="fas fa-trash"></i></button>
                                                 </form>
                                             </td>
                                         </tr>
                                         @empty
-                                        <tr><td colspan="4" class="text-center py-4">Tidak ada data.</td></tr>
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted small">Belum ada riwayat pengiriman.</td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -156,26 +145,23 @@
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         $(document).ready(function() {
+            // Inisialisasi Select2
             $('.select2').select2({ theme: "bootstrap-5" });
 
+            // Logika Tampilkan/Sembunyikan Kelas
             $('input[name="target_type"]').on('change', function() {
-                const val = $(this).val();
-                
-                // Hide all and remove required
-                $('#wrapper_classroom, #wrapper_manual').hide();
-                $('#classroom_id, #manual_numbers').removeAttr('required');
-
-                if (val === 'parents') {
+                if ($(this).val() === 'teachers') {
+                    $('#wrapper_classroom').slideUp();
+                    $('#classroom_id').removeAttr('required');
+                } else {
                     $('#wrapper_classroom').slideDown();
                     $('#classroom_id').attr('required', 'required');
-                } else if (val === 'manual') {
-                    $('#wrapper_manual').slideDown();
-                    $('#manual_numbers').attr('required', 'required');
                 }
             });
         });
