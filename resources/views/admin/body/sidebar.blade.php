@@ -235,7 +235,7 @@ $status = $guruId->status;
 
 				<!-- MENU PENGATURAN (Hanya muncul untuk Super Selain Admin & Admin) -->
 				@hasanyrole('piket|guru|admin')
-                <li class="menu-label">Rekap Datang & Pulang</li>
+                <li class="menu-label">Presensi & Laporan</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bxs-barcode'></i>
@@ -250,6 +250,15 @@ $status = $guruId->status;
 						</li>
 
 					</ul>
+				</li>
+
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"> <i class="bx bxs-report"></i></div>
+						<div class="menu-title">Laporan</div>
+					</a>
+				<ul>
+					<li> <a href="{{route('daily_attendance.report')}}"><i class='bx bx-border-all'></i>Gerbang</a>
 				</li>
                 @endrole
 

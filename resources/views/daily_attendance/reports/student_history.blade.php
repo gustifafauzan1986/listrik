@@ -72,13 +72,6 @@
 </head>
 <body>
 
-    <!-- Kop Surat -->
-    <!-- <div class="header">
-        <h1>{{$school['name']}}</h1>
-        <p>{{$school['address']}} | Telp: {{$school['phone']}}</p>
-        <p>Laporan Riwayat Kehadiran Siswa</p>
-    </div> -->
-
      <table class="header-table-logo">
         <tr>
             <!-- LOGO KIRI -->
