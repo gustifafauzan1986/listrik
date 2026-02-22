@@ -251,6 +251,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/guidance/{guidanceId}/print-agreement', [GuidanceController::class, 'printAgreement'])->name('admin.guidance.print_agreement');
 
         Route::post('/guidance/{id}/summon', [GuidanceController::class, 'sendSummon'])->name('admin.guidance.summon');
+
+        Route::post('/izin/store', [StudentPermissionController::class, 'store'])->name('izin.store');
+        Route::post('/izin/show', [StudentPermissionController::class, 'show'])->name('izin.show');
+        Route::post('/izin/check', [StudentPermissionController::class, 'check'])->name('izin.check');
+        Route::post('/izin/return', [StudentPermissionController::class, 'markReturn'])->name('izin.return');
+        Route::get('/izin/print/{id}', [StudentPermissionController::class, 'print'])->name('izin.print');
     });
 
     // =========================================================================
@@ -460,11 +466,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/scan-camera', [ScannerDeviceController::class, 'scan'])->name('scan.camera');
 
-        Route::post('/izin/store', [StudentPermissionController::class, 'store'])->name('izin.store');
-        Route::post('/izin/show', [StudentPermissionController::class, 'show'])->name('izin.show');
-        Route::post('/izin/check', [StudentPermissionController::class, 'check'])->name('izin.check');
-        Route::post('/izin/return', [StudentPermissionController::class, 'markReturn'])->name('izin.return');
-        Route::get('/izin/print/{id}', [StudentPermissionController::class, 'print'])->name('izin.print');
+        
 
 
         // --- REKAPITULASI MENYELURUH (MASTER RECAP) ---
