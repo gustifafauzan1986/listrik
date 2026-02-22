@@ -80,8 +80,7 @@ $status = $guruId->status;
 
                 @endrole
 
-				<!-- MENU PENGATURAN (Hanya muncul untuk Super Admin & Admin) -->
-				@hasanyrole('super_admin|admin')
+                @role('admin')
 
 				<li>
 					<a class="has-arrow" href="javascript:;">
@@ -233,8 +232,7 @@ $status = $guruId->status;
 
                 @endrole
 
-				<!-- MENU PENGATURAN (Hanya muncul untuk Super Selain Admin & Admin) -->
-				@hasanyrole('piket|guru|admin')
+                @role('piket|guru|admin')
                 <li class="menu-label">Rekap Datang & Pulang</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">

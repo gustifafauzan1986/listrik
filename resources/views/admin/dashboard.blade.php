@@ -1,14 +1,75 @@
-@section('title', 'Dashboard Admin')
+@section('title', 'Dashboard Monitoring')
 
 <x-app-layout>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        
+        .page-content { 
+            background: #f4f7fa; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            padding: 20px;
+        }
+
+        /* Grouping Section */
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i { margin-right: 8px; font-size: 18px; color: #3b82f6; }
+
+        /* Card Customization */
+        .bento-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        .bento-card:hover { transform: translateY(-3px); }
+
+        /* Dashboard Filter Floating */
+        .filter-container {
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Icon Backgrounds */
+        .icon-box {
+            width: 45px; height: 45px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+
+        .chart-height { height: 300px; position: relative; }
+
+        @media (max-width: 768px) {
+            .filter-container { flex-direction: column; gap: 10px; text-align: center; }
+        }
+    </style>
+
     <div class="page-content">
-
-        <!-- HEADER FILTER -->
-        <!-- <div class="d-flex justify-content-between align-items-center mb-4">
-            <h6 class="mb-0 text-uppercase">Ringkasan Data</h6>
+        
+        <div class="filter-container">
+            <div>
+                <h5 class="fw-bold mb-0">E-Monitoring Dashboard</h5>
+                <p class="text-muted small mb-0">Update terakhir: {{ now()->format('d M Y, H:i') }}</p>
+            </div>
             <form method="GET" class="d-flex gap-2">
-                <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <option value="harian" {{ $filter == 'harian' ? 'selected' : '' }}>Harian (7 Hari)</option>
+                <select name="filter" class="form-select border-1" onchange="this.form.submit()" style="border-radius: 8px;">
+                    <option value="harian" {{ $filter == 'harian' ? 'selected' : '' }}>Harian</option>
                     <option value="mingguan" {{ $filter == 'mingguan' ? 'selected' : '' }}>Mingguan</option>
                     <option value="bulanan" {{ $filter == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
                     <option value="semester" {{ $filter == 'semester' ? 'selected' : '' }}>Semester</option>
@@ -16,576 +77,208 @@
                 </select>
             </form>
         </div>
-        <hr/> -->
 
-        <!-- BARIS 1: DATA PENGGUNA UTAMA -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
-            <div class="col">
-                <div class="card radius-10 border-start border-0 border-4 border-info">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Total Pengguna</p>
-                                <h4 class="my-1 text-info">{{ $countUser ?? 0 }}</h4>
-                            </div>
-                            <div class="widgets-icons-2 rounded-circle bg-gradient-blues text-white ms-auto">
-                                <i class='bx bx-user'></i>
-                            </div>
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="bento-card card h-100 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-light-primary text-primary"><i class='bx bx-user'></i></div>
+                        <div class="ms-3">
+                            <p class="mb-0 text-muted small fw-bold">User</p>
+                            <h5 class="mb-0 fw-bold">{{ $countUser }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card radius-10 border-start border-0 border-4 border-info">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Total Guru</p>
-                                <h4 class="my-1 text-danger">{{ $countAllTeacher ?? 0 }}</h4>
-                                <!-- <p class="mb-0 font-13">Admin: {{ $countAdmin }} | Piket: {{ $countPiket }} | Guru: {{ $countGuru }}</p> -->
-                            </div>
-                            <div class="widgets-icons-2 rounded-circle bg-gradient-burning text-white ms-auto">
-                                <i class='bx bx-chalkboard'></i>
-                            </div>
+            <div class="col-6 col-md-3">
+                <div class="bento-card card h-100 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-light-danger text-danger"><i class='bx bx-chalkboard'></i></div>
+                        <div class="ms-3">
+                            <p class="mb-0 text-muted small fw-bold">Guru</p>
+                            <h5 class="mb-0 fw-bold">{{ $countAllTeacher }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card radius-10 border-start border-0 border-4 border-info">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Total Siswa</p>
-                                <h4 class="my-1 text-warning">{{ $countStudent ?? 0 }}</h4>
-                            </div>
-                            <div class="widgets-icons-2 rounded-circle bg-gradient-orange text-white ms-auto">
-                                <i class='bx bxs-group'></i>
-                            </div>
+            <div class="col-6 col-md-3">
+                <div class="bento-card card h-100 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-light-warning text-warning"><i class='bx bxs-group'></i></div>
+                        <div class="ms-3">
+                            <p class="mb-0 text-muted small fw-bold">Siswa</p>
+                            <h5 class="mb-0 fw-bold">{{ $countStudent }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-               <div class="card radius-10 border-start border-0 border-4 border-info">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Absensi Gerbang</p>
-                                <h4 class="my-1 text-success">{{ $countPresensi ?? 0 }}</h4>
-                                <!-- <small class="text-muted">Masuk: {{ $countPresensiMasuk }} | Plg: {{ $countPresensiPulang }}</small> -->
-                            </div>
-                            <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto">
-                                <i class='bx bx-scan'></i>
-                            </div>
+            <div class="col-6 col-md-3">
+                <div class="bento-card card h-100 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-light-success text-success"><i class='bx bx-scan'></i></div>
+                        <div class="ms-3">
+                            <p class="mb-0 text-muted small fw-bold">Presensi</p>
+                            <h5 class="mb-0 fw-bold">{{ $countPresensi }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- BARIS 2: DATA AKADEMIK -->
-        <!-- <h6 class="mb-0 text-uppercase">Statistik Akademik</h6>
-        <hr/> -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-2 row-cols-xxl-4">
-            <div class="col">
-                <div class="card radius-10 bg-gradient-cosmic">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Mata Pelajaran</p>
-                                <h4 class="my-1 text-white">{{ $countMapel ?? 0 }}</h4>
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-book'></i></div>
-                        </div>
+        <div class="section-title"><i class='bx bx-door-open'></i> Monitoring Kehadiran Gerbang</div>
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-xl-8">
+                <div class="bento-card card p-4">
+                    <h6 class="fw-bold mb-4">Tren Kehadiran Gerbang ({{ ucfirst($filter) }})</h6>
+                    <div class="chart-height">
+                        <canvas id="chartTrendGerbangOnly"></canvas>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card radius-10 bg-gradient-ibiza">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Total Kelas</p>
-                                <h4 class="my-1 text-white">{{ $countKelasTotal ?? 0 }}</h4>
-                                <!-- <small class="text-white">Isi: {{ $countKelasIsi }} | Kosong: {{ $countKelasKosong }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-door-open'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10 bg-gradient-ohhappiness">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-dark">Jurusan</p>
-                                <h4 class="my-1 text-dark">{{ $countJurusan ?? 0 }}</h4>
-                            </div>
-                            <div class="text-dark ms-auto font-35"><i class='bx bxs-graduation'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-               <div class="card radius-10 bg-gradient-kyoto">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Jadwal Mapel</p>
-                                <h4 class="my-1 text-white">{{ $countJadwal ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- HEADER FILTER -->
-        <div class="d-flex justify-content-between align-items-center mb-4 ">
-            <h6 class="mb-0 text-uppercase">STATISTIK DATA</h6>
-            <form method="GET" class="d-flex gap-2">
-                <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <option value="harian" {{ $filter == 'harian' ? 'selected' : '' }}>Harian (7 Hari)</option>
-                    <option value="mingguan" {{ $filter == 'mingguan' ? 'selected' : '' }}>Mingguan</option>
-                    <option value="bulanan" {{ $filter == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
-                    <option value="semester" {{ $filter == 'semester' ? 'selected' : '' }}>Semester</option>
-                    <option value="tahunan" {{ $filter == 'tahunan' ? 'selected' : '' }}>Tahunan</option>
-                </select>
-            </form>
-        </div>
-        <hr/>
-
-        <!-- BARIS 3: GRAFIK -->
-        
-
-        <div class="row row-cols-1 row-cols-md-1 row-cols-xl-5 mb-4">
-            <div class="col">
-                <div class="card radius-10 bg-success bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Hadir Gerbang</p>
-                                <h4 class="my-1 text-white">{{ $pieDataGerbang[0] ?? 0 }}</h4>
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-book'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10 bg-primary bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Terlambat</p>
-                                <h4 class="my-1 text-white">{{ $pieDataGerbang[1] ?? 0 }}</h4>
-                                <!-- <small class="text-white">Isi: {{ $countKelasIsi }} | Kosong: {{ $countKelasKosong }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-door-open'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10 bg-warning bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-dark">Sakit</p>
-                                <h4 class="my-1 text-dark">{{ $pieDataGerbang[2] ?? 0 }}</h4>
-                            </div>
-                            <div class="text-dark ms-auto font-35"><i class='bx bxs-graduation'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-               <div class="card radius-10 bg-secondary bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Izin</p>
-                                <h4 class="my-1 text-white">{{ $pieDataGerbang[3] ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col">
-               <div class="card radius-10 bg-danger bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Alpa</p>
-                                <h4 class="my-1 text-white">{{ $pieDataGerbang[4] ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row row-cols-1 row-cols-md-1 row-cols-xl-5 mb-4">
-            <div class="col">
-                <div class="card radius-10 bg-success bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Hadir PBM</p>
-                                <h4 class="my-1 text-white">{{ $pieData[0] ?? 0 }}</h4>
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-book'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10 bg-primary bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Terlambat</p>
-                                <h4 class="my-1 text-white">{{ $pieData[1] ?? 0 }}</h4>
-                                <!-- <small class="text-white">Isi: {{ $countKelasIsi }} | Kosong: {{ $countKelasKosong }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-door-open'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10 bg-warning bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-dark">Sakit</p>
-                                <h4 class="my-1 text-dark">{{ $pieData[2] ?? 0 }}</h4>
-                            </div>
-                            <div class="text-dark ms-auto font-35"><i class='bx bxs-graduation'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-               <div class="card radius-10 bg-secondary bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Izin</p>
-                                <h4 class="my-1 text-white">{{ $pieData[3] ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col">
-               <div class="card radius-10 bg-danger bg-gradient">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-white">Alpa</p>
-                                <h4 class="my-1 text-white">{{ $pieData[4] ?? 0 }}</h4>
-                                <!-- <small class="text-white">Total Hadir: {{ $countMapelHadir }}</small> -->
-                            </div>
-                            <div class="text-white ms-auto font-35"><i class='bx bx-calendar'></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row row-cols-1 row-cols-md-1 row-cols-xl-1 row-cols-xxl-2">
-
-                <div class="row">
-                   <div class="col-12 col-lg-12">
-                      <!-- <div class="card radius-10 border-start border-0 border-4 border-info"> -->
-                        <div class="card radius-10">
-                            <div class="card-header border-bottom-0 bg-transparent">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <h6 class="mb-0">Tren Kehadiran Gerbang ({{ ucfirst($filter) }})</h6>
-                                    </div>
+            <div class="col-12 col-xl-4">
+                <div class="bento-card card p-4">
+                    <h6 class="fw-bold mb-4">Status Gerbang</h6>
+                    <div style="height: 200px;"><canvas id="chartPieGerbangOnly"></canvas></div>
+                    <div class="mt-4">
+                        @php $labels = ['Hadir', 'Terlambat', 'Sakit', 'Izin', 'Alpha']; $colors = ['success', 'warning', 'info', 'primary', 'danger']; @endphp
+                        <div class="row g-2">
+                            @foreach($labels as $index => $label)
+                            <div class="col-6">
+                                <div class="p-2 border rounded text-center">
+                                    <small class="text-muted d-block">{{ $label }}</small>
+                                    <span class="fw-bold text-{{ $colors[$index] }}">{{ $pieDataGerbang[$index] ?? 0 }}</span>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div class="chart-container-1">
-                                    <canvas id="chartTrendGerbang"></canvas>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
-				   </div>
-				</div><!--end row-->	
-                
-                <div class="row">
-                   <div class="col-12 col-lg-12">
-                      <!-- <div class="card radius-10 border-start border-0 border-4 border-info"> -->
-                        <div class="card radius-10">
-                            <div class="card-header border-bottom-0 bg-transparent">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <h6 class="mb-0">Tren Kehadiran ({{ ucfirst($filter) }})</h6>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-container-1">
-                                    <canvas id="chartTrend"></canvas>
-                                </div>
-                            </div>
-                        </div>
-				   </div>
-				</div><!--end row-->	
-                
-                
-            
-        </div>
-
-        <!-- BARIS 3: GRAFIK -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-2 mb-4">
-           
-            <!-- Grafik Lingkaran -->
-            <div class="col-12 col-lg-4">
-                <div class="card radius-10">
-                    <div class="card-header border-bottom-0 bg-transparent">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <h6 class="mb-0">Kehadiran Gerbang ({{ ucfirst($filter) }})</h6>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container-2">
-                            <canvas id="chartPieGerbang"></canvas>
-                        </div>
-                        <ul class="list-group list-group-flush mt-3">
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Hadir <span class="badge bg-success rounded-pill">{{ $pieDataGerbang[0] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Terlambat <span class="badge bg-warning text-dark rounded-pill">{{ $pieDataGerbang[1] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Sakit <span class="badge bg-info rounded-pill">{{ $pieDataGerbang[2] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Izin <span class="badge bg-primary rounded-pill">{{ $pieDataGerbang[3] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Alpha <span class="badge bg-danger rounded-pill">{{ $pieDataGerbang[4] }}</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>   
-            </div>
-
-            <!-- Grafik Lingkaran -->
-            <div class="col-12 col-lg-4">
-                <div class="card radius-10">
-                    <div class="card-header border-bottom-0 bg-transparent">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <h6 class="mb-0">Kehadiran PBM ({{ ucfirst($filter) }})</h6>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container-2">
-                            <canvas id="chartPie"></canvas>
-                        </div>
-                        <ul class="list-group list-group-flush mt-3">
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Hadir <span class="badge bg-success rounded-pill">{{ $pieData[0] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Terlambat <span class="badge bg-warning text-dark rounded-pill">{{ $pieData[1] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Sakit <span class="badge bg-info rounded-pill">{{ $pieData[2] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Izin <span class="badge bg-primary rounded-pill">{{ $pieData[3] }}</span>
-                            </li>
-                            <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
-                                Alpha <span class="badge bg-danger rounded-pill">{{ $pieData[4] }}</span>
-                            </li>
-                        </ul>
                     </div>
                 </div>
-
-                
-
-                
             </div>
-            
         </div>
 
-        
-        
+        <div class="section-title"><i class='bx bx-book-reader'></i> Monitoring Pembelajaran (PBM)</div>
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-xl-4">
+                <div class="bento-card card p-4">
+                    <h6 class="fw-bold mb-4">Status Kehadiran PBM</h6>
+                    <div style="height: 200px;"><canvas id="chartPiePBMOnly"></canvas></div>
+                    <div class="list-group list-group-flush mt-4">
+                        @foreach($labels as $index => $label)
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-1">
+                            <small class="text-muted">{{ $label }}</small>
+                            <span class="badge bg-{{ $colors[$index] }} rounded-pill">{{ $pieData[$index] ?? 0 }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-8">
+                <div class="bento-card card p-4 h-100">
+                    <h6 class="fw-bold mb-4">Tren Kehadiran PBM ({{ ucfirst($filter) }})</h6>
+                    <div class="chart-height">
+                        <canvas id="chartTrendPBMOnly"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        
-
-        
-
+        <div class="section-title"><i class='bx bx-data'></i> Informasi Akademik</div>
+        <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+            <div class="col">
+                <div class="bento-card bg-primary text-white p-3 text-center">
+                    <h4 class="mb-0 fw-bold">{{ $countMapel }}</h4>
+                    <small>Mata Pelajaran</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="bento-card bg-info text-white p-3 text-center">
+                    <h4 class="mb-0 fw-bold">{{ $countKelasTotal }}</h4>
+                    <small>Total Kelas</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="bento-card bg-dark text-white p-3 text-center">
+                    <h4 class="mb-0 fw-bold">{{ $countJurusan }}</h4>
+                    <small>Jurusan</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="bento-card bg-secondary text-white p-3 text-center">
+                    <h4 class="mb-0 fw-bold">{{ $countJadwal }}</h4>
+                    <small>Jadwal Aktif</small>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- SCRIPT CHART.JS -->
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            
-            // --- 1. CHART BATANG (TREN) ---
-            var ctxBar = document.getElementById('chartTrend').getContext('2d');
-            new Chart(ctxBar, {
+            const chartOptions = {
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [2, 2] } },
+                    x: { grid: { display: false } }
+                }
+            };
+
+            // 1. Trend Gerbang
+            new Chart(document.getElementById('chartTrendGerbangOnly'), {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($chartDataGerbang['labels']) !!},
+                    datasets: [{
+                        label: 'Hadir',
+                        data: {!! json_encode($chartDataGerbang['hadir']) !!},
+                        borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.3
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // 2. Trend PBM
+            new Chart(document.getElementById('chartTrendPBMOnly'), {
                 type: 'bar',
                 data: {
                     labels: {!! json_encode($chartData['labels']) !!},
-                    datasets: [
-                        {
-                            label: 'Hadir',
-                            data: {!! json_encode($chartData['hadir']) !!},
-                            backgroundColor: '#15ca20',
-                            borderColor: '#15ca20',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Terlambat',
-                            data: {!! json_encode($chartData['terlambat']) !!},
-                            backgroundColor: '#ffc107',
-                            borderColor: '#ffc107',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Alpha',
-                            data: {!! json_encode($chartData['alpa']) !!},
-                            backgroundColor: '#fd3550',
-                            borderColor: '#fd3550',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#e9ecef' } },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-
-            // --- 1. CHART BATANG (TREN) GERBANG---
-            var ctxBar = document.getElementById('chartTrendGerbang').getContext('2d');
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: {!! json_encode($chartDataGerbang['labels']) !!},
-                    datasets: [
-                        {
-                            label: 'Hadir',
-                            data: {!! json_encode($chartDataGerbang['hadir']) !!},
-                            backgroundColor: '#15ca20',
-                            borderColor: '#15ca20',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Terlambat',
-                            data: {!! json_encode($chartDataGerbang['terlambat']) !!},
-                            backgroundColor: '#ffc107',
-                            borderColor: '#ffc107',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Alpha',
-                            data: {!! json_encode($chartDataGerbang['alpa']) !!},
-                            backgroundColor: '#fd3550',
-                            borderColor: '#fd3550',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#e9ecef' } },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-
-            // --- 2. CHART LINGKARAN (PIE) ---
-            var ctxPie = document.getElementById('chartPie').getContext('2d');
-            new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Hadir', 'Terlambat', 'Sakit', 'Izin', 'Alpha'],
                     datasets: [{
-                        data: {!! json_encode($pieData) !!},
-                        backgroundColor: [
-                            '#15ca20', // Hijau
-                            '#ffc107', // Kuning
-                            '#0dcaf0', // Cyan
-                            '#0d6efd', // Biru
-                            '#fd3550'  // Merah
-                        ],
-                        borderWidth: 0
+                        label: 'Hadir PBM',
+                        data: {!! json_encode($chartData['hadir']) !!},
+                        backgroundColor: '#3b82f6', borderRadius: 5
                     }]
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
+                options: chartOptions
             });
 
-            // --- 2. CHART LINGKARAN (PIE) ---
-            var ctxPie = document.getElementById('chartPieGerbang').getContext('2d');
-            new Chart(ctxPie, {
+            // 3. Pie Gerbang
+            new Chart(document.getElementById('chartPieGerbangOnly'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Hadir', 'Terlambat', 'Sakit', 'Izin', 'Alpha'],
                     datasets: [{
                         data: {!! json_encode($pieDataGerbang) !!},
-                        backgroundColor: [
-                            '#15ca20', // Hijau
-                            '#ffc107', // Kuning
-                            '#0dcaf0', // Cyan
-                            '#0d6efd', // Biru
-                            '#fd3550'  // Merah
-                        ],
-                        borderWidth: 0
+                        backgroundColor: ['#10b981', '#f59e0b', '#0ea5e9', '#6366f1', '#ef4444'],
+                        cutout: '80%'
                     }]
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
+            // 4. Pie PBM
+            new Chart(document.getElementById('chartPiePBMOnly'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hadir', 'Terlambat', 'Sakit', 'Izin', 'Alpha'],
+                    datasets: [{
+                        data: {!! json_encode($pieData) !!},
+                        backgroundColor: ['#10b981', '#f59e0b', '#0ea5e9', '#6366f1', '#ef4444'],
+                        cutout: '80%'
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
         });
     </script>
     @endpush
