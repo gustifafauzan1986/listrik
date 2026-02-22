@@ -22,7 +22,6 @@
                         <small>Gerbang SMK N 1 Bukittinggi</small>
                     </div>
                     <div class="text-center card-body bg-light">
-                        
                         <div class="mb-4 btn-group w-100" role="group">
                             <input type="radio" class="btn-check" name="scan_mode" id="mode_daily" value="daily" checked>
                             <label class="btn btn-outline-primary fw-bold" for="mode_daily">
@@ -43,7 +42,7 @@
                             </div>
                         </div>
 
-                        <div id="reader" style="width: 100%; border: 2px solid #3b82f6; border-radius:12px; min-height: 320px; background: #000; overflow:hidden;"></div>
+                        <div id="reader" style="width: 100%; border: 2px solid #3b82f6; border-radius:8px; min-height: 300px; background: #000; overflow:hidden;"></div>
                         <canvas id="capture-canvas" style="display:none;"></canvas>
 
                         <div class="mt-3">
@@ -74,19 +73,6 @@
                 sound.play().catch(e => console.warn("Audio blocked"));
             }
 
-            function captureFace() {
-                const video = document.querySelector('#reader video');
-                const canvas = document.getElementById('capture-canvas');
-                if (video) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    const context = canvas.getContext('2d');
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    return canvas.toDataURL('image/jpeg', 0.7);
-                }
-                return null;
-            }
-
             function safeResume() {
                 isProcessing = false;
                 try { if(isScanning) html5QrCode.resume(); } catch(e){}
@@ -104,39 +90,36 @@
                 }).then(() => safeResume());
             }
 
-            // --- ON SCAN SUCCESS ---
+            // --- FUNGSI SCAN SUCCESS ---
             function onScanSuccess(decodedText, decodedResult) {
                 if (!isScanning || isProcessing) return;
                 isProcessing = true;
-                
-                const capturedImage = captureFace(); 
                 html5QrCode.pause();
 
                 let mode = $('input[name="scan_mode"]:checked').val();
-                let deviceToken = localStorage.getItem('device_token') || 'GATE-BK';
+                let deviceToken = localStorage.getItem('device_token') || 'SATPAM-GATES-1';
 
                 if (mode === 'daily') {
-                    processDailyAttendance(decodedText, deviceToken, capturedImage);
+                    processDailyAttendance(decodedText, deviceToken);
                 } else {
-                    processPermission(decodedText, deviceToken, capturedImage);
+                    processPermission(decodedText, deviceToken);
                 }
             }
 
-            // --- 1. PROSES ABSENSI HARIAN ---
-            function processDailyAttendance(nis, token, image) {
+            // --- LOGIKA ABSENSI HARIAN ---
+            function processDailyAttendance(nis, token) {
                 Swal.fire({ title: 'Memproses Absensi...', didOpen: () => Swal.showLoading() });
 
                 $.ajax({
                     url: "{{ route('daily.store') }}",
                     type: "POST",
-                    data: { _token: "{{ csrf_token() }}", nis: nis, device_token: token, image: image },
+                    data: { _token: "{{ csrf_token() }}", nis: nis, device_token: token },
                     success: function(res) {
-                        const isSuccess = (res.status === 'success');
-                        playSound(isSuccess ? 'success' : 'error');
+                        playSound(res.status === 'success' ? 'success' : 'error');
                         Swal.fire({
-                            title: isSuccess ? 'BERHASIL' : 'GAGAL',
-                            text: res.message + (res.student ? ' - ' + res.student.name : ''),
-                            icon: isSuccess ? 'success' : 'error',
+                            title: res.message,
+                            text: res.student?.name || '',
+                            icon: res.status === 'success' ? 'success' : 'error',
                             timer: 3000,
                             showConfirmButton: false
                         }).then(() => safeResume());
@@ -145,9 +128,9 @@
                 });
             }
 
-            // --- 2. PROSES IZIN (KELUAR/MASUK) ---
-            function processPermission(nis, token, image) {
-                Swal.fire({ title: 'Cek Status Izin...', didOpen: () => Swal.showLoading() });
+            // --- FUNGSI IZIN KELUAR (FITUR BARU) ---
+            function processPermission(nis, token) {
+                Swal.fire({ title: 'Cek Status Siswa...', didOpen: () => Swal.showLoading() });
 
                 $.ajax({
                     url: "{{ route('izin.check') }}",
@@ -155,9 +138,9 @@
                     data: { _token: "{{ csrf_token() }}", nis: nis },
                     success: function(res) {
                         if (res.status === 'active_permission') {
-                            confirmReturn(res.data, image);
+                            confirmReturn(res.data);
                         } else if (res.status === 'can_leave') {
-                            inputReason(nis, res.student, image);
+                            inputReason(nis, res.student);
                         } else {
                             playSound('error');
                             Swal.fire({ title: 'Gagal', text: res.message, icon: 'error', timer: 3000, showConfirmButton: false })
@@ -168,72 +151,67 @@
                 });
             }
 
-            function inputReason(nis, student, image) {
+            function inputReason(nis, student) {
                 Swal.fire({
-                    title: 'Izin Keluar Sekolah',
+                    title: 'Izin Meninggalkan Sekolah',
                     html: `Siswa: <b>${student.name}</b><br>Kelas: ${student.classroom}`,
                     input: 'text',
-                    inputLabel: 'Alasan Keluar',
+                    inputLabel: 'Keperluan / Alasan',
                     inputPlaceholder: 'Contoh: Sakit, Urusan Keluarga...',
                     showCancelButton: true,
-                    confirmButtonText: 'Simpan & Keluar',
+                    confirmButtonText: 'Simpan Izin & Cetak',
                     cancelButtonText: 'Batal',
-                    inputValidator: (value) => { if (!value) return 'Alasan harus diisi!' }
+                    inputValidator: (value) => { if (!value) return 'Alasan wajib diisi!' }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        savePermission(nis, result.value, image);
+                        savePermission(nis, result.value);
                     } else {
                         safeResume();
                     }
                 });
             }
 
-            function savePermission(nis, reason, image) {
+            function savePermission(nis, reason) {
                 $.ajax({
                     url: "{{ route('izin.store') }}",
                     type: "POST",
-                    data: { _token: "{{ csrf_token() }}", nis: nis, reason: reason, image: image },
+                    data: { _token: "{{ csrf_token() }}", nis: nis, reason: reason },
                     success: function(res) {
                         playSound('success');
-                        // KHUSUS SUKSES IZIN: Tampilkan tombol cetak, JANGAN pakai timer
                         Swal.fire({
                             icon: 'success',
-                            title: 'Izin Berhasil!',
-                            html: `
-                                <div class="mt-2">
-                                    <p>Siswa: <b>${res.student_name}</b></p>
-                                    <a href="/izin/print/${res.id}" target="_blank" class="btn btn-primary btn-lg w-100">
-                                        <i class="fas fa-print"></i> CETAK SURAT IZIN
-                                    </a>
-                                </div>
-                            `,
+                            title: 'Izin Tercatat!',
+                            html: `Silakan ambil surat izin.<br><br>
+                                   <a href="/izin/print/${res.id}" target="_blank" class="btn btn-primary btn-lg">
+                                   <i class="fas fa-print"></i> CETAK SURAT IZIN</a>`,
                             showConfirmButton: true,
-                            confirmButtonText: 'Tutup & Scan Lagi',
-                            confirmButtonColor: '#28a745',
-                            allowOutsideClick: false
+                            confirmButtonText: 'Tutup & Lanjut'
                         }).then(() => safeResume());
                     },
                     error: function(xhr) { handleError(xhr); }
                 });
             }
 
-            function confirmReturn(permissionData, image) {
+            function confirmReturn(permissionData) {
                 Swal.fire({
                     title: 'Siswa Kembali?',
-                    html: `Siswa: <b>${permissionData.student.name}</b><br>Alasan: ${permissionData.reason}`,
+                    html: `Siswa <b>${permissionData.student.name}</b> tercatat izin keluar.<br>
+                           Alasan: "${permissionData.reason}"<br>
+                           Jam Keluar: ${permissionData.time_out}<br><br>
+                           Apakah siswa sudah kembali ke sekolah?`,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Ya, Masuk',
+                    confirmButtonText: 'Ya, Catat Kembali',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
                             url: "{{ route('izin.return') }}",
                             type: "POST",
-                            data: { _token: "{{ csrf_token() }}", id: permissionData.id, image: image },
+                            data: { _token: "{{ csrf_token() }}", id: permissionData.id },
                             success: function(res) {
                                 playSound('success');
-                                Swal.fire({ title: 'Berhasil', text: 'Siswa kembali masuk.', icon: 'success', timer: 3000, showConfirmButton: false })
+                                Swal.fire({ title: 'Berhasil', text: 'Siswa kembali ke sekolah.', icon: 'success', timer: 2000, showConfirmButton: false })
                                     .then(() => safeResume());
                             },
                             error: function(xhr) { handleError(xhr); }
@@ -244,7 +222,7 @@
                 });
             }
 
-            // --- KAMERA SETUP ---
+            // --- CAMERA SETUP ---
             Html5Qrcode.getCameras().then(devices => {
                 const cameraSelect = $('#camera-select');
                 if (devices && devices.length) {
