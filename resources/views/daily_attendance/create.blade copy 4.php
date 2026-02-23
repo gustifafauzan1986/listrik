@@ -18,7 +18,7 @@
                     </div>
                 </div>
 
-                @if(isset($gatePercentage) && $gatePercentage < 100)
+                @if(isset($gatePercentage) && $gatePercentage < 50)
                     <div class="shadow-sm alert alert-danger border-left-danger d-flex align-items-center justify-content-between">
                         <div>
                             <h5 class="alert-heading fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> PERHATIAN!</h5>
@@ -45,22 +45,10 @@
                             @csrf
 
                             <div class="mb-3 row">
-                                <div class="gap-2 col-md-6 d-flex">
-                                    @php
-                                        // Mengambil daftar nama kelas unik dari daftar siswa keseluruhan
-                                        // Sesuaikan 'classroom.name' jika struktur relasi DB Anda berbeda
-                                        $uniqueMainClasses = $students->pluck('classroom.name')->filter()->unique();
-                                    @endphp
-                                    <select id="filterMainClass" class="w-auto form-select">
-                                        <option value="">Semua Kelas</option>
-                                        @foreach($uniqueMainClasses as $cls)
-                                            <option value="{{ strtolower($cls) }}">{{ $cls }}</option>
-                                        @endforeach
-                                    </select>
-
+                                <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
-                                        <input type="text" id="searchStudent" class="form-control" placeholder="Cari Nama/NIS...">
+                                        <input type="text" id="searchStudent" class="form-control" placeholder="Cari Nama Siswa atau NIS...">
                                     </div>
                                 </div>
 
@@ -100,17 +88,12 @@
                                                 elseif ($dbStatus == 'alpha' || $dbStatus == 'alpa') $checked = 'alpa';
 
                                                 $isMissingGate = isset($studentsMissingGate) ? $studentsMissingGate->contains('id', $student->id) : false;
-
-                                                // Dapatkan nama kelas
-                                                $className = $student->classroom->name ?? $student->kelas ?? '-';
                                             @endphp
                                             <tr class="student-row {{ $isMissingGate ? 'table-danger' : '' }}">
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td class="text-center font-monospace student-nis">{{ $student->nis }}</td>
                                                 <td class="fw-bold student-name">
                                                     {{ $student->name }}
-                                                    <span class="student-class d-none">{{ $className }}</span>
-
                                                     @if($isMissingGate)
                                                         <span class="badge bg-danger ms-2" title="Belum Scan Gerbang">Belum Masuk</span>
                                                     @endif
@@ -180,6 +163,9 @@
 
                             <div class="gap-2 d-flex">
                                 @php
+                                    // Mengambil daftar nama kelas unik dari data siswa yang belum absen gerbang
+                                    // Asumsi relasi nama kelas ada di $mStudent->classroom->name
+                                    // Jika struktur DB Anda berbeda, sesuaikan 'classroom.name' di bawah ini
                                     $uniqueClasses = $studentsMissingGate->pluck('classroom.name')->filter()->unique();
                                 @endphp
                                 <select id="filterModalClass" class="form-select form-select-sm" style="min-width: 120px;">
@@ -252,6 +238,7 @@
                 checkAllBtn.addEventListener('change', function() {
                     let checkboxes = document.querySelectorAll('.student-check');
                     checkboxes.forEach(cb => {
+                        // Hanya check/uncheck yang barisnya visible (tidak tersaring fitur cari/filter)
                         if(cb.closest('tr').style.display !== 'none') {
                             cb.checked = this.checked;
                         }
@@ -273,9 +260,13 @@
                     let nis = row.querySelector('.modal-student-nis').textContent.toLowerCase();
                     let kelas = row.querySelector('.modal-student-class').textContent.toLowerCase();
 
+                    // Kondisi 1: Apakah nama atau NIS mengandung teks pencarian?
                     let matchText = name.includes(textFilter) || nis.includes(textFilter);
+
+                    // Kondisi 2: Apakah kelas cocok dengan filter dropdown? (Jika kosong berarti tampilkan semua)
                     let matchClass = (classFilter === '') || (kelas === classFilter);
 
+                    // Tampilkan hanya jika cocok keduanya
                     if (matchText && matchClass) {
                         row.style.display = '';
                     } else {
@@ -284,37 +275,29 @@
                 });
             }
 
+            // Pasang event listener ke input teks dan dropdown select
             if(searchModal) searchModal.addEventListener('keyup', applyModalFilters);
             if(filterClassModal) filterClassModal.addEventListener('change', applyModalFilters);
 
-
-            // SCRIPT FILTER KELAS & PENCARIAN SISWA TABEL UTAMA (CLIENT SIDE)
+            // SCRIPT PENCARIAN SISWA TABEL UTAMA (CLIENT SIDE)
             const searchMain = document.getElementById('searchStudent');
-            const filterClassMain = document.getElementById('filterMainClass');
+            if(searchMain) {
+                searchMain.addEventListener('keyup', function() {
+                    let filter = this.value.toLowerCase();
+                    let rows = document.querySelectorAll('.student-row');
 
-            function applyMainFilters() {
-                let textFilter = searchMain ? searchMain.value.toLowerCase() : '';
-                let classFilter = filterClassMain ? filterClassMain.value.toLowerCase() : '';
-                let rows = document.querySelectorAll('.student-row');
+                    rows.forEach(row => {
+                        let name = row.querySelector('.student-name').textContent.toLowerCase();
+                        let nis = row.querySelector('.student-nis').textContent.toLowerCase();
 
-                rows.forEach(row => {
-                    let name = row.querySelector('.student-name').textContent.toLowerCase();
-                    let nis = row.querySelector('.student-nis').textContent.toLowerCase();
-                    let kelas = row.querySelector('.student-class').textContent.toLowerCase();
-
-                    let matchText = name.includes(textFilter) || nis.includes(textFilter);
-                    let matchClass = (classFilter === '') || (kelas === classFilter);
-
-                    if (matchText && matchClass) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                        if (name.includes(filter) || nis.includes(filter)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
                 });
             }
-
-            if(searchMain) searchMain.addEventListener('keyup', applyMainFilters);
-            if(filterClassMain) filterClassMain.addEventListener('change', applyMainFilters);
         });
 
         // SCRIPT QUICK CHECK STATUS
