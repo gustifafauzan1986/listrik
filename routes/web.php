@@ -235,10 +235,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/guidance', [GuidanceController::class, 'index'])->name('admin.guidance.index');
         Route::get('/guidance/create', [GuidanceController::class, 'create'])->name('admin.guidance.create');
         Route::get('/guidance/{id}', [GuidanceController::class, 'show'])->name('admin.guidance.show');
-        
+
         // Simpan Pembinaan
         Route::post('/guidance/{id}/store', [GuidanceController::class, 'storeGuidance'])->name('admin.guidance.store');
-        
+
         // Simpan Pelanggaran
         Route::post('/guidance/{id}/violation', [GuidanceController::class, 'storeViolation'])->name('admin.violation.store');
         Route::get('/violationt/index', [ViolationTypeController::class, 'index'])->name('admin.violation-types.index');
@@ -466,7 +466,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/scan-camera', [ScannerDeviceController::class, 'scan'])->name('scan.camera');
 
-        
+
 
 
         // --- REKAPITULASI MENYELURUH (MASTER RECAP) ---

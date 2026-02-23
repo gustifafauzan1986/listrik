@@ -22,7 +22,7 @@
                         <small>Gerbang SMK N 1 Bukittinggi</small>
                     </div>
                     <div class="text-center card-body bg-light">
-
+                        
                         <div class="mb-4 btn-group w-100" role="group">
                             <input type="radio" class="btn-check" name="scan_mode" id="mode_daily" value="daily" checked>
                             <label class="btn btn-outline-primary fw-bold" for="mode_daily">
@@ -108,8 +108,8 @@
             function onScanSuccess(decodedText, decodedResult) {
                 if (!isScanning || isProcessing) return;
                 isProcessing = true;
-
-                const capturedImage = captureFace();
+                
+                const capturedImage = captureFace(); 
                 html5QrCode.pause();
 
                 let mode = $('input[name="scan_mode"]:checked').val();
