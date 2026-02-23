@@ -1,25 +1,30 @@
 @section('title')
-    Absensi Manual -
+    Absensi Manual - 
 @endsection
 
 <x-app-layout>
     <div class="page-content">
         <div class="row justify-content-center">
             <div class="col-md-12">
-
+                
+                <!-- Header -->
                 <div class="mb-4 d-flex justify-content-between align-items-center">
                     <div>
                         <h4 class="mb-1 fw-bold text-primary">Absensi Manual</h4>
                         <small class="text-muted fw-bold">
-                            <i class="fas fa-book-open me-1"></i>
-                            <span class="mx-2">|</span>
-                            <i class="fas fa-door-open me-1"></i>
+                            <i class="fas fa-book-open me-1"></i> 
+                            <span class="mx-2">|</span> 
+                            <i class="fas fa-door-open me-1"></i> 
                         </small>
                     </div>
+                    <!-- <a href="{{ route('daily.create') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali
+                    </a> -->
                 </div>
 
+                <!-- 1. ALERT & FITUR BANTUAN ABSEN GERBANG -->
                 @if(isset($gatePercentage) && $gatePercentage < 50)
-                    <div class="shadow-sm alert alert-danger border-left-danger d-flex align-items-center justify-content-between">
+                    <div class="alert alert-danger shadow-sm border-left-danger d-flex align-items-center justify-content-between">
                         <div>
                             <h5 class="alert-heading fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> PERHATIAN!</h5>
                             <p class="mb-0 small">
@@ -27,24 +32,26 @@
                                 <br>Siswa yang belum scan gerbang <strong>tidak dapat</strong> diabsen di mapel ini.
                             </p>
                         </div>
-                        <button type="button" class="shadow-sm btn btn-light text-danger fw-bold" data-bs-toggle="modal" data-bs-target="#bulkGateModal">
+                        <button type="button" class="btn btn-light text-danger fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkGateModal">
                             <i class="fas fa-magic me-1"></i> Bantuan: Absen Gerbang Otomatis
                         </button>
                     </div>
                 @elseif(isset($gatePercentage))
-                    <div class="mb-4 alert alert-info small">
-                        <i class="fas fa-check-circle me-1"></i>
+                    <div class="alert alert-info small mb-4">
+                        <i class="fas fa-check-circle me-1"></i> 
                         <strong>Status Gerbang Aman:</strong> {{ round($gatePercentage) }}% siswa sudah scan masuk.
                     </div>
                 @endif
 
+                <!-- 2. FORM ABSENSI MAPEL -->
                 <div class="shadow card border-top-primary">
                     <div class="card-body">
-
+                        
                         <form action="{{route('daily.storeManual')}}" method="POST">
                             @csrf
 
-                            <div class="mb-3 row">
+                            <div class="row mb-3">
+                                <!-- FITUR BARU: PENCARIAN SISWA -->
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
@@ -52,7 +59,8 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-2 col-md-6 text-md-end mt-md-0">
+                                <!-- TOMBOL QUICK CHECK -->
+                                <div class="col-md-6 text-md-end mt-2 mt-md-0">
                                     <span class="me-2 fw-bold small text-muted">Set Semua Ke:</span>
                                     <div class="btn-group" role="group">
                                         <button type="button" class="btn btn-sm btn-outline-success" onclick="setAllStatus('hadir')">Hadir</button>
@@ -66,7 +74,7 @@
 
                             <div class="table-responsive">
                                 <table class="table align-middle table-hover table-bordered" id="attendanceTable">
-                                    <thead class="text-center table-light">
+                                    <thead class="table-light text-center">
                                         <tr>
                                             <th width="5%">No</th>
                                             <th width="15%">NIS</th>
@@ -78,7 +86,7 @@
                                         @forelse($students as $index => $student)
                                             @php
                                                 $dbStatus = $existingAttendances[$student->id] ?? null;
-
+                                                
                                                 $checked = '';
                                                 // Mapping status
                                                 if ($dbStatus == 'present' || $dbStatus == 'hadir') $checked = 'hadir';
@@ -105,6 +113,7 @@
                                                         </div>
                                                     @else
                                                         <div class="btn-group w-100" role="group">
+                                                            <!-- Tambahkan class 'status-radio' untuk selector JS -->
                                                             <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="h_{{ $student->id }}" value="hadir" {{ $checked == 'hadir' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-success btn-sm" for="h_{{ $student->id }}">Hadir</label>
 
@@ -130,8 +139,8 @@
                                 </table>
                             </div>
 
-                            <div class="gap-2 mt-4 d-grid">
-                                <button type="submit" class="shadow-sm btn btn-primary btn-lg">
+                            <div class="mt-4 d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg shadow-sm">
                                     <i class="fas fa-save me-2"></i> Simpan Data Absensi Mapel
                                 </button>
                             </div>
@@ -143,64 +152,41 @@
         </div>
     </div>
 
+    <!-- 3. MODAL BANTUAN ABSENSI GERBANG (POPUP) -->
     @if(isset($studentsMissingGate) && $studentsMissingGate->count() > 0)
     <div class="modal fade" id="bulkGateModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="text-white modal-header bg-danger">
+                <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title fw-bold"><i class="fas fa-magic me-2"></i> Bantuan Absensi Gerbang</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('daily.store_bulk') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="border alert alert-light">
+                        <div class="alert alert-light border">
                             <p class="mb-0 small">Fitur ini digunakan jika terjadi kendala pada scanner gerbang atau siswa lupa scan. Guru/Piket dapat mengabsenkan mereka secara massal di gerbang agar status mapel terbuka.</p>
                         </div>
-
-                        <div class="mb-2 d-flex justify-content-between align-items-center">
-                            <p class="mb-0 fw-bold">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
-
-                            <div class="gap-2 d-flex">
-                                @php
-                                    // Mengambil daftar nama kelas unik dari data siswa yang belum absen gerbang
-                                    // Asumsi relasi nama kelas ada di $mStudent->classroom->name
-                                    // Jika struktur DB Anda berbeda, sesuaikan 'classroom.name' di bawah ini
-                                    $uniqueClasses = $studentsMissingGate->pluck('classroom.name')->filter()->unique();
-                                @endphp
-                                <select id="filterModalClass" class="form-select form-select-sm" style="min-width: 120px;">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach($uniqueClasses as $cls)
-                                        <option value="{{ strtolower($cls) }}">{{ $cls }}</option>
-                                    @endforeach
-                                </select>
-
-                                <div class="input-group input-group-sm" style="min-width: 200px;">
-                                    <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
-                                    <input type="text" id="searchModalStudent" class="form-control" placeholder="Cari Siswa...">
-                                </div>
-                            </div>
-                        </div>
-
+                        
+                        <p class="fw-bold mb-2">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
+                        
                         <div class="table-responsive" style="max-height: 300px; overflow-y:auto;">
                             <table class="table table-sm table-bordered">
-                                <thead class="table-light sticky-top">
+                                <thead class="table-light">
                                     <tr>
                                         <th width="40" class="text-center"><input type="checkbox" id="checkAll"></th>
                                         <th>Nama Siswa</th>
                                         <th>NIS</th>
-                                        <th>Kelas</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($studentsMissingGate as $mStudent)
-                                        <tr class="modal-student-row">
+                                        <tr>
                                             <td class="text-center">
                                                 <input type="checkbox" name="student_ids[]" value="{{ $mStudent->id }}" class="student-check" checked>
                                             </td>
-                                            <td class="modal-student-name">{{ $mStudent->name }}</td>
-                                            <td class="modal-student-nis">{{ $mStudent->nis }}</td>
-                                            <td class="modal-student-class">{{ $mStudent->classroom->name ?? $mStudent->kelas ?? '-' }}</td>
+                                            <td>{{ $mStudent->name }}</td>
+                                            <td>{{ $mStudent->nis }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -209,13 +195,16 @@
 
                         <div class="mt-3">
                             <label class="fw-bold small">Set Status Gerbang Sebagai:</label>
-                            <select name="status" class="w-auto form-select d-inline-block ms-2">
+                            <select name="status" class="form-select w-auto d-inline-block ms-2">
                                 <option value="hadir" selected>Hadir (Tepat Waktu)</option>
                                 <option value="terlambat">Terlambat</option>
                                 <option value="sakit">Sakit</option>
                                 <option value="izin">Izin</option>
                                 <option value="alpa">Alpa</option>
                             </select>
+                            <div class="form-text text-muted small mt-1">
+                                *Pilih "Sakit/Izin" untuk siswa yang tidak hadir, agar data harian lengkap.
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -226,102 +215,59 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Script Check All di Modal
+        document.getElementById('checkAll')?.addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.student-check');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
     @endif
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            // Script Check All di Modal
-            const checkAllBtn = document.getElementById('checkAll');
-            if(checkAllBtn) {
-                checkAllBtn.addEventListener('change', function() {
-                    let checkboxes = document.querySelectorAll('.student-check');
-                    checkboxes.forEach(cb => {
-                        // Hanya check/uncheck yang barisnya visible (tidak tersaring fitur cari/filter)
-                        if(cb.closest('tr').style.display !== 'none') {
-                            cb.checked = this.checked;
-                        }
-                    });
-                });
-            }
-
-            // SCRIPT FILTER KELAS & PENCARIAN DI MODAL (CLIENT SIDE)
-            const searchModal = document.getElementById('searchModalStudent');
-            const filterClassModal = document.getElementById('filterModalClass');
-
-            function applyModalFilters() {
-                let textFilter = searchModal ? searchModal.value.toLowerCase() : '';
-                let classFilter = filterClassModal ? filterClassModal.value.toLowerCase() : '';
-                let rows = document.querySelectorAll('.modal-student-row');
-
-                rows.forEach(row => {
-                    let name = row.querySelector('.modal-student-name').textContent.toLowerCase();
-                    let nis = row.querySelector('.modal-student-nis').textContent.toLowerCase();
-                    let kelas = row.querySelector('.modal-student-class').textContent.toLowerCase();
-
-                    // Kondisi 1: Apakah nama atau NIS mengandung teks pencarian?
-                    let matchText = name.includes(textFilter) || nis.includes(textFilter);
-
-                    // Kondisi 2: Apakah kelas cocok dengan filter dropdown? (Jika kosong berarti tampilkan semua)
-                    let matchClass = (classFilter === '') || (kelas === classFilter);
-
-                    // Tampilkan hanya jika cocok keduanya
-                    if (matchText && matchClass) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            }
-
-            // Pasang event listener ke input teks dan dropdown select
-            if(searchModal) searchModal.addEventListener('keyup', applyModalFilters);
-            if(filterClassModal) filterClassModal.addEventListener('change', applyModalFilters);
-
-            // SCRIPT PENCARIAN SISWA TABEL UTAMA (CLIENT SIDE)
-            const searchMain = document.getElementById('searchStudent');
-            if(searchMain) {
-                searchMain.addEventListener('keyup', function() {
-                    let filter = this.value.toLowerCase();
-                    let rows = document.querySelectorAll('.student-row');
-
-                    rows.forEach(row => {
-                        let name = row.querySelector('.student-name').textContent.toLowerCase();
-                        let nis = row.querySelector('.student-nis').textContent.toLowerCase();
-
-                        if (name.includes(filter) || nis.includes(filter)) {
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
-                });
-            }
-        });
-
         // SCRIPT QUICK CHECK STATUS
         function setAllStatus(value) {
             let radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
             radios.forEach(radio => {
+                // Hanya centang jika baris visible (tidak difilter) dan tidak disabled
                 if(!radio.disabled && radio.closest('tr').style.display !== 'none') {
                     radio.checked = true;
                 }
             });
         }
-    </script>
 
+        // SCRIPT PENCARIAN SISWA (CLIENT SIDE)
+        document.getElementById('searchStudent').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('.student-row');
+
+            rows.forEach(row => {
+                let name = row.querySelector('.student-name').textContent.toLowerCase();
+                let nis = row.querySelector('.student-nis').textContent.toLowerCase();
+
+                if (name.includes(filter) || nis.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
                 text: "{{ session('success') }}",
                 showConfirmButton: false,
-                timer: 2000
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
             });
         @endif
 
+        // Opsional: Cek jika ada error validasi
         @if($errors->any())
             Swal.fire({
                 icon: 'error',

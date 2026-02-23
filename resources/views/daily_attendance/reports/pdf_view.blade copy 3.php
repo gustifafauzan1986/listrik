@@ -36,23 +36,21 @@
         .bg-alpa { background-color: red; }
         .signature-section { margin-top: 40px; page-break-inside: avoid; }
         .footer-print { position: fixed; bottom: -50px; left: 0; right: 0; text-align: center; font-size: 10px; padding-top: 5px; border-top: 1px solid #ccc; width: 100%; }
-
-        /* Tambahan style untuk tanda tangan agar rata vertikal */
-        .signature-table { width: 100%; margin-top: 20px; }
-        .signature-table td { width: 33.33%; text-align: center; vertical-align: top; }
-        .signature-table p { margin: 2px 0; }
     </style>
 </head>
 <body>
 
+    <!-- KOP SURAT -->
     <table class="header-table">
         <tr>
+            <!-- LOGO KIRI (Sudah Base64 dari Controller) -->
             <td width="15%" class="text-center">
                 @if(!empty($school['logo_left']))
                     <img src="{{ $school['logo_left'] }}" class="logo-img">
                 @endif
             </td>
 
+            <!-- TENGAH -->
             <td width="70%" class="school-info">
                 <h1>DINAS {{ $school['provinsi_name'] }}</h1>
                 <h1>{{ $school['school_name'] }}</h1>
@@ -61,6 +59,7 @@
                 <p>{{ $school['school_web'] }}</p>
             </td>
 
+            <!-- LOGO KANAN (Sudah Base64 dari Controller) -->
             <td width="15%" class="text-center">
                 @if(!empty($school['logo_right']))
                     <img src="{{ $school['logo_right'] }}" class="logo-img">
@@ -130,44 +129,32 @@
     </table>
 
     <div class="signature-section">
-        <table class="signature-table">
+        <table width="100%">
             <tr>
-                <td>
-                    <p>Mengetahui,</p>
+                <td width="60%"></td>
+                <td width="40%" class="text-center">
+                    <p>{{ $school['sign_city'] }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+
                     @if(isset($id) && $id == 'guru')
                         <p>Guru Mata Pelajaran,</p>
-                        <br><br><br><br><br>
-                        <p style="text-decoration: underline; font-weight: bold; margin-bottom: 0;">{{ Auth::user()->name }}</p>
-                        <p style="margin-top: 2px;">NIP. {{ optional(Auth::user()->teacher)->nip ?? '-' }}</p>
+                        <br><br><br>
+                        <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">{{ Auth::user()->name }}</p>
+                        <p>NIP. {{ optional(Auth::user()->teacher)->nip ?? '-' }}</p>
                     @else
                         <p>{{ $school['sign_title'] }},</p>
 
+                        <!-- TANDA TANGAN (Sudah Base64 dari Controller) -->
                         @if(!empty($school['sign_image']))
                             <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
                                 <img src="{{ $school['sign_image'] }}" style="height: 120px; max-width: 100%; object-fit: contain;">
                             </div>
                         @else
-                            <br><br><br><br><br>
+                            <br><br><br>
                         @endif
 
-                        <p style="text-decoration: underline; font-weight: bold; margin-bottom: 0;">{{ $school['sign_name'] }}</p>
-                        <p style="margin-top: 2px;">NIP. {{ $school['sign_nip'] }}</p>
+                        <p style="text-decoration: underline; font-weight: bold; margin-top: 5px; margin-bottom: 1px;">{{ $school['sign_name'] }}</p>
+                        <p style="margin-top: 1px;">NIP. {{ $school['sign_nip'] }}</p>
                     @endif
-                </td>
-
-                <td>
-                    <p>&nbsp;</p> <p>Guru Bimbingan dan Konseling,</p>
-                    <br><br><br><br><br>
-                    <p style="text-decoration: underline; font-weight: bold; margin-bottom: 0;">{{ $guruBkName ?? '(............................................)' }}</p>
-                    <p style="margin-top: 2px;">NIP. {{ $guruBkNip ?? '.....................................' }}</p>
-                </td>
-
-                <td>
-                    <p>{{ $school['sign_city'] }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                    <p>Wali Kelas,</p>
-                    <br><br><br><br><br>
-                    <p style="text-decoration: underline; font-weight: bold; margin-bottom: 0;">{{ $waliKelasName ?? '(............................................)' }}</p>
-                    <p style="margin-top: 2px;">NIP. {{ $waliKelasNip ?? '.....................................' }}</p>
                 </td>
             </tr>
         </table>
@@ -224,5 +211,23 @@
             $pdf->page_text($xRight, $y, $textRight, $font, $size, $textColor);
         }
     </script>
+
+    {{-- <script type="text/php">
+        if (isset($pdf)) {
+            $text = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
+            $size = 9;
+            $font = $fontMetrics->getFont("Helvetica", "italic");
+            $width = $fontMetrics->get_text_width($text, $font, $size);
+            $color = array(0.5, 0.5, 0.5); // Warna Abu-abu
+
+            // Hitung posisi X agar mepet kanan (Lebar Halaman - Lebar Teks - Margin Kanan 30pt)
+            $x = $pdf->get_width() - $width - 30;
+
+            // Hitung posisi Y (sekitar 30px dari bawah)
+            $y = $pdf->get_height() - 30;
+
+            $pdf->page_text($x, $y, $text, $font, $size, $color);
+        }
+    </script> --}}
 </body>
 </html>

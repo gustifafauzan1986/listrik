@@ -193,6 +193,9 @@ Route::middleware(['auth'])->group(function () {
         // 1. Route Menampilkan Form Manual (GET)
         // Sesuai dengan method create() di controller
         Route::get('/daily-attendance/manual', [DailyAttendanceController::class, 'create'])->name('daily.create');
+        // 2. Route Menyimpan Data Manual (POST)
+        // Sesuai dengan method storeManual() di controller
+        Route::post('/daily-attendance/manual', [DailyAttendanceController::class, 'storeManual'])->name('daily.storeManual');
 
         //Route::get('/absensi/report', [DailyAttendanceController::class, 'report'])->name('daily_attendance.report');
         //Route::get('/absensi/laporan', [DailyAttendanceController::class, 'laporan'])->name('daily_attendance.report');
@@ -200,9 +203,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('laporan-gerbang', [DailyReportController::class, 'reportDaily'])->name('daily_attendance.report');
         Route::post('/report-absensi-print', [DailyReportController::class, 'printAbsensi'])->name('report.print.absensi');
 
-        // 2. Route Menyimpan Data Manual (POST)
-        // Sesuai dengan method storeManual() di controller
-        Route::post('/daily-attendance/manual', [DailyAttendanceController::class, 'storeManual'])->name('daily.storeManual');
 
         Route::get('/api/realtime-stats', [DashboardController::class, 'getRealtimeStats'])->name('api.stats');
 

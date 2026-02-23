@@ -16,7 +16,7 @@
                             <i class="fas fa-door-open me-1"></i>
                         </small>
                     </div>
-                </div>
+                    </div>
 
                 @if(isset($gatePercentage) && $gatePercentage < 50)
                     <div class="shadow-sm alert alert-danger border-left-danger d-flex align-items-center justify-content-between">
@@ -161,24 +161,9 @@
                         <div class="mb-2 d-flex justify-content-between align-items-center">
                             <p class="mb-0 fw-bold">Daftar Siswa Belum Absen Gerbang ({{ $studentsMissingGate->count() }}):</p>
 
-                            <div class="gap-2 d-flex">
-                                @php
-                                    // Mengambil daftar nama kelas unik dari data siswa yang belum absen gerbang
-                                    // Asumsi relasi nama kelas ada di $mStudent->classroom->name
-                                    // Jika struktur DB Anda berbeda, sesuaikan 'classroom.name' di bawah ini
-                                    $uniqueClasses = $studentsMissingGate->pluck('classroom.name')->filter()->unique();
-                                @endphp
-                                <select id="filterModalClass" class="form-select form-select-sm" style="min-width: 120px;">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach($uniqueClasses as $cls)
-                                        <option value="{{ strtolower($cls) }}">{{ $cls }}</option>
-                                    @endforeach
-                                </select>
-
-                                <div class="input-group input-group-sm" style="min-width: 200px;">
-                                    <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
-                                    <input type="text" id="searchModalStudent" class="form-control" placeholder="Cari Siswa...">
-                                </div>
+                            <div class="input-group input-group-sm w-50">
+                                <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+                                <input type="text" id="searchModalStudent" class="form-control" placeholder="Cari Siswa di daftar ini...">
                             </div>
                         </div>
 
@@ -189,7 +174,6 @@
                                         <th width="40" class="text-center"><input type="checkbox" id="checkAll"></th>
                                         <th>Nama Siswa</th>
                                         <th>NIS</th>
-                                        <th>Kelas</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -200,7 +184,6 @@
                                             </td>
                                             <td class="modal-student-name">{{ $mStudent->name }}</td>
                                             <td class="modal-student-nis">{{ $mStudent->nis }}</td>
-                                            <td class="modal-student-class">{{ $mStudent->classroom->name ?? $mStudent->kelas ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -216,6 +199,9 @@
                                 <option value="izin">Izin</option>
                                 <option value="alpa">Alpa</option>
                             </select>
+                            <div class="mt-1 form-text text-muted small">
+                                *Pilih "Sakit/Izin" untuk siswa yang tidak hadir, agar data harian lengkap.
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -238,7 +224,7 @@
                 checkAllBtn.addEventListener('change', function() {
                     let checkboxes = document.querySelectorAll('.student-check');
                     checkboxes.forEach(cb => {
-                        // Hanya check/uncheck yang barisnya visible (tidak tersaring fitur cari/filter)
+                        // Hanya check/uncheck yang barisnya visible (tidak tersaring fitur cari)
                         if(cb.closest('tr').style.display !== 'none') {
                             cb.checked = this.checked;
                         }
@@ -246,38 +232,25 @@
                 });
             }
 
-            // SCRIPT FILTER KELAS & PENCARIAN DI MODAL (CLIENT SIDE)
+            // SCRIPT PENCARIAN SISWA DI MODAL (CLIENT SIDE)
             const searchModal = document.getElementById('searchModalStudent');
-            const filterClassModal = document.getElementById('filterModalClass');
+            if(searchModal) {
+                searchModal.addEventListener('keyup', function() {
+                    let filter = this.value.toLowerCase();
+                    let rows = document.querySelectorAll('.modal-student-row');
 
-            function applyModalFilters() {
-                let textFilter = searchModal ? searchModal.value.toLowerCase() : '';
-                let classFilter = filterClassModal ? filterClassModal.value.toLowerCase() : '';
-                let rows = document.querySelectorAll('.modal-student-row');
+                    rows.forEach(row => {
+                        let name = row.querySelector('.modal-student-name').textContent.toLowerCase();
+                        let nis = row.querySelector('.modal-student-nis').textContent.toLowerCase();
 
-                rows.forEach(row => {
-                    let name = row.querySelector('.modal-student-name').textContent.toLowerCase();
-                    let nis = row.querySelector('.modal-student-nis').textContent.toLowerCase();
-                    let kelas = row.querySelector('.modal-student-class').textContent.toLowerCase();
-
-                    // Kondisi 1: Apakah nama atau NIS mengandung teks pencarian?
-                    let matchText = name.includes(textFilter) || nis.includes(textFilter);
-
-                    // Kondisi 2: Apakah kelas cocok dengan filter dropdown? (Jika kosong berarti tampilkan semua)
-                    let matchClass = (classFilter === '') || (kelas === classFilter);
-
-                    // Tampilkan hanya jika cocok keduanya
-                    if (matchText && matchClass) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                        if (name.includes(filter) || nis.includes(filter)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
                 });
             }
-
-            // Pasang event listener ke input teks dan dropdown select
-            if(searchModal) searchModal.addEventListener('keyup', applyModalFilters);
-            if(filterClassModal) filterClassModal.addEventListener('change', applyModalFilters);
 
             // SCRIPT PENCARIAN SISWA TABEL UTAMA (CLIENT SIDE)
             const searchMain = document.getElementById('searchStudent');
@@ -304,6 +277,7 @@
         function setAllStatus(value) {
             let radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
             radios.forEach(radio => {
+                // Hanya centang jika baris visible (tidak difilter) dan tidak disabled
                 if(!radio.disabled && radio.closest('tr').style.display !== 'none') {
                     radio.checked = true;
                 }
@@ -312,16 +286,18 @@
     </script>
 
     <script>
+        // Cek apakah ada session 'success' yang dikirim dari controller
         @if(session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
                 text: "{{ session('success') }}",
                 showConfirmButton: false,
-                timer: 2000
+                timer: 2000 // Notifikasi hilang otomatis setelah 2 detik
             });
         @endif
 
+        // Opsional: Cek jika ada error validasi
         @if($errors->any())
             Swal.fire({
                 icon: 'error',
