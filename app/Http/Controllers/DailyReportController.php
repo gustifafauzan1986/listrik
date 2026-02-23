@@ -85,7 +85,7 @@ class DailyReportController extends Controller
         $endDate = null;
         $labelPeriode = "";
         $id = Auth::user()->jenis_user;
-        
+
         // AMBIL DATA SEKOLAH (UPDATED KEY MAPPING)
         $school = $this->getSchoolData();
 
@@ -167,13 +167,13 @@ class DailyReportController extends Controller
             'id',
             'school'
         ));
-        
+
         $pdf->setOptions([
-            'isRemoteEnabled' => true, 
+            'isRemoteEnabled' => true,
             'isPhpEnabled' => true,
-            'chroot' => public_path(), 
+            'chroot' => public_path(),
         ]);
-        
+
         $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
 
         return $pdf->stream('Laporan-Kehadiran.pdf');
@@ -215,9 +215,9 @@ class DailyReportController extends Controller
 
         // FIX: Tambahkan options yang sama
         $pdf->setOptions([
-            'isRemoteEnabled' => true, 
+            'isRemoteEnabled' => true,
             'isPhpEnabled' => true,
-            'chroot' => public_path(), 
+            'chroot' => public_path(),
         ]);
 
         $pdf->setPaper($school['paper_size'], $school['paper_orientation']);
@@ -228,13 +228,13 @@ class DailyReportController extends Controller
     // --- HELPER UNTUK MENGUBAH GAMBAR JADI BASE64 AGAR TAMPIL DI PDF ---
     private function imageToBase64($path) {
         if (!$path || $path == '-') return null;
-        
+
         // Bersihkan path jika ada prefix 'storage/' ganda
         $cleanPath = str_replace('storage/', '', $path);
-        
+
         // Coba akses path fisik langsung (paling aman untuk DOMPDF)
         $fullPath = storage_path('app/public/' . $cleanPath);
-        
+
         if (!file_exists($fullPath)) {
             // Fallback ke public path jika file tidak ketemu di storage/app
             $fullPath = public_path('storage/' . $cleanPath);
@@ -245,7 +245,7 @@ class DailyReportController extends Controller
             $data = file_get_contents($fullPath);
             return 'data:image/' . $type . ';base64,' . base64_encode($data);
         }
-        
+
         return null;
     }
 
@@ -259,7 +259,8 @@ class DailyReportController extends Controller
             'school_phone'   => Setting::value('school_phone', '-'),
             'school_web'     => Setting::value('school_web', '-'),
             'school_email'   => Setting::value('school_email', '-'),
-            
+            'provinsi_name'   => Setting::value('provinsi_name', '-'),
+
             // Convert Logo ke Base64
             'logo_left'      => $this->imageToBase64(Setting::value('logo_left')),
             'logo_right'     => $this->imageToBase64(Setting::value('logo_right')),

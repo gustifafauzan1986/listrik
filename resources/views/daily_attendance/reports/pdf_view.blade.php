@@ -6,7 +6,7 @@
         @page {
             margin-top: {{ $school['margin_top'] ?? '2.5cm' }};
             margin-right: {{ $school['margin_right'] ?? '2.5cm' }};
-            margin-bottom: 3cm; 
+            margin-bottom: 3cm;
             margin-left: {{ $school['margin_left'] ?? '2.5cm' }};
         }
         body { font-family: sans-serif; font-size: 12px; }
@@ -44,6 +44,7 @@
 
             <!-- TENGAH -->
             <td width="70%" class="school-info">
+                <h1>DINAS {{ $school['provinsi_name'] }}</h1>
                 <h1>{{ $school['school_name'] }}</h1>
                 <p>{{ $school['school_address'] }}</p>
                 <p>Telp: {{ $school['school_phone'] }} | Email: {{ $school['school_email'] }}</p>
@@ -61,7 +62,7 @@
 
     <h3 class="text-center" style="text-transform: uppercase; margin-bottom: 5px;">LAPORAN DATANG & PULANG SISWA</h3>
     <h4 class="text-center" style="margin-top: 0; font-weight: normal; font-size: 12px;">{{ $labelPeriode ?? '' }}</h4>
-    
+
     @if(isset($labelTambahan))
         <h5 class="text-center" style="margin-top: 5px; font-weight: bold; text-decoration: underline; font-size: 12px;">{{ $labelTambahan }}</h5>
     @endif
@@ -84,8 +85,19 @@
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
                 <td class="text-center">{{ \Carbon\Carbon::parse($row->date)->translatedFormat('d/m/Y') }}</td>
+
+                @if($row->status == 'izin' || $row->status == 'sakit' || $row->status == 'alpa' )
+                <td class="text-center">-</td>
+                @else
                 <td class="text-center">{{ $row->arrival_time ? \Carbon\Carbon::parse($row->arrival_time)->format('H:i') : '-' }}</td>
+                @endif
+                @if($row->status == 'izin' || $row->status == 'sakit' || $row->status == 'alpa' )
+                <td class="text-center">-</td>
+                @else
                 <td class="text-center">{{ $row->departure_time ? \Carbon\Carbon::parse($row->departure_time)->format('H:i') : '-' }}</td>
+                @endif
+
+
                 <td>{{ $row->student->nis }}</td>
                 <td>{{ $row->student->name }}</td>
                 <td>{{ $row->student->classroom->name ?? '-' }}</td>
@@ -114,7 +126,7 @@
                 <td width="60%"></td>
                 <td width="40%" class="text-center">
                     <p>{{ $school['sign_city'] }}, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                    
+
                     @if(isset($id) && $id == 'guru')
                         <p>Guru Mata Pelajaran,</p>
                         <br><br><br>
@@ -122,7 +134,7 @@
                         <p>NIP. {{ optional(Auth::user()->teacher)->nip ?? '-' }}</p>
                     @else
                         <p>{{ $school['sign_title'] }},</p>
-                        
+
                         <!-- TANDA TANGAN (Sudah Base64 dari Controller) -->
                         @if(!empty($school['sign_image']))
                             <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
@@ -131,35 +143,83 @@
                         @else
                             <br><br><br>
                         @endif
-                        
-                        <p style="text-decoration: underline; font-weight: bold; margin-top: 5px;">{{ $school['sign_name'] }}</p>
-                        <p>NIP. {{ $school['sign_nip'] }}</p>
+
+                        <p style="text-decoration: underline; font-weight: bold; margin-top: 5px; margin-bottom: 1px;">{{ $school['sign_name'] }}</p>
+                        <p style="margin-top: 1px;">NIP. {{ $school['sign_nip'] }}</p>
                     @endif
                 </td>
             </tr>
         </table>
     </div>
 
-    <div class="footer-print">
+    {{-- <div class="footer-print">
         <small>dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }}</small>
-    </div>
-    
-<script type="text/php">
+    </div> --}}
+
+        <script type="text/php">
+        if (isset($pdf)) {
+            // ===========================================
+            // KONFIGURASI
+            // ===========================================
+            $font = $fontMetrics->getFont("Helvetica", "italic");
+            $size = 8;
+            $textColor = array(0.3, 0.3, 0.3); // Abu gelap (Teks)
+            $lineColor = array(0.8, 0.8, 0.8); // Abu pudar (Garis)
+
+            // Posisi Y dasar (35 point dari bawah)
+            $y = $pdf->get_height() - 35;
+
+            // ===========================================
+            // 1. GAMBAR GARIS (MENGGUNAKAN KOTAK TIPIS)
+            // ===========================================
+            // Trik: Gunakan filled_rectangle agar lebih kompatibel daripada line()
+            // Rumus: filled_rectangle(x, y, lebar, tinggi, warna)
+
+            $lineY = $y - 10;           // Posisi Y garis
+            $lineX = 30;                // Mulai dari kiri
+            $lineW = $pdf->get_width() - 60; // Lebar kertas dikurangi margin kiri-kanan (30+30)
+            $lineH = 1;                 // Ketebalan garis (1 point)
+
+            $pdf->filled_rectangle($lineX, $lineY, $lineW, $lineH, $lineColor);
+
+            // ===========================================
+            // 2. TEXT FOOTER
+            // ===========================================
+
+            // KIRI: Nama Aplikasi
+            $appName = "{{ \App\Models\Setting::value('app_name', 'GATECH') }} - Generated by System";
+            $pdf->page_text(30, $y, $appName, $font, $size, $textColor);
+
+            // KANAN: Halaman & Tanggal
+            $date = "{{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }}";
+            $textRight = "Dicetak: " . $date . " | Hal {PAGE_NUM} dari {PAGE_COUNT}";
+
+            // Hitung posisi X agar rata kanan
+            $width = $fontMetrics->get_text_width($textRight, $font, $size);
+
+            // Margin kanan 15 (sesuai request sebelumnya)
+            $xRight = $pdf->get_width() - $width - 15;
+
+            $pdf->page_text($xRight, $y, $textRight, $font, $size, $textColor);
+        }
+    </script>
+
+    {{-- <script type="text/php">
         if (isset($pdf)) {
             $text = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
             $size = 9;
             $font = $fontMetrics->getFont("Helvetica", "italic");
             $width = $fontMetrics->get_text_width($text, $font, $size);
             $color = array(0.5, 0.5, 0.5); // Warna Abu-abu
-            
+
             // Hitung posisi X agar mepet kanan (Lebar Halaman - Lebar Teks - Margin Kanan 30pt)
             $x = $pdf->get_width() - $width - 30;
-            
+
             // Hitung posisi Y (sekitar 30px dari bawah)
             $y = $pdf->get_height() - 30;
-            
+
             $pdf->page_text($x, $y, $text, $font, $size, $color);
         }
-    </script>
+    </script> --}}
 </body>
 </html>
