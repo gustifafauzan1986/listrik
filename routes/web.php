@@ -73,6 +73,7 @@ use App\Http\Controllers\Student\DashboardStudentController;
 use App\Http\Controllers\Student\PrayerStudentController;
 use App\Http\Controllers\Student\RamadanJournalStudentController;
 use App\Http\Controllers\Student\GuidanceStudentController;
+use App\Http\Controllers\Student\TahfizController;
 use App\Services\GithubVersionChecker; // Service Pengecekan Versi
 
 Route::view('/', 'welcome');
@@ -257,6 +258,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/izin/check', [StudentPermissionController::class, 'check'])->name('izin.check');
         Route::post('/izin/return', [StudentPermissionController::class, 'markReturn'])->name('izin.return');
         Route::get('/izin/print/{id}', [StudentPermissionController::class, 'print'])->name('izin.print');
+
+        // Route Tahfiz
+        Route::get('/tahfiz', [TahfizController::class, 'index'])->name('tahfiz.index');
+        Route::post('/tahfiz', [TahfizController::class, 'store'])->name('tahfiz.store');
+        Route::delete('/tahfiz/{id}', [TahfizController::class, 'destroy'])->name('tahfiz.destroy');
     });
 
     // =========================================================================
@@ -605,6 +611,8 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/guidance', [GuidanceStudentController::class, 'index'])->name('guidance.index');
             Route::post('/guidance/{id}/upload', [GuidanceStudentController::class, 'uploadAgreement'])->name('guidance.upload');
+
+            
         });
     });
 });

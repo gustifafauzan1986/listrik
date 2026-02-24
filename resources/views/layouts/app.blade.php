@@ -57,7 +57,11 @@
 		<!--end header -->
 		<!--start page wrapper -->
 		<div class="page-wrapper">
-			{{ $slot }}
+			@if (isset($slot))
+				{{ $slot }}
+			@else
+				@yield('content')
+			@endif
 		</div>
 		<!--end page wrapper -->
 		<!--start overlay-->
