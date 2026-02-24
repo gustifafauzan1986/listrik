@@ -24,7 +24,10 @@ class TahfizRecord extends Model
     {
         // Ganti User::class menjadi Student::class
         // Pastikan kolom student_id di tabel tahfiz_records merujuk ke ID di tabel students
-        return $this->belongsTo(\App\Models\Student::class, 'student_id');
+        // return $this->belongsTo(\App\Models\Student::class, 'student_id');
+        // student_id di tahfiz_records sebenarnya berisi user_id
+    // maka kita hubungkan student_id ke kolom user_id di tabel students
+    return $this->belongsTo(\App\Models\Student::class, 'student_id', 'user_id');
     }
 
     // Relasi ke Guru Penyimak
