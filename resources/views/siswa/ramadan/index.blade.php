@@ -2,13 +2,14 @@
 
 <x-app-layout>
     <div class="page-content">
+        <div class="row justify-content-center">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="mb-0 fw-bold text-success"><i class="fas fa-moon me-2"></i>Jurnal Ramadhan</h4>
-                <p class="text-muted small mb-0">Catat amalan harianmu di bulan suci.</p>
+                <p class="mb-0 text-muted small">Catat amalan harianmu di bulan suci.</p>
             </div>
-            <div class="badge bg-success p-2">
+            <div class="p-2 badge bg-success">
                 <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
             </div>
         </div>
@@ -19,26 +20,26 @@
 
         <div class="row">
             <!-- KOLOM KIRI: FORM INPUT -->
-            <div class="col-md-5 mb-4">
-                <div class="card shadow-sm border-0 border-top border-success border-3 h-100">
-                    <div class="card-header bg-white py-3">
+            <div class="mb-4 col-md-5">
+                <div class="border-0 shadow-sm card border-top border-success border-3 h-100">
+                    <div class="py-3 bg-white card-header">
                         <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-edit me-2 text-success"></i>Isi Agenda Hari Ini</h6>
                     </div>
                     <div class="card-body">
                         @if($todayEntry)
-                            <div class="text-center py-5">
+                            <div class="py-5 text-center">
                                 <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
-                                <h5 class="fw-bold mt-3">Jurnal Terisi</h5>
+                                <h5 class="mt-3 fw-bold">Jurnal Terisi</h5>
                                 <p class="text-muted">Kamu sudah mengisi jurnal hari ini.</p>
                                 <span class="badge bg-success rounded-pill">Tetap Istiqomah!</span>
                             </div>
                         @else
                             <form action="{{ route('student.ramadan.store') }}" method="POST">
                                 @csrf
-                                
+
                                 <!-- 1. PUASA -->
                                 <div class="mb-3">
-                                    <label class="fw-bold small text-muted text-uppercase mb-2">Status Puasa</label>
+                                    <label class="mb-2 fw-bold small text-muted text-uppercase">Status Puasa</label>
                                     <select name="fasting_status" class="form-select">
                                         <option value="full">Puasa Penuh</option>
                                         <option value="half">Puasa Setengah Hari</option>
@@ -48,8 +49,8 @@
 
                                 <!-- 2. SHOLAT WAJIB -->
                                 <div class="mb-3">
-                                    <label class="fw-bold small text-muted text-uppercase mb-2">Sholat Fardhu</label>
-                                    <div class="d-flex flex-wrap gap-2">
+                                    <label class="mb-2 fw-bold small text-muted text-uppercase">Sholat Fardhu</label>
+                                    <div class="flex-wrap gap-2 d-flex">
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input" type="checkbox" name="prayer_subuh" id="subuh" value="1">
                                             <label class="form-check-label" for="subuh">Subuh</label>
@@ -75,7 +76,7 @@
 
                                 <!-- 3. IBADAH SUNNAH -->
                                 <div class="mb-3">
-                                    <label class="fw-bold small text-muted text-uppercase mb-2">Ibadah Sunnah</label>
+                                    <label class="mb-2 fw-bold small text-muted text-uppercase">Ibadah Sunnah</label>
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <div class="form-check">
@@ -105,20 +106,20 @@
                                 </div>
 
                                 <!-- 4. TADARUS -->
-                                <div class="mb-3 p-3 bg-light rounded">
-                                    <div class="form-check mb-2">
+                                <div class="p-3 mb-3 rounded bg-light">
+                                    <div class="mb-2 form-check">
                                         <input class="form-check-input" type="checkbox" name="read_quran" id="quran" onchange="toggleQuranInput(this)">
                                         <label class="form-check-label fw-bold" for="quran">Membaca Al-Qur'an (Tadarus)</label>
                                     </div>
                                     <div id="quran-inputs" style="display:none;">
-                                        <input type="text" name="surah_name" class="form-control form-control-sm mb-2" placeholder="Nama Surat (Contoh: Al-Baqarah)">
+                                        <input type="text" name="surah_name" class="mb-2 form-control form-control-sm" placeholder="Nama Surat (Contoh: Al-Baqarah)">
                                         <input type="text" name="ayat_range" class="form-control form-control-sm" placeholder="Ayat (Contoh: 1-50)">
                                     </div>
                                 </div>
 
                                 <!-- 5. CATATAN -->
                                 <div class="mb-3">
-                                    <label class="fw-bold small text-muted mb-1">Ringkasan Ceramah / Catatan</label>
+                                    <label class="mb-1 fw-bold small text-muted">Ringkasan Ceramah / Catatan</label>
                                     <textarea name="notes" class="form-control" rows="3" placeholder="Tulis ringkasan ceramah tarawih/subuh..."></textarea>
                                 </div>
 
@@ -133,23 +134,23 @@
 
             <!-- KOLOM KANAN: STATISTIK & RIWAYAT -->
             <div class="col-md-7">
-                
+
                 <!-- Statistik Card -->
-                <div class="row g-3 mb-4">
+                <div class="mb-4 row g-3">
                     <div class="col-4">
-                        <div class="card bg-success text-white text-center p-2 border-0 shadow-sm">
+                        <div class="p-2 text-center text-white border-0 shadow-sm card bg-success">
                             <h3 class="mb-0 fw-bold">{{ $stats['total_fasting'] }}</h3>
                             <small class="text-white-50">Hari Puasa</small>
                         </div>
                     </div>
                     <div class="col-4">
-                        <div class="card bg-primary text-white text-center p-2 border-0 shadow-sm">
+                        <div class="p-2 text-center text-white border-0 shadow-sm card bg-primary">
                             <h3 class="mb-0 fw-bold">{{ $stats['total_tarawih'] }}</h3>
                             <small class="text-white-50">Tarawih</small>
                         </div>
                     </div>
                     <div class="col-4">
-                        <div class="card bg-warning text-dark text-center p-2 border-0 shadow-sm">
+                        <div class="p-2 text-center border-0 shadow-sm card bg-warning text-dark">
                             <h3 class="mb-0 fw-bold">{{ $stats['total_quran'] }}</h3>
                             <small class="text-black-50">Tadarus</small>
                         </div>
@@ -157,13 +158,13 @@
                 </div>
 
                 <!-- Tabel Riwayat -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white py-3">
+                <div class="border-0 shadow-sm card">
+                    <div class="py-3 bg-white card-header">
                         <h6 class="mb-0 fw-bold text-dark">Riwayat Jurnal</h6>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="p-0 card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 text-sm">
+                            <table class="table mb-0 text-sm align-middle table-hover">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4">Tanggal</th>
@@ -197,7 +198,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" class="text-center py-4 text-muted">Belum ada catatan jurnal.</td>
+                                        <td colspan="5" class="py-4 text-center text-muted">Belum ada catatan jurnal.</td>
                                     </tr>
                                     @endforelse
                                 </tbody>

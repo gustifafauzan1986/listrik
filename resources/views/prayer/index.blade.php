@@ -1,12 +1,14 @@
 @section('title', 'Jadwal & Absensi Sholat')
 
 <x-app-layout>
+    @push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         #map-container {
             height: 200px;
             width: 100%;
             border-radius: 12px;
-            display: none; /* Muncul hanya saat tombol absen ditekan */
+            display: none;
             margin-bottom: 15px;
             border: 2px solid #e2e8f0;
         }
@@ -15,96 +17,125 @@
             margin-bottom: 10px;
         }
     </style>
+    @endpush
 
     <div class="page-content">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
+            <div class="col-md-10 col-lg-8">
 
-                <!-- HEADER WAKTU -->
-                <div class="mb-4 text-white shadow-lg card bg-primary">
-                    <div class="p-4 text-center card-body">
-                        <h5 class="mb-1 text-white-50">Jadwal Sholat Hari Ini</h5>
-                        <h2 class="mb-0 fw-bold">Bukittinggi & Sekitarnya</h2>
-                        <div class="px-3 py-2 mt-3 bg-white badge text-primary fs-6">
-                            <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}
-                        </div>
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1 fw-bold text-primary"><i class="fas fa-mosque me-2"></i> Jadwal Sholat</h4>
+                        <p class="mb-0 text-muted small"><i class="fas fa-map-marker-alt me-1"></i> Bukittinggi & Sekitarnya</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="px-3 py-2 shadow-sm badge bg-primary rounded-pill fs-6">
+                            <i class="fas fa-calendar-alt me-1"></i> {{ \Carbon\Carbon::parse($today)->translatedFormat('d M Y') }}
+                        </span>
                     </div>
                 </div>
 
-                <!-- DAFTAR JADWAL SHOLAT -->
-                <div class="shadow-sm card">
-                    <div class="list-group list-group-flush">
-                        @php
-                            $prayers = [
-                                'subuh'   => 'Subuh',
-                                'dhuha'   => 'Dhuha (Sunnah)',
-                                'dzuhur'  => 'Dzuhur',
-                                'ashar'   => 'Ashar',
-                                'maghrib' => 'Maghrib',
-                                'isya'    => 'Isya',
-                            ];
-                            $currentTime = \Carbon\Carbon::now()->format('H:i');
-                        @endphp
+                @if(session('success'))
+                    <div class="shadow-sm alert alert-success alert-dismissible fade show">
+                        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
-                        @foreach($prayers as $key => $label)
+                <div class="border-0 shadow-lg card">
+                    <div class="p-4 card-body">
+                        <div class="mt-2 timeline-container ps-2">
                             @php
-                                $time = $schedule[$key] ?? '-';
-                                $isDone = isset($attendances[$key]);
-                                $isActive = ($currentTime >= $time) || $key == 'dhuha';
+                                $prayers = [
+                                    'subuh'   => 'Subuh',
+                                    'dhuha'   => 'Dhuha (Sunnah)',
+                                    'dzuhur'  => 'Dzuhur',
+                                    'ashar'   => 'Ashar',
+                                    'maghrib' => 'Maghrib',
+                                    'isya'    => 'Isya',
+                                ];
+                                $currentTime = \Carbon\Carbon::now()->format('H:i');
                             @endphp
 
-                            <div class="list-group-item p-3 d-flex justify-content-between align-items-center {{ $isDone ? 'bg-light' : '' }}">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon-box me-3 {{ $isDone ? 'text-success' : 'text-primary' }}">
-                                        @if($key == 'subuh' || $key == 'isya') <i class="fas fa-moon fa-2x"></i>
-                                        @elseif($key == 'maghrib') <i class="fas fa-cloud-sun fa-2x"></i>
-                                        @else <i class="fas fa-sun fa-2x"></i>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <h5 class="mb-0 fw-bold {{ $isDone ? 'text-decoration-line-through text-muted' : '' }}">
-                                            {{ $label }}
-                                        </h5>
-                                        <span class="text-muted small">
-                                            <i class="far fa-clock"></i> {{ $time }} WIB
-                                        </span>
-                                    </div>
-                                </div>
+                            @foreach($prayers as $key => $label)
+                                @php
+                                    $time = $schedule[$key] ?? '-';
+                                    $isDone = isset($attendances[$key]);
+                                    $isActive = ($currentTime >= $time) || $key == 'dhuha';
 
-                                <div>
-                                    @if($isDone)
-                                        <button class="px-3 btn btn-sm btn-success disabled rounded-pill">
-                                            <i class="fas fa-check-circle me-1"></i> Selesai
-                                        </button>
-                                        <div class="text-end" style="font-size: 0.7rem; color: #888;">
-                                            {{ \Carbon\Carbon::parse($attendances[$key])->format('H:i') }}
+                                    // Penentuan warna status timeline
+                                    if ($isDone) {
+                                        $statusColor = 'success';
+                                    } elseif ($isActive) {
+                                        $statusColor = 'primary';
+                                    } else {
+                                        $statusColor = 'secondary';
+                                    }
+                                @endphp
+
+                                <div class="timeline-item position-relative pb-4 ps-4 border-start border-2 border-{{ $statusColor }}">
+                                    <div class="position-absolute top-0 start-0 translate-middle rounded-circle border border-white shadow-sm bg-{{ $statusColor }}" style="width: 16px; height: 16px;"></div>
+
+                                    <div class="border-0 shadow-sm card bg-light">
+                                        <div class="flex-wrap gap-2 p-3 card-body d-flex justify-content-between align-items-center">
+
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-box me-3 text-{{ $statusColor }}">
+                                                    @if($key == 'subuh' || $key == 'isya') <i class="fas fa-moon fa-2x"></i>
+                                                    @elseif($key == 'maghrib') <i class="fas fa-cloud-sun fa-2x"></i>
+                                                    @else <i class="fas fa-sun fa-2x"></i>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1 {{ $isDone ? 'text-decoration-line-through text-muted' : 'text-dark' }}">
+                                                        {{ $label }}
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        <i class="far fa-clock me-1"></i> {{ $time }} WIB
+                                                    </small>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                @if($isDone)
+                                                    <div class="text-end">
+                                                        <span class="px-3 py-2 badge bg-success rounded-pill">
+                                                            <i class="fas fa-check-circle me-1"></i> Selesai
+                                                        </span>
+                                                        <div class="mt-1" style="font-size: 0.7rem; color: #888;">
+                                                            Absen: {{ \Carbon\Carbon::parse($attendances[$key])->format('H:i') }}
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    @if($isActive)
+                                                        <button onclick="handleAbsensi('{{ $key }}', '{{ $label }}')" class="px-3 shadow-sm btn btn-sm btn-primary rounded-pill">
+                                                            <i class="fas fa-map-marker-alt me-1"></i> Absen
+                                                        </button>
+                                                    @else
+                                                        <button class="px-3 btn btn-sm btn-outline-secondary disabled rounded-pill">
+                                                            <i class="fas fa-lock me-1"></i> Belum Waktu
+                                                        </button>
+                                                    @endif
+                                                @endif
+                                            </div>
+
                                         </div>
-                                    @else
-                                        @if($isActive)
-                                            <button onclick="handleAbsensi('{{ $key }}', '{{ $label }}')" class="px-3 btn btn-sm btn-outline-primary rounded-pill">
-                                                <i class="fas fa-map-marker-alt me-1"></i> Absen
-                                            </button>
-                                        @else
-                                            <button class="px-3 btn btn-sm btn-light text-muted disabled rounded-pill">
-                                                Belum Waktu
-                                            </button>
-                                        @endif
-                                    @endif
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
+                            @endforeach
+                        </div>
 
-                <div class="mt-4 text-center text-muted small">
-                    <p>Sumber Jadwal: <strong>myquran.com</strong></p>
+                        <div class="pt-3 mt-4 text-center text-muted small border-top">
+                            <p class="mb-0">Sumber Jadwal: <strong>myquran.com</strong></p>
+                        </div>
+
+                    </div>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <!-- Container Peta (Hidden by default) -->
     <template id="map-template">
         <div id="location-info" class="mb-2 text-start">
             <div id="status-text" class="p-2 mb-2 badge bg-info w-100 text-wrap">
@@ -113,10 +144,6 @@
             <div id="map-canvas" style="height: 200px; width: 100%; border-radius: 8px;"></div>
         </div>
     </template>
-
-    @push('styles')
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    @endpush
 
     @push('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -155,7 +182,6 @@
         }
 
         function initMap() {
-            // Default center ke Bukittinggi jika GPS gagal
             const defaultLoc = [-0.3051, 100.3688];
 
             map = L.map('map-canvas').setView(defaultLoc, 15);
@@ -174,12 +200,10 @@
                         if (marker) map.removeLayer(marker);
                         marker = L.marker(userLoc).addTo(map).bindPopup("Lokasi Anda").openPopup();
 
-                        // Simpan koordinat di element temporary
                         const statusBox = document.getElementById('status-text');
                         statusBox.className = "badge bg-success w-100 p-2 mb-2";
                         statusBox.innerHTML = `<i class="fas fa-check-circle me-2"></i>Lokasi Terkunci: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 
-                        // Inject hidden inputs ke swal
                         const container = document.getElementById('location-info');
                         container.innerHTML += `<input type="hidden" id="lat_val" value="${lat}"><input type="hidden" id="lng_val" value="${lng}">`;
                     },
