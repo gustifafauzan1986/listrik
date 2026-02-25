@@ -5,293 +5,237 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TahfizRecord;
-use App\Models\Classroom; // Sesuaikan jika nama model kelas Anda berbeda
-use App\Models\User;
+use App\Models\Classroom;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class TahfizController extends Controller
 {
+    /**
+     * Menampilkan daftar rekapitulasi hafalan
+     */
+    public function index(Request $request)
+    {
+        $today = Carbon::today()->toDateString();
+        // Memuat relasi student dan teacher, urutkan berdasarkan tanggal terbaru
+        $query = TahfizRecord::with(['student', 'teacher'])->latest('date');
+
+        // Fitur Pencarian berdasarkan nama siswa (mencari di tabel students melalui relasi)
+        if ($request->has('search') && $request->filled('search')) {
+            $query->whereHas('student', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Jika user yang login adalah siswa, batasi tampilan hanya untuk data mereka sendiri
+        if (Auth::user()->hasRole('siswa')) {
+            // Mengambil ID student dari user yang sedang login
+            $studentId = Auth::user()->student->id ?? null;
+
+            if ($studentId) {
+                $query->where('student_id', $studentId);
+            } else {
+                // Mencegah siswa yang belum terhubung ke tabel student melihat data lain
+                $query->where('student_id', '00000000-0000-0000-0000-000000000000');
+            }
+        }
+
+        // Paginasi dengan mempertahankan parameter query (misal saat mencari nama sambil pindah halaman)
+        $records = $query->paginate(15)->appends($request->all());
+
+        // Mengambil daftar siswa aktif untuk dropdown di form modal
+        $students = Student::orderBy('name')->get();
+
+            // Ambil data untuk dropdown
+        $classes = Classroom::orderBy('name', 'asc')->get();
+
+        // Mengambil daftar Surah Juz 30 dari Model
+        $surahs = TahfizRecord::getJuz30Surahs();
+
+        return view('siswa.tahfiz.index', compact('records', 'students', 'surahs', 'classes', 'today'));
+    }
+
     // public function index(Request $request)
     // {
-    //     // Ambil data rekap, bisa difilter berdasarkan nama siswa
-    //     $query = TahfizRecord::with(['student', 'teacher'])->latest('date');
+    //     $today = Carbon::today()->toDateString();
 
-    //     if ($request->has('search')) {
-    //         $query->whereHas('student', function($q) use ($request) {
-    //             $q->where('name', 'like', '%' . $request->search . '%');
-    //         });
-    //     }
+    //     // Ambil data untuk dropdown
+    //     $classes = Classroom::orderBy('name', 'asc')->get();
+    //     $students = Student::orderBy('name', 'asc')->get();
 
-    //     // Jika yang login siswa, hanya tampilkan miliknya
-    //     if (Auth::user()->hasRole('siswa')) {
-    //         $query->where('student_id', Auth::id());
-    //     }
+    //     $surahs = [
+    //         'An-Naba', 'An-Naziat', 'Abasa', 'At-Takwir', 'Al-Infitar',
+    //         'Al-Mutaffifin', 'Al-Inshiqaq', 'Al-Buruj', 'At-Tariq', 'Al-A\'la',
+    //         'Al-Ghashiyah', 'Al-Fajr', 'Al-Balad', 'Ash-Shams', 'Al-Lail',
+    //         'Ad-Duha', 'Ash-Sharh', 'At-Tin', 'Al-\'Alaq', 'Al-Qadr',
+    //         'Al-Bayyinah', 'Az-Zalzalah', 'Al-\'Adiyat', 'Al-Qari\'ah', 'At-Takathur',
+    //         'Al-\'Asr', 'Al-Humazah', 'Al-Fil', 'Quraish', 'Al-Ma\'un',
+    //         'Al-Kauthar', 'Al-Kafirun', 'An-Nasr', 'Al-Masad', 'Al-Ikhlas',
+    //         'Al-Falaq', 'An-Nas'
+    //     ];
 
-    //     $records = $query->paginate(15);
-
-    //     // Ambil daftar siswa untuk form input (Hanya guru/admin yang butuh)
-    //     $students = User::role('siswa')->orderBy('name')->get();
-
-    //     // Ambil daftar surah Juz 30 dari Model
-    //     $surahs = TahfizRecord::getJuz30Surahs();
-
-    //     return view('siswa.tahfiz.index', compact('records', 'students', 'surahs'));
-    // }
-
-    // public function index(Request $request)
-    // {
-    //     // Tambahkan baris ini
-    //     $today = \Carbon\Carbon::today()->toDateString();
-
-    //     // ... kode kamu yang lain (seperti ambil jadwal, attendances, dll) ...
-    //     // 1. Ambil data kelas untuk dikirim ke Dropdown
-    //     // (Sesuaikan "Classroom" dengan nama model kelas kamu)
-    //     $classes = Classroom::all();
-
-    //     // 2. Query dasar (beserta relasinya agar tidak N+1 issue)
+    //     // Query dengan Eager Loading student
     //     $query = TahfizRecord::with(['student', 'teacher']);
 
-    //     // 3. Filter jika form pencarian nama diisi
-    //     // if ($request->filled('search')) {
-    //     //     $query->whereHas('student', function($q) use ($request) {
-    //     //         $q->where('name', 'like', '%' . $request->search . '%');
-    //     //     });
-    //     // }
-    //     // LOGIKA FILTER NAMA SISWA (Case-Insensitive)
+    //     // Filter Nama (Case-Insensitive PostgreSQL)
     //     if ($request->filled('search')) {
     //         $query->whereHas('student', function($q) use ($request) {
-    //             // 1. Ubah kata kunci pencarian menjadi huruf kecil semua
     //             $searchTerm = strtolower($request->search);
-
-    //             // 2. Gunakan whereRaw dengan fungsi LOWER() dari SQL
     //             $q->whereRaw('LOWER(name) LIKE ?', ['%' . $searchTerm . '%']);
     //         });
     //     }
 
-    //     // // 4. Filter jika Dropdown Kelas dipilih
-    //     // if ($request->filled('kelas_id')) {
-    //     //     $query->whereHas('student', function($q) use ($request) {
-    //     //         // Sesuaikan "classroom_id" dengan nama foreign key di tabel students
-    //     //         $q->where('classroom_id', $request->kelas_id);
-    //     //     });
-    //     // }
-
-    //     // 4. Filter jika Dropdown Kelas dipilih
-    //     // if ($request->filled('kelas_id')) {
-    //     //     $query->whereHas('student', function($q) use ($request) {
-    //     //         // Kita tambahkan "users." di depan nama kolom
-    //     //         // agar PostgreSQL tidak bingung kolom ini milik siapa
-    //     //         $q->where('users.classroom_id', $request->kelas_id);
-    //     //     });
-    //     // }
-
-    //     // 4. Filter jika Dropdown Kelas dipilih
-    //     // 4. Filter Berdasarkan Kelas (Mencari di tabel students)
-    //     // if ($request->filled('kelas_id')) {
-    //     //     $query->whereHas('student', function($q) use ($request) {
-    //     //         // Kita spesifik arahkan ke students.classroom_id
-    //     //         $q->where('students.classroom_id', $request->kelas_id);
-    //     //     });
-    //     // }
-
-    //     // 4. Filter Berdasarkan Kelas (Cara Subquery - Paling Aman untuk PostgreSQL)
+    //     // Filter Kelas (Cari user_id/id di tabel students yang memiliki classroom_id tersebut)
     //     if ($request->filled('kelas_id')) {
     //         $query->whereIn('student_id', function($q) use ($request) {
-    //             $q->select('id') // ID ini adalah ID di tabel students
-    //             ->from('students')
-    //             ->where('classroom_id', $request->kelas_id);
+    //             $q->select('id') // Gunakan 'id' karena foreign key Bapak merujuk ke id tabel students
+    //               ->from('students')
+    //               ->where('classroom_id', $request->kelas_id);
     //         });
     //     }
 
-    //     // 5. Eksekusi query
-    //     $records = $query->latest('date')->paginate(10)->withQueryString();
+    //     $records = $query->latest('date')->paginate(12)->withQueryString();
 
-    //         // Ambil daftar siswa untuk form input (Hanya guru/admin yang butuh)
-    //         // $students = User::role('siswa')->orderBy('name')->get();
-    //         // Ambil daftar siswa dari model Student agar ID-nya sinkron
-    //         $students = \App\Models\Student::orderBy('name')->get();
-
-    //         // Ambil daftar surah Juz 30 dari Model
-    //         $surahs = TahfizRecord::getJuz30Surahs();
-
-    //     // Pastikan $classes ikut dikirim ke view
     //     return view('siswa.tahfiz.index', compact('records', 'classes', 'students', 'surahs', 'today'));
     // }
-    public function index(Request $request)
-    {
-        $today = Carbon::today()->toDateString();
 
-        // Ambil master data
-        $classes = Classroom::orderBy('name', 'asc')->get();
-        $students = Student::orderBy('name', 'asc')->get();
+    /**
+     * Menyimpan data hafalan baru
+     */
+    // public function store(Request $request)
+    // {
+    //     // Validasi input form
+    //     $request->validate([
+    //         'student_id' => 'required|uuid|exists:students,id',
+    //         'surah_name' => 'required|string',
+    //         'ayat'       => 'nullable|string',
+    //         'predicate'  => 'required|string',
+    //         'date'       => 'required|date',
+    //         'notes'      => 'nullable|string'
+    //     ], [
+    //         'student_id.exists' => 'Siswa tidak ditemukan di database.',
+    //         'student_id.uuid'   => 'Format ID Siswa tidak valid.'
+    //     ]);
 
-        $surahs = [
-            'An-Naba', 'An-Naziat', 'Abasa', 'At-Takwir', 'Al-Infitar',
-            'Al-Mutaffifin', 'Al-Inshiqaq', 'Al-Buruj', 'At-Tariq', 'Al-A\'la',
-            'Al-Ghashiyah', 'Al-Fajr', 'Al-Balad', 'Ash-Shams', 'Al-Lail',
-            'Ad-Duha', 'Ash-Sharh', 'At-Tin', 'Al-\'Alaq', 'Al-Qadr',
-            'Al-Bayyinah', 'Az-Zalzalah', 'Al-\'Adiyat', 'Al-Qari\'ah', 'At-Takathur',
-            'Al-\'Asr', 'Al-Humazah', 'Al-Fil', 'Quraish', 'Al-Ma\'un',
-            'Al-Kauthar', 'Al-Kafirun', 'An-Nasr', 'Al-Masad', 'Al-Ikhlas',
-            'Al-Falaq', 'An-Nas'
-        ];
+    //     // Menyimpan data ke database
+    //     TahfizRecord::create([
+    //         'student_id' => $request->student_id,
+    //         'teacher_id' => Auth::id(), // ID Guru (User yang sedang login)
+    //         'surah_name' => $request->surah_name,
+    //         'ayat'       => $request->ayat ?? 'Lengkap',
+    //         'predicate'  => $request->predicate,
+    //         'date'       => $request->date,
+    //         'notes'      => $request->notes,
+    //     ]);
 
-        // Query Utama dengan Eager Loading tabel 'student'
-        $query = TahfizRecord::with(['student', 'teacher']);
+    //     return redirect()->route('tahfiz.index')
+    //         ->with('success', 'Setoran hafalan berhasil dicatat!');
+    // }
+//     public function store(Request $request)
+// {
+//     $request->validate([
+//         // Pastikan student_id ada di tabel students kolom id
+//         'student_id'   => 'required|exists:students,id',
+//         'date'         => 'required|date',
+//         // Validasi surah_name sebagai array (karena pakai multi-select)
+//         'surah_name'   => 'required|array',
+//         'surah_name.*' => 'string',
+//         'predicate'    => 'required|string',
+//     ], [
+//         // Pesan error kustom (opsional)
+//         'student_id.exists' => 'Siswa tidak ditemukan di database.',
+//         'surah_name.array'  => 'Pilih minimal satu surah.',
+//     ]);
 
-        // 1. Filter Pencarian Nama (Case-Insensitive PostgreSQL)
-        if ($request->filled('search')) {
-            $query->whereHas('student', function($q) use ($request) {
-                $searchTerm = strtolower($request->search);
-                $q->whereRaw('LOWER(students.name) LIKE ?', ['%' . $searchTerm . '%']);
-            });
-        }
+//     try {
+//         // Gabungkan array menjadi string untuk disimpan ke database
+//         $surahString = implode(', ', $request->surah_name);
 
-        // 2. Filter Kelas (Gunakan WhereIn untuk UUID di PostgreSQL)
-        if ($request->filled('kelas_id')) {
-            $query->whereIn('student_id', function($q) use ($request) {
-                $q->select('id')
-                  ->from('students')
-                  ->where('classroom_id', $request->kelas_id);
-            });
-        }
+//         TahfizRecord::create([
+//             'student_id' => $request->student_id,
+//             'teacher_id' => auth()->id(),
+//             'date'       => $request->date,
+//             'surah_name' => $surahString,
+//             'ayat'       => $request->ayat ?? 'Lengkap',
+//             'predicate'  => $request->predicate,
+//             'notes'      => $request->notes,
+//         ]);
 
-        $records = $query->latest('date')->paginate(12)->withQueryString();
+//         return redirect()->back()->with('success', 'Setoran berhasil dicatat!');
+//     } catch (\Exception $e) {
+//         return redirect()->back()->withErrors(['error' => 'Gagal simpan: ' . $e->getMessage()]);
+//     }
+// }
 
-        return view('siswa.tahfiz.index', compact('records', 'classes', 'students', 'surahs', 'today'));
-    }
-
-    public function store(Request $request)
+public function store(Request $request)
     {
         $request->validate([
-            'student_id' => 'required|exists:users,id',
-            'surah_name' => 'required|array', // Ubah menjadi array
-            'ayat' => 'nullable|string',
-            'predicate' => 'required|string',
-            'date' => 'required|date',
-            'notes' => 'nullable|string'
+            'student_id'   => 'required|exists:students,id',
+            'date'         => 'required|date',
+            'surah_name'   => 'required|array',
+            'predicate'    => 'required|string',
         ]);
 
-        // WAJIB DITAMBAHKAN: Ubah array surah menjadi teks (string) yang dipisah koma
-        // sebelum disimpan ke database
-        $surahs = implode(', ', $request->surah_name);
+        try {
+            $surahString = implode(', ', $request->surah_name);
 
-        TahfizRecord::create([
-            'student_id' => $request->student_id,
-            'teacher_id' => Auth::id(), // Guru yang sedang login
-            // 'surah_name' => $request->surah_name,
-            'surah_name' => $surahs, // Masukkan variabel $surahs yang sudah di-implode
-            'ayat' => $request->ayat ?? 'Lengkap',
-            'predicate' => $request->predicate,
-            'date' => $request->date,
-            'notes' => $request->notes,
-        ]);
+            TahfizRecord::create([
+                'student_id' => $request->student_id,
+                'teacher_id' => Auth::id(),
+                'date'       => $request->date,
+                'surah_name' => $surahString,
+                'ayat'       => $request->ayat ?? 'Lengkap',
+                'predicate'  => $request->predicate,
+                'notes'      => $request->notes,
+            ]);
 
-        return redirect()->route('tahfiz.index')->with('success', 'Setoran hafalan berhasil dicatat!');
+            return redirect()->back()->with('success', 'Setoran hafalan berhasil disimpan!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal: ' . $e->getMessage()]);
+        }
     }
 
+    /**
+     * Memperbarui data hafalan yang sudah ada (Opsional jika form edit digunakan)
+     */
+    public function update(Request $request, $id)
+    {
+        $record = TahfizRecord::findOrFail($id);
+
+        $request->validate([
+            'student_id' => 'required|uuid|exists:students,id',
+            'surah_name' => 'required|string',
+            'ayat'       => 'nullable|string',
+            'predicate'  => 'required|string',
+            'date'       => 'required|date',
+            'notes'      => 'nullable|string'
+        ]);
+
+        $record->update([
+            'student_id' => $request->student_id,
+            'surah_name' => $request->surah_name,
+            'ayat'       => $request->ayat ?? 'Lengkap',
+            'predicate'  => $request->predicate,
+            'date'       => $request->date,
+            'notes'      => $request->notes,
+            // teacher_id tidak diubah agar tetap mencatat guru pertama yang menyimak
+            // atau bisa diubah sesuai kebutuhan bisnis logic Anda
+        ]);
+
+        return redirect()->route('tahfiz.index')
+            ->with('success', 'Data hafalan berhasil diperbarui!');
+    }
+
+    /**
+     * Menghapus data hafalan
+     */
     public function destroy($id)
     {
         $record = TahfizRecord::findOrFail($id);
         $record->delete();
 
-        return redirect()->route('tahfiz.index')->with('success', 'Data hafalan berhasil dihapus!');
+        return redirect()->route('tahfiz.index')
+            ->with('success', 'Data hafalan berhasil dihapus!');
     }
 }
-
-// {
-//     public function index(Request $request)
-//     {
-//         $today = Carbon::today()->toDateString();
-
-//         // 1. Ambil data master untuk Dropdown Filter & Form Input
-//         $classes = Classroom::orderBy('name', 'asc')->get();
-
-//         // Ambil daftar siswa (disesuaikan dengan role/kebutuhan Anda)
-//         $students = User::role('siswa')->orderBy('name', 'asc')->get();
-
-//         // Daftar surah Juz 30
-//         $surahs = [
-//             'An-Naba', 'An-Naziat', 'Abasa', 'At-Takwir', 'Al-Infitar',
-//             'Al-Mutaffifin', 'Al-Inshiqaq', 'Al-Buruj', 'At-Tariq', 'Al-A\'la',
-//             'Al-Ghashiyah', 'Al-Fajr', 'Al-Balad', 'Ash-Shams', 'Al-Lail',
-//             'Ad-Duha', 'Ash-Sharh', 'At-Tin', 'Al-\'Alaq', 'Al-Qadr',
-//             'Al-Bayyinah', 'Az-Zalzalah', 'Al-\'Adiyat', 'Al-Qari\'ah', 'At-Takathur',
-//             'Al-\'Asr', 'Al-Humazah', 'Al-Fil', 'Quraish', 'Al-Ma\'un',
-//             'Al-Kauthar', 'Al-Kafirun', 'An-Nasr', 'Al-Masad', 'Al-Ikhlas',
-//             'Al-Falaq', 'An-Nas'
-//         ];
-
-//         // 2. Query dasar dengan Eager Loading untuk performa
-//         $query = TahfizRecord::with(['student', 'teacher']);
-
-//         // 3. Filter Pencarian Nama (Case-Insensitive PostgreSQL)
-//         if ($request->filled('search')) {
-//             $query->whereHas('student', function($q) use ($request) {
-//                 $searchTerm = strtolower($request->search);
-//                 // Menggunakan users.name untuk menghindari ambiguity di PostgreSQL
-//                 $q->whereRaw('LOWER(users.name) LIKE ?', ['%' . $searchTerm . '%']);
-//             });
-//         }
-
-//         // 4. Filter Berdasarkan Kelas (UUID)
-//         if ($request->filled('kelas_id')) {
-//             $query->whereHas('student', function($q) use ($request) {
-//                 // Spesifik menunjuk ke users.classroom_id sesuai desain tabel Anda
-//                 $q->where('users.classroom_id', $request->kelas_id);
-//             });
-//         }
-
-//         // 5. Eksekusi query dengan Pagination
-//         $records = $query->latest('date')->paginate(10)->withQueryString();
-
-//         // 6. Return View
-//         return view('siswa.tahfiz.index', compact('records', 'classes', 'students', 'surahs', 'today'));
-//     }
-
-//     public function store(Request $request)
-//     {
-//         // Validasi Input
-//         $request->validate([
-//             'student_id'   => 'required|exists:users,id',
-//             'date'         => 'required|date',
-//             'surah_name'   => 'required|array', // Validasi sebagai array karena multi-select
-//             'ayat'         => 'nullable|string',
-//             'predicate'    => 'required|string',
-//             'notes'        => 'nullable|string',
-//         ]);
-
-//         try {
-//             // Gabungkan array surah menjadi satu string dipisah koma
-//             $surahString = implode(', ', $request->surah_name);
-
-//             TahfizRecord::create([
-//                 'student_id' => $request->student_id,
-//                 'teacher_id' => Auth::id(), // ID Guru yang sedang login
-//                 'date'       => $request->date,
-//                 'surah_name' => $surahString,
-//                 'ayat'       => $request->ayat,
-//                 'predicate'  => $request->predicate,
-//                 'notes'      => $request->notes,
-//             ]);
-
-//             return redirect()->back()->with('success', 'Setoran tahfiz siswa berhasil dicatat!');
-//         } catch (\Exception $e) {
-//             return redirect()->back()->withErrors(['error' => 'Gagal menyimpan data: ' . $e->getMessage()]);
-//         }
-//     }
-
-//     public function destroy($id)
-//     {
-//         try {
-//             $record = TahfizRecord::findOrFail($id);
-//             $record->delete();
-
-//             return redirect()->back()->with('success', 'Data setoran berhasil dihapus!');
-//         } catch (\Exception $e) {
-//             return redirect()->back()->withErrors(['error' => 'Gagal menghapus data.']);
-//         }
-//     }
-// }

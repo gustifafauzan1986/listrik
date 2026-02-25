@@ -19,24 +19,27 @@ class TahfizRecord extends Model
         'notes',
     ];
 
-    // Relasi ke Siswa
+    /**
+     * Relasi ke model Student (Siswa)
+     * Menggunakan foreign key student_id yang merujuk ke tabel students
+     */
     public function student()
     {
-        // Ganti User::class menjadi Student::class
-        // Pastikan kolom student_id di tabel tahfiz_records merujuk ke ID di tabel students
-        // return $this->belongsTo(\App\Models\Student::class, 'student_id');
-        // student_id di tahfiz_records sebenarnya berisi user_id
-    // maka kita hubungkan student_id ke kolom user_id di tabel students
-    return $this->belongsTo(\App\Models\Student::class, 'student_id', 'user_id');
+        return $this->belongsTo(Student::class, 'student_id');
     }
 
-    // Relasi ke Guru Penyimak
+    /**
+     * Relasi ke Guru Penyimak
+     * (Asumsi guru masih menggunakan tabel users. Jika menggunakan tabel teachers, ubah ke Teacher::class)
+     */
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
-    // Daftar Surah Juz 30 (Bisa dipanggil di Controller/View)
+    /**
+     * Daftar Surah Juz 30
+     */
     public static function getJuz30Surahs()
     {
         return [

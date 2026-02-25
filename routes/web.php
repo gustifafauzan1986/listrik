@@ -67,6 +67,7 @@ use App\Http\Controllers\Admin\PKLMappingController;
 use App\Http\Controllers\Admin\GuidanceController;
 use App\Http\Controllers\Admin\ViolationTypeController;
 use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\InventoryAdminController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Http\Controllers\Student\DashboardStudentController;
@@ -570,6 +571,14 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/admin/pkl/timeline/{id}', [InternshipTimelineController::class, 'update'])->name('admin.timeline.update');
         Route::delete('/admin/pkl/timeline/{id}', [InternshipTimelineController::class, 'destroy'])->name('admin.timeline.destroy');
 
+        Route::get('/admin/inventory', [InventoryAdminController::class, 'index'])->name('admin.inventory.index');
+        Route::post('/admin/inventory/item', [InventoryAdminController::class, 'storeItem'])->name('admin.inventory.item.store');
+
+        // Transaksi masuk keluar
+        Route::post('/admin/inventory/transaction', [InventoryAdminController::class, 'storeTransaction'])->name('admin.inventory.transaction.store');
+
+        // Riwayat (Opsional, Anda bisa membuat view resources/views/inventory/history.blade.php terpisah)
+        Route::get('/admin/inventory/history', [InventoryAdminController::class, 'history'])->name('admin.inventory.history');
 
     });
 
@@ -612,7 +621,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/guidance', [GuidanceStudentController::class, 'index'])->name('guidance.index');
             Route::post('/guidance/{id}/upload', [GuidanceStudentController::class, 'uploadAgreement'])->name('guidance.upload');
 
-            
+
         });
     });
 });
