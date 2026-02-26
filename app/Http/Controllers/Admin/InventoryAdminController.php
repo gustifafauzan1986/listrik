@@ -137,4 +137,57 @@ class InventoryAdminController extends Controller
 
         return view('admin.inventory.history', compact('transactions'));
     }
+
+        /**
+     * Memproses Import Excel Master Barang
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120' // Max 5MB
+        ]);
+
+        try {
+            $import = new ItemImport();
+            Excel::import($import, $request->file('file'));
+
+            $msg = "Berhasil mengimpor {$import->importedCount} barang baru.";
+            if ($import->skippedCount > 0) {
+                $msg .= " (Terdapat {$import->skippedCount} data dilewati karena Kode Barang sudah ada).";
+            }
+
+            return redirect()->back()->with('success', $msg);
+
+        } catch (\Exception $e) {
+            Log::error("Import Inventory Error: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mengimpor file. Pastikan format kolom sesuai template. Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download Template Excel
+     */
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Content-type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=Template_Import_Barang.csv',
+            'Expires'             => '0',
+            'Pragma'              => 'public'
+        ];
+
+        $columns = ['kode', 'nama_barang', 'satuan', 'deskripsi', 'stok_awal', 'sumber_dana', 'tahun_anggaran'];
+
+        $callback = function() use ($columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            // Contoh isi
+            fputcsv($file, ['INV-001', 'Laptop Asus Core i5', 'Unit', 'Warna Hitam', '5', 'Dana BOS', '2024']);
+            fputcsv($file, ['INV-002', 'Kertas HVS A4', 'Rim', 'Sinar Dunia 80gr', '20', 'Dana Yayasan', '2024']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

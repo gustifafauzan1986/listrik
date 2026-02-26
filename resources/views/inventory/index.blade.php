@@ -1,524 +1,306 @@
-@section('title', 'Inventaris Bengkel')
-
 <x-app-layout>
-    <div class="page-content">
-        <div class="row">
-            <div class="col-12">
-
-                <!-- HEADER & FILTER -->
-                <div class="mb-4 shadow-sm card">
-                    <div class="card-body">
-                        <div class="d-md-flex justify-content-between align-items-center">
-                            <h5 class="mb-3 mb-md-0 fw-bold text-primary">
-                                <i class="fas fa-tools me-2"></i> Inventaris Alat & Barang Bengkel
-                            </h5>
-
-                            <div class="gap-2 d-flex">
-                                <!-- TOMBOL DATA PEMINJAMAN -->
-                                <button class="text-white btn btn-info" onclick="showLoansModal()">
-                                    <i class="fas fa-list-alt me-1"></i> Data Peminjaman
-                                </button>
-
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
-                                    <i class="fas fa-plus me-1"></i> Tambah Barang
-                                </button>
-                            </div>
-                        </div>
-                        <hr>
-                        <form action="{{ route('inventory.index') }}" method="GET" class="row g-2">
-                            <div class="col-md-4">
-                                <select name="room_id" class="form-select" onchange="this.form.submit()">
-                                    <option value="">-- Semua Ruangan / Bengkel --</option>
-                                    @foreach($rooms as $room)
-                                        <option value="{{ $room->id }}" {{ request('room_id') == $room->id ? 'selected' : '' }}>
-                                            {{ $room->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select name="category" class="form-select" onchange="this.form.submit()">
-                                    <option value="">-- Semua Kategori --</option>
-                                    <option value="alat" {{ request('category') == 'alat' ? 'selected' : '' }}>Alat (Aset Tetap)</option>
-                                    <option value="bahan" {{ request('category') == 'bahan' ? 'selected' : '' }}>Bahan (Habis Pakai)</option>
-                                    <option value="mesin" {{ request('category') == 'mesin' ? 'selected' : '' }}>Mesin</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <a href="{{ route('inventory.index') }}" class="btn btn-secondary w-100">Reset</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- TABEL DATA -->
-                <div class="shadow card">
-                    <div class="p-0 card-body">
-                        @if(session('success'))
-                            <div class="m-3 alert alert-success alert-dismissible fade show">
-                                {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        @endif
-
-                        @if($errors->any())
-                            <div class="m-3 alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        <div class="table-responsive">
-                            <table class="table mb-0 align-middle table-hover table-striped">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="text-center" width="5%">No</th>
-                                        <th>Kode</th>
-                                        <th>Nama Barang</th>
-                                        <th>Lokasi (Bengkel)</th>
-                                        <th class="text-center">Jml</th>
-                                        <th class="text-center">Kondisi</th>
-                                        <th class="text-center" width="15%">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($inventories as $index => $item)
-                                        <tr>
-                                            <td class="text-center">{{ $inventories->firstItem() + $index }}</td>
-                                            <td>
-                                                <span class="badge bg-secondary font-monospace">{{ $item->code }}</span><br>
-                                                <small class="text-muted">{{ ucfirst($item->category) }}</small>
-                                            </td>
-                                            <td class="fw-bold">
-                                                {{ $item->name }}
-                                                <div class="small text-muted fw-normal">{{ $item->brand ?? '-' }}</div>
-                                            </td>
-                                            <td>
-                                                <i class="fas fa-map-marker-alt text-danger me-1"></i>
-                                                {{ $item->room->name ?? 'Tidak diketahui' }}
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="fw-bold text-dark">{{ $item->quantity }}</span>
-                                                <small class="text-muted">{{ $item->unit }}</small>
-                                            </td>
-                                            <td class="text-center">
-                                                @php
-                                                    $condClass = match($item->condition) {
-                                                        'baik' => 'bg-success',
-                                                        'rusak_ringan' => 'bg-warning text-dark',
-                                                        'rusak_berat' => 'bg-danger',
-                                                        default => 'bg-secondary',
-                                                    };
-                                                @endphp
-                                                <span class="badge {{ $condClass }}">
-                                                    {{ str_replace('_', ' ', ucfirst($item->condition)) }}
-                                                </span>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="btn-group">
-                                                    <!-- Tombol Pinjam -->
-                                                    <button class="text-white btn btn-sm btn-info" title="Pinjam Barang"
-                                                        onclick="borrowInventory('{{ $item->id }}', '{{ $item->name }}', '{{ $item->quantity }}')">
-                                                        <i class="fas fa-hand-holding"></i>
-                                                    </button>
-
-
-                                                    <button class="btn btn-sm btn-warning" title="Edit" onclick="editInventory({{ json_encode($item) }})">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-
-                                                    <form action="{{ route('inventory.barcode', $item->id) }}" method="GET" class="d-inline">
-                                                        @csrf
-                                                        <button class="btn btn-sm btn-primary" title="qrcode"><i class="fas fa-qrcode"></i></button>
-                                                    </form>
-                                                    <form action="{{ route('inventory.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus barang ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="btn btn-sm btn-danger" title="Hapus"><i class="fas fa-trash"></i></button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="py-5 text-center text-muted">
-                                                <i class="mb-3 fas fa-box-open fa-3x"></i><br>
-                                                Belum ada data inventaris.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="p-3">
-                            {{ $inventories->links() }}
-                        </div>
-                    </div>
-                </div>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Inventaris Barang & Stok') }}
+            </h2>
+            <div class="flex space-x-2">
+                <a href="{{ route('inventory.history') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded shadow text-sm transition duration-150 ease-in-out">
+                    Riwayat Transaksi
+                </a>
+                <button onclick="openModal('importModal')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow text-sm transition duration-150 ease-in-out">
+                    <i class="fas fa-file-excel mr-1"></i> Import
+                </button>
+                <button onclick="openModal('addItemModal')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow text-sm transition duration-150 ease-in-out">
+                    + Tambah Barang Baru
+                </button>
             </div>
         </div>
-    </div>
+    </x-slot>
 
-    <!-- MODAL TAMBAH/EDIT BARANG -->
-    <div class="modal fade" id="addInventoryModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="text-white modal-header bg-primary">
-                    <h5 class="modal-title" id="modalTitle">Tambah Inventaris Baru</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
+            {{-- Alerts --}}
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4 shadow-sm">
+                    <span class="block sm:inline">{{ session('success') }}</span>
                 </div>
-                <form action="{{ route('inventory.store') }}" method="POST" id="inventoryForm">
-                    @csrf
-                    <div id="methodField"></div> <!-- Untuk Method PUT saat Edit -->
-
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label fw-bold">Nama Barang</label>
-                                <input type="text" name="name" id="name" class="form-control" required placeholder="Contoh: Tang Kombinasi">
-                            </div>
-                            <div class="mb-3 col-md-3">
-                                <label class="form-label fw-bold">Kode Barang</label>
-                                <input type="text" name="code" id="code" class="form-control" required placeholder="Auto/Manual">
-                            </div>
-                            <div class="mb-3 col-md-3">
-                                <label class="form-label fw-bold">Merk/Brand</label>
-                                <input type="text" name="brand" id="brand" class="form-control" placeholder="Opsional">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label fw-bold">Lokasi Ruangan/Bengkel</label>
-                                <select name="room_id" id="room_id" class="form-select" required>
-                                    <option value="">-- Pilih Ruangan --</option>
-                                    @foreach($rooms as $r)
-                                        <option value="{{ $r->id }}">{{ $r->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mb-3 col-md-3">
-                                <label class="form-label fw-bold">Kategori</label>
-                                <select name="category" id="category" class="form-select" required>
-                                    <option value="alat">Alat</option>
-                                    <option value="bahan">Bahan</option>
-                                    <option value="mesin">Mesin</option>
-                                </select>
-                            </div>
-                            <div class="mb-3 col-md-3">
-                                <label class="form-label fw-bold">Kondisi</label>
-                                <select name="condition" id="condition" class="form-select" required>
-                                    <option value="baik">Baik</option>
-                                    <option value="rusak_ringan">Rusak Ringan</option>
-                                    <option value="rusak_berat">Rusak Berat</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="mb-3 col-md-4">
-                                <label class="form-label fw-bold">Jumlah</label>
-                                <input type="number" name="quantity" id="quantity" class="form-control" required min="0">
-                            </div>
-                            <div class="mb-3 col-md-4">
-                                <label class="form-label fw-bold">Satuan</label>
-                                <input type="text" name="unit" id="unit" class="form-control" placeholder="Pcs, Unit, Set" value="pcs">
-                            </div>
-                            <div class="mb-3 col-md-4">
-                                <label class="form-label fw-bold">Tanggal Pengadaan</label>
-                                <input type="date" name="purchase_date" id="purchase_date" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Keterangan</label>
-                            <textarea name="description" id="description" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary" id="btnSubmit">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL FORM PINJAM -->
-    <div class="modal fade" id="borrowModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="text-white modal-header bg-info">
-                    <h5 class="modal-title"><i class="fas fa-hand-holding me-2"></i> Pinjam Barang</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            @endif
+            @if($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 shadow-sm">
+                    <ul class="list-disc pl-5">
+                        @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+                    </ul>
                 </div>
-                <form action="{{ route('inventory-loan.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="inventory_id" id="borrow_inventory_id">
+            @endif
 
-                    <div class="modal-body">
-                        <div class="border alert alert-light">
-                            <strong>Barang:</strong> <span id="borrow_item_name"></span><br>
-                            <small class="text-muted">Stok Tersedia: <span id="borrow_max_qty"></span></small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Peminjam <span class="text-danger">*</span></label>
-                            <input type="text" name="borrower_name" class="form-control" placeholder="Nama Siswa / Guru" required>
-                        </div>
-
-                        <div class="row">
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label fw-bold">Jumlah Pinjam <span class="text-danger">*</span></label>
-                                <input type="number" name="quantity" class="form-control" value="1" min="1" required>
-                            </div>
-                            <div class="mb-3 col-md-6">
-                                <label class="form-label fw-bold">Tanggal Pinjam</label>
-                                <input type="datetime-local" name="loan_date" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Catatan (Opsional)</label>
-                            <textarea name="notes" class="form-control" rows="2" placeholder="Keperluan..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="text-white btn btn-info">Simpan Peminjaman</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DAFTAR PEMINJAMAN AKTIF & RIWAYAT -->
-    <div class="modal fade" id="loansModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="text-white modal-header bg-success">
-                    <h5 class="modal-title"><i class="fas fa-list-alt me-2"></i> Riwayat Peminjaman Barang</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="p-0 modal-body">
-                    <div id="loansLoading" class="p-4 text-center">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">Memuat data peminjaman...</p>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table mb-0 align-middle table-striped table-hover">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-3">Nama Peminjam</th>
-                                    <th>Barang</th>
-                                    <th class="text-center">Jml</th>
-                                    <th>Tgl Pinjam</th>
-                                    <th>Status / Catatan</th>
-                                    <th class="text-center pe-3">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="loansTableBody">
-                                <!-- Data akan diisi via AJAX -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function editInventory(item) {
-            // Ubah Title & Action URL
-            document.getElementById('modalTitle').innerText = 'Edit Inventaris';
-            document.getElementById('inventoryForm').action = `/inventory/${item.id}`;
-            document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
-            document.getElementById('btnSubmit').innerText = 'Update';
-
-            // Isi Form
-            document.getElementById('name').value = item.name;
-            document.getElementById('code').value = item.code;
-            document.getElementById('brand').value = item.brand;
-            document.getElementById('room_id').value = item.room_id;
-            document.getElementById('category').value = item.category;
-            document.getElementById('condition').value = item.condition;
-            document.getElementById('quantity').value = item.quantity;
-            document.getElementById('unit').value = item.unit;
-            document.getElementById('purchase_date').value = item.purchase_date;
-            document.getElementById('description').value = item.description;
-
-            // Buka Modal
-            var myModal = new bootstrap.Modal(document.getElementById('addInventoryModal'));
-            myModal.show();
-        }
-
-        function borrowInventory(id, name, maxQty) {
-            document.getElementById('borrow_inventory_id').value = id;
-            document.getElementById('borrow_item_name').innerText = name;
-            document.getElementById('borrow_max_qty').innerText = maxQty;
-
-            var myModal = new bootstrap.Modal(document.getElementById('borrowModal'));
-            myModal.show();
-        }
-
-        // --- FUNGSI LOAD DATA PEMINJAMAN VIA AJAX ---
-        function showLoansModal() {
-            var myModal = new bootstrap.Modal(document.getElementById('loansModal'));
-            myModal.show();
-            loadLoans();
-        }
-
-        function loadLoans() {
-            const tableBody = document.getElementById('loansTableBody');
-            const loading = document.getElementById('loansLoading');
-
-            tableBody.innerHTML = '';
-            loading.style.display = 'block';
-
-            fetch('/inventory-loan/active')
-                .then(response => response.json())
-                .then(data => {
-                    loading.style.display = 'none';
-                    if (data.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-muted">Belum ada riwayat peminjaman.</td></tr>';
-                        return;
-                    }
-
-                    data.forEach(loan => {
-                        // Tentukan Status dan Tombol Aksi
-                        let statusBadge = '';
-                        let actionButtons = '';
-
-                        // LOGIKA TOMBOL CETAK BUKTI
-                        let printTitle = 'Cetak Bukti Peminjaman';
-                        let printBtnClass = 'btn-secondary';
-
-                        if (loan.status === 'kembali') {
-                            printTitle = 'Cetak Bukti Pengembalian';
-                            printBtnClass = 'btn-primary'; // Warna biru jika sudah kembali
-                        }
-
-                        // Link Cetak Bukti
-                        const printBtn = `
-                            <a href="/inventory-loan/${loan.id}/print" target="_blank" class="text-white btn btn-sm ${printBtnClass} me-1" title="${printTitle}">
-                                <i class="fas fa-print"></i>
-                            </a>
-                        `;
-
-                        if (loan.status === 'dipinjam') {
-                            statusBadge = '<span class="badge bg-warning text-dark">Dipinjam</span>';
-                            // Tombol Kembali
-                            actionButtons = `
-                                ${printBtn}
-                                <button class="text-white btn btn-sm btn-success" onclick="returnItem('${loan.id}', '${loan.borrower_name}')" title="Kembalikan">
-                                    <i class="fas fa-undo"></i>
-                                </button>
-                            `;
-                        } else {
-                            statusBadge = '<span class="badge bg-success">Kembali</span>';
-                            actionButtons = printBtn;
-                        }
-
-                        const row = `
+            {{-- Tabel Master Barang --}}
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <td class="ps-3 fw-bold">
-                                    ${loan.borrower_name}<br>
-                                    ${statusBadge}
-                                </td>
-                                <td>${loan.inventory ? loan.inventory.name : 'Item dihapus'}</td>
-                                <td class="text-center fw-bold">${loan.quantity}</td>
-                                <td>
-                                    <small class="d-block text-muted">Pinjam:</small>
-                                    ${new Date(loan.loan_date).toLocaleString('id-ID')}
-                                    ${loan.return_date ? '<small class="d-block text-success">Kembali: ' + new Date(loan.return_date).toLocaleString('id-ID') + '</small>' : ''}
-                                </td>
-                                <td><small class="text-muted">${loan.notes || '-'}</small></td>
-                                <td class="text-center pe-3">
-                                    <div class="btn-group">
-                                        ${actionButtons}
-                                    </div>
-                                </td>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Barang</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Sisa Stok</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi (In/Out)</th>
                             </tr>
-                        `;
-                        tableBody.innerHTML += row;
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    loading.style.display = 'none';
-                    tableBody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-danger">Gagal memuat data. Pastikan route /inventory-loan/active ada.</td></tr>';
-                });
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse($items as $item)
+                                <tr class="hover:bg-gray-50 transition duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->code }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                        <div class="font-semibold">{{ $item->name }}</div>
+                                        <div class="text-xs text-gray-500 mt-1">{{ $item->description }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-bold rounded-full {{ $item->stock > 5 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $item->stock }} {{ $item->unit }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium flex justify-center space-x-2">
+                                        <button onclick="openTransactionModal('{{ $item->id }}', '{{ $item->name }}', '{{ $item->unit }}', 'in')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs shadow-sm transition">
+                                            + Masuk
+                                        </button>
+                                        <button onclick="openTransactionModal('{{ $item->id }}', '{{ $item->name }}', '{{ $item->unit }}', 'out')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs shadow-sm transition {{ $item->stock <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $item->stock <= 0 ? 'disabled' : '' }}>
+                                            - Keluar
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Belum ada data barang.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                {{ $items->links() }}
+            </div>
+
+        </div>
+    </div>
+
+    {{-- DataList --}}
+    <datalist id="unitList">
+        <option value="Pcs"><option value="Rim"><option value="Box"><option value="Lusin">
+        <option value="Pak"><option value="Kg"><option value="Liter"><option value="Unit">
+    </datalist>
+    <datalist id="fundingSources">
+        <option value="Dana BOS"><option value="APBD / Pemerintah"><option value="Dana Yayasan">
+        <option value="Sumbangan / Hibah"><option value="Dana Mandiri">
+    </datalist>
+
+    {{-- Modal Import Data --}}
+    <div id="importModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900 bg-opacity-50 transition-opacity" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4 border-b pb-2"><i class="fas fa-file-excel text-green-600 me-2"></i> Import Data Inventaris</h3>
+                    
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4 text-sm text-blue-800">
+                        <p class="font-bold mb-1"><i class="fas fa-info-circle"></i> Petunjuk Import:</p>
+                        <ol class="list-decimal pl-4 space-y-1">
+                            <li>Gunakan format Excel (.xlsx, .xls, .csv).</li>
+                            <li>Pastikan nama kolom / <em>header</em> pada baris pertama persis seperti template.</li>
+                            <li><a href="{{ route('inventory.template') }}" class="font-bold text-blue-600 hover:text-blue-800 underline">Unduh Template CSV Disini</a></li>
+                        </ol>
+                    </div>
+
+                    <form action="{{ route('inventory.import') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pilih File Excel / CSV</label>
+                            <input type="file" name="file" required accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-md p-2">
+                        </div>
+                        
+                        <div class="flex justify-end space-x-2 mt-5 pt-4 border-t border-gray-100">
+                            <button type="button" onclick="closeModal('importModal')" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded shadow-sm text-sm font-medium">Batal</button>
+                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm text-sm font-medium">Mulai Import</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Tambah Master Barang --}}
+    <div id="addItemModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900 bg-opacity-50 transition-opacity" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4 border-b pb-2" id="modal-title">Tambah Master Barang Baru</h3>
+                    <form action="{{ route('inventory.item.store') }}" method="POST">
+                        @csrf
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Kode Barang</label>
+                                <input type="text" name="code" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Satuan (Unit)</label>
+                                <input type="text" name="unit" list="unitList" placeholder="Pcs, Rim, dll" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Nama Barang</label>
+                            <input type="text" name="name" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Stok Awal</label>
+                                <input type="number" name="initial_stock" value="0" min="0" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Sumber Dana <span class="text-xs text-gray-400 font-normal">(Opsional)</span></label>
+                                <input type="text" name="funding_source" list="fundingSources" placeholder="Pilih / Ketik manual" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Tahun Anggaran/Perolehan</label>
+                            <input type="number" name="year" value="{{ date('Y') }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Keterangan Barang</label>
+                            <textarea name="description" rows="2" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-2 mt-5 pt-4 border-t border-gray-100">
+                            <button type="button" onclick="closeModal('addItemModal')" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded shadow-sm text-sm font-medium">Batal</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow-sm text-sm font-medium">Simpan Barang</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Transaksi Masuk/Keluar --}}
+    <div id="transactionModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900 bg-opacity-50 transition-opacity" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4 border-b pb-2" id="transModalTitle">Transaksi Barang</h3>
+                    <form action="{{ route('inventory.transaction.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="item_id" id="transItemId">
+                        <input type="hidden" name="type" id="transType">
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Barang yang Dipilih</label>
+                            <input type="text" id="transItemName" disabled class="mt-1 block w-full bg-gray-100 shadow-sm sm:text-sm border-gray-300 rounded-md border p-2 font-bold text-gray-800 cursor-not-allowed">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Jumlah (<span id="transItemUnit" class="text-blue-600">Qty</span>)</label>
+                                <input type="number" name="quantity" min="1" value="1" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Tanggal Transaksi</label>
+                                <input type="date" name="date" value="{{ date('Y-m-d') }}" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2">
+                            </div>
+                        </div>
+                        
+                        {{-- Container IN (Masuk): Sumber Dana & Tahun --}}
+                        <div id="inContainer" style="display: none;" class="p-4 bg-green-50 rounded-lg border border-green-100 mb-4">
+                            <p class="text-xs font-semibold text-green-800 mb-2 uppercase tracking-wide">Detail Barang Masuk</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Tahun Anggaran</label>
+                                    <input type="number" name="year" id="transYear" value="{{ date('Y') }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-green-500 focus:border-green-500 rounded-md border p-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Sumber Dana</label>
+                                    <input type="text" name="funding_source" id="transFundingSource" list="fundingSources" placeholder="Pilih / Ketik" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-green-500 focus:border-green-500 rounded-md border p-2">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Container OUT (Keluar): Pengambil --}}
+                        <div id="outContainer" style="display: none;" class="p-4 bg-red-50 rounded-lg border border-red-100 mb-4">
+                            <p class="text-xs font-semibold text-red-800 mb-2 uppercase tracking-wide">Detail Barang Keluar</p>
+                            <label class="block text-sm font-medium text-gray-700">Nama Penerima / Pengambil</label>
+                            <input type="text" name="receiver" id="transReceiver" placeholder="Cth: Pak Budi / Ruang Guru" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-red-500 focus:border-red-500 rounded-md border p-2">
+                            <p class="text-xs text-gray-500 mt-1">Siapa yang meminta/mengambil barang ini?</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Keterangan Tambahan</label>
+                            <textarea name="notes" rows="2" placeholder="Tuliskan catatan opsional di sini..." class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md border p-2"></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-2 mt-5 pt-4 border-t border-gray-100">
+                            <button type="button" onclick="closeModal('transactionModal')" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded shadow-sm text-sm font-medium">Batal</button>
+                            <button type="submit" id="transSubmitBtn" class="bg-blue-600 text-white px-4 py-2 rounded shadow-sm text-sm font-medium hover:opacity-90 transition">Simpan Transaksi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mencegah resubmission saat refresh
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
         }
 
-        // --- FIX: FUNGSI PENGEMBALIAN BARANG DENGAN TEXTAREA ---
-        function returnItem(id, borrowerName) {
-            Swal.fire({
-                title: 'Konfirmasi Pengembalian',
-                html: `Barang dipinjam oleh: <b>${borrowerName}</b><br><br>Masukkan catatan kondisi barang (Opsional):`,
-                icon: 'question',
-                input: 'textarea', // Gunakan textarea agar bisa input banyak baris
-                inputPlaceholder: 'Contoh: Barang kondisi baik / Ada lecet...',
-                inputAttributes: {
-                    'aria-label': 'Catatan kondisi barang'
-                },
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                confirmButtonText: 'Terima Barang',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const notes = result.value;
-
-                    // Loading state
-                    Swal.fire({title: 'Memproses...', didOpen: () => Swal.showLoading()});
-
-                    fetch(`/inventory-loan/${id}/return`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json', // PENTING agar dikenali sebagai AJAX
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({ notes: notes })
-                    })
-                    .then(async response => {
-                        let data;
-                        try {
-                            data = await response.json();
-                        } catch (e) {
-                            data = { message: 'Terjadi kesalahan pada respon server.' };
-                        }
-
-                        if (response.ok) {
-                            Swal.fire('Berhasil!', data.message || 'Barang telah dikembalikan.', 'success');
-                            loadLoans(); // Reload tabel modal
-                        } else {
-                            Swal.fire('Gagal!', data.message || 'Terjadi kesalahan sistem.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
-                    });
-                }
-            });
+        function openModal(id) { 
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+        function closeModal(id) { 
+            document.getElementById(id).classList.add('hidden'); 
         }
 
-        // Reset modal saat ditutup (agar kembali ke mode tambah)
-        document.getElementById('addInventoryModal').addEventListener('hidden.bs.modal', function () {
-            document.getElementById('inventoryForm').reset();
-            document.getElementById('inventoryForm').action = "{{ route('inventory.store') }}";
-            document.getElementById('methodField').innerHTML = '';
-            document.getElementById('modalTitle').innerText = 'Tambah Inventaris Baru';
-            document.getElementById('btnSubmit').innerText = 'Simpan';
-        });
+        function openTransactionModal(itemId, itemName, itemUnit, type) {
+            document.getElementById('transItemId').value = itemId;
+            document.getElementById('transItemName').value = itemName + ' (' + itemUnit + ')';
+            document.getElementById('transItemUnit').innerText = itemUnit;
+            document.getElementById('transType').value = type;
+            
+            const title = document.getElementById('transModalTitle');
+            const btn = document.getElementById('transSubmitBtn');
+            
+            const inContainer = document.getElementById('inContainer');
+            const outContainer = document.getElementById('outContainer');
+            
+            const inputYear = document.getElementById('transYear');
+            const inputFunding = document.getElementById('transFundingSource');
+            const inputReceiver = document.getElementById('transReceiver');
+            
+            if(type === 'in') {
+                title.innerText = 'Catat Barang Masuk (+)';
+                btn.innerText = 'Simpan Barang Masuk';
+                btn.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm text-sm font-medium transition';
+                
+                inContainer.style.display = 'block';
+                outContainer.style.display = 'none';
+                
+                inputFunding.required = true;
+                inputYear.required = true;
+                inputReceiver.required = false;
+                inputReceiver.value = '';
+            } else {
+                title.innerText = 'Catat Barang Keluar (-)';
+                btn.innerText = 'Simpan Barang Keluar';
+                btn.className = 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow-sm text-sm font-medium transition';
+                
+                inContainer.style.display = 'none';
+                outContainer.style.display = 'block';
+                
+                inputReceiver.required = true;
+                inputFunding.required = false;
+                inputYear.required = false;
+                inputFunding.value = '';
+            }
+            
+            openModal('transactionModal');
+        }
     </script>
-    @endpush
 </x-app-layout>

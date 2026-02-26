@@ -580,6 +580,9 @@ Route::middleware(['auth'])->group(function () {
         // Riwayat (Opsional, Anda bisa membuat view resources/views/inventory/history.blade.php terpisah)
         Route::get('/admin/inventory/history', [InventoryAdminController::class, 'history'])->name('admin.inventory.history');
 
+        Route::get('/admin/inventory/template', [InventoryAdminController::class, 'downloadTemplate'])->name('admin.inventory.template');
+        Route::post('/admin/inventory/import', [InventoryAdminController::class, 'import'])->name('admin.inventory.import');
+
     });
 
     Route::middleware(['role:siswa'])->group(function () {
