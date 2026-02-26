@@ -10,42 +10,41 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Imports\ItemImport;
+use App\Models\InventoryTransaction;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class ItemImport implements ToModel, ToCollection, WithHeadingRow
+class ItemImport implements ToCollection, WithHeadingRow, WithChunkReading
 {
-    /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
-    public function model(array $row)
-    {
-        return new Item([
-            //
-        ]);
-    }
 
+       // Properti untuk menghitung hasil import
+    public $importedCount = 0;
+    public $skippedCount = 0;
+
+    /**
+     * @param Collection $rows
+     */
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            // Validasi minimal: pastikan ada kode dan nama barang
+            // 1. Validasi minimal: pastikan ada kode dan nama barang
+            // Note: 'kode' dan 'nama_barang' harus sesuai dengan header di file Excel
             if (empty($row['kode']) || empty($row['nama_barang'])) {
                 continue;
             }
 
             $code = trim($row['kode']);
 
-            // Cek duplikasi berdasarkan kode barang
+            // 2. Cek duplikasi berdasarkan kode barang
             if (Item::where('code', $code)->exists()) {
                 $this->skippedCount++;
                 continue; // Skip jika kode sudah ada di database
             }
 
+            // 3. Proses Simpan dengan Transaction
             DB::transaction(function () use ($row, $code) {
                 $stock = isset($row['stok_awal']) ? (int) $row['stok_awal'] : 0;
-                
-                // 1. Simpan Master Barang
+
+                // Simpan ke Tabel Master Barang
                 $item = Item::create([
                     'code'        => $code,
                     'name'        => trim($row['nama_barang']),
@@ -54,7 +53,7 @@ class ItemImport implements ToModel, ToCollection, WithHeadingRow
                     'stock'       => $stock,
                 ]);
 
-                // 2. Jika ada stok awal, otomatis buat riwayat transaksinya
+                // Jika ada stok awal, otomatis buat riwayat transaksinya
                 if ($stock > 0) {
                     InventoryTransaction::create([
                         'item_id'        => $item->id,
@@ -72,4 +71,11 @@ class ItemImport implements ToModel, ToCollection, WithHeadingRow
             });
         }
     }
+
+    // Server hanya akan membaca 100 baris per tahap
+    public function chunkSize(): int
+    {
+        return 100;
+    }
+
 }
