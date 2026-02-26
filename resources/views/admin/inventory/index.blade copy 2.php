@@ -1,22 +1,16 @@
 @section('title', 'Inventaris Barang & Stok')
 
 <x-app-layout>
-    {{-- Sedikit CSS untuk merapikan ukuran Paginasi bawaan Laravel jika membesar --}}
-    <style>
-        .pagination { font-size: 0.875rem; margin-bottom: 0; }
-        .page-link { padding: 0.3rem 0.75rem; }
-    </style>
-
     <div class="py-4 page-content">
         {{-- Header Halaman --}}
-        <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="mb-1 fw-bold text-primary">
                     <i class="fas fa-boxes me-2"></i>Inventaris Barang & Stok
                 </h4>
                 <p class="mb-0 text-muted small">Manajemen aset dan mutasi stok bengkel TITL</p>
             </div>
-            <div class="gap-2 d-flex flex-wrap">
+            <div class="gap-2 d-flex">
                 <a href="{{ route('admin.inventory.history') }}" class="shadow-sm btn btn-outline-secondary">
                     <i class="fas fa-history me-1"></i> Riwayat
                 </a>
@@ -26,28 +20,6 @@
                 <button class="shadow-sm btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
                     <i class="fas fa-plus me-1"></i> Tambah Barang
                 </button>
-            </div>
-        </div>
-
-        {{-- Form Pencarian dengan AJAX --}}
-        <div class="mb-4 border-0 shadow-sm card">
-            <div class="p-3 card-body">
-                <form id="searchForm" action="{{ route('admin.inventory.index') }}" method="GET" class="m-0 row g-2 align-items-center">
-                    <div class="col-12 col-md-8 col-lg-9">
-                        <div class="input-group">
-                            <span class="bg-white input-group-text border-end-0 text-muted">
-                                <i class="fas fa-search" id="searchIcon"></i>
-                                <div class="spinner-border spinner-border-sm text-primary d-none" id="loadingIcon" role="status"></div>
-                            </span>
-                            <input type="text" id="searchInput" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik nama barang atau kode alat..." value="{{ request('search') }}" autocomplete="off">
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-4 col-lg-3 d-flex gap-2">
-                        <button type="button" onclick="document.getElementById('searchInput').value = ''; document.getElementById('searchInput').dispatchEvent(new Event('input'));" class="btn btn-outline-secondary w-100 shadow-sm">
-                            <i class="fas fa-sync-alt me-1"></i> Reset
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
 
@@ -72,24 +44,24 @@
         <div class="border-0 shadow-lg card">
             <div class="p-0 card-body">
                 <div class="table-responsive">
-                    <table class="table mb-0 align-middle table-hover text-nowrap">
+                    <table class="table mb-0 align-middle table-hover">
                         <thead class="bg-light">
                             <tr>
-                                <th class="py-3 ps-4 text-uppercase small fw-bold">Kode</th>
-                                <th class="py-3 text-uppercase small fw-bold w-100">Nama Barang</th>
-                                <th class="py-3 text-center text-uppercase small fw-bold">Sisa Stok</th>
-                                <th class="py-3 text-center pe-4 text-uppercase small fw-bold">Aksi (In/Out)</th>
+                                <th class="py-3 ps-4 text-uppercase small fw-bold" style="width: 15%">Kode</th>
+                                <th class="py-3 text-uppercase small fw-bold" style="width: 35%">Nama Barang</th>
+                                <th class="py-3 text-center text-uppercase small fw-bold" style="width: 25%">Sisa Stok</th>
+                                <th class="py-3 text-center pe-4 text-uppercase small fw-bold" style="width: 25%">Aksi (In/Out)</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody" style="transition: opacity 0.2s ease-in-out;">
+                        <tbody>
                             @forelse($items as $item)
                                 <tr>
                                     <td class="ps-4">
                                         <span class="border badge bg-light text-dark fw-medium">{{ $item->code }}</span>
                                     </td>
-                                    <td class="text-wrap">
+                                    <td>
                                         <div class="fw-bold text-dark">{{ $item->name }}</div>
-                                        <small class="text-muted d-inline-block text-truncate" style="max-width: 250px;">{{ $item->description ?? '-' }}</small>
+                                        <small class="text-muted d-block text-truncate" style="max-width: 250px;">{{ $item->description ?? '-' }}</small>
                                     </td>
                                     <td class="text-center">
                                         <span class="px-3 py-2 badge rounded-pill {{ $item->stock > 5 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}">
@@ -111,9 +83,9 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="py-5 text-center text-muted text-wrap">
+                                    <td colspan="4" class="py-5 text-center text-muted">
                                         <i class="mb-3 fas fa-box-open fa-3x d-block text-light"></i>
-                                        Belum ada data atau tidak ditemukan.
+                                        Belum ada data barang di inventaris.
                                     </td>
                                 </tr>
                             @endforelse
@@ -121,12 +93,11 @@
                     </table>
                 </div>
             </div>
-
-            <div class="py-3 bg-white border-0 card-footer d-flex justify-content-end" id="paginationContainer">
-                @if($items->hasPages())
-                    {{ $items->links('pagination::bootstrap-5') }}
-                @endif
-            </div>
+            @if($items->hasPages())
+                <div class="py-3 bg-white border-0 card-footer">
+                    {{ $items->links() }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -156,8 +127,8 @@
                             <a href="{{ route('admin.inventory.template') }}" class="mt-1 fw-bold d-block text-decoration-none">Unduh Template Disini</a>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">PILIH FILE EXCEL (.xlsx)</label>
-                            <input type="file" name="file" class="form-control" required accept=".xlsx,.xls">
+                            <label class="form-label fw-bold small text-muted">PILIH FILE EXCEL/CSV</label>
+                            <input type="file" name="file" class="form-control" required accept=".xlsx,.xls,.csv">
                         </div>
                     </div>
                     <div class="border-0 modal-footer bg-light">
@@ -183,7 +154,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">KODE BARANG</label>
-                                <input type="text" name="code" class="form-control bg-light text-primary fw-bold" required value="{{ $autoCode ?? '' }}" readonly>
+                                <input type="text" name="code" class="form-control" required placeholder="Cth: TITL-001">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">SATUAN (UNIT)</label>
@@ -275,76 +246,7 @@
 
     @push('scripts')
     <script>
-        // --- 1. SCRIPT UNTUK AJAX PENCARIAN & PAGINASI ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const tableBody = document.getElementById('tableBody');
-            const paginationContainer = document.getElementById('paginationContainer');
-            const searchIcon = document.getElementById('searchIcon');
-            const loadingIcon = document.getElementById('loadingIcon');
-
-            let debounceTimer;
-
-            function fetchInventoryData(url) {
-                tableBody.style.opacity = '0.4';
-                searchIcon.classList.add('d-none');
-                loadingIcon.classList.remove('d-none');
-
-                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                    .then(response => response.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-
-                        const newTableBody = doc.getElementById('tableBody');
-                        if (newTableBody) tableBody.innerHTML = newTableBody.innerHTML;
-
-                        const newPagination = doc.getElementById('paginationContainer');
-                        if (newPagination && paginationContainer) {
-                            paginationContainer.innerHTML = newPagination.innerHTML;
-                        }
-
-                        tableBody.style.opacity = '1';
-                        loadingIcon.classList.add('d-none');
-                        searchIcon.classList.remove('d-none');
-                    })
-                    .catch(error => {
-                        console.error('AJAX Error:', error);
-                        tableBody.style.opacity = '1';
-                        loadingIcon.classList.add('d-none');
-                        searchIcon.classList.remove('d-none');
-                    });
-            }
-
-            if(searchInput) {
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(debounceTimer);
-                    const query = this.value;
-                    const url = `{{ route('admin.inventory.index') }}?search=${encodeURIComponent(query)}`;
-
-                    debounceTimer = setTimeout(() => {
-                        fetchInventoryData(url);
-                    }, 400);
-                });
-            }
-
-            const searchForm = document.getElementById('searchForm');
-            if(searchForm) {
-                searchForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                });
-            }
-
-            document.addEventListener('click', function(e) {
-                const pageLink = e.target.closest('#paginationContainer a');
-                if (pageLink) {
-                    e.preventDefault();
-                    fetchInventoryData(pageLink.href);
-                }
-            });
-        });
-
-        // --- 2. SCRIPT UNTUK MODAL TRANSAKSI ---
+        // Gunakan Bootstrap Modal API agar konsisten dengan template lain
         function openTransactionModal(itemId, itemName, itemUnit, type) {
             document.getElementById('transItemId').value = itemId;
             document.getElementById('transItemName').value = itemName + ' (' + itemUnit + ')';

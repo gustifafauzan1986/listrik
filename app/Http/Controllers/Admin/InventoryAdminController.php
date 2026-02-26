@@ -21,11 +21,34 @@ class InventoryAdminController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Item::query();
+        // $query = Item::query();
 
-        if ($request->has('search') && $request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('code', 'like', '%' . $request->search . '%');
+        // if ($request->has('search') && $request->filled('search')) {
+        //     $query->where('name', 'like', '%' . $request->search . '%')
+        //           ->orWhere('code', 'like', '%' . $request->search . '%');
+        // }
+
+        $query = Item::latest();
+
+        // // Logika Pencarian
+        // if ($request->has('search') && $request->filled('search') && $request->search != '') {
+        //     $search = $request->search;
+        //     $query->where(function($q) use ($search) {
+        //         $q->where('name', 'like', '%' . $search . '%')
+        //         ->orWhere('code', 'like', '%' . $search . '%');
+        //     });
+        // }
+
+        // 1. Logika Pencarian (Mendukung Kapital & Huruf Kecil)
+        if ($request->has('search') && $request->search != '') {
+            // Ubah kata kunci pencarian menjadi huruf kecil semua
+            $search = strtolower($request->search);
+
+            $query->where(function($q) use ($search) {
+                // Gunakan LOWER() untuk mengubah data di tabel menjadi huruf kecil saat dicocokkan
+                $q->whereRaw('LOWER(name) LIKE ?', ['%' . $search . '%'])
+                ->orWhereRaw('LOWER(code) LIKE ?', ['%' . $search . '%']);
+            });
         }
 
         $items = $query->latest()->paginate(10)->appends($request->all());

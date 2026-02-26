@@ -1,14 +1,8 @@
 @section('title', 'Inventaris Barang & Stok')
 
 <x-app-layout>
-    {{-- Sedikit CSS untuk merapikan ukuran Paginasi bawaan Laravel jika membesar --}}
-    <style>
-        .pagination { font-size: 0.875rem; margin-bottom: 0; }
-        .page-link { padding: 0.3rem 0.75rem; }
-    </style>
-
     <div class="py-4 page-content">
-        {{-- Header Halaman --}}
+        {{-- Header Halaman (Responsif untuk HP/PC) --}}
         <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
                 <h4 class="mb-1 fw-bold text-primary">
@@ -29,23 +23,21 @@
             </div>
         </div>
 
-        {{-- Form Pencarian dengan AJAX --}}
+        {{-- Form Pencarian --}}
         <div class="mb-4 border-0 shadow-sm card">
             <div class="p-3 card-body">
-                <form id="searchForm" action="{{ route('admin.inventory.index') }}" method="GET" class="m-0 row g-2 align-items-center">
+                <form action="{{ route('admin.inventory.index') }}" method="GET" class="m-0 row g-2 align-items-center">
                     <div class="col-12 col-md-8 col-lg-9">
                         <div class="input-group">
-                            <span class="bg-white input-group-text border-end-0 text-muted">
-                                <i class="fas fa-search" id="searchIcon"></i>
-                                <div class="spinner-border spinner-border-sm text-primary d-none" id="loadingIcon" role="status"></div>
-                            </span>
-                            <input type="text" id="searchInput" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik nama barang atau kode alat..." value="{{ request('search') }}" autocomplete="off">
+                            <span class="bg-white input-group-text border-end-0 text-muted"><i class="fas fa-search"></i></span>
+                            <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari nama barang atau kode alat..." value="{{ request('search') }}">
                         </div>
                     </div>
                     <div class="col-12 col-md-4 col-lg-3 d-flex gap-2">
-                        <button type="button" onclick="document.getElementById('searchInput').value = ''; document.getElementById('searchInput').dispatchEvent(new Event('input'));" class="btn btn-outline-secondary w-100 shadow-sm">
-                            <i class="fas fa-sync-alt me-1"></i> Reset
-                        </button>
+                        <button type="submit" class="btn btn-primary w-100 shadow-sm"><i class="fas fa-search me-1"></i> Cari</button>
+                        @if(request('search'))
+                            <a href="{{ route('admin.inventory.index') }}" class="btn btn-outline-secondary w-100 shadow-sm">Reset</a>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -81,7 +73,7 @@
                                 <th class="py-3 text-center pe-4 text-uppercase small fw-bold">Aksi (In/Out)</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody" style="transition: opacity 0.2s ease-in-out;">
+                        <tbody>
                             @forelse($items as $item)
                                 <tr>
                                     <td class="ps-4">
@@ -113,7 +105,11 @@
                                 <tr>
                                     <td colspan="4" class="py-5 text-center text-muted text-wrap">
                                         <i class="mb-3 fas fa-box-open fa-3x d-block text-light"></i>
-                                        Belum ada data atau tidak ditemukan.
+                                        @if(request('search'))
+                                            Tidak ditemukan barang dengan kata kunci "<strong>{{ request('search') }}</strong>".
+                                        @else
+                                            Belum ada data barang di inventaris.
+                                        @endif
                                     </td>
                                 </tr>
                             @endforelse
@@ -121,12 +117,11 @@
                     </table>
                 </div>
             </div>
-
-            <div class="py-3 bg-white border-0 card-footer d-flex justify-content-end" id="paginationContainer">
-                @if($items->hasPages())
-                    {{ $items->links('pagination::bootstrap-5') }}
-                @endif
-            </div>
+            @if($items->hasPages())
+                <div class="py-3 bg-white border-0 card-footer">
+                    {{ $items->links() }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -275,76 +270,6 @@
 
     @push('scripts')
     <script>
-        // --- 1. SCRIPT UNTUK AJAX PENCARIAN & PAGINASI ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const tableBody = document.getElementById('tableBody');
-            const paginationContainer = document.getElementById('paginationContainer');
-            const searchIcon = document.getElementById('searchIcon');
-            const loadingIcon = document.getElementById('loadingIcon');
-
-            let debounceTimer;
-
-            function fetchInventoryData(url) {
-                tableBody.style.opacity = '0.4';
-                searchIcon.classList.add('d-none');
-                loadingIcon.classList.remove('d-none');
-
-                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                    .then(response => response.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-
-                        const newTableBody = doc.getElementById('tableBody');
-                        if (newTableBody) tableBody.innerHTML = newTableBody.innerHTML;
-
-                        const newPagination = doc.getElementById('paginationContainer');
-                        if (newPagination && paginationContainer) {
-                            paginationContainer.innerHTML = newPagination.innerHTML;
-                        }
-
-                        tableBody.style.opacity = '1';
-                        loadingIcon.classList.add('d-none');
-                        searchIcon.classList.remove('d-none');
-                    })
-                    .catch(error => {
-                        console.error('AJAX Error:', error);
-                        tableBody.style.opacity = '1';
-                        loadingIcon.classList.add('d-none');
-                        searchIcon.classList.remove('d-none');
-                    });
-            }
-
-            if(searchInput) {
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(debounceTimer);
-                    const query = this.value;
-                    const url = `{{ route('admin.inventory.index') }}?search=${encodeURIComponent(query)}`;
-
-                    debounceTimer = setTimeout(() => {
-                        fetchInventoryData(url);
-                    }, 400);
-                });
-            }
-
-            const searchForm = document.getElementById('searchForm');
-            if(searchForm) {
-                searchForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                });
-            }
-
-            document.addEventListener('click', function(e) {
-                const pageLink = e.target.closest('#paginationContainer a');
-                if (pageLink) {
-                    e.preventDefault();
-                    fetchInventoryData(pageLink.href);
-                }
-            });
-        });
-
-        // --- 2. SCRIPT UNTUK MODAL TRANSAKSI ---
         function openTransactionModal(itemId, itemName, itemUnit, type) {
             document.getElementById('transItemId').value = itemId;
             document.getElementById('transItemName').value = itemName + ' (' + itemUnit + ')';
