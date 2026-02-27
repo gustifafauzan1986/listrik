@@ -18,6 +18,7 @@ use App\Http\Controllers\FaceController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ProfileSignatureController;
 
 use App\Http\Controllers\DailyAttendanceController;
 use App\Http\Controllers\CardController;
@@ -118,6 +119,11 @@ Route::middleware(['auth'])->group(function () {
     // --- DASHBOARD REDIRECTOR (UPDATED) ---
     // Logika pengalihan user ke halaman yang sesuai role-nya
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    
+    // Route untuk menu Tanda Tangan
+    Route::get('/profil/tanda-tangan', [ProfileSignatureController::class, 'edit'])->name('profile.signature.edit');
+    Route::post('/profil/tanda-tangan', [ProfileSignatureController::class, 'update'])->name('profile.signature.update');
 });
 
 

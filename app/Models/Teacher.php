@@ -29,7 +29,8 @@ class Teacher extends Model
         'major_id',
         'golongan',
         'pangkat',
-        'tugas_tambahan'
+        'tugas_tambahan',
+        'signature', // Tambahan baru
     ];
 
     public function user()
