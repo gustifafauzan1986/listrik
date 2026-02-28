@@ -53,6 +53,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryLoanController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PrayerMonitoringController;
+use App\Http\Controllers\AbsensiKegiatanController;
 use App\Http\Controllers\Guru\LaporanGuruController;
 use App\Http\Controllers\Guru\InternshipAssessmentController;
 use App\Http\Controllers\Guru\DashboardGuruController;
@@ -270,6 +271,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tahfiz', [TahfizController::class, 'index'])->name('tahfiz.index');
         Route::post('/tahfiz', [TahfizController::class, 'store'])->name('tahfiz.store');
         Route::delete('/tahfiz/{id}', [TahfizController::class, 'destroy'])->name('tahfiz.destroy');
+
+        Route::get('/kegiatan', [AbsensiKegiatanController::class, 'index'])->name('kegiatan.index');
+        Route::get('/kegiatan/scan/{kode_unik}', [AbsensiKegiatanController::class, 'scanQr'])->name('kegiatan.scan');
+        Route::get('/kegiatan/scan/', [AbsensiKegiatanController::class, 'scan'])->name('kegiatan.scan.camera');
+        Route::post('/kegiatan/scan/proses', [AbsensiKegiatanController::class, 'proses'])->name('scan.proses');
+        Route::get('/kegiatan/{id}', [AbsensiKegiatanController::class, 'showKegiatan'])->name('kegiatan.show');
+        Route::post('/kegiatan/store', [AbsensiKegiatanController::class, 'storeKegiatan'])->name('kegiatan.store');
+        Route::get('/kegiatan/print/{id}', [AbsensiKegiatanController::class, 'printKegiatan'])->name('kegiatan.print');
+        Route::get('/api/kegiatan/total-hadir', [AbsensiKegiatanController::class, 'apiTotalHadir']);
+        Route::get('/kegiatan/{id}/total-hadir', [AbsensiKegiatanController::class, 'getTotalHadir'])->name('kegiatan.total-hadir');
     });
 
     // =========================================================================
