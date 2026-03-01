@@ -14,6 +14,8 @@ class Absensi extends Model
         'kegiatan_id',
         'user_id',
         'waktu_hadir',
+        'latitude', 
+        'longitude', 
     ];
 
 

@@ -1,57 +1,105 @@
-@extends('layouts.app') <!-- Sesuaikan dengan layout Anda -->
+@extends('layouts.app')
 
 @section('content')
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
-            <h2 class="mb-4">Scan QR Code Absensi</h2>
+            <h2 class="mb-4 fw-bold text-primary"><i class="fas fa-qrcode me-2"></i>Scanner Absensi Bengkel</h2>
             
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <!-- Area Kamera akan muncul di div ini -->
-                    <div id="reader" style="width: 100%; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden;"></div>
-                    
-                    <!-- Area Pesan/Notifikasi (Sukses/Gagal) -->
-                    <div id="result" class="mt-4" style="display: none;">
-                        <div class="alert" id="result-alert" role="alert">
-                            <h4 class="alert-heading" id="result-title"></h4>
-                            <p id="result-message" class="mb-0"></p>
-                        </div>
-                        <!-- Tombol untuk scan ulang (muncul setelah berhasil/gagal) -->
-                        <button class="btn btn-primary mt-2" id="btn-scan-ulang" onclick="resetScanner()" style="display: none;">Scan Ulang</button>
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <div id="gps-status" class="alert alert-info border-0 mb-3 shadow-sm">
+                        <i class="fas fa-spinner fa-spin me-2"></i> Sedang mengunci sinyal GPS...
                     </div>
 
-                    <p class="text-muted mt-3 small">Arahkan kamera ke QR Code kegiatan. Pastikan pencahayaan cukup.</p>
+                    <div id="reader" class="rounded-3 overflow-hidden shadow-sm" style="width: 100%; max-width: 500px; margin: 0 auto; border: 2px solid #dee2e6;"></div>
+                    
+                    <div id="result" class="mt-4" style="display: none;">
+                        <div class="alert shadow-sm" id="result-alert" role="alert">
+                            <h4 class="alert-heading fw-bold" id="result-title"></h4>
+                            <p id="result-message" class="mb-0 font-monospace"></p>
+                        </div>
+                        <button class="btn btn-primary btn-lg rounded-pill px-5 mt-2 shadow" id="btn-scan-ulang" onclick="resetScanner()">
+                            <i class="fas fa-sync-alt me-2"></i> Scan Ulang
+                        </button>
+                    </div>
+
+                    <p class="text-muted mt-3 small italic">
+                        <i class="fas fa-info-circle me-1"></i> Pastikan Anda berada di area kegiatan dan GPS HP aktif.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Load library HTML5-QRCode via CDN -->
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-<!-- Tambahkan tag meta CSRF Token di head layout.app Anda jika belum ada -->
-<!-- <meta name="csrf-token" content="{{ csrf_token() }}"> -->
+
 
 <script>
-    // Inisialisasi variabel scanner
     let html5QrcodeScanner;
-    let isProcessing = false; // Mencegah scan berulang saat sedang memproses data
+    let isProcessing = false;
+    let userLat = null;
+    let userLng = null;
+    let isLocationReady = false;
 
-    // Fungsi yang dipanggil ketika QR Code berhasil terbaca
+    // 1. FUNGSI UNTUK MENGUNCI LOKASI (WAJIB TERBACA DULU)
+    function getLocation() {
+        const gpsStatus = document.getElementById('gps-status');
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLat = position.coords.latitude;
+                    userLng = position.coords.longitude;
+                    isLocationReady = true;
+
+                    gpsStatus.className = "alert alert-success border-0 mb-3 shadow-sm";
+                    gpsStatus.innerHTML = '<i class="fas fa-map-marker-alt me-2"></i> GPS Terkunci! Silakan lakukan scan.';
+                    console.log("Location Ready:", userLat, userLng);
+                },
+                (error) => {
+                    isLocationReady = false;
+                    gpsStatus.className = "alert alert-danger border-0 mb-3 shadow-sm";
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            gpsStatus.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Izin GPS Ditolak! Mohon izinkan lokasi di browser.';
+                            break;
+                        default:
+                            gpsStatus.innerHTML = '<i class="fas fa-satellite-dish me-2"></i> Sinyal GPS Lemah. Mohon cari tempat terbuka.';
+                            break;
+                    }
+                },
+                { 
+                    enableHighAccuracy: true, // Akurasi Tinggi untuk Area Bengkel
+                    timeout: 10000, 
+                    maximumAge: 0 
+                }
+            );
+        } else {
+            gpsStatus.innerHTML = "Browser Anda tidak mendukung GPS.";
+        }
+    }
+
+    // 2. FUNGSI SAAT SCAN BERHASIL
     function onScanSuccess(decodedText, decodedResult) {
-        // Jika sedang memproses data sebelumnya, abaikan scan ini
         if (isProcessing) return;
-        isProcessing = true;
 
-        // 1. Hentikan (pause) scanner sementara agar tidak scan berulang kali
+        // VALIDASI: LOKASI HARUS TERBACA DULU
+        if (!isLocationReady || userLat === null) {
+            alert("⚠️ LOKASI BELUM TERKUNCI!\nMohon tunggu hingga status GPS berwarna hijau sebelum melakukan scan.");
+            getLocation(); // Coba ambil ulang lokasi
+            return;
+        }
+
+        isProcessing = true;
         html5QrcodeScanner.pause(true);
 
-        // 2. Kirim data (decodedText / kode unik) ke server via AJAX Fetch
-        // Pastikan Anda memiliki meta tag csrf-token di layout utama Anda
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+        // KIRIM DATA KE CONTROLLER
         fetch("{{ route('scan.proses') }}", {
             method: 'POST',
             headers: {
@@ -59,11 +107,14 @@
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ kode_unik: decodedText })
+            body: JSON.stringify({ 
+                kode_unik: decodedText,
+                latitude: userLat,
+                longitude: userLng
+            })
         })
         .then(response => response.json())
         .then(data => {
-            // Tampilkan area hasil
             const resultDiv = document.getElementById('result');
             const resultAlert = document.getElementById('result-alert');
             const resultTitle = document.getElementById('result-title');
@@ -72,69 +123,59 @@
 
             resultDiv.style.display = 'block';
             btnUlang.style.display = 'inline-block';
+            resultAlert.className = 'alert shadow-sm';
 
-            // Bersihkan class alert sebelumnya
-            resultAlert.className = 'alert';
-
-            // Tangani response dari server
             if (data.status === 'success') {
                 resultAlert.classList.add('alert-success');
-                resultTitle.innerHTML = '<i class="bi bi-check-circle-fill"></i> Berhasil!';
+                resultTitle.innerHTML = '<i class="fas fa-check-circle me-2"></i> ABSEN BERHASIL!';
                 resultMessage.innerText = data.message;
-                
-                // Opsional: Mainkan suara 'beep' sukses di sini
-                
+                // Getar HP jika sukses (hanya Android)
+                if (navigator.vibrate) navigator.vibrate(200);
             } else if (data.status === 'warning') {
                 resultAlert.classList.add('alert-warning');
-                resultTitle.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Perhatian!';
+                resultTitle.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i> SUDAH ABSEN';
                 resultMessage.innerText = data.message;
             } else {
                 resultAlert.classList.add('alert-danger');
-                resultTitle.innerHTML = '<i class="bi bi-x-circle-fill"></i> Gagal!';
-                resultMessage.innerText = data.message || 'Terjadi kesalahan tidak dikenal.';
+                resultTitle.innerHTML = '<i class="fas fa-times-circle me-2"></i> ABSEN GAGAL!';
+                resultMessage.innerText = data.message;
             }
         })
         .catch(error => {
+            isProcessing = false;
             console.error('Error:', error);
-            // Tangani error jaringan / server
-            const resultDiv = document.getElementById('result');
-            const resultAlert = document.getElementById('result-alert');
-            
-            resultDiv.style.display = 'block';
-            resultAlert.className = 'alert alert-danger';
-            document.getElementById('result-title').innerHTML = 'Error Server!';
-            document.getElementById('result-message').innerText = 'Gagal menghubungi server. Periksa koneksi internet Anda.';
-            document.getElementById('btn-scan-ulang').style.display = 'inline-block';
+            alert("Terjadi kesalahan server. Mohon periksa koneksi internet.");
         });
     }
 
-    // Fungsi yang dipanggil jika gagal membaca (biasanya diabaikan saja)
     function onScanFailure(error) {
-        // handle scan failure, usually better to ignore and keep scanning.
-        // console.warn(`Code scan error = ${error}`);
+        // Abaikan error pembacaan kecil
     }
 
-    // Fungsi untuk memulai ulang scanner setelah sukses/gagal
+    // 3. FUNGSI RESET SCANNER
     function resetScanner() {
         document.getElementById('result').style.display = 'none';
         document.getElementById('btn-scan-ulang').style.display = 'none';
         isProcessing = false;
         
-        // Lanjutkan scanner (resume)
+        // Refresh lokasi tiap kali scan ulang
+        getLocation(); 
         html5QrcodeScanner.resume();
     }
 
-    // Konfigurasi dan mulai HTML5 QRCode Scanner saat halaman dimuat
+    // 4. JALANKAN SAAT HALAMAN DIBUKA
     document.addEventListener("DOMContentLoaded", function() {
+        getLocation();
+
         html5QrcodeScanner = new Html5QrcodeScanner(
             "reader",
             { 
-                fps: 10,             // Frame per second (kecepatan scan)
-                qrbox: {width: 250, height: 250}, // Ukuran kotak fokus scanner
-                aspectRatio: 1.0,    // Rasio aspek kamera
-                showTorchButtonIfSupported: true // Tampilkan tombol flash jika didukung HP
+                fps: 15, 
+                qrbox: {width: 250, height: 250}, 
+                aspectRatio: 1.0,
+                showTorchButtonIfSupported: true 
             },
-            /* verbose= */ false
+            false
         );
         html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     });
