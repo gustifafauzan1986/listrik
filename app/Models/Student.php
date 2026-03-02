@@ -34,6 +34,12 @@ class Student extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    // Relasi ke tabel daily_attendances
+    public function dailyAttendances()
+    {
+        return $this->hasMany(DailyAttendance::class, 'student_id');
+    }
+
     // Relasi ke Absensi Sholat
     public function prayer_attendance() {
         return $this->hasMany(PrayerAttendance::class);
@@ -41,7 +47,7 @@ class Student extends Model
 
 
 
-    
+
 
     public function violationPoints()
     {

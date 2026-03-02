@@ -3058,4 +3058,121 @@ class ReportController extends Controller
             'tanggal_surat'   => Setting::value('tanggal_surat', '-'),
         ];
     }
+
+    public function cetakLaporan(Request $request)
+    // {
+    //     // Set lokalisasi ke bahasa Indonesia agar nama hari menjadi Senin, Selasa, dst.
+    //     Carbon::setLocale('id');
+
+    //     // Gunakan parameter start_date jika ada, atau gunakan default 02 Maret 2026
+    //     $inputDate = $request->input('start_date', '2026-03-02');
+    //     $startDate = Carbon::parse($inputDate)->startOfWeek(); // Pastikan selalu dimulai dari Senin
+
+    //     $days = [];
+    //     // Looping untuk mendapatkan 5 hari (Senin - Jumat)
+    //     for ($i = 0; $i < 5; $i++) {
+    //         $days[] = $startDate->copy()->addDays($i);
+    //     }
+
+    //     // Query data siswa beserta kelas dan absensi pada rentang tanggal tersebut
+    //     $students = Student::with(['classroom', 'dailyAttendances' => function($query) use ($days) {
+    //         $query->whereBetween('date', [
+    //             $days[0]->format('Y-m-d'),
+    //             $days[4]->format('Y-m-d')
+    //         ]);
+    //     }])
+    //     ->whereHas('classroom', function($query) {
+    //         $query->where('name', 'X TITL 2');
+    //     })
+    //     ->orderBy('name', 'asc')
+    //     ->get();
+
+    //     return view('report.kegiatan', compact('students', 'days'));
+    // }
+
+    // {
+    //     Carbon::setLocale('id');
+
+    //     // Ambil semua data kelas untuk ditampilkan di dropdown form
+    //     $classrooms = Classroom::orderBy('name', 'asc')->get();
+
+    //     // Tangkap input filter dari user
+    //     $classroomId = $request->input('classroom_id');
+    //     // Default tanggal menggunakan hari ini, lalu dikunci ke awal minggu (Senin)
+    //     $inputDate = $request->input('start_date', Carbon::now()->startOfWeek()->format('Y-m-d'));
+
+    //     $startDate = Carbon::parse($inputDate)->startOfWeek();
+
+    //     $days = [];
+    //     for ($i = 0; $i < 5; $i++) {
+    //         $days[] = $startDate->copy()->addDays($i);
+    //     }
+
+    //     $students = collect(); // Koleksi kosong sebagai default
+    //     $selectedClassroom = null;
+
+    //     // Jika user sudah memilih kelas dan menekan tombol filter
+    //     if ($classroomId) {
+    //         $selectedClassroom = Classroom::find($classroomId);
+
+    //         $students = Student::with(['classroom', 'dailyAttendances' => function($query) use ($days) {
+    //             $query->whereBetween('date', [
+    //                 $days[0]->format('Y-m-d'),
+    //                 $days[4]->format('Y-m-d')
+    //             ]);
+    //         }])
+    //         ->where('classroom_id', $classroomId) // Filter berdasarkan ID Kelas yang dipilih
+    //         ->orderBy('name', 'asc')
+    //         ->get();
+    //     }
+
+    //     return view('report.kegiatan', compact(
+    //         'classrooms', 'students', 'days', 'classroomId', 'inputDate', 'selectedClassroom'
+    //     ));
+    // }
+
+    {
+        // Set lokalisasi ke bahasa Indonesia
+        Carbon::setLocale('id');
+
+        // Ambil semua data kelas untuk ditampilkan di dropdown form
+        $classrooms = Classroom::orderBy('name', 'asc')->get();
+
+        // Tangkap input filter dari user
+        $classroomId = $request->input('classroom_id');
+        // Default tanggal menggunakan hari ini, lalu dikunci ke awal minggu (Senin)
+        $inputDate = $request->input('start_date', Carbon::now()->startOfWeek()->format('Y-m-d'));
+
+        $startDate = Carbon::parse($inputDate)->startOfWeek();
+
+        $days = [];
+        // Looping untuk mendapatkan 5 hari (Senin - Jumat)
+        for ($i = 0; $i < 5; $i++) {
+            $days[] = $startDate->copy()->addDays($i);
+        }
+
+        $students = collect();
+        $selectedClassroom = null;
+
+        // Jika user sudah memilih kelas
+        if ($classroomId) {
+            // Eager load relasi guru BK dan Wali Kelas
+            $selectedClassroom = Classroom::with(['homeroomTeacher', 'counselingTeacher'])->find($classroomId);
+
+            // Query data siswa beserta kelas dan absensinya
+            $students = Student::with(['classroom', 'dailyAttendances' => function($query) use ($days) {
+                $query->whereBetween('date', [
+                    $days[0]->format('Y-m-d'),
+                    $days[4]->format('Y-m-d')
+                ]);
+            }])
+            ->where('classroom_id', $classroomId)
+            ->orderBy('name', 'asc')
+            ->get();
+        }
+
+        return view('report.kegiatan', compact(
+            'classrooms', 'students', 'days', 'classroomId', 'inputDate', 'selectedClassroom'
+        ));
+    }
 }
