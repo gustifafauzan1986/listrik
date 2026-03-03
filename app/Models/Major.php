@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Major extends Model
 {
-    protected $fillable = ['code', 'name'];
+    protected $fillable = [
+        'code',
+        'name',
+        'program_name',
+        'head_of_major',
+        'head_of_workshop'
+        ];
 
     public function teachers()
     {

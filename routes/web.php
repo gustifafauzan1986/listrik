@@ -70,6 +70,7 @@ use App\Http\Controllers\Admin\GuidanceController;
 use App\Http\Controllers\Admin\ViolationTypeController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\InventoryAdminController;
+use App\Http\Controllers\Admin\CapacityReportController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Http\Controllers\Student\DashboardStudentController;
@@ -603,6 +604,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/admin/inventory/template', [InventoryAdminController::class, 'downloadTemplate'])->name('admin.inventory.template');
         Route::post('/admin/inventory/import', [InventoryAdminController::class, 'import'])->name('admin.inventory.import');
+
+        Route::get('/usulan-daya-tampung', [CapacityReportController::class, 'index'])->name('laporan.daya_tampung');
 
     });
 
