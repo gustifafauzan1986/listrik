@@ -3177,6 +3177,14 @@ class ReportController extends Controller
     // }
 
     {
+        // =======================================================
+        // SECURITY CHECK: Blokir jika yang login adalah siswa
+        // =======================================================
+        if (Auth::check() && Auth::user()->jenis_user == 'siswa') {
+            // Langsung lemparkan ke halaman 403 Forbidden bawaan Laravel
+            abort(403, 'Akses Ditolak: Halaman ini hanya untuk Guru dan Admin.');
+        }
+        // =======================================================
         // Set lokalisasi ke bahasa Indonesia
         Carbon::setLocale('id');
 
