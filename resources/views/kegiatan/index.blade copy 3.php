@@ -30,7 +30,6 @@
                             <th class="ps-4 py-3">No</th>
                             <th>Nama Kegiatan</th>
                             <th>Tanggal</th>
-                            <th>Selesai</th>
                             <th>Kode QR</th>
                             <th class="text-center">Total Hadir</th>
                             <th>Status Lokasi</th>
@@ -46,20 +45,6 @@
                                     <small class="text-muted">{{ Str::limit($kegiatan->deskripsi, 40) ?? 'Tidak ada deskripsi' }}</small>
                                 </td>
                                 <td><i class="far fa-calendar-alt me-1 text-primary"></i> {{ \Carbon\Carbon::parse($kegiatan->tanggal)->format('d/m/Y') }}</td>
-                                <td>
-                                    @if($kegiatan->waktu_berakhir === null)
-                                    <div><i class="far fa-calendar-alt me-1"></i>Tidak Dibatasi</div>
-                                    @else
-                                        @if($kegiatan->waktu_berakhir)
-                                            @if(now()->greaterThan(\Carbon\Carbon::parse($kegiatan->waktu_berakhir)))
-                                                <span class="badge bg-danger mt-1" style="font-size: 0.7rem;"><i class="fas fa-times-circle me-1"></i>Expired</span>
-                                            @else
-                                                <div><i class="far fa-calendar-alt me-1 text-primary"></i> {{ \Carbon\Carbon::parse($kegiatan->waktu_berakhir)->format('d/m/Y') }}</div>
-                                                <span class="badge bg-success mt-1" style="font-size: 0.7rem;"><i class="fas fa-clock me-1"></i>S/d {{ \Carbon\Carbon::parse($kegiatan->waktu_berakhir)->format('H:i') }}</span>
-                                            @endif
-                                        @endif
-                                    @endif
-                                </td>
                                 <td><span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2">{{ $kegiatan->kode_unik }}</span></td>
                                 <td class="text-center">
                                     <div class="badge bg-primary rounded-pill px-3 py-2 total-hadir" data-id="{{ $kegiatan->id }}">
@@ -76,24 +61,14 @@
                                     @endif
                                 </td>
                                 <td class="text-end pe-4">
-                                    
-                                    <a href="{{ route('kegiatan.show', $kegiatan->id) }}" class="btn btn-sm btn-outline-secondary" title="Lihat Barcode">
-                                        <i class="fas fa-qrcode"></i>
-                                    </a>
-                                    
-                                    <a href="{{ route('kegiatan.scan', $kegiatan->kode_unik) }}" class="btn btn-sm btn-outline-primary" title="Scan Kamera">
-                                        <i class="fas fa-camera"></i>
-                                    </a>
-                                    
-                                    @role('admin')
-                                    <form action="{{ route('kegiatan.destroy', $kegiatan->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Peringatan: Apakah Bapak yakin ingin menghapus kegiatan \'{{ $kegiatan->nama_kegiatan }}\'? Semua data absensi siswa pada kegiatan ini juga akan ikut terhapus permanen.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Kegiatan">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                    @endrole
+                                    <div class="btn-group">
+                                        <a href="{{ route('kegiatan.show', $kegiatan->id) }}" class="btn btn-sm btn-outline-dark" title="Lihat Barcode & Log">
+                                            <i class="fas fa-qrcode"></i>
+                                        </a>
+                                        <a href="{{ route('kegiatan.scan', $kegiatan->kode_unik) }}" class="btn btn-sm btn-outline-primary" title="Halaman Scan">
+                                            <i class="fas fa-camera"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -123,18 +98,13 @@
                 @csrf
                 <div class="modal-body p-4">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <label class="form-label fw-bold small text-muted">NAMA KEGIATAN</label>
                             <input type="text" class="form-control bg-light border-0 py-2" name="nama_kegiatan" required placeholder="Contoh: Praktek Motor Listrik">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="form-label fw-bold small text-muted">TANGGAL</label>
                             <input type="date" class="form-control bg-light border-0 py-2" name="tanggal" value="{{ date('Y-m-d') }}" required>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="small fw-bold text-danger mb-1"><i class="fas fa-stopwatch me-1"></i>BATAS ABSEN</label>
-                            <input type="datetime-local" name="waktu_berakhir" class="form-control border-0 bg-light py-2" title="Kosongkan jika tidak ada batas waktu">
                         </div>
 
                         <div class="col-12 mt-4">

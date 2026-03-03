@@ -121,7 +121,7 @@ Route::middleware(['auth'])->group(function () {
     // Logika pengalihan user ke halaman yang sesuai role-nya
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
+    
     // Route untuk menu Tanda Tangan
     Route::get('/profil/tanda-tangan', [ProfileSignatureController::class, 'edit'])->name('profile.signature.edit');
     Route::post('/profil/tanda-tangan', [ProfileSignatureController::class, 'update'])->name('profile.signature.update');
@@ -189,7 +189,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pembelajaran/print', [ReportController::class, 'print'])->name('report.print');
         // [BARU] Route Cetak Laporan Per Jadwal (Direct Link)
         Route::get('/report/schedule/{id}', [ReportController::class, 'printSchedule'])->name('report.schedule');
-        Route::get('/laporan-kegiatan', [ReportController::class, 'cetakLaporan'])->name('laporan.kegiatan');
         Route::resource('subjects', SubjectController::class);
 
         // Route untuk mencetak Laporan Riwayat Siswa (Transkrip)
@@ -279,6 +278,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/kegiatan/scan/proses', [AbsensiKegiatanController::class, 'proses'])->name('scan.proses');
         Route::get('/kegiatan/{id}', [AbsensiKegiatanController::class, 'showKegiatan'])->name('kegiatan.show');
         Route::post('/kegiatan/store', [AbsensiKegiatanController::class, 'storeKegiatan'])->name('kegiatan.store');
+        Route::delete('/kegiatan/{id}', [AbsensiKegiatanController::class, 'destroy'])->name('kegiatan.destroy');
         Route::get('/kegiatan/print/{id}', [AbsensiKegiatanController::class, 'printKegiatan'])->name('kegiatan.print');
         Route::get('/api/kegiatan/total-hadir', [AbsensiKegiatanController::class, 'apiTotalHadir']);
         Route::get('/kegiatan/{id}/total-hadir', [AbsensiKegiatanController::class, 'getTotalHadir'])->name('kegiatan.total-hadir');

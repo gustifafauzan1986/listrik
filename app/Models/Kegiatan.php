@@ -19,6 +19,7 @@ class Kegiatan extends Model
         'deskripsi',
         'latitude', 
         'longitude', 
+        'waktu_berakhir', 
         'radius'
     ];
 

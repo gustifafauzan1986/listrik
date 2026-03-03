@@ -308,6 +308,7 @@ public function scanQr(Request $request, $kode_unik = null)
             'nama_kegiatan' => $request->nama_kegiatan,
             'tanggal'       => $request->tanggal,
             'kode_unik'     => $kodeUnik,
+            'waktu_berakhir' => $request->waktu_berakhir, // <--- TAMBAHAN INI
             'deskripsi'     => $request->deskripsi,
             'latitude'      => $request->latitude,
             'longitude'     => $request->longitude,
@@ -597,5 +598,25 @@ public function scanQr(Request $request, $kode_unik = null)
                 ];
             })
         ]);
+    }
+
+    // 5. Fitur Hapus Kegiatan
+    public function destroy($id)
+    {
+        $kegiatan = Kegiatan::findOrFail($id);
+        $user = auth()->user();
+
+        if ($user->jenis_user == 'siswa' || $user->jenis_user == 'guru') {
+            return redirect()->route('kegiatan.scan.camera', $kegiatan->kode_unik)
+                            ->with('info', 'Anda diarahkan otomatis ke halaman scan absensi.');
+        }
+
+        // Hapus juga data absensi yang terkait dengan kegiatan ini
+        Absensi::where('kegiatan_id', $kegiatan->id)->delete();
+        
+        // Hapus kegiatannya
+        $kegiatan->delete();
+
+        return redirect()->route('kegiatan.index')->with('success', 'Kegiatan beserta data absensinya berhasil dihapus permanen.');
     }
 }
