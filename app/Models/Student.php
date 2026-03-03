@@ -45,10 +45,6 @@ class Student extends Model
         return $this->hasMany(PrayerAttendance::class);
     }
 
-
-
-
-
     public function violationPoints()
     {
         // Student has many ViolationType THROUGH Violation

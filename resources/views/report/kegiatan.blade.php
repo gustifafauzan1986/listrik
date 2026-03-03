@@ -1,220 +1,228 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Laporan Kegiatan Siswa</title>
+@section('title', 'Laporan Kegiatan Siswa')
+
+<x-app-layout>
+    @push('styles')
     <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; }
+        /* Indikator Loading */
+        .loading-text { text-align: center; color: #0d6efd; font-weight: bold; margin: 40px 0; display: none; }
 
-        /* Area Filter & Tombol Cetak */
-        .filter-container { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
-        .filter-container select, .filter-container input, .filter-container button { padding: 5px; margin-right: 10px; }
-        .btn-cetak { padding: 8px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; font-size: 14px; border-radius: 4px; }
-        .btn-cetak:hover { background-color: #45a049; }
-
-        /* Tabel Utama */
-        table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table.data-table th, table.data-table td { border: 1px solid #000; padding: 6px; text-align: center; }
-        table.data-table th { background-color: #f2f2f2; }
-        .text-left { text-align: left !important; }
-
-        /* Pewarnaan Kolom PG dan SG */
+        /* Pewarnaan Kolom PG & SG (Untuk Tampilan Layar) */
         .bg-pg { background-color: #e3f2fd !important; }
         .bg-sg { background-color: #e8f5e9 !important; }
 
-        /* Efek Baris Zebra (Selang-seling) */
-        table.data-table tbody tr:nth-child(even) td { background-color: #f5f5f5; }
-        table.data-table tbody tr:nth-child(even) td.bg-pg { background-color: #bbdefb !important; }
-        table.data-table tbody tr:nth-child(even) td.bg-sg { background-color: #c8e6c9 !important; }
-
         /* Area Tanda Tangan */
-        table.signature-table {
-            width: 100%; margin-top: 40px; border-collapse: collapse;
-            page-break-inside: avoid; /* Mencegah terpotong halaman saat print */
-        }
-        table.signature-table td {
-            border: none !important; text-align: center; padding: 5px;
-            background-color: transparent !important; width: 25%; vertical-align: top;
-        }
+        table.signature-table { width: 100%; margin-top: 50px; border-collapse: collapse; page-break-inside: avoid; min-width: 800px; }
+        table.signature-table td { border: none !important; text-align: center; padding: 5px; background-color: transparent !important; width: 25%; vertical-align: top; }
 
-        /* Aturan Print */
-        @media print {
-            .no-print { display: none !important; }
-            body {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-        }
+        /* Header khusus cetak disembunyikan di layar biasa */
+        .print-only-header { display: none; }
     </style>
-</head>
-<body>
+    @endpush
 
-    <div class="filter-container no-print">
-        <form method="GET" action="{{ route('laporan.kegiatan') }}">
-            <label for="classroom_id">Pilih Kelas:</label>
-            <select name="classroom_id" id="classroom_id" required>
-                <option value="">-- Pilih Kelas --</option>
-                @foreach($classrooms as $kelas)
-                    <option value="{{ $kelas->id }}" {{ $classroomId == $kelas->id ? 'selected' : '' }}>
-                        {{ $kelas->name }}
-                    </option>
-                @endforeach
-            </select>
+    <div class="page-content">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card shadow">
 
-            <label for="start_date">Pilih Tanggal Mulai:</label>
-            <input type="date" name="start_date" id="start_date" value="{{ $inputDate }}" required>
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-clipboard-list me-2"></i> Laporan Kegiatan Siswa</h5>
 
-            <button type="submit">Tampilkan Laporan</button>
-        </form>
+                        <div id="action-buttons" style="display: none;">
+                            <button onclick="exportToExcel()" class="btn btn-success btn-sm me-1">
+                                <i class="fas fa-file-excel me-1"></i> Export Excel
+                            </button>
+                            <button onclick="printLaporan()" class="btn btn-primary btn-sm">
+                                <i class="fas fa-print me-1"></i> Cetak Laporan
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body border-bottom bg-light">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label for="classroom_id" class="form-label fw-bold">Pilih Kelas</label>
+                                <select name="classroom_id" id="classroom_id" class="form-select border">
+                                    <option value="">-- Silakan Pilih Kelas --</option>
+                                    @foreach($classrooms as $kelas)
+                                        <option value="{{ $kelas->id }}">{{ $kelas->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="start_date" class="form-label fw-bold">Tanggal Mulai (Acuan Senin)</label>
+                                <input type="date" name="start_date" id="start_date" class="form-control border" value="{{ $inputDate }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div id="loading" class="loading-text">
+                            <i class="fas fa-spinner fa-spin me-2"></i> Sedang memuat data laporan...
+                        </div>
+
+                        <div id="report-container">
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-info-circle fa-3x mb-3 text-light"></i>
+                                <p>Silakan pilih kelas terlebih dahulu untuk menampilkan data.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 
-    @if($selectedClassroom)
-        <div class="no-print" style="text-align: right; margin-bottom: 15px;">
-            <button onclick="window.print()" class="btn-cetak">🖨️ Cetak Laporan</button>
-        </div>
+    @push('scripts')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const classSelect = document.getElementById('classroom_id');
+            const dateInput = document.getElementById('start_date');
+            const reportContainer = document.getElementById('report-container');
+            const loadingIndicator = document.getElementById('loading');
+            const actionButtons = document.getElementById('action-buttons');
 
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h3 style="margin: 0;">LAPORAN KEGIATAN SISWA</h3>
-            <h4 style="margin: 5px 0 0 0;">SMK N 1 BUKITTINGGI</h4>
-            <p style="margin: 5px 0 0 0;"><strong>KELAS {{ strtoupper($selectedClassroom->name) }}</strong></p>
-        </div>
+            function fetchReport() {
+                const classroomId = classSelect.value;
+                const startDate = dateInput.value;
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th rowspan="3" style="width: 30px;">NO</th>
-                    <th rowspan="3" style="width: 250px;">NAMA</th>
-                    <th rowspan="3" style="width: 100px;">KELAS</th>
-                    @foreach($days as $day)
-                        <th colspan="2">{{ strtoupper($day->translatedFormat('l')) }}</th>
-                    @endforeach
-                </tr>
-                <tr>
-                    @foreach($days as $day)
-                        <th colspan="2">{{ $day->translatedFormat('d M y') }}</th>
-                    @endforeach
-                </tr>
-                <tr>
-                    @foreach($days as $day)
-                        <th class="bg-pg">PG</th>
-                        <th class="bg-sg">SG</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($students as $index => $student)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td class="text-left">{{ $student->name }}</td>
-                        <td>{{ $student->classroom->name ?? '-' }}</td>
+                if (!classroomId) {
+                    reportContainer.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-info-circle fa-3x mb-3 text-light"></i><p>Silakan pilih kelas terlebih dahulu untuk menampilkan data.</p></div>';
+                    actionButtons.style.display = 'none';
+                    return;
+                }
 
-                        @foreach($days as $day)
-                            @php
-                                $attendance = $student->dailyAttendances
-                                    ->where('date', $day->format('Y-m-d'))
-                                    ->first();
+                reportContainer.innerHTML = '';
+                loadingIndicator.style.display = 'block';
+                actionButtons.style.display = 'none';
 
-                                $pg = '';
-                                $sg = '';
+                const url = `{{ route('laporan.kegiatan') }}?classroom_id=${classroomId}&start_date=${startDate}`;
 
-                                // Logika untuk Kedatangan (PG) & Status
-                                if ($attendance && $attendance->arrival_time) {
-                                    $time = \Carbon\Carbon::parse($attendance->arrival_time)->format('H:i');
-                                    $statusStr = strtolower($attendance->status ?? '');
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    loadingIndicator.style.display = 'none';
+                    reportContainer.innerHTML = html;
+                    actionButtons.style.display = 'block';
+                })
+                .catch(error => {
+                    loadingIndicator.style.display = 'none';
+                    reportContainer.innerHTML = '<div class="alert alert-danger text-center"><i class="fas fa-exclamation-triangle me-2"></i> Gagal memuat data. Silakan coba lagi.</div>';
+                });
+            }
 
-                                    if ($statusStr == 'hadir') {
-                                        $pg = $time . ' (H)';
-                                    } elseif ($statusStr == 'terlambat') {
-                                        $pg = $time . ' (T)';
-                                    } else {
-                                        $hurufStatus = $statusStr ? strtoupper(substr($statusStr, 0, 1)) : 'H';
-                                        $pg = $time . ' (' . $hurufStatus . ')';
-                                    }
-                                } else {
-                                    // Jika tidak absen
-                                    $pg = '(A)';
-                                }
+            classSelect.addEventListener('change', fetchReport);
+            dateInput.addEventListener('change', fetchReport);
+        });
 
-                                // Logika untuk Kepulangan (SG)
-                                if ($attendance && $attendance->departure_time) {
-                                    $sg = \Carbon\Carbon::parse($attendance->departure_time)->format('H:i');
-                                }
-                            @endphp
+        // ==========================================
+        // FUNGSI CETAK LAPORAN (FIT TO PAGE)
+        // ==========================================
+        function printLaporan() {
+            let printContents = document.getElementById('report-container').innerHTML;
+            let printWindow = window.open('', '_blank', 'width=1000,height=700');
 
-                            <td class="bg-pg">{{ $pg }}</td>
-                            <td class="bg-sg">{{ $sg }}</td>
-                        @endforeach
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="13">Tidak ada data siswa di kelas ini.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Cetak Laporan Kegiatan</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        body { font-family: Arial, sans-serif; color: #000; padding: 10px; }
 
-        <table class="signature-table">
-            <tr>
-                <td>
-                    Mengetahui,<br>
-                    Kepala Sekolah
-                </td>
-                <td>
-                    <br>
-                    Kepala Bengkel TITL
-                </td>
-                <td>
-                    <br>
-                    Bimbingan Konseling
-                </td>
-                <td>
-                    Bukittinggi, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
-                    Wali Kelas {{ $selectedClassroom->name }}
-                </td>
-            </tr>
-            <tr>
-                <td style="height: 80px;"></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>
-                    <strong>( ......................................... )</strong><br>
-                    NIP.
-                </td>
-                <td>
-                    <strong><u>Gustifa Fauzan, S.Pd.</u></strong><br>
-                    NIP. .........................................
-                </td>
-                <td>
-                    <strong>
-                        @if($selectedClassroom->counselingTeacher)
-                            <u>{{ $selectedClassroom->counselingTeacher->name }}</u>
-                        @else
-                            ( ......................................... )
-                        @endif
-                    </strong><br>
-                    NIP. {{ $selectedClassroom->counselingTeacher->nip ?? '.........................' }}
-                </td>
-                <td>
-                    <strong>
-                        @if($selectedClassroom->homeroomTeacher)
-                            <u>{{ $selectedClassroom->homeroomTeacher->name }}</u>
-                        @else
-                            ( ......................................... )
-                        @endif
-                    </strong><br>
-                    NIP. {{ $selectedClassroom->homeroomTeacher->nip ?? '.........................' }}
-                </td>
-            </tr>
-        </table>
+                        /* Pewarnaan Tabel Cetak */
+                        .bg-pg { background-color: #e3f2fd !important; }
+                        .bg-sg { background-color: #e8f5e9 !important; }
 
-    @else
-        <div class="no-print" style="text-align: center; margin-top: 50px;">
-            <p style="color: #666; font-size: 14px;">Silakan pilih kelas dan tanggal terlebih dahulu, kemudian klik "Tampilkan Laporan".</p>
-        </div>
-    @endif
+                        /* Pengaturan Tanda Tangan */
+                        .signature-table td { border: none !important; font-size: 11px !important; }
 
-</body>
-</html>
+                        /* ==================================================== */
+                        /* ATURAN WAJIB AGAR TABEL TIDAK TERPOTONG DI KERTAS    */
+                        /* ==================================================== */
+                        @media print {
+                            /* Wajib Landscape karena kolomnya sangat banyak (13 kolom) */
+                            @page { size: landscape; margin: 10mm; }
+
+                            /* 1. MATIKAN RESPONSIVE BROWSER */
+                            .table-responsive {
+                                overflow: visible !important;
+                                width: 100% !important;
+                                display: block !important;
+                            }
+
+                            /* 2. PAKSA TABEL MENGECIL */
+                            table.data-table {
+                                width: 100% !important;
+                                max-width: 100% !important;
+                                table-layout: auto !important;
+                            }
+
+                            /* 3. KECILKAN HURUF DAN PADDING (Ini kunci utamanya) */
+                            .table-bordered th, .table-bordered td {
+                                border: 1px solid #000 !important;
+                                padding: 3px !important; /* Kurangi jarak kosong dalam sel */
+                                font-size: 10px !important; /* Huruf diperkecil agar pas */
+                                word-wrap: break-word !important;
+                                color: #000 !important;
+                            }
+
+                            /* 4. Pastikan Background Tercetak */
+                            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContents}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            // Jendela virtual akan menutup otomatis setelah dialog print selesai
+                            window.onafterprint = function() { window.close(); }
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+        }
+
+        // ==========================================
+        // FUNGSI EXCEL (Tetap seperti sebelumnya)
+        // ==========================================
+        function exportToExcel() {
+            let table = document.querySelector(".data-table");
+            if(!table) return alert("Tabel tidak ditemukan!");
+
+            let selectElem = document.getElementById('classroom_id');
+            let className = selectElem.options[selectElem.selectedIndex].text.replace(/\s+/g, '_');
+
+            let html = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head><meta charset="UTF-8"></head>
+                <body>
+                    <h3 style="text-align:center;">LAPORAN KEGIATAN SISWA SMK N 1 BUKITTINGGI</h3>
+                    <h4 style="text-align:center;">KELAS ${className.replace(/_/g, ' ')}</h4>
+                    ${table.outerHTML}
+                </body>
+                </html>
+            `;
+
+            let blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+
+            a.href = url;
+            a.download = `Laporan_Kegiatan_${className}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+    @endpush
+</x-app-layout>

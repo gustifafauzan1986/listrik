@@ -121,10 +121,13 @@ Route::middleware(['auth'])->group(function () {
     // Logika pengalihan user ke halaman yang sesuai role-nya
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    
+
     // Route untuk menu Tanda Tangan
     Route::get('/profil/tanda-tangan', [ProfileSignatureController::class, 'edit'])->name('profile.signature.edit');
     Route::post('/profil/tanda-tangan', [ProfileSignatureController::class, 'update'])->name('profile.signature.update');
+
+
+    Route::get('/laporan-kegiatan', [ReportController::class, 'cetakLaporan'])->name('laporan.kegiatan');
 });
 
 

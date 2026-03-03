@@ -3131,48 +3131,93 @@ class ReportController extends Controller
     //     ));
     // }
 
+    // {
+    //     // Set lokalisasi ke bahasa Indonesia
+    //     Carbon::setLocale('id');
+
+    //     // Ambil semua data kelas untuk ditampilkan di dropdown form
+    //     $classrooms = Classroom::orderBy('name', 'asc')->get();
+
+    //     // Tangkap input filter dari user
+    //     $classroomId = $request->input('classroom_id');
+    //     // Default tanggal menggunakan hari ini, lalu dikunci ke awal minggu (Senin)
+    //     $inputDate = $request->input('start_date', Carbon::now()->startOfWeek()->format('Y-m-d'));
+
+    //     $startDate = Carbon::parse($inputDate)->startOfWeek();
+
+    //     $days = [];
+    //     // Looping untuk mendapatkan 5 hari (Senin - Jumat)
+    //     for ($i = 0; $i < 5; $i++) {
+    //         $days[] = $startDate->copy()->addDays($i);
+    //     }
+
+    //     $students = collect();
+    //     $selectedClassroom = null;
+
+    //     // Jika user sudah memilih kelas
+    //     if ($classroomId) {
+    //         // Eager load relasi guru BK dan Wali Kelas
+    //         $selectedClassroom = Classroom::with(['homeroomTeacher', 'counselingTeacher'])->find($classroomId);
+
+    //         // Query data siswa beserta kelas dan absensinya
+    //         $students = Student::with(['classroom', 'dailyAttendances' => function($query) use ($days) {
+    //             $query->whereBetween('date', [
+    //                 $days[0]->format('Y-m-d'),
+    //                 $days[4]->format('Y-m-d')
+    //             ]);
+    //         }])
+    //         ->where('classroom_id', $classroomId)
+    //         ->orderBy('name', 'asc')
+    //         ->get();
+    //     }
+
+    //     return view('report.kegiatan', compact(
+    //         'classrooms', 'students', 'days', 'classroomId', 'inputDate', 'selectedClassroom'
+    //     ));
+    // }
+
     {
         // Set lokalisasi ke bahasa Indonesia
         Carbon::setLocale('id');
 
-        // Ambil semua data kelas untuk ditampilkan di dropdown form
-        $classrooms = Classroom::orderBy('name', 'asc')->get();
-
-        // Tangkap input filter dari user
-        $classroomId = $request->input('classroom_id');
         // Default tanggal menggunakan hari ini, lalu dikunci ke awal minggu (Senin)
         $inputDate = $request->input('start_date', Carbon::now()->startOfWeek()->format('Y-m-d'));
 
-        $startDate = Carbon::parse($inputDate)->startOfWeek();
+        // === JIKA REQUEST DATANG DARI AJAX (Saat User Memilih Kelas) ===
+        if ($request->ajax()) {
+            $classroomId = $request->input('classroom_id');
+            $startDate = Carbon::parse($inputDate)->startOfWeek();
 
-        $days = [];
-        // Looping untuk mendapatkan 5 hari (Senin - Jumat)
-        for ($i = 0; $i < 5; $i++) {
-            $days[] = $startDate->copy()->addDays($i);
+            $days = [];
+            for ($i = 0; $i < 5; $i++) {
+                $days[] = $startDate->copy()->addDays($i);
+            }
+
+            $students = collect();
+            $selectedClassroom = null;
+
+            if ($classroomId) {
+                // Eager load relasi guru
+                $selectedClassroom = Classroom::with(['homeroomTeacher', 'counselingTeacher'])->find($classroomId);
+
+                // Query data siswa dan absensi
+                $students = Student::with(['classroom', 'dailyAttendances' => function($query) use ($days) {
+                    $query->whereBetween('date', [
+                        $days[0]->format('Y-m-d'),
+                        $days[4]->format('Y-m-d')
+                    ]);
+                }])
+                ->where('classroom_id', $classroomId)
+                ->orderBy('name', 'asc')
+                ->get();
+            }
+
+            // Kembalikan HANYA view tabel
+            return view('report.table_kegiatan', compact('students', 'days', 'selectedClassroom'));
         }
 
-        $students = collect();
-        $selectedClassroom = null;
-
-        // Jika user sudah memilih kelas
-        if ($classroomId) {
-            // Eager load relasi guru BK dan Wali Kelas
-            $selectedClassroom = Classroom::with(['homeroomTeacher', 'counselingTeacher'])->find($classroomId);
-
-            // Query data siswa beserta kelas dan absensinya
-            $students = Student::with(['classroom', 'dailyAttendances' => function($query) use ($days) {
-                $query->whereBetween('date', [
-                    $days[0]->format('Y-m-d'),
-                    $days[4]->format('Y-m-d')
-                ]);
-            }])
-            ->where('classroom_id', $classroomId)
-            ->orderBy('name', 'asc')
-            ->get();
-        }
-
-        return view('report.kegiatan', compact(
-            'classrooms', 'students', 'days', 'classroomId', 'inputDate', 'selectedClassroom'
-        ));
+        // === JIKA REQUEST BIASA (Loading Halaman Pertama Kali) ===
+        $classrooms = Classroom::orderBy('name', 'asc')->get();
+        return view('report.kegiatan', compact('classrooms', 'inputDate'));
     }
 }
