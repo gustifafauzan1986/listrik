@@ -18,7 +18,25 @@
                     </div>
                 </div>
 
-
+                @if(isset($gatePercentage) && $gatePercentage < 100)
+                    <div class="shadow-sm alert alert-danger border-left-danger d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="alert-heading fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> PERHATIAN!</h5>
+                            <p class="mb-0 small">
+                                Hanya <strong>{{ round($gatePercentage) }}%</strong> siswa di kelas ini yang sudah melakukan scan di gerbang.
+                                <br>Siswa yang belum scan gerbang <strong>tidak dapat</strong> diabsen di mapel ini.
+                            </p>
+                        </div>
+                        <button type="button" class="shadow-sm btn btn-light text-danger fw-bold" data-bs-toggle="modal" data-bs-target="#bulkGateModal">
+                            <i class="fas fa-magic me-1"></i> Bantuan: Absen Gerbang Otomatis
+                        </button>
+                    </div>
+                @elseif(isset($gatePercentage))
+                    <div class="mb-4 alert alert-info small">
+                        <i class="fas fa-check-circle me-1"></i>
+                        <strong>Status Gerbang Aman:</strong> {{ round($gatePercentage) }}% siswa sudah scan masuk.
+                    </div>
+                @endif
 
                 <div class="shadow card border-top-primary">
                     <div class="card-body">
@@ -98,7 +116,11 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-
+                                                    @if($isMissingGate)
+                                                        <div class="text-danger small fw-bold">
+                                                            <i class="fas fa-lock"></i> Terkunci (Belum Absen Gerbang)
+                                                        </div>
+                                                    @else
                                                         <div class="btn-group w-100" role="group">
                                                             <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="h_{{ $student->id }}" value="hadir" {{ $checked == 'hadir' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-success btn-sm" for="h_{{ $student->id }}">Hadir</label>
@@ -115,7 +137,7 @@
                                                             <input type="radio" class="btn-check status-radio" name="attendances[{{ $student->id }}]" id="a_{{ $student->id }}" value="alpa" {{ $checked == 'alpa' ? 'checked' : '' }}>
                                                             <label class="btn btn-outline-danger btn-sm" for="a_{{ $student->id }}">Alpa</label>
                                                         </div>
-
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @empty
