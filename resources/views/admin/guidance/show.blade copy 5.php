@@ -3,13 +3,6 @@
 <x-app-layout>
     <div class="page-content">
 
-        <!-- Tombol Kembali -->
-        <div class="mb-3">
-            <a href="{{ route('admin.guidance.index') }}" class="shadow-sm btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i> Kembali
-            </a>
-        </div>
-
         <!-- Header Info Siswa -->
         <div class="mb-4 text-white border-0 shadow-sm card bg-primary">
             <div class="card-body d-flex align-items-center justify-content-between">
@@ -50,9 +43,7 @@
                                         <th class="ps-3">Tanggal</th>
                                         <th>Pelanggaran</th>
                                         <th class="text-center">Poin</th>
-                                        @role('admin')
                                         <th class="text-center">Aksi</th>
-                                        @endrole
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -66,7 +57,6 @@
                                         <td class="text-center">
                                             <span class="badge bg-danger rounded-pill">{{ $v->type->points ?? 0 }}</span>
                                         </td>
-                                        @role('admin')
                                         <td class="text-center">
                                             <div class="btn-group btn-group-sm">
                                                 <!-- Tombol Edit -->
@@ -83,7 +73,6 @@
                                                 </form>
                                             </div>
                                         </td>
-                                        @endrole
                                     </tr>
 
                                     <!-- MODAL EDIT PELANGGARAN (Spesifik per item) -->

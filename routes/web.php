@@ -246,25 +246,27 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/guru/internships/{id}/store', [InternshipAssessmentController::class, 'store'])->name('teacher.internships.store');
         Route::get('/guru/internships/{id}/certificate', [InternshipAssessmentController::class, 'printCertificate'])->name('teacher.internships.certificate');
 
-        Route::get('/guidance', [GuidanceController::class, 'index'])->name('admin.guidance.index');
-        Route::get('/guidance/create', [GuidanceController::class, 'create'])->name('admin.guidance.create');
-        Route::get('/guidance/{id}', [GuidanceController::class, 'show'])->name('admin.guidance.show');
+        Route::get('/pembinaan', [GuidanceController::class, 'index'])->name('admin.guidance.index');
+        Route::get('/pembinaan/buat', [GuidanceController::class, 'create'])->name('admin.guidance.create');
+        Route::get('/pembinaan/{id}', [GuidanceController::class, 'show'])->name('admin.guidance.show');
+        Route::put('/pembinaan/{id}', [GuidanceController::class, 'update'])->name('admin.violation.update');
+        Route::delete('/pembinaan/{id}', [GuidanceController::class, 'destroy'])->name('admin.violation.destroy');
 
         // Simpan Pembinaan
         Route::post('/guidance/{id}/store', [GuidanceController::class, 'storeGuidance'])->name('admin.guidance.store');
 
         // Simpan Pelanggaran
         Route::post('/guidance/{id}/violation', [GuidanceController::class, 'storeViolation'])->name('admin.violation.store');
-        Route::get('/violationt/index', [ViolationTypeController::class, 'index'])->name('admin.violation-types.index');
-        Route::get('/violationt/create', [ViolationTypeController::class, 'create'])->name('admin.violation-types.create');
-        Route::get('/violationt/edit/{id}', [ViolationTypeController::class, 'edit'])->name('admin.violation-types.edit');
-        Route::put('/violationt/update/{id}', [ViolationTypeController::class, 'update'])->name('admin.violation-types.update');
-        Route::post('/violationt/store', [ViolationTypeController::class, 'store'])->name('admin.violation-types.store');
-        Route::delete('/violationt/destroy', [ViolationTypeController::class, 'destroy'])->name('admin.violation-types.destroy');
+        Route::get('/pelanggaran', [ViolationTypeController::class, 'index'])->name('admin.violation-types.index');
+        Route::get('/pelanggaran/buat', [ViolationTypeController::class, 'create'])->name('admin.violation-types.create');
+        Route::get('/pelanggaran/edit/{id}', [ViolationTypeController::class, 'edit'])->name('admin.violation-types.edit');
+        Route::put('/pelanggaran/update/{id}', [ViolationTypeController::class, 'update'])->name('admin.violation-types.update');
+        Route::post('/pelanggaran/store', [ViolationTypeController::class, 'store'])->name('admin.violation-types.store');
+        Route::delete('/pelanggaran/destroy', [ViolationTypeController::class, 'destroy'])->name('admin.violation-types.destroy');
 
-        Route::get('/guidance/{guidanceId}/print-agreement', [GuidanceController::class, 'printAgreement'])->name('admin.guidance.print_agreement');
+        Route::get('/pembinaan/{guidanceId}/print-agreement', [GuidanceController::class, 'printAgreement'])->name('admin.guidance.print_agreement');
 
-        Route::post('/guidance/{id}/summon', [GuidanceController::class, 'sendSummon'])->name('admin.guidance.summon');
+        Route::post('/pembinaan/{id}/summon', [GuidanceController::class, 'sendSummon'])->name('admin.guidance.summon');
 
         Route::post('/izin/store', [StudentPermissionController::class, 'store'])->name('izin.store');
         Route::post('/izin/show', [StudentPermissionController::class, 'show'])->name('izin.show');

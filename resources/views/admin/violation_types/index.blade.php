@@ -3,12 +3,12 @@
 <x-app-layout>
     <div class="page-content">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="fw-bold text-primary"><i class="fas fa-exclamation-circle me-2"></i>Jenis Pelanggaran</h4>
-                <p class="text-muted mb-0">Kelola daftar pelanggaran dan bobot poin siswa.</p>
+                <p class="mb-0 text-muted">Kelola daftar pelanggaran dan bobot poin siswa.</p>
             </div>
-            <a href="{{ route('admin.violation-types.create') }}" class="btn btn-primary shadow-sm fw-bold">
+            <a href="{{ route('admin.violation-types.create') }}" class="shadow-sm btn btn-primary fw-bold">
                 <i class="fas fa-plus me-1"></i> Tambah Data
             </a>
         </div>
@@ -21,30 +21,32 @@
             </div>
         @endif
 
-        <div class="card border-0 shadow-lg">
-            <div class="card-header bg-white py-3">
+        <div class="border-0 shadow-lg card">
+            <div class="py-3 bg-white card-header">
                 <div class="row">
                     <div class="col-md-6">
-                        <h6 class="mb-0 fw-bold text-dark mt-2">Daftar Pelanggaran</h6>
+                        <h6 class="mt-2 mb-0 fw-bold text-dark">Daftar Pelanggaran</h6>
                     </div>
                     <div class="col-md-6">
-                        <form action="{{ route('admin.violation-types.index') }}" method="GET" class="d-flex gap-2">
+                        <form action="{{ route('admin.violation-types.index') }}" method="GET" class="gap-2 d-flex">
                             <input type="text" name="search" class="form-control" placeholder="Cari nama pelanggaran..." value="{{ request('search') }}">
                             <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i></button>
                         </form>
                     </div>
                 </div>
             </div>
-            <div class="card-body p-0">
+            <div class="p-0 card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table mb-0 align-middle table-hover">
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-4" width="5%">No</th>
                                 <th width="40%">Nama Pelanggaran</th>
                                 <th class="text-center" width="15%">Kategori</th>
                                 <th class="text-center" width="15%">Bobot Poin</th>
+                                @role('admin')
                                 <th class="text-center" width="15%">Aksi</th>
+                                @endrole
                             </tr>
                         </thead>
                         <tbody>
@@ -68,6 +70,7 @@
                                 <td class="text-center">
                                     <span class="fw-bold text-danger">{{ $item->points }} Poin</span>
                                 </td>
+                                @role('admin')
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
                                         <a href="{{ route('admin.violation-types.edit', $item->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
@@ -82,11 +85,12 @@
                                         </form>
                                     </div>
                                 </td>
+                                @endrole
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
-                                    <img src="https://illustrations.popsy.co/gray/question-mark.svg" class="w-25 opacity-50 mb-3" alt="Empty">
+                                <td colspan="5" class="py-5 text-center text-muted">
+                                    <img src="https://illustrations.popsy.co/gray/question-mark.svg" class="mb-3 opacity-50 w-25" alt="Empty">
                                     <br>Belum ada data pelanggaran.
                                 </td>
                             </tr>
@@ -95,7 +99,7 @@
                     </table>
                 </div>
             </div>
-            <div class="card-footer bg-white">
+            <div class="bg-white card-footer">
                 {{ $violationTypes->links() }}
             </div>
         </div>

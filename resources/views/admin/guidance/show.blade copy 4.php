@@ -3,13 +3,6 @@
 <x-app-layout>
     <div class="page-content">
 
-        <!-- Tombol Kembali -->
-        <div class="mb-3">
-            <a href="{{ route('admin.guidance.index') }}" class="shadow-sm btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i> Kembali
-            </a>
-        </div>
-
         <!-- Header Info Siswa -->
         <div class="mb-4 text-white border-0 shadow-sm card bg-primary">
             <div class="card-body d-flex align-items-center justify-content-between">
@@ -50,9 +43,7 @@
                                         <th class="ps-3">Tanggal</th>
                                         <th>Pelanggaran</th>
                                         <th class="text-center">Poin</th>
-                                        @role('admin')
                                         <th class="text-center">Aksi</th>
-                                        @endrole
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -66,14 +57,7 @@
                                         <td class="text-center">
                                             <span class="badge bg-danger rounded-pill">{{ $v->type->points ?? 0 }}</span>
                                         </td>
-                                        @role('admin')
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <!-- Tombol Edit -->
-                                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editViolationModal{{ $v->id }}" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <!-- Form Hapus -->
+                                        <!-- Form Hapus -->
                                                 <form action="{{ route('admin.violation.destroy', $v->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelanggaran ini? Poin akan dikembalikan.');">
                                                     @csrf
                                                     @method('DELETE')
@@ -81,54 +65,9 @@
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
-                                            </div>
-                                        </td>
-                                        @endrole
                                     </tr>
-
-                                    <!-- MODAL EDIT PELANGGARAN (Spesifik per item) -->
-                                    <div class="modal fade" id="editViolationModal{{ $v->id }}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog text-start">
-                                            <div class="modal-content">
-                                                <form action="{{ route('admin.violation.update', $v->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <div class="text-white modal-header bg-primary">
-                                                        <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Pelanggaran</h5>
-                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">Jenis Pelanggaran</label>
-                                                            <select name="violation_type_id" class="form-select" required>
-                                                                @foreach($violationTypes as $type)
-                                                                    <option value="{{ $type->id }}" {{ $v->violation_type_id == $type->id ? 'selected' : '' }}>
-                                                                        {{ $type->name }} ({{ $type->points }} Poin)
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">Tanggal Kejadian</label>
-                                                            <input type="date" name="date" class="form-control" value="{{ \Carbon\Carbon::parse($v->date)->format('Y-m-d') }}" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-bold">Catatan Tambahan</label>
-                                                            <textarea name="note" class="form-control" rows="2">{{ $v->note }}</textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Simpan Perubahan</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- END MODAL EDIT -->
-
                                     @empty
-                                    <tr><td colspan="4" class="py-4 text-center text-muted">Belum ada pelanggaran tercatat.</td></tr>
+                                    <tr><td colspan="3" class="py-4 text-center text-muted">Belum ada pelanggaran tercatat.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -194,6 +133,7 @@
                                 <div class="modal fade" id="summonModal{{ $g->id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
+                                            <!-- Pastikan route admin.guidance.summon sudah ada di web.php -->
                                             <form action="{{ route('admin.guidance.summon', $g->id) }}" method="POST">
                                                 @csrf
                                                 <div class="text-white modal-header bg-danger">

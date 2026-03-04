@@ -46,7 +46,7 @@ class GuidanceController extends Controller
     //                 ->whereColumn('student_violations.student_id', 'students.id')
     //                 ->selectRaw('COALESCE(SUM(violation_types.points), 0)');
     //           }, 'total_points');
-        
+
     //     // Filter Pencarian
     //     if ($request->filled('search')) {
     //         $query->where(function($q) use ($request) {
@@ -78,7 +78,7 @@ class GuidanceController extends Controller
                 DB::raw('COALESCE(SUM(violation_types.points), 0) as total_points')
             )
             ->groupBy('students.id');
-        
+
         // Filter Pencarian
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -103,7 +103,7 @@ class GuidanceController extends Controller
         $students = Student::with('classroom')->orderBy('name')->get();
         // Ambil jenis pelanggaran
         $violationTypes = ViolationType::orderBy('name')->get();
-        
+
         return view('admin.guidance.create', compact('students', 'violationTypes'));
     }
 
@@ -114,11 +114,11 @@ class GuidanceController extends Controller
     {
         $student = Student::with(['classroom', 'violations.type', 'guidances.teacher'])->findOrFail($id);
         $violationTypes = ViolationType::orderBy('name')->get();
-        
+
         // Cek Role Guru yang sedang login
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->first();
-        
+
         $role = 'guru_biasa';
         if($teacher) {
             // Logika sederhana penentuan role (bisa disesuaikan dengan logic role Anda)
@@ -189,7 +189,7 @@ class GuidanceController extends Controller
         // Cari data pembinaan beserta relasinya
         $guidance = StudentGuidance::with(['student.classroom', 'teacher.user'])->findOrFail($guidanceId);
         $student = $guidance->student;
-        
+
         // Ambil data sekolah dari pengaturan (atau gunakan default)
         $school = [
             'name' => Setting::value('school_name', 'SMK NEGERI 1 BUKITTINGGI'),
@@ -223,11 +223,11 @@ class GuidanceController extends Controller
 
         // 1. Ambil Data Sekolah
         $school = \App\Models\Setting::pluck('value', 'key')->toArray();
-        
+
         // 2. Generate PDF Surat Panggilan
         // Menggunakan view summon_pdf yang sudah Anda buat sebelumnya
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.guidance.summon_pdf', compact('guidance', 'student', 'school', 'request'));
-        
+
         // Simpan PDF ke Storage public
         $fileName = 'surat_panggilan_' . $student->nis . '_' . time() . '.pdf';
         $filePath = 'guidance_summons/' . $fileName;
@@ -243,11 +243,11 @@ class GuidanceController extends Controller
 
         // 4. Kirim WhatsApp ke Orang Tua
         // Asumsi model Student memiliki kolom 'parent_phone', jika tidak fallback ke nomor HP siswa
-        $parentPhone = $student->parent_phone ?? $student->phone; 
-        
+        $parentPhone = $student->parent_phone ?? $student->phone;
+
         if ($parentPhone) {
             $dateFormatted = \Carbon\Carbon::parse($request->summon_date)->translatedFormat('l, d F Y');
-            
+
             $message = "*SURAT PANGGILAN ORANG TUA/WALI*\n\n"
                      . "Yth. Bapak/Ibu Orang Tua/Wali dari *{$student->name}*,\n\n"
                      . "Sehubungan dengan evaluasi kedisiplinan dan pembinaan siswa, kami mengharap kehadiran Bapak/Ibu pada:\n\n"
@@ -268,5 +268,27 @@ class GuidanceController extends Controller
         }
 
         return back()->with('success', 'Surat panggilan berhasil dibuat dan otomatis dikirim ke WA Orang Tua.');
+    }
+
+    /**
+     * Menghapus data pembinaan (Guidance)
+     */
+    public function destroy($id)
+    {
+        $pelanggaran = StudentViolation::findOrFail($id);
+        $pelanggaran->delete();
+
+        return redirect()->back()->with('success', 'Data riwayat pembinaan berhasil dihapus.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $violationType = StudentViolation::findOrFail($id);
+
+
+
+        $violationType->update($request->all());
+
+        return redirect()->back()->with('success', 'Data pelanggaran berhasil diperbarui.');
     }
 }

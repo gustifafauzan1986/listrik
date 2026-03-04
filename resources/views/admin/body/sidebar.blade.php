@@ -253,14 +253,30 @@ $status = $guruId->status;
 					</ul>
 				</li>
 
+                <li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class="bx bx-cog"></i>
+						</div>
+						<div class="menu-title">Pembinaan</div>
+					</a>
+					<ul>
+						<li> <a href="{{route('admin.guidance.index')}}"><i class='bx bx-radio-circle'></i>Pembinaan</a></li>
+						<li> <a href="{{route('admin.guidance.create')}}"><i class='bx bx-radio-circle'></i>Tambah Pembinaan</a></li>
+						<li> <a href="{{route('admin.violation-types.index')}}"><i class='bx bx-radio-circle'></i>Pelanggaran</a></li>
+						<li> <a href="{{route('admin.violation-types.create')}}"><i class='bx bx-radio-circle'></i>Tambah Pelanggaran</a></li>
+					</ul>
+				</li>
+                @role('guru')
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"> <i class="bx bxs-report"></i></div>
 						<div class="menu-title">Laporan</div>
 					</a>
 				<ul>
+
 					<li> <a href="{{route('daily_attendance.report')}}"><i class='bx bx-border-all'></i>Gerbang</a>
 				</li>
+                @endrole
                 @endrole
 
                 @role('siswa')
