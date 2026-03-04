@@ -71,6 +71,7 @@ use App\Http\Controllers\Admin\ViolationTypeController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\InventoryAdminController;
 use App\Http\Controllers\Admin\CapacityReportController;
+use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Student\InternshipStudentController;
 use App\Http\Controllers\Student\InternshipAttendanceController;
 use App\Http\Controllers\Student\DashboardStudentController;
@@ -606,6 +607,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/inventory/import', [InventoryAdminController::class, 'import'])->name('admin.inventory.import');
 
         Route::get('/usulan-daya-tampung', [CapacityReportController::class, 'index'])->name('laporan.daya_tampung');
+        Route::get('/program', [ProgramController::class, 'index'])->name('programs.index');
+        Route::get('/program/create', [ProgramController::class, 'create'])->name('programs.create');
+        Route::get('/program/edit/{id}', [ProgramController::class, 'edit'])->name('programs.edit');
+        Route::post('/program/store', [ProgramController::class, 'store'])->name('programs.store');
+        Route::put('/program/{id}', [ProgramController::class, 'update'])->name('programs.update');
+        Route::delete('/program/destroy', [ProgramController::class, 'destroy'])->name('programs.destroy');
 
     });
 

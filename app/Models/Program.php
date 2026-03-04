@@ -13,7 +13,7 @@ class Program extends Model
     protected $fillable = [
         'name',
         'code',
-        'head_of_program',
+        'program_teacher_id',
     ];
 
     /**
@@ -22,5 +22,11 @@ class Program extends Model
     public function majors()
     {
         return $this->hasMany(Major::class);
+    }
+
+    public function teacher()
+    {
+        // Hubungkan ke tabel Teacher melalui kolom program_teacher_id
+        return $this->belongsTo(Teacher::class, 'program_teacher_id');
     }
 }
