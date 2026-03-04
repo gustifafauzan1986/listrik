@@ -101,4 +101,6 @@ class ViolationTypeController extends Controller
         return redirect()->route('admin.violation-types.index')
             ->with('success', 'Jenis pelanggaran berhasil dihapus.');
     }
+
+
 }
