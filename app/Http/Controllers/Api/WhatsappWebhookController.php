@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Student;
+use App\Models\StudentPermission; // Dari kode 1
 use App\Models\DailyAttendance;
 use App\Models\Attendance;
 use App\Models\Schedule;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str; // Dari kode 1
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class WhatsappWebhookController extends Controller
@@ -44,17 +46,53 @@ class WhatsappWebhookController extends Controller
             $phone0 = (substr($phonePure, 0, 2) == '62') ? '0' . substr($phonePure, 2) : $phonePure;
             $phone62 = (substr($phonePure, 0, 1) == '0') ? '62' . substr($phonePure, 1) : $phonePure;
 
+            // ==========================================
+            // LOGIKA PENGAJUAN IZIN (Dari Kode Pertama)
+            // Diletakkan di sini agar bisa diakses walau nomor HP tidak terdaftar,
+            // asalkan NIS yang dimasukkan benar.
+            // ==========================================
+            if (preg_match('/^IZIN#(\d+)#(.*)$/i', $messageRaw, $matches)) {
+                $nis = $matches[1];
+                $alasan = $matches[2];
+
+                // Cari siswa berdasarkan NIS di tabel students
+                $student = Student::where('nis', $nis)->first();
+
+                if ($student) {
+                    // Simpan ke database
+                    StudentPermission::create([
+                        'student_id' => $student->id,
+                        'date' => now()->toDateString(),
+                        'reason' => $alasan,
+                        'status' => 'pending',
+                        'wa_number' => $senderNumber // Simpan nomor pengirim asli
+                    ]);
+
+                    // Balasan otomatis berhasil
+                    $this->sendText($phonePure, "Terima kasih, pengajuan izin untuk siswa *{$student->name}* telah diterima dan menunggu persetujuan (Approval) dari Admin.", $sessionId);
+
+                    return response()->json(['status' => 'success', 'message' => 'Izin berhasil diajukan']);
+                } else {
+                    // Balasan otomatis gagal (NIS tidak ditemukan)
+                    $this->sendText($phonePure, "Maaf, siswa dengan NIS {$nis} tidak ditemukan di database.", $sessionId);
+
+                    return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan']);
+                }
+            }
+            // ==========================================
+
             // 4. Cari Siswa berdasarkan nomor (Bisa di-expand ke parent_phone jika perlu)
             $student = Student::where(function($q) use ($phone0, $phone62) {
                 $q->where('phone', $phone0)->orWhere('phone', $phone62);
             })->first();
 
+            // Jika nomor tidak terdaftar (dan bukan format IZIN), hentikan proses
             if (!$student) {
-                $this->sendText($phonePure, "Maaf, nomor Anda ($phone0) belum terdaftar di sistem sekolah.", $sessionId);
+                $this->sendText($phonePure, "Maaf, nomor Anda ($phone0) belum terdaftar di sistem sekolah. Ketik dengan format *IZIN#NIS#Alasan* jika ingin mengajukan izin.", $sessionId);
                 return response()->json(['status' => 'ignored', 'reason' => 'unknown_number']);
             }
 
-            // --- LOGIKA CHATBOT ---
+            // --- LOGIKA CHATBOT MENU UTAMA ---
             $message = strtoupper($messageRaw);
 
             if (in_array($message, ['MENU', 'HALO', 'INFO', 'TES'])) {
@@ -87,7 +125,7 @@ class WhatsappWebhookController extends Controller
                 $this->exportRekapPDF($phonePure, $student, $sessionId);
             }
             else {
-                $this->sendText($phonePure, "Halo {$student->name}, ketik *MENU* untuk bantuan.", $sessionId);
+                $this->sendText($phonePure, "Halo {$student->name}, ketik *MENU* untuk bantuan atau ketik *IZIN#NIS#Alasan* untuk izin absen.", $sessionId);
             }
 
             return response()->json(['status' => 'processed']);
@@ -104,7 +142,7 @@ class WhatsappWebhookController extends Controller
 
     private function sendMenu($phone, $student, $sessionId)
     {
-        $pesanTeks = "Halo, Bapak/Ibu dari *{$student->name}*.\n\nSilakan pilih menu:\n1️⃣ Cek Absensi Hari Ini\n2️⃣ Cek Jadwal\n3️⃣ Info SPP\n4️⃣ Rekap Mingguan\n-----------------\n7️⃣ Export Excel\n8️⃣ Export PDF";
+        $pesanTeks = "Halo, Bapak/Ibu dari *{$student->name}*.\n\nSilakan pilih menu:\n1️⃣ Cek Absensi Hari Ini\n2️⃣ Cek Jadwal\n3️⃣ Info SPP\n4️⃣ Rekap Mingguan\n-----------------\n7️⃣ Export Excel\n8️⃣ Export PDF\n\n_Untuk izin, ketik manual:_\n*IZIN#NIS#Alasan*";
 
         $payload = [
             'session_id' => $sessionId,
@@ -204,6 +242,7 @@ class WhatsappWebhookController extends Controller
     }
 
     private function cekJadwal($phone, $student, $sessionId) {
+        // Cek jadwal tergabung dengan laporan harian
         $this->cekAbsensiHarian($phone, $student, $sessionId);
     }
 
