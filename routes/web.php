@@ -54,6 +54,7 @@ use App\Http\Controllers\InventoryLoanController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\PrayerMonitoringController;
 use App\Http\Controllers\AbsensiKegiatanController;
+use App\Http\Controllers\AdminPermissionController;
 use App\Http\Controllers\Guru\LaporanGuruController;
 use App\Http\Controllers\Guru\InternshipAssessmentController;
 use App\Http\Controllers\Guru\DashboardGuruController;
@@ -615,6 +616,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/program/store', [ProgramController::class, 'store'])->name('programs.store');
         Route::put('/program/{id}', [ProgramController::class, 'update'])->name('programs.update');
         Route::delete('/program/{id}', [ProgramController::class, 'destroy'])->name('programs.destroy');
+
+        Route::get('/admin/izin', [AdminPermissionController::class, 'index'])->name('admin.izin');
 
     });
 
