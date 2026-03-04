@@ -20,10 +20,18 @@ class MajorController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    // public function create()
+    // {
+    //     $teachers = Teacher::orderBy('name', 'asc')->get();
+    //     return view('majors.create', compact('teachers'));
+    // }
+
     public function create()
     {
-        $teachers = Teacher::orderBy('name', 'asc')->get();
-        return view('majors.create', compact('teachers'));
+        $programs = \App\Models\Program::orderBy('name', 'asc')->get();
+        $teachers = \App\Models\Teacher::orderBy('name', 'asc')->get();
+        
+        return view('majors.create', compact('programs', 'teachers'));
     }
 
     /**

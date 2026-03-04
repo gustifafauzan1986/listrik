@@ -46,7 +46,19 @@ class ProgramController extends Controller
     public function create()
     {
         // Mengambil daftar guru untuk dropdown Ketua Program / Penilai
-        $teachers = Teacher::orderBy('name', 'asc')->get();
+        // $teachers = Teacher::orderBy('name', 'asc')->get();
+
+        // 1. Ambil array ID guru yang sudah terdaftar sebagai ketua program
+        $assignedTeacherIds = Program::whereNotNull('program_teacher_id')
+                                     ->pluck('program_teacher_id')
+                                     ->toArray();
+
+        // dd($assignedTeacherIds);
+
+        // 2. Tampilkan HANYA guru yang ID-nya tidak ada di array $assignedTeacherIds
+        $teachers = Teacher::whereNotIn('id', $assignedTeacherIds)
+                           ->orderBy('name', 'asc')
+                           ->get();
         return view('admin.programs.create', compact('teachers'));
     }
 

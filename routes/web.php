@@ -612,7 +612,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/program/edit/{id}', [ProgramController::class, 'edit'])->name('programs.edit');
         Route::post('/program/store', [ProgramController::class, 'store'])->name('programs.store');
         Route::put('/program/{id}', [ProgramController::class, 'update'])->name('programs.update');
-        Route::delete('/program/destroy', [ProgramController::class, 'destroy'])->name('programs.destroy');
+        Route::delete('/program/{id}', [ProgramController::class, 'destroy'])->name('programs.destroy');
 
     });
 

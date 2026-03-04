@@ -42,35 +42,16 @@
                         <!-- Kepala Bengkel -->
                         <div class="mb-4">
                             <label class="fw-bold mb-1">Kepala Bengkel (Kabeng)</label>
-                            @php
-                                // 1. Ambil ID guru yang sudah menjadi Ketua Program Keahlian
-                                $assignedProgramTeachers = \App\Models\Program::whereNotNull('program_teacher_id')
-                                                            ->pluck('program_teacher_id')
-                                                            ->toArray();
-                                
-                                // 2. Ambil ID guru yang sudah menjadi Kepala Bengkel di jurusan lain
-                                $assignedWorkshopTeachers = \App\Models\Major::whereNotNull('workshop_teacher_id')
-                                                            ->pluck('workshop_teacher_id')
-                                                            ->toArray();
-                                                            
-                                // Gabungkan keduanya agar 1 guru tidak merangkap jabatan
-                                $excludedTeachers = array_unique(array_merge($assignedProgramTeachers, $assignedWorkshopTeachers));
-
-                                // 3. Filter guru: Hanya tampilkan guru yang BELUM memiliki jabatan
-                                $availableTeachers = \App\Models\Teacher::whereNotIn('id', $excludedTeachers)
-                                                            ->orderBy('name', 'asc')
-                                                            ->get();
-                            @endphp
                             <select name="workshop_teacher_id" class="form-select @error('workshop_teacher_id') is-invalid @enderror">
                                 <option value="">-- Pilih Kepala Bengkel --</option>
-                                {{-- Looping dari variabel availableTeachers --}}
-                                @foreach($availableTeachers as $teacher)
+                                {{-- Looping dari tabel teachers menggunakan ID --}}
+                                @foreach($teachers as $teacher)
                                     <option value="{{ $teacher->id }}" {{ old('workshop_teacher_id') == $teacher->id ? 'selected' : '' }}>
                                         {{ $teacher->name }}
                                     </option>
                                 @endforeach
                             </select>
-                            <small class="text-muted">Guru yang sudah menjadi Ketua Program atau Kabeng tidak akan muncul di sini.</small>
+                            <small class="text-muted">Opsional. Pilih guru yang ditugaskan sebagai Kepala Bengkel.</small>
                             @error('workshop_teacher_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

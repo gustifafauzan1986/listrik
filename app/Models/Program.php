@@ -29,4 +29,12 @@ class Program extends Model
         // Hubungkan ke tabel Teacher melalui kolom program_teacher_id
         return $this->belongsTo(Teacher::class, 'program_teacher_id');
     }
+
+    /**
+     * Relasi ke Majors (Satu Program Keahlian memiliki banyak Konsentrasi/Major)
+     */
+    // public function majors()
+    // {
+    //     return $this->hasMany(Major::class, 'program_id');
+    // }
 }
