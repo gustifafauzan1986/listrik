@@ -6,13 +6,13 @@
 <div class="page-content">
     <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8">
-            <div class="shadow card border-0">
-                <div class="text-white card-header bg-primary py-3">
+            <div class="border-0 shadow card">
+                <div class="py-3 text-white card-header bg-primary">
                     <h5 class="mb-0 fw-bold"><i class="fas fa-user-plus me-2"></i> Registrasi Wajah: {{ $student->name }}</h5>
                 </div>
                 <div class="text-center card-body bg-light">
 
-                    <div id="loading" class="alert alert-warning py-2 small">
+                    <div id="loading" class="py-2 alert alert-warning small">
                         <span class="spinner-border spinner-border-sm me-2"></span> Memuat AI Ringan... Mohon tunggu sebentar.
                     </div>
 
@@ -25,16 +25,16 @@
                         </div>
                     </div>
 
-                    <div class="video-container shadow-sm">
+                    <div class="shadow-sm video-container">
                         <video id="video" autoplay muted playsinline></video>
                         <canvas id="overlay"></canvas>
                     </div>
 
                     <div class="mt-4">
-                        <button id="btn-save" class="btn btn-success btn-lg w-100 mb-2 py-3 shadow-sm" disabled>
+                        <button id="btn-save" class="py-3 mb-2 shadow-sm btn btn-success btn-lg w-100" disabled>
                             <i class="fas fa-search"></i> Mencari Wajah...
                         </button>
-                        <a href="{{ route('students.index', ['classroom_id' => $student->classroom_id]) }}" class="btn btn-outline-secondary w-100">Batal</a>
+                        <a href="{{ route('face.index', ['classroom_id' => $student->classroom_id]) }}" class="btn btn-outline-secondary w-100">Batal</a>
                     </div>
 
                     <p class="mt-3 text-muted small"><i class="fas fa-info-circle me-1"></i> Tips: Pastikan wajah terlihat jelas dan pencahayaan terang.</p>
@@ -73,7 +73,7 @@
         height: 100%;
         transform: scaleX(-1);
     }
-    
+
     /* Animasi tombol saat aktif */
     .btn-success { transition: all 0.3s ease; }
 </style>
@@ -106,8 +106,8 @@
     async function getCameras() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
-        
-        cameraSelect.innerHTML = videoDevices.map((dev, i) => 
+
+        cameraSelect.innerHTML = videoDevices.map((dev, i) =>
             `<option value="${dev.deviceId}">${dev.label || 'Kamera ' + (i+1)}</option>`
         ).join('');
     }
@@ -191,8 +191,8 @@
             },
             success: function(res) {
                 Swal.fire({ icon: 'success', title: 'Registrasi Berhasil!', timer: 1500, showConfirmButton: false })
-                .then(() => { 
-                    window.location.href = "{{ route('students.index', ['classroom_id' => $student->classroom_id]) }}"; 
+                .then(() => {
+                    window.location.href = "{{ route('students.index', ['classroom_id' => $student->classroom_id]) }}";
                 });
             },
             error: function() {

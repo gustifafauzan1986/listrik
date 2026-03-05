@@ -115,7 +115,7 @@ $status = $guruId->status;
 						<li> <a href="{{route('teachers.index')}}"><i class='bx bx-radio-circle'></i>Guru</a></li>
 						<li> <a href="{{route('classrooms.index')}}"><i class='bx bxs-group'></i>Rombel</a></li>
 						<li> <a href="{{route('students.index')}}"><i class='bx bxs-user-check'></i>Murid</a></li>
-						<!-- <li> <a href="{{url('/face/register')}}"><i class='bx bxs-file-find'></i>Scan Wajah</a></li> -->
+						<li> <a href="{{url('/face/register')}}"><i class='bx bxs-file-find'></i>Scan Wajah</a></li>
 						<li> <a href="{{url('/teaching-assignments')}}"><i class='bx bx-home-smile'></i>PBM</a></li>
 						<li> <a href="{{url('/schedule/all')}}"><i class='bx bx-home-smile'></i>Jadwal</a></li>
 
@@ -138,7 +138,7 @@ $status = $guruId->status;
 					</ul>
 				</li>
 
-                <li class="menu-label">Forms & Tables</li>
+                <li class="menu-label">Absensi</li>
 				<li>
 					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon"><i class='bx bx-printer'></i>
@@ -154,14 +154,9 @@ $status = $guruId->status;
 				</li>
 
 
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class="bx bx-grid-alt"></i>
-					</div>
-					<div class="menu-title">GTK</div>
-				</a>
-				<ul>
-					<li> <a href="{{route('users.import')}}"><i class='bx bx-radio-circle'></i>Impor Guru</a>
+
+			<ul>
+
 				</li>
 			</ul>
 		</li>
