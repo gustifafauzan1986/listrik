@@ -597,17 +597,19 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/admin/pkl/timeline/{id}', [InternshipTimelineController::class, 'update'])->name('admin.timeline.update');
         Route::delete('/admin/pkl/timeline/{id}', [InternshipTimelineController::class, 'destroy'])->name('admin.timeline.destroy');
 
-        Route::get('/admin/inventory', [InventoryAdminController::class, 'index'])->name('admin.inventory.index');
-        Route::post('/admin/inventory/item', [InventoryAdminController::class, 'storeItem'])->name('admin.inventory.item.store');
+        Route::get('/admin/inventaris', [InventoryAdminController::class, 'index'])->name('admin.inventory.index');
+        Route::post('/admin/inventaris/item', [InventoryAdminController::class, 'storeItem'])->name('admin.inventory.item.store');
 
         // Transaksi masuk keluar
-        Route::post('/admin/inventory/transaction', [InventoryAdminController::class, 'storeTransaction'])->name('admin.inventory.transaction.store');
+        Route::get('/admin/inventaris/transaction', [InventoryAdminController::class, 'transactions'])->name('admin.inventory.transaction.index');
+        Route::get('/admin/transactions/create', [InventoryAdminController::class, 'createTransaction'])->name('admin.transactions.create');
+        Route::post('/admin/inventaris/transaction', [InventoryAdminController::class, 'storeTransaction'])->name('admin.inventory.transaction.store');
 
         // Riwayat (Opsional, Anda bisa membuat view resources/views/inventory/history.blade.php terpisah)
-        Route::get('/admin/inventory/history', [InventoryAdminController::class, 'history'])->name('admin.inventory.history');
+        Route::get('/admin/inventaris/history', [InventoryAdminController::class, 'history'])->name('admin.inventory.history');
 
-        Route::get('/admin/inventory/template', [InventoryAdminController::class, 'downloadTemplate'])->name('admin.inventory.template');
-        Route::post('/admin/inventory/import', [InventoryAdminController::class, 'import'])->name('admin.inventory.import');
+        Route::get('/admin/inventaris/template', [InventoryAdminController::class, 'downloadTemplate'])->name('admin.inventory.template');
+        Route::post('/admin/inventaris/import', [InventoryAdminController::class, 'import'])->name('admin.inventory.import');
 
         Route::get('/usulan-daya-tampung', [CapacityReportController::class, 'index'])->name('laporan.daya_tampung');
         Route::get('/program', [ProgramController::class, 'index'])->name('programs.index');

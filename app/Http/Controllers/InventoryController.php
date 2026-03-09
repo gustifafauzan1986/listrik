@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Inventory;
 use App\Models\Room;
 use App\Models\Setting;
+use App\Models\InventoryTransaction;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -123,4 +124,6 @@ class InventoryController extends Controller
 
         return view('inventory.barcode', compact('inventory', 'schoolName', 'printQty'));
     }
+
+
 }

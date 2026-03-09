@@ -215,4 +215,20 @@ class InventoryAdminController extends Controller
     {
         return Excel::download(new InventoryTemplateExport, 'template_inventaris_titl.xlsx');
     }
+
+     // Menampilkan riwayat transaksi
+    public function transactions()
+    {
+        $transactions = InventoryTransaction::with('item')->latest()->get();
+        return view('inventory.transactions', compact('transactions'));
+    }
+
+    // Form transaksi masuk/keluar
+    public function createTransaction()
+    {
+        $items = Item::all();
+        return view('inventory.create_transaction', compact('items'));
+    }
+
+
 }
