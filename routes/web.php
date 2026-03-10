@@ -601,7 +601,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/inventaris/item', [InventoryAdminController::class, 'storeItem'])->name('admin.inventory.item.store');
 
         // Transaksi masuk keluar
-        Route::get('/admin/inventaris/transaction', [InventoryAdminController::class, 'transactions'])->name('admin.inventory.transaction.index');
+        Route::get('/admin/inventaris/mutasi', [InventoryAdminController::class, 'transactions'])->name('admin.inventory.transaction.index');
         Route::get('/admin/transactions/create', [InventoryAdminController::class, 'createTransaction'])->name('admin.transactions.create');
         Route::post('/admin/inventaris/transaction', [InventoryAdminController::class, 'storeTransaction'])->name('admin.inventory.transaction.store');
 
