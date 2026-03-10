@@ -528,8 +528,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pm2/delete', [Pm2Controller::class, 'delete'])->name('pm2.delete');
         Route::post('/pm2/monitor', [Pm2Controller::class, 'monitor'])->name('pm2.monitor');
         Route::post('/pm2/save', [Pm2Controller::class, 'save'])->name('pm2.save');
-        Route::post('/pm2//install-service', [Pm2Controller::class, 'installService'])->name('pm2.install_service');
-        Route::post('/pm2//uninstall-service', [Pm2Controller::class, 'uninstallService'])->name('pm2.uninstall_service');
+        Route::post('/pm2/install-service', [Pm2Controller::class, 'installService'])->name('pm2.install_service');
+        Route::post('/pm2/uninstall-service', [Pm2Controller::class, 'uninstallService'])->name('pm2.uninstall_service');
 
         Route::prefix('whatsapp')->name('whatsapp.')->group(function() {
             Route::get('/', [WhatsappGatewayController::class, 'index'])->name('index');
