@@ -23,6 +23,7 @@ use App\Http\Controllers\ProfileSignatureController;
 use App\Http\Controllers\DailyAttendanceController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DocumentController;
 
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\DashboardController;
@@ -290,6 +291,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kegiatan/print/{id}', [AbsensiKegiatanController::class, 'printKegiatan'])->name('kegiatan.print');
         Route::get('/api/kegiatan/total-hadir', [AbsensiKegiatanController::class, 'apiTotalHadir']);
         Route::get('/kegiatan/{id}/total-hadir', [AbsensiKegiatanController::class, 'getTotalHadir'])->name('kegiatan.total-hadir');
+        Route::prefix('documents')->name('documents.')->group(function () {
+            Route::get('/', [DocumentController::class, 'index'])->name('index');
+            Route::get('/create', [DocumentController::class, 'create'])->name('create');
+            Route::post('/', [DocumentController::class, 'store'])->name('store');
+            // Route untuk pratinjau, download, dan hapus
+            Route::get('/{id}', [DocumentController::class, 'show'])->name('show');
+            Route::get('/{id}/download', [DocumentController::class, 'download'])->name('download');
+            Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // =========================================================================
